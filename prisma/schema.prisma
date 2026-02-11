@@ -1,0 +1,190 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+}
+
+enum UserType {
+    NRC
+    STRAVA
+
+    @@map("user_types")
+}
+
+// Necessary for Next auth
+model Account {
+    id                       String  @id @default(auto()) @map("_id") @db.ObjectId
+    userId                   String  @db.ObjectId
+    type                     String
+    provider                 String
+    providerAccountId        String
+    refresh_token            String?
+    access_token             String?
+    expires_at               Int?
+    token_type               String?
+    scope                    String?
+    id_token                 String?
+    session_state            String?
+    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    refresh_token_expires_in Int?
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    sessionToken String   @unique
+    userId       String   @db.ObjectId
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+model Leaderboard {
+    id          String            @id @default(auto()) @map("_id") @db.ObjectId
+    name        String
+    description String?
+    createdAt   DateTime          @default(now())
+    updatedAt   DateTime          @updatedAt
+    isPublic    Boolean           @default(false)
+    isActive    Boolean           @default(true)
+    createdBy   User              @relation("LeaderboardCreator", fields: [createdById], references: [id], onDelete: Cascade)
+    createdById String            @db.ObjectId
+    club        Club?             @relation(fields: [clubId], references: [id], onDelete: SetNull)
+    clubId      String?           @db.ObjectId
+    entries     UserLeaderBoard[]
+    user        User?             @relation(fields: [userId], references: [id])
+    userId      String?           @db.ObjectId
+
+    @@index([name])
+    @@index([createdById])
+    @@index([clubId])
+    @@index([isPublic, isActive])
+    @@index([createdAt])
+    @@index([clubId, isPublic, isActive])
+    @@map("leaderboards")
+}
+
+model Club {
+    id           String        @id @default(auto()) @map("_id") @db.ObjectId
+    name         String        @unique
+    description  String?
+    image        String?
+    slug         String        @unique
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    isPublic     Boolean       @default(false)
+    isActive     Boolean       @default(true)
+    memberCount  Int           @default(0)
+    createdBy    User          @relation("ClubCreator", fields: [createdById], references: [id], onDelete: Cascade)
+    createdById  String        @db.ObjectId
+    members      UserClub[]
+    leaderboards Leaderboard[]
+    user         User?         @relation(fields: [userId], references: [id])
+    userId       String?       @db.ObjectId
+
+    // @@index([name])
+    // @@index([slug])
+    @@index([isPublic, isActive])
+    @@index([createdAt])
+    @@index([createdById])
+    @@index([memberCount])
+    @@map("clubs")
+}
+
+model UserClub {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId    String   @db.ObjectId
+    clubId    String   @db.ObjectId
+    role      ClubRole @default(MEMBER)
+    joinedAt  DateTime @default(now())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    isActive  Boolean  @default(true)
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, clubId])
+    @@index([userId])
+    @@index([clubId])
+    @@index([role])
+    @@index([joinedAt])
+    @@index([clubId, isActive])
+    @@index([userId, isActive])
+    @@map("user_clubs")
+}
+
+model UserLeaderBoard {
+    id            String      @id @default(auto()) @map("_id") @db.ObjectId
+    userId        String      @db.ObjectId
+    leaderboardId String      @db.ObjectId
+    score         Int         @default(0)
+    rank          Int?
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+    lastScoreDate DateTime?
+    isActive      Boolean     @default(true)
+    user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    leaderboard   Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, leaderboardId])
+    @@index([userId])
+    @@index([leaderboardId])
+    @@index([score])
+    @@index([rank])
+    @@index([leaderboardId, score])
+    @@index([leaderboardId, rank])
+    @@index([userId, score])
+    @@index([lastScoreDate])
+    @@index([leaderboardId, isActive, score])
+    @@map("user_leaderboards")
+}
+
+model User {
+    id                  String            @id @default(auto()) @map("_id") @db.ObjectId
+    email               String            @unique
+    avatar              String?
+    type                UserType
+    username            String?           @unique
+    createdAt           DateTime          @default(now())
+    updatedAt           DateTime          @updatedAt
+    lastLoginAt         DateTime?
+    access_token        String?
+    accounts            Account[]
+    sessions            Session[]
+    createdLeaderboards Leaderboard[]     @relation("LeaderboardCreator")
+    createdClubs        Club[]            @relation("ClubCreator")
+    clubMemberships     UserClub[]
+    leaderboardEntries  UserLeaderBoard[]
+    leaderboard         Leaderboard[]
+    club                Club[]
+
+    // @@index([email])
+    // @@index([username])
+    @@index([createdAt])
+    @@index([lastLoginAt])
+    @@map("users")
+}
+
+enum ClubRole {
+    OWNER
+    ADMIN
+    MODERATOR
+    MEMBER
+
+    @@map("club_roles")
+}
