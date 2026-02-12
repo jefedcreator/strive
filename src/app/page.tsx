@@ -1,6 +1,6 @@
 "use client";
 import StravaOAuthApp from "@/components/Strava";
-import NikeOAuthApp from "@/components/Nike";
+// import NikeOAuthApp from "@/components/Nike";
 
 export default function HomePage() {
   return (
@@ -18,12 +18,12 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="flex flex-col">
+          {/* <div className="flex flex-col">
             <h2 className="text-xl font-bold mb-4 text-center text-gray-900">Nike Run Club</h2>
             <div className="flex-1 rounded-xl overflow-hidden shadow-lg border border-gray-200 bg-white">
               <NikeOAuthApp />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </main>

@@ -17,6 +17,48 @@ const StravaOAuthApp = () => {
   const REDIRECT_URI =
     typeof window !== "undefined" ? window.location.origin : "";
   const SCOPE = "read,activity:read_all";
+  // Step 2: Exchange authorization code for access token via backend
+  const exchangeToken = useCallback(
+    async (code: string) => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "strava",
+            code: code,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.message || `HTTP error! status: ${response.status}`,
+          );
+        }
+
+        const result = await response.json();
+        const { data } = result;
+
+        // The backend returns the user object which includes the token and other details
+        setAccessToken(data.access_token);
+        setUser(data);
+
+        // Clean up URL after successful authentication
+        router.replace("/");
+      } catch (err: any) {
+        setError("Failed to exchange token: " + err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [router],
+  );
 
   // Check for OAuth callback on component mount
   useEffect(() => {
@@ -52,44 +94,6 @@ const StravaOAuthApp = () => {
 
     window.location.href = authUrl;
   };
-
-  // Step 2: Exchange authorization code for access token via backend
-  const exchangeToken = useCallback(async (code: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: "strava",
-          code: code,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      const { data } = result;
-
-      // The backend returns the user object which includes the token and other details
-      setAccessToken(data.access_token);
-      setUser(data);
-
-      // Clean up URL after successful authentication
-      router.replace("/");
-    } catch (err: any) {
-      setError("Failed to exchange token: " + err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
 
   // Logout function
   const logout = () => {
