@@ -9,6 +9,7 @@ const config = {
   images: {
     remotePatterns: [new URL("https://lh3.googleusercontent.com/**")],
   },
+  serverExternalPackages: ["puppeteer-extra", "puppeteer-extra-plugin-stealth", "puppeteer"],
 };
 
 export default config;

@@ -1,5 +1,7 @@
-import puppeteer from "puppeteer-extra";
-import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const puppeteer = require("puppeteer-extra");
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 import type { Browser } from "puppeteer";
 
 // Register the stealth plugin

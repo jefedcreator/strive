@@ -1,14 +1,11 @@
-import { DateRangeFilters } from "@/types";
+import type { DateRangeFilters } from "@/types";
 import { getChildId } from "@/utils/getChildId";
 import bcrypt from "bcryptjs";
 import { type ClassValue, clsx } from "clsx";
 import moment from "moment";
 import { twMerge } from "tailwind-merge";
 import {
-  adjectives,
-  Config,
-  generateUsername,
-  nouns,
+  generateUsername
 } from 'unique-username-generator';
 
 const cn = (...inputs: ClassValue[]) => {
@@ -161,8 +158,7 @@ const genUsername = () => {
 export {
   cn,
   convertBase64ToFile,
-  convertFileToBase64,
-  getChildId,
+  convertFileToBase64, generateRandomString, genUsername, getChildId,
   getDateRange,
   hashPassword,
   isFile,
@@ -171,5 +167,5 @@ export {
   parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword, genUsername, generateRandomString
+  verifyPassword
 };

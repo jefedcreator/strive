@@ -6,7 +6,8 @@ export const loginValidatorSchema = z
       .enum(["strava", "nrc"], {
         required_error: "type is required",
         invalid_type_error: "type must be a valid string",
-      })
+      }),
+    code: z.string().optional(),
   })
   .strict();
 

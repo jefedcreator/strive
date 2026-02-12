@@ -14,8 +14,6 @@ const StravaOAuthApp = () => {
 
   // Replace these with your actual Strava app credentials
   const CLIENT_ID = process.env.AUTH_STRAVA_CLIENT_ID ?? "your_client_id_here";
-  const CLIENT_SECRET =
-    process.env.AUTH_STRAVA_SECRET ?? "your_client_secret_here";
   const REDIRECT_URI =
     typeof window !== "undefined" ? window.location.origin : "";
   const SCOPE = "read,activity:read_all";
@@ -55,33 +53,34 @@ const StravaOAuthApp = () => {
     window.location.href = authUrl;
   };
 
-  // Step 2: Exchange authorization code for access token
+  // Step 2: Exchange authorization code for access token via backend
   const exchangeToken = useCallback(async (code: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("https://www.strava.com/oauth/token", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          client_id: CLIENT_ID,
-          client_secret: CLIENT_SECRET,
+          type: "strava",
           code: code,
-          grant_type: "authorization_code",
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const result = await response.json();
+      const { data } = result;
 
+      // The backend returns the user object which includes the token and other details
       setAccessToken(data.access_token);
-      setUser(data.athlete);
+      setUser(data);
 
       // Clean up URL after successful authentication
       router.replace("/");
@@ -90,7 +89,7 @@ const StravaOAuthApp = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [CLIENT_ID, CLIENT_SECRET, router]);
+  }, [router]);
 
   // Logout function
   const logout = () => {
@@ -157,19 +156,21 @@ const StravaOAuthApp = () => {
             <div className="text-center">
               <div className="mb-6">
                 <Image
-                  src={user.profile_medium ?? user.profile}
+                  src={user.avatar ?? "/placeholder-avatar.png"}
                   alt="Profile"
                   className="mx-auto mb-4 h-20 w-20 rounded-full border-4 border-orange-200"
                   width={100}
                   height={100}
                 />
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {user.firstname} {user.lastname}
+                  {user.name || user.username}
                 </h2>
                 <p className="text-gray-600">@{user.username}</p>
-                <p className="mt-2 text-sm text-gray-500">
-                  {user.city}, {user.state} {user.country}
-                </p>
+                {user.city && (
+                  <p className="mt-2 text-sm text-gray-500">
+                    {user.city}, {user.state} {user.country}
+                  </p>
+                )}
               </div>
 
               <div className="mb-6 rounded-lg bg-gray-50 p-4">

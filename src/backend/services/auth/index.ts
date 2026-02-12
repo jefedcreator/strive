@@ -5,12 +5,14 @@ import { generateUsername } from "unique-username-generator";
 class AuthService {
     async findOrCreateUser(
         {
-            type, token, email="", username
+            type, token, email="", username, avatar, name
         }: {
             type: UserType,
             email: string,
             token: string | null,
             username: string | null,
+            avatar?: string | null,
+            name?: string | null,
         }
     ): Promise<User> {
         const user = await prisma.user.findFirst({
@@ -29,6 +31,8 @@ class AuthService {
                     type,
                     access_token: token,
                     lastLoginAt: new Date(),
+                    avatar: avatar ?? user.avatar,
+                    name: name ?? user.name,
                 }
             });
             return user;
@@ -39,6 +43,8 @@ class AuthService {
                 username,
                 type,
                 email,
+                avatar,
+                name,
                 access_token: token,
                 lastLoginAt: new Date(),
             };

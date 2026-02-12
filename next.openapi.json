@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "API Documentation",
+    "title": "Strive Documentation",
     "version": "1.0.0",
     "description": "This is the OpenAPI specification for your project."
   },
