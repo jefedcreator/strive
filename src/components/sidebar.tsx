@@ -125,7 +125,7 @@ export function Sidebar() {
             >
               {!isCollapsed && (
                 <Link href="/" className="flex items-center font-semibold">
-                  <span className="text-lg">Flowers&Saints</span>
+                  <span className="text-lg">Strive</span>
                 </Link>
               )}
               <Button

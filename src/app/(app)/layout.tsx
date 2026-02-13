@@ -1,7 +1,7 @@
 import { Provider } from "@/provider";
 import "@/styles/globals.css";
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import NextTopLoader from "nextjs-toploader";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -15,10 +15,7 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -26,23 +23,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en"  className={`${geist.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.className}`} suppressHydrationWarning>
       <body>
         <NextTopLoader showSpinner={false} color="#ff014e" />
         <Provider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             {/* <SettingsProvider> */}
-              <TooltipProvider delayDuration={0}>
-                <div className="flex min-h-screen">
-                  <Sidebar />
-                  <div className="flex-1">
-                    <TopNav />
-                    <div className="container mx-auto max-w-7xl p-6">
-                      <main className="w-full">{children}</main>
-                    </div>
+            <TooltipProvider delayDuration={0}>
+              <div className="flex min-h-screen">
+                <Sidebar />
+                <div className="flex-1">
+                  <TopNav />
+                  <div className="container mx-auto max-w-7xl p-6">
+                    <main className="w-full">{children}</main>
                   </div>
                 </div>
-              </TooltipProvider>
+              </div>
+            </TooltipProvider>
             {/* </SettingsProvider> */}
           </ThemeProvider>
           <Toaster richColors position="top-center" closeButton />

@@ -2,11 +2,14 @@ import { db } from "@/server/db";
 import { parseHttpError } from "@/utils";
 import { NextResponse } from "next/server";
 import type z from "zod";
+import jwt from "jsonwebtoken";
 import type {
   AuthRequest,
+  I_JwtPayload,
   MiddlewareFunction,
   ValidationResult,
 } from "./types";
+
 /**
  *
  * @param handler (request: AuthRequest) => Promise<Response>
@@ -118,28 +121,42 @@ export const authMiddleware = async <T = any, B = any, Q = any>(
     }
 
     const auth_token = token?.split("Bearer")[1];
-    //  const decoded = jwt.verify(auth_token?.trim(), JWT_SECRET!) as I_JwtPayload;
-    // if (!decoded) {
-    //   return {
-    //     message: "Unauthorized",
-    //     statusCode: 401,
-    //     next: false,
-    //   };
-    // }
+    if (!auth_token) {
+      return {
+        message: "Invalid auth token format",
+        statusCode: 401,
+        next: false,
+      };
+    }
 
-    const user = await db.user.findUnique({
-      where: {
-        id: "",
-      },
-    });
+    const decoded = jwt.verify(
+      auth_token.trim(),
+      process.env.AUTH_SECRET!,
+    ) as I_JwtPayload;
 
-    if (!user) {
+    if (!decoded || !decoded.uid) {
       return {
         message: "Unauthorized",
         statusCode: 401,
         next: false,
       };
     }
+
+    const user = await db.user.findUnique({
+      where: {
+        id: decoded.uid,
+      },
+    });
+
+    if (!user) {
+      return {
+        message: "User not found",
+        statusCode: 401,
+        next: false,
+      };
+    }
+
+    request.user = user;
   } catch (error) {
     console.error(error);
     return {

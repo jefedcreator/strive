@@ -26,10 +26,8 @@ interface StravaTokenResponse {
 export class StravaService {
     private readonly CLIENT_ID = process.env.AUTH_STRAVA_ID;
     private readonly CLIENT_SECRET = process.env.AUTH_STRAVA_SECRET;
-    private readonly BASE_URL = "https://www.strava.com/oauth";
-
-    // console.log('CLIENT_ID', CLIENT_ID);
-
+    private readonly OAUTH_BASE_URL = "https://www.strava.com/oauth";
+    private readonly API_BASE_URL = "https://www.strava.com/api/v3";
 
     constructor() {
         if (!this.CLIENT_ID || !this.CLIENT_SECRET) {
@@ -39,8 +37,6 @@ export class StravaService {
 
     /**
      * Step 1: Generate the URL to redirect the user to Strava's consent screen.
-     * @param redirectUri The callback URL where Strava will send the code (must match Strava app settings)
-     * @param scopes Comma-separated scopes (e.g., 'read,activity:read')
      */
     getAuthorizationUrl(): string {
         const params = new URLSearchParams({
@@ -51,7 +47,7 @@ export class StravaService {
             scope: "read,activity:read_all",
         });
 
-        return `${this.BASE_URL}/authorize?${params.toString()}`;
+        return `${this.OAUTH_BASE_URL}/authorize?${params.toString()}`;
     }
 
     /**
@@ -63,14 +59,13 @@ export class StravaService {
             client_secret: this.CLIENT_SECRET,
             code: code,
             grant_type: "authorization_code",
-        });
+        }, true);
 
         return this.formatAuthResult(response);
     }
 
     /**
      * Step 3: Refresh an expired access token.
-     * Strava tokens expire after 6 hours. You must store the refresh_token to keep the user logged in.
      */
     async refreshAccessToken(refreshToken: string): Promise<Omit<StravaAuthResult, 'user'>> {
         const response = await this.postRequest('/token', {
@@ -78,9 +73,8 @@ export class StravaService {
             client_secret: this.CLIENT_SECRET,
             refresh_token: refreshToken,
             grant_type: "refresh_token",
-        });
+        }, true);
 
-        // Refresh response does NOT return the athlete object, only tokens.
         return {
             auth: {
                 accessToken: response.access_token,
@@ -91,14 +85,88 @@ export class StravaService {
         };
     }
 
+    /**
+     * Fetch activities for the authenticated athlete.
+     * @param accessToken Valid Strava access token
+     * @param page Page number
+     * @param perPage Number of items per page
+     */
+    async fetchActivities(accessToken: string, page = 1, perPage = 30): Promise<any[]> {
+        const response = await fetch(`${this.API_BASE_URL}/athlete/activities?page=${page}&per_page=${perPage}`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Failed to fetch Strava activities: ${response.status} ${JSON.stringify(errorData)}`);
+        }
+
+        const activities = await response.json();
+
+        // Return normalized data similar to NRC
+        return activities.map((activity: any) => {
+            const distanceKm = activity.distance / 1000;
+            const durationMin = activity.moving_time / 60;
+
+            // Calculate pace: min/km
+            let pace = '0:00';
+            if (distanceKm > 0) {
+                const totalSeconds = activity.moving_time / distanceKm;
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = Math.round(totalSeconds % 60);
+                pace = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            return {
+                id: activity.id.toString(),
+                date: activity.start_date,
+                distance: parseFloat(distanceKm.toFixed(2)),
+                duration: parseFloat(durationMin.toFixed(2)),
+                pace,
+                type: activity.type,
+                name: activity.name
+            };
+        });
+    }
+
+    /**
+     * Fetch all activities for the authenticated athlete by iterating through all pages.
+     * @param accessToken Valid Strava access token
+     */
+    async fetchAllActivities(accessToken: string): Promise<any[]> {
+        let allActivities: any[] = [];
+        let page = 1;
+        const perPage = 100;
+        let hasMore = true;
+
+        while (hasMore) {
+            const activities = await this.fetchActivities(accessToken, page, perPage);
+            if (activities.length === 0) {
+                hasMore = false;
+            } else {
+                allActivities = [...allActivities, ...activities];
+                page++;
+                // If we got fewer activities than requested, it's likely the last page
+                if (activities.length < perPage) {
+                    hasMore = false;
+                }
+            }
+        }
+
+        return allActivities;
+    }
+
     // --- Private Helpers ---
 
-    private async postRequest(endpoint: string, body: Record<string, any>): Promise<StravaTokenResponse> {
+    private async postRequest(endpoint: string, body: Record<string, any>, isOAuth = false): Promise<StravaTokenResponse> {
         if (!this.CLIENT_ID || !this.CLIENT_SECRET) {
             throw new Error("Strava client ID or secret is not configured.");
         }
 
-        const response = await fetch(`${this.BASE_URL}${endpoint}`, {
+        const baseUrl = isOAuth ? this.OAUTH_BASE_URL : this.API_BASE_URL;
+        const response = await fetch(`${baseUrl}${endpoint}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),

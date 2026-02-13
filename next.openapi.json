@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Strive Documentation",
+    "title": "API Documentation",
     "version": "1.0.0",
     "description": "This is the OpenAPI specification for your project."
   },
@@ -96,11 +96,11 @@
       }
     }
   },
-  "apiDir": "./src/app/api",
+  "apiDir": "./src/app/(app)/api",
   "schemaDir": "./src",
   "schemaType": "zod",
   "schemaFiles": [],
-  "docsUrl": "api-docs",
+  "docsUrl": "docs",
   "ui": "swagger",
   "outputFile": "openapi.json",
   "outputDir": "./public",

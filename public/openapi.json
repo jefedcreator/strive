@@ -71,6 +71,10 @@
               "strava",
               "nrc"
             ]
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -184,6 +188,10 @@
               "strava",
               "nrc"
             ]
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -490,7 +498,7 @@
         "summary": "",
         "description": "",
         "tags": [
-          "Login"
+          "login"
         ],
         "parameters": [],
         "requestBody": {
@@ -503,6 +511,44 @@
           },
           "description": "Authenticates a user and returns a JWT token. Currently supports Nike (NRC) login via puppeteer"
         },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/login/strava/callback": {
+      "get": {
+        "operationId": "get-login-strava-callback",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Login"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/runs": {
+      "get": {
+        "operationId": "get-runs",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "runs"
+        ],
+        "parameters": [],
         "responses": {
           "400": {
             "$ref": "#/components/responses/400"

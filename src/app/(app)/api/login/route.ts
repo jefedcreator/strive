@@ -4,6 +4,8 @@ import { puppeteerService } from "@/backend/services/puppeteer";
 import { stravaService } from "@/backend/services/strava";
 import { loginValidatorSchema, type LoginValidatorSchema } from "@/backend/validators/auth.validator";
 import { signIn } from "@/server/auth";
+import jwt from "jsonwebtoken";
+import moment from "moment";
 
 /**
  * @body LoginValidatorSchema
@@ -59,15 +61,33 @@ export const POST = withMiddleware<LoginValidatorSchema>(
             throw new Error("User authentication failed.");
         }
 
+
+        // ---------------------------------------------------------
+        // 4. GENERATE JWT FOR API AUTHENTICATION
+        // ---------------------------------------------------------
+        const jwtPayload = { uid: user.id, email: user.email };
+        const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
+        const expiresAt = moment().add(jwtExpirationTimeInSec, "seconds").toISOString();
+
+        const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
+            expiresIn: jwtExpirationTimeInSec,
+        });
+
         await signIn("credentials", {
             userId: user.id,
             redirect: false,
+            token: auth_token
         });
+
 
         return Response.json(
             {
                 status: 201,
-                data: user,
+                data: {
+                    ...user,
+                    token: auth_token,
+                    expiresAt
+                },
             },
             { status: 201 }
         );
