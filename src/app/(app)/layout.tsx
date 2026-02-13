@@ -4,6 +4,10 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
 import NextTopLoader from "nextjs-toploader";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Sidebar } from "@/components/sidebar";
+import { TopNav } from "@/components/top-nav";
+import { TooltipProvider } from "@/components/tooltip";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -27,7 +31,7 @@ export default function RootLayout({
         <NextTopLoader showSpinner={false} color="#ff014e" />
         <Provider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <SettingsProvider>
+            {/* <SettingsProvider> */}
               <TooltipProvider delayDuration={0}>
                 <div className="flex min-h-screen">
                   <Sidebar />
@@ -39,7 +43,7 @@ export default function RootLayout({
                   </div>
                 </div>
               </TooltipProvider>
-            </SettingsProvider>
+            {/* </SettingsProvider> */}
           </ThemeProvider>
           <Toaster richColors position="top-center" closeButton />
         </Provider>

@@ -6,6 +6,7 @@ import { Button } from "@/primitives";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { LoginValidatorSchema } from "@/backend/validators/auth.validator";
+import { useSession } from "next-auth/react";
 
 interface LoginResponse {
   status: number;
@@ -29,7 +30,11 @@ const StravaLogo = () => (
 
 // Nike Logo SVG (Swoosh)
 const NikeLogo = () => (
-  <svg className="h-5 w-5" viewBox="135.5 361.38 1000 356.39" fill="currentColor">
+  <svg
+    className="h-5 w-5"
+    viewBox="135.5 361.38 1000 356.39"
+    fill="currentColor"
+  >
     <path d="M245.8075 717.62406c-29.79588-1.1837-54.1734-9.3368-73.23459-24.4796-3.63775-2.8928-12.30611-11.5663-15.21427-15.2245-7.72958-9.7193-12.98467-19.1785-16.48977-29.6734-10.7857-32.3061-5.23469-74.6989 15.87753-121.2243 18.0765-39.8316 45.96932-79.3366 94.63252-134.0508 7.16836-8.0511 28.51526-31.5969 28.65302-31.5969.051 0-1.11225 2.0153-2.57652 4.4694-12.65304 21.1938-23.47957 46.158-29.37751 67.7703-9.47448 34.6785-8.33163 64.4387 3.34693 87.5151 8.05611 15.898 21.86731 29.6684 37.3979 37.2806 27.18874 13.3214 66.9948 14.4235 115.60699 3.2245 3.34694-.7755 169.19363-44.801 368.55048-97.8366 199.35686-53.0408 362.49439-96.4029 362.51989-96.3672.056.046-463.16259 198.2599-703.62654 299.9999-240.46395 101.7401-437.2653 185.9948-437.3366 185.9948-.0713 0-1.29592-.5153-2.72448-1.1428z" />
   </svg>
 );
@@ -38,19 +43,22 @@ export default function HomePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const { data: session, isLoading: isSessionLoading } = useQuery({
-    queryKey: ["session"],
-    queryFn: async () => {
-      const res = await fetch("/api/auth/session");
-      return res.json();
-    },
-  });
+  // const { data: session, isLoading: isSessionLoading } = useQuery({
+  //   queryKey: ["session"],
+  //   queryFn: async () => {
+  //     const res = await fetch("/api/auth/session");
+  //     return res.json();
+  //   },
+  // });
 
-  useEffect(() => {
-    if (session?.user) {
-      router.replace("/home");
-    }
-  }, [session, router]);
+  const { data: session, status } = useSession();
+  // const user = session?.user;
+
+  // useEffect(() => {
+  //   if (session?.user) {
+  //     router.replace("/home");
+  //   }
+  // }, [session, router]);
 
   const loginMutation = useMutation({
     mutationFn: async (payload: LoginValidatorSchema) => {
@@ -116,7 +124,7 @@ export default function HomePage() {
   const isLoading = loginMutation.isPending;
   const loadingType = loginMutation.variables?.type;
 
-  if (isSessionLoading || session?.user) {
+  if (status == "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
@@ -126,7 +134,7 @@ export default function HomePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#F8FAFC] p-6 text-slate-900">
-      <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 space-y-8 text-center duration-1000">
+      <div className="animate-in fade-in slide-in-from-bottom-4 w-full max-w-md space-y-8 text-center duration-1000">
         <div className="space-y-2">
           <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
             STRIVE
@@ -163,7 +171,7 @@ export default function HomePage() {
 
             <div className="flex items-center gap-4 py-2">
               <div className="h-px flex-1 bg-slate-100" />
-              <span className="text-xs font-medium uppercase tracking-wider text-slate-400">
+              <span className="text-xs font-medium tracking-wider text-slate-400 uppercase">
                 or
               </span>
               <div className="h-px flex-1 bg-slate-100" />
