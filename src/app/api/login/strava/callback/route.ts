@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { stravaService } from "@/backend/services/strava";
 import { authService } from "@/backend/services/auth";
-import moment from "moment";
+import { signIn } from "@/server/auth";
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -22,24 +21,12 @@ export async function GET(request: NextRequest) {
             token: auth.accessToken,
         });
 
-        const jwtPayload = { uid: user.id, email: user.email };
-        const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
-        const expiresAt = moment().add(jwtExpirationTimeInSec, "seconds").toISOString();
-
-        const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
-            expiresIn: jwtExpirationTimeInSec,
+        await signIn("credentials", {
+            userId: user.id,
+            redirect: false,
         });
-        return Response.json(
-            {
-                status: 201,
-                data: {
-                    ...user,
-                    token: auth_token,
-                    expiresAt
-                },
-            },
-            { status: 201 }
-        );
+
+        return NextResponse.redirect(new URL("/home", request.url));
 
     } catch (error) {
         console.error("Login error:", error);

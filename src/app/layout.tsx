@@ -18,13 +18,31 @@ const geist = Geist({
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${geist.variable}`}>
+    <html lang="en"  className={`${geist.variable}`} suppressHydrationWarning>
       <body>
         <NextTopLoader showSpinner={false} color="#ff014e" />
-        <Provider>{children}</Provider>
-        <Toaster richColors position="top-center" closeButton />
+        <Provider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <SettingsProvider>
+              <TooltipProvider delayDuration={0}>
+                <div className="flex min-h-screen">
+                  <Sidebar />
+                  <div className="flex-1">
+                    <TopNav />
+                    <div className="container mx-auto max-w-7xl p-6">
+                      <main className="w-full">{children}</main>
+                    </div>
+                  </div>
+                </div>
+              </TooltipProvider>
+            </SettingsProvider>
+          </ThemeProvider>
+          <Toaster richColors position="top-center" closeButton />
+        </Provider>
       </body>
     </html>
   );

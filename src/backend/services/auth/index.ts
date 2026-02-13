@@ -31,7 +31,7 @@ class AuthService {
                     access_token: token,
                     lastLoginAt: new Date(),
                     avatar: avatar ?? user.avatar,
-                    name: name ?? user.name,
+                    username: username,
                 }
             });
             return user;

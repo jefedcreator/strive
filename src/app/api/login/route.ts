@@ -3,8 +3,7 @@ import { authService } from "@/backend/services/auth";
 import { puppeteerService } from "@/backend/services/puppeteer";
 import { stravaService } from "@/backend/services/strava";
 import { loginValidatorSchema, type LoginValidatorSchema } from "@/backend/validators/auth.validator";
-import jwt from "jsonwebtoken";
-import moment from "moment";
+import { signIn } from "@/server/auth";
 
 /**
  * @body LoginValidatorSchema
@@ -24,7 +23,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
                 const authorizationUrl = stravaService.getAuthorizationUrl();
                 return Response.json({
                     status: 200,
-                    action: "redirect", 
+                    action: "redirect",
                     url: authorizationUrl
                 });
             }
@@ -54,28 +53,21 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         }
 
         // ---------------------------------------------------------
-        // 3. GENERATE SESSION (JWT)
+        // 3. ESTABLISH SESSION (Auth.js)
         // ---------------------------------------------------------
         if (!user) {
             throw new Error("User authentication failed.");
         }
 
-        const jwtPayload = { uid: user.id, email: user.email };
-        const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
-        const expiresAt = moment().add(jwtExpirationTimeInSec, "seconds").toISOString();
-
-        const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
-            expiresIn: jwtExpirationTimeInSec,
+        await signIn("credentials", {
+            userId: user.id,
+            redirect: false,
         });
 
         return Response.json(
             {
                 status: 201,
-                data: {
-                    ...user,
-                    token: auth_token,
-                    expiresAt
-                },
+                data: user,
             },
             { status: 201 }
         );

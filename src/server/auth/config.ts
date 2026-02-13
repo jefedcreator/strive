@@ -1,7 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
-
+import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/server/db";
 
 /**
@@ -14,15 +14,13 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      username?: string | null;
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    username?: string | null;
+  }
 }
 
 /**
@@ -33,24 +31,47 @@ declare module "next-auth" {
 export const authConfig = {
   providers: [
     DiscordProvider,
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
+    CredentialsProvider({
+      name: "Manual Auth",
+      credentials: {
+        userId: { label: "User ID", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.userId) return null;
+        
+        const user = await db.user.findUnique({
+          where: { id: credentials.userId as string },
+        });
+
+        if (!user) return null;
+
+        return {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          avatar: user.avatar,
+        };
+      },
+    }),
   ],
   adapter: PrismaAdapter(db),
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
-    session: ({ session, user }) => ({
+    session: ({ session, token }) => ({
       ...session,
       user: {
         ...session.user,
-        id: user.id,
+        id: token.sub!,
+        username: token.username as string | null,
       },
     }),
+    jwt: ({ token, user }) => {
+      if (user) {
+        token.username = user.username;
+      }
+      return token;
+    },
   },
 } satisfies NextAuthConfig;
