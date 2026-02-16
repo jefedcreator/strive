@@ -1,9 +1,9 @@
-import { env } from "@/env";
-import { 
-  v2 as cloudinary, 
-  type UploadApiResponse, 
-  type UploadApiOptions 
-} from "cloudinary";
+import { env } from '@/env';
+import {
+  v2 as cloudinary,
+  type UploadApiResponse,
+  type UploadApiOptions,
+} from 'cloudinary';
 
 export interface CloudinaryUploadOptions extends UploadApiOptions {
   folder?: string;
@@ -28,24 +28,24 @@ class CloudinaryService {
     fileBuffer: Buffer,
     options: CloudinaryUploadOptions = {}
   ): Promise<UploadApiResponse> {
-    const { folder = "strive", ...rest } = options;
+    const { folder = 'strive', ...rest } = options;
 
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder,
-          resource_type: "auto",
+          resource_type: 'auto',
           ...rest,
         },
         (error, result) => {
           if (error) {
-            console.error("Cloudinary upload error:", error);
-            return reject(new Error("Failed to upload file to Cloudinary"));
+            console.error('Cloudinary upload error:', error);
+            return reject(new Error('Failed to upload file to Cloudinary'));
           }
           if (result) {
             return resolve(result);
           }
-          reject(new Error("No response returned from Cloudinary"));
+          reject(new Error('No response returned from Cloudinary'));
         }
       );
 
@@ -76,12 +76,12 @@ class CloudinaryService {
   async deleteImage(publicId: string): Promise<void> {
     try {
       const result = await cloudinary.uploader.destroy(publicId);
-      if (result.result !== "ok") {
+      if (result.result !== 'ok') {
         console.warn(`Cloudinary delete warning for ${publicId}:`, result);
       }
     } catch (error) {
-      console.error("Cloudinary delete error:", error);
-      throw new Error("Failed to delete image from Cloudinary");
+      console.error('Cloudinary delete error:', error);
+      throw new Error('Failed to delete image from Cloudinary');
     }
   }
 

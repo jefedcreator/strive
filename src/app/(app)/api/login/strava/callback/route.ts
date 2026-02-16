@@ -1,7 +1,4 @@
-import {
-  queryValidatorMiddleware,
-  withMiddleware,
-} from '@/backend/middleware';
+import { queryValidatorMiddleware, withMiddleware } from '@/backend/middleware';
 import { authService } from '@/backend/services/auth';
 import { stravaService } from '@/backend/services/strava';
 import { signIn } from '@/server/auth';
@@ -26,7 +23,8 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
     try {
       const { code } = request.query!;
 
-      const { auth, user: stravaUser } = await stravaService.exchangeToken(code);
+      const { auth, user: stravaUser } =
+        await stravaService.exchangeToken(code);
       const user = await authService.findOrCreateUser({
         type: 'STRAVA',
         email: stravaUser.email,

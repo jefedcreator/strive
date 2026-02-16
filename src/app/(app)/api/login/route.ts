@@ -1,7 +1,4 @@
-import {
-  bodyValidatorMiddleware,
-  withMiddleware,
-} from '@/backend/middleware';
+import { bodyValidatorMiddleware, withMiddleware } from '@/backend/middleware';
 import { authService } from '@/backend/services/auth';
 import { puppeteerService } from '@/backend/services/puppeteer';
 import { stravaService } from '@/backend/services/strava';

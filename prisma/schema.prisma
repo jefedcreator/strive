@@ -55,19 +55,20 @@ model VerificationToken {
 }
 
 model Leaderboard {
-    id          String            @id @default(auto()) @map("_id") @db.ObjectId
-    name        String
-    description String?
-    createdAt   DateTime          @default(now())
-    updatedAt   DateTime          @updatedAt
-    isPublic    Boolean           @default(false)
-    isActive    Boolean           @default(true)
-    expiryDate  DateTime?
-    createdBy   User              @relation("LeaderboardCreator", fields: [createdById], references: [id], onDelete: Cascade)
-    createdById String            @db.ObjectId
-    club        Club?             @relation(fields: [clubId], references: [id], onDelete: SetNull)
-    clubId      String?           @db.ObjectId
-    entries     UserLeaderboard[]
+    id                 String               @id @default(auto()) @map("_id") @db.ObjectId
+    name               String
+    description        String?
+    createdAt          DateTime             @default(now())
+    updatedAt          DateTime             @updatedAt
+    isPublic           Boolean              @default(true)
+    isActive           Boolean              @default(true)
+    expiryDate         DateTime?
+    createdBy          User                 @relation("LeaderboardCreator", fields: [createdById], references: [id], onDelete: Cascade)
+    createdById        String               @db.ObjectId
+    club               Club?                @relation(fields: [clubId], references: [id], onDelete: SetNull)
+    clubId             String?              @db.ObjectId
+    entries            UserLeaderboard[]
+    leaderboardInvites LeaderboardInvites[]
 
     @@index([name])
     @@index([createdById])
@@ -94,6 +95,7 @@ model Club {
     createdById  String        @db.ObjectId
     members      UserClub[]
     leaderboards Leaderboard[]
+    clubInvites  ClubInvites[]
 
     // @@index([name])
     // @@index([slug])
@@ -153,27 +155,51 @@ model UserLeaderboard {
 }
 
 model User {
-    id                  String            @id @default(auto()) @map("_id") @db.ObjectId
-    email               String            @unique
+    id                  String               @id @default(auto()) @map("_id") @db.ObjectId
+    email               String               @unique
     avatar              String?
     type                UserType
-    username            String?           @unique
-    createdAt           DateTime          @default(now())
-    updatedAt           DateTime          @updatedAt
+    username            String?              @unique
+    createdAt           DateTime             @default(now())
+    updatedAt           DateTime             @updatedAt
     lastLoginAt         DateTime?
     access_token        String?
     accounts            Account[]
     sessions            Session[]
-    createdLeaderboards Leaderboard[]     @relation("LeaderboardCreator")
-    createdClubs        Club[]            @relation("ClubCreator")
+    createdLeaderboards Leaderboard[]        @relation("LeaderboardCreator")
+    createdClubs        Club[]               @relation("ClubCreator")
     clubs               UserClub[]
     leaderboards        UserLeaderboard[]
+    clubInvites         ClubInvites[]
+    leaderboardInvites  LeaderboardInvites[]
 
     // @@index([email])
     // @@index([username])
     @@index([createdAt])
     @@index([lastLoginAt])
     @@map("users")
+}
+
+model ClubInvites {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId    String   @db.ObjectId
+    clubId    String   @db.ObjectId
+    joinedAt  DateTime @default(now())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model LeaderboardInvites {
+    id            String      @id @default(auto()) @map("_id") @db.ObjectId
+    userId        String      @db.ObjectId
+    leaderboardId String      @db.ObjectId
+    joinedAt      DateTime    @default(now())
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+    user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    leaderboard   Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
 }
 
 enum ClubRole {

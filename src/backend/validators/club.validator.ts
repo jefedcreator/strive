@@ -36,8 +36,8 @@ export const clubValidatorSchema = z
     isPublic: z
       .string()
       .optional()
-      .transform((val) => val === 'true') 
-      .pipe(z.boolean().default(false)), 
+      .transform((val) => val === 'true')
+      .pipe(z.boolean().default(false)),
     isActive: z
       .string()
       .optional()
@@ -73,8 +73,26 @@ export const clubQueryValidatorSchema = baseQueryValidatorSchema
   })
   .strict();
 
+export const clubInviteValidatorSchema = z
+  .object({
+    userId: mongoIdValidator,
+  })
+  .strict();
+
+export const acceptInviteValidatorSchema = z
+  .object({
+    userId: mongoIdValidator,
+  })
+  .strict();
+
 export type ClubValidatorSchema = z.infer<typeof clubValidatorSchema>;
 export type UpdateClubValidatorSchema = z.infer<
   typeof updateClubValidatorSchema
 >;
 export type ClubQueryValidatorSchema = z.infer<typeof clubQueryValidatorSchema>;
+export type ClubInviteValidatorSchema = z.infer<
+  typeof clubInviteValidatorSchema
+>;
+export type AcceptInviteValidatorSchema = z.infer<
+  typeof acceptInviteValidatorSchema
+>;
