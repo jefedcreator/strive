@@ -143,12 +143,8 @@ export const pathParamValidatorMiddleware =
  *
  * @returns
  */
-export const authMiddleware = async <
-  T = unknown,
-  B = unknown,
-  Q = QueryParameters,
->(
-  request: AuthRequest<T, Q>
+export const authMiddleware = async <B = unknown, Q = QueryParameters>(
+  request: AuthRequest<B, Q>
 ): Promise<MiddlewareResponse> => {
   const token = request.headers.get('authorization')!;
 
@@ -220,7 +216,7 @@ export const authMiddleware = async <
  *
  * @returns
  */
-export const queryMiddleware =
+export const queryValidatorMiddleware =
   <Q extends z.ZodTypeAny>(schema: Q) =>
   async (
     request: AuthRequest<unknown, z.infer<Q>>
@@ -271,18 +267,18 @@ export const queryMiddleware =
  * @returns
  */
 
-export const schemaValidatorMiddleware =
-  <T extends z.ZodTypeAny>(schema: T) =>
+export const bodyValidatorMiddleware =
+  <B extends z.ZodTypeAny>(schema: B) =>
   async (
-    request: AuthRequest<z.infer<T>, unknown>
+    request: AuthRequest<z.infer<B>, unknown>
   ): Promise<MiddlewareResponse> => {
     const body = request.parsedBody ?? {};
-    const query = request.query ?? {};
+    // const query = request.query ?? {};
     const files = (request.files as Record<string, unknown>) ?? {};
 
     const dataToValidate = {
       ...(body as Record<string, unknown>),
-      ...(query as Record<string, unknown>),
+      // ...(query as Record<string, unknown>),
       ...files,
     };
     const result = schema.safeParse(dataToValidate);

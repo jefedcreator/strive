@@ -1,6 +1,7 @@
 import {
   authMiddleware,
-  schemaValidatorMiddleware,
+  bodyValidatorMiddleware,
+  queryValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
 import {
@@ -14,14 +15,12 @@ import { type ApiResponse, type PaginatedApiResponse } from '@/types';
 import { InternalServerErrorException } from '@/utils/exceptions';
 import { type Leaderboard, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import { type QueryParameters } from '@/backend/middleware/types';
-import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validator';
 
 /**
  * @body LeaderboardValidatorSchema
  * @description Creates a new leaderboard for the authenticated user. Allows specifying a name, optional description, club association, visibility, and an optional expiry date.
  */
-export const POST = withMiddleware<LeaderboardValidatorSchema, QueryParameters>(
+export const POST = withMiddleware<LeaderboardValidatorSchema>(
   async (request) => {
     try {
       const payload = request.validatedData!;
@@ -79,7 +78,7 @@ export const POST = withMiddleware<LeaderboardValidatorSchema, QueryParameters>(
       );
     }
   },
-  [authMiddleware, schemaValidatorMiddleware(leaderboardValidatorSchema)]
+  [authMiddleware, bodyValidatorMiddleware(leaderboardValidatorSchema)]
 );
 
 /**
@@ -200,5 +199,5 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
       );
     }
   },
-  [authMiddleware, schemaValidatorMiddleware(leaderboardQueryValidatorSchema)]
+  [authMiddleware, queryValidatorMiddleware(leaderboardQueryValidatorSchema)]
 );

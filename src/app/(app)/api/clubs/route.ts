@@ -1,6 +1,7 @@
 import {
   authMiddleware,
-  schemaValidatorMiddleware,
+  bodyValidatorMiddleware,
+  queryValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
 import {
@@ -12,19 +13,17 @@ import {
 import { db } from '@/server/db';
 import { type ApiResponse, type PaginatedApiResponse } from '@/types';
 import {
-  InternalServerErrorException,
   ConflictException,
+  InternalServerErrorException,
 } from '@/utils/exceptions';
 import { type Club, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import { type QueryParameters } from '@/backend/middleware/types';
-import type { LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
 
 /**
  * @body ClubValidatorSchema
  * @description Creates a new club for the authenticated user.
  */
-export const POST = withMiddleware<ClubValidatorSchema, QueryParameters>(
+export const POST = withMiddleware<ClubValidatorSchema>(
   async (request) => {
     try {
       const payload = request.validatedData!;
@@ -102,7 +101,7 @@ export const POST = withMiddleware<ClubValidatorSchema, QueryParameters>(
       );
     }
   },
-  [authMiddleware, schemaValidatorMiddleware(clubValidatorSchema)]
+  [authMiddleware, bodyValidatorMiddleware(clubValidatorSchema)]
 );
 
 /**
@@ -211,5 +210,5 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
       );
     }
   },
-  [authMiddleware, schemaValidatorMiddleware(clubQueryValidatorSchema)]
+  [authMiddleware, queryValidatorMiddleware(clubQueryValidatorSchema)]
 );

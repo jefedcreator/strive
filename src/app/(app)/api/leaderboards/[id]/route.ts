@@ -1,7 +1,7 @@
 import {
   authMiddleware,
   pathParamValidatorMiddleware,
-  schemaValidatorMiddleware,
+  bodyValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
 import { paramValidator } from '@/backend/validators/index.validator';
@@ -88,7 +88,7 @@ export const PUT = withMiddleware<UpdateLeaderboardValidatorSchema>(
   [
     authMiddleware,
     pathParamValidatorMiddleware(paramValidator),
-    schemaValidatorMiddleware(updateLeaderboardValidatorSchema),
+    bodyValidatorMiddleware(updateLeaderboardValidatorSchema),
   ]
 );
 
