@@ -1,32 +1,16 @@
-import { db } from "@/server/db";
-import { parseHttpError } from "@/utils";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import jwt from "jsonwebtoken";
+import { db } from '@/server/db';
+import { parseHttpError } from '@/utils';
+import { HttpException } from '@/utils/exceptions';
+import jwt from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
+import { type z } from 'zod';
 import type {
   AuthRequest,
   I_JwtPayload,
   MiddlewareFunction,
-  ValidationResult,
-  QueryParameters,
   MiddlewareResponse,
-} from "./types";
-
-const querySchema = z
-  .object({
-    page: z.string().optional(),
-    size: z.string().optional(),
-    query: z.string().optional(),
-    limit: z.string().optional(),
-    search: z.string().optional(),
-    clubId: z.string().optional(),
-    createdById: z.string().optional(),
-    isPublic: z.string().optional(),
-    isActive: z.string().optional(),
-    sortBy: z.string().optional(),
-    sortOrder: z.string().optional(),
-  })
-  .strict();
+  QueryParameters,
+} from './types';
 
 /**
  *
@@ -37,22 +21,22 @@ const querySchema = z
  * @returns
  */
 
-export const withMiddleware = <
-  T = unknown,
-  B = unknown,
-  Q = QueryParameters,
->(
+export const withMiddleware = <T = unknown, B = unknown, Q = QueryParameters>(
   handler: (
     request: AuthRequest<T, B, Q>,
-    context: { params: Record<string, string> },
+    context: { params: Record<string, string> }
   ) => Promise<Response>,
-  middlewares: MiddlewareFunction<T, B, Q>[],
+  middlewares: MiddlewareFunction<T, B, Q>[]
 ) => {
   return async (
     request: AuthRequest<T, B, Q>,
-    context: { params: Promise<Record<string, string>> },
+    context: { params: Promise<Record<string, string>> }
   ) => {
     try {
+      // Resolve and attach path parameters
+      const resolvedParams = await context.params;
+      request.params = resolvedParams;
+
       // Parse Query Parameters
       const searchParams = request.nextUrl.searchParams;
       const query: Record<string, string> = {};
@@ -62,15 +46,15 @@ export const withMiddleware = <
       request.query = query as Q;
 
       const contentType =
-        request.headers.get("content-type") ?? "application/json";
+        request.headers.get('content-type') ?? 'application/json';
 
-      if (contentType.includes("application/json")) {
+      if (contentType.includes('application/json')) {
         const body = (await request.json().catch(() => null)) as B;
         if (body) {
           request.parsedBody = body;
           request.files = {};
         }
-      } else if (contentType.includes("multipart/form-data")) {
+      } else if (contentType.includes('multipart/form-data')) {
         const formData = await request.formData();
         const parsedBody: Record<string, unknown> = {};
         const files: Record<string, File> = {};
@@ -84,7 +68,7 @@ export const withMiddleware = <
             parsedBody[key] = value;
           }
         }
-        console.log("parsedBody", parsedBody);
+        console.log('parsedBody', parsedBody);
 
         request.parsedBody = parsedBody as B;
         request.files = files;
@@ -101,25 +85,57 @@ export const withMiddleware = <
         }
       }
     } catch (error) {
-      console.error("Middleware error:", error);
+      console.error('Middleware error:', error);
       return NextResponse.json(
-        { message: parseHttpError(error) ?? "Internal server error" },
-        { status: 500 },
+        { message: parseHttpError(error) ?? 'Internal server error' },
+        { status: 500 }
       );
     }
 
     try {
-      const resolvedParams = await context.params;
-      return handler(request, { params: resolvedParams });
+      return handler(request, { params: request.params! });
     } catch (error: unknown) {
-      console.error("Handler error:", error);
+      console.error('Handler error:', error);
+      const statusCode =
+        error instanceof HttpException ? error.statusCode : 500;
       return NextResponse.json(
-        { message: parseHttpError(error) ?? "Internal server error" },
-        { status: 500 },
+        { message: parseHttpError(error) ?? 'Internal server error' },
+        { status: statusCode }
       );
     }
   };
 };
+
+/**
+ * Validates path parameters using a Zod schema.
+ * @param schema Zod schema to validate params against (e.g. z.object({ id: mongoIdValidator }))
+ */
+export const pathParamValidatorMiddleware =
+  (schema: z.ZodObject<any>) =>
+  async (request: AuthRequest<any, any, any>): Promise<MiddlewareResponse> => {
+    const params = request.params ?? {};
+    const result = schema.safeParse(params);
+
+    if (result.success) {
+      return {
+        message: 'Invalid ID parameter',
+        statusCode: 200,
+        next: true,
+      };
+    } else {
+      const firstError = result.error.issues[0];
+      const errorPath = firstError?.path.join('.');
+      const errorMessage = firstError?.message;
+
+      return {
+        message: errorPath
+          ? `${errorPath}: ${errorMessage}`
+          : (errorMessage ?? ''),
+        statusCode: 422,
+        next: false,
+      };
+    }
+  };
 
 /**
  *
@@ -132,23 +148,23 @@ export const authMiddleware = async <
   B = unknown,
   Q = QueryParameters,
 >(
-  request: AuthRequest<T, B, Q>,
+  request: AuthRequest<T, B, Q>
 ): Promise<MiddlewareResponse> => {
-  const token = request.headers.get("authorization")!;
+  const token = request.headers.get('authorization')!;
 
   try {
     if (!token) {
       return {
-        message: "Unauthorized",
+        message: 'Unauthorized',
         statusCode: 401,
         next: false,
       };
     }
 
-    const auth_token = token?.split("Bearer")[1];
+    const auth_token = token?.split('Bearer')[1];
     if (!auth_token) {
       return {
-        message: "Invalid auth token format",
+        message: 'Invalid auth token format',
         statusCode: 401,
         next: false,
       };
@@ -156,12 +172,12 @@ export const authMiddleware = async <
 
     const decoded = jwt.verify(
       auth_token.trim(),
-      process.env.AUTH_SECRET!,
+      process.env.AUTH_SECRET!
     ) as I_JwtPayload;
 
     if (!decoded || !decoded.uid) {
       return {
-        message: "Unauthorized",
+        message: 'Unauthorized',
         statusCode: 401,
         next: false,
       };
@@ -175,7 +191,7 @@ export const authMiddleware = async <
 
     if (!user) {
       return {
-        message: "User not found",
+        message: 'User not found',
         statusCode: 401,
         next: false,
       };
@@ -185,13 +201,14 @@ export const authMiddleware = async <
   } catch (error) {
     console.error(error);
     return {
-      message: "Invalid auth token",
+      message: 'Invalid auth token',
       statusCode: 401,
       next: false,
     };
   }
 
   return {
+    message: '',
     statusCode: 200,
     next: true,
   };
@@ -203,50 +220,49 @@ export const authMiddleware = async <
  *
  * @returns
  */
-export const queryMiddleware = async <
-  T = unknown,
-  B = unknown,
-  Q = QueryParameters,
->(
-  request: AuthRequest<T, B, Q>,
-): Promise<MiddlewareResponse> => {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const query: Record<string, string> = {};
-    searchParams.forEach((value, key) => {
-      query[key] = value;
-    });
+export const queryMiddleware =
+  <Q extends z.ZodTypeAny>(schema: Q) =>
+  async (
+    request: AuthRequest<unknown, unknown, z.infer<Q>>
+  ): Promise<MiddlewareResponse> => {
+    try {
+      const searchParams = request.nextUrl.searchParams;
+      const query: Record<string, string> = {};
+      searchParams.forEach((value, key) => {
+        query[key] = value;
+      });
 
-    const result = querySchema.safeParse(query);
+      const result = schema.safeParse(query);
 
-    if (!result.success) {
-      const firstError = result.error.issues[0];
-      const errorPath = firstError?.path.join(".");
+      if (!result.success) {
+        const firstError = result.error.issues[0];
+        const errorPath = firstError?.path.join('.');
 
+        return {
+          message: errorPath
+            ? `Invalid query parameter: ${errorPath}`
+            : 'Invalid query parameters',
+          statusCode: 422,
+          next: false,
+        };
+      }
+
+      request.query = result.data;
+    } catch (error) {
+      console.error(error);
       return {
-        message: errorPath
-          ? `Invalid query parameter: ${errorPath}`
-          : "Invalid query parameters",
-        statusCode: 422,
+        message: 'Error parsing query parameters',
+        statusCode: 400,
         next: false,
       };
     }
 
-    request.query = result.data as Q;
-  } catch (error) {
-    console.error(error);
     return {
-      message: "Error parsing query parameters",
-      statusCode: 400,
-      next: false,
+      message: '',
+      statusCode: 200,
+      next: true,
     };
-  }
-
-  return {
-    statusCode: 200,
-    next: true,
   };
-};
 
 /**
  *
@@ -258,7 +274,7 @@ export const queryMiddleware = async <
 export const schemaValidatorMiddleware =
   <T extends z.ZodTypeAny>(schema: T) =>
   async (
-    request: AuthRequest<z.infer<T>, unknown, unknown>,
+    request: AuthRequest<z.infer<T>, unknown, unknown>
   ): Promise<MiddlewareResponse> => {
     const body = request.parsedBody ?? {};
     const query = request.query ?? {};
@@ -275,18 +291,19 @@ export const schemaValidatorMiddleware =
       request.validatedData = result.data;
 
       return {
+        message: '',
         statusCode: 200,
         next: true,
       };
     } else {
       const firstError = result.error.issues[0];
-      const errorPath = firstError?.path.join(".");
+      const errorPath = firstError?.path.join('.');
       const errorMessage = firstError?.message;
 
       return {
         message: errorPath
           ? `${errorPath}: ${errorMessage}`
-          : errorMessage ?? "Validation failed",
+          : (errorMessage ?? 'Validation failed'),
         statusCode: 422,
         next: false,
       };

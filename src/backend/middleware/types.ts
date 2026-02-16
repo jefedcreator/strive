@@ -1,12 +1,14 @@
-import type { User } from "@prisma/client";
-import { type NextRequest } from "next/server";
-import type z from "zod";
+import type { User } from '@prisma/client';
+import { type NextRequest } from 'next/server';
+import type z from 'zod';
 
-import type { LeaderboardQueryValidatorSchema } from "@/backend/validators/leaderboard.validator";
+import type { BaseQueryValidatorInput } from '@/backend/validators/index.validator';
 
-export type MiddlewareResponse =
-  | { message: string; statusCode: number; next: boolean }
-  | { statusCode: number; next: boolean; message?: undefined };
+export type MiddlewareResponse = {
+  message: string;
+  statusCode: number;
+  next: boolean;
+};
 
 export type MiddlewareFunction<
   T = unknown,
@@ -21,12 +23,13 @@ export interface I_JwtPayload {
   permissions: any;
 }
 
-export type QueryParameters = LeaderboardQueryValidatorSchema;
+export type QueryParameters = BaseQueryValidatorInput;
 
 export interface AuthRequest<T = unknown, B = unknown, Q = QueryParameters>
   extends NextRequest {
   parsedBody?: B;
   query?: Q;
+  params?: Record<string, string>;
   files?: Record<string, File>;
   validatedData?: T;
   user: User | null;
