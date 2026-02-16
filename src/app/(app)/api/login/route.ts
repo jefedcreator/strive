@@ -55,7 +55,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
           type: 'NRC',
           email,
           token,
-          username,
+          fullname: username,
         });
       } else {
         throw new Error('Invalid login type provided.');

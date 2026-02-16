@@ -159,6 +159,7 @@ model User {
     email               String               @unique
     avatar              String?
     type                UserType
+    fullname            String              @unique
     username            String?              @unique
     createdAt           DateTime             @default(now())
     updatedAt           DateTime             @updatedAt

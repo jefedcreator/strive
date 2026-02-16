@@ -7,13 +7,13 @@ class AuthService {
     type,
     token,
     email = '',
-    username,
+    fullname,
     avatar,
   }: {
     type: UserType;
     email: string;
     token: string | null;
-    username: string | null;
+    fullname: string | null;
     avatar?: string | null;
   }): Promise<User> {
     const user = await prisma.user.findFirst({
@@ -24,36 +24,33 @@ class AuthService {
 
     console.log('userData', user);
 
+    const data: Prisma.UserUpdateInput = {
+      fullname: fullname ?? (await this.generateUniqueUsername()),
+      type,
+      access_token: token,
+      lastLoginAt: new Date(),
+      avatar: avatar ?? user?.avatar,
+    };
+
     if (user) {
       await prisma.user.update({
         where: {
           id: user.id,
         },
-        data: {
-          type,
-          access_token: token,
-          lastLoginAt: new Date(),
-          avatar: avatar ?? user.avatar,
-          username: username,
-        },
+        data,
       });
       return user;
     }
 
     try {
       const data: Prisma.UserCreateInput = {
-        username,
+        fullname: fullname ?? (await this.generateUniqueUsername()),
         type,
         email,
         avatar,
         access_token: token,
         lastLoginAt: new Date(),
       };
-
-      if (!username) {
-        const generatedUsername = generateUsername();
-        data.username = await this.checkUserName(generatedUsername);
-      }
 
       const createdUser = await prisma.user.create({
         data,
@@ -64,6 +61,12 @@ class AuthService {
       console.error('Error in findOrCreateUser:', error);
       throw error;
     }
+  }
+
+  private async generateUniqueUsername(): Promise<string> {
+    const generatedUsername = generateUsername();
+    const uniqueUsername = await this.checkUserName(generatedUsername);
+    return uniqueUsername;
   }
 
   private async checkUserName(
@@ -81,7 +84,7 @@ class AuthService {
     }
 
     const isUsernameTaken = await prisma.user.findFirst({
-      where: { username: baseUsername.toLowerCase() },
+      where: { fullname: baseUsername.toLowerCase() },
     });
 
     if (isUsernameTaken) {

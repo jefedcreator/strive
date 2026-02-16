@@ -28,7 +28,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
       const user = await authService.findOrCreateUser({
         type: 'STRAVA',
         email: stravaUser.email,
-        username: stravaUser.fullName,
+        fullname: stravaUser.fullName,
         avatar: stravaUser.avatar,
         token: auth.accessToken,
       });

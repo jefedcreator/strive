@@ -178,6 +178,28 @@
           "createdById"
         ]
       },
+      "AcceptLeaderboardInviteValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "LeaderboardInviteValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
       "UpdateLeaderboardValidatorSchema": {
         "type": "object",
         "properties": {
@@ -610,6 +632,28 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "leaderboardInviteValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "acceptLeaderboardInviteValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "userId"
         ]
       },
       "updateLeaderboardValidatorSchema": {
@@ -1418,6 +1462,120 @@
             "schema": {},
             "required": true,
             "example": "123"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/leaderboards/{id}/accept": {
+      "post": {
+        "operationId": "post-leaderboards-{id}-accept",
+        "summary": "",
+        "description": "Accept a join request (invite) for a leaderboard. Only the creator can do this.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptLeaderboardInviteValidatorSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/leaderboards/{id}/invite": {
+      "post": {
+        "operationId": "post-leaderboards-{id}-invite",
+        "summary": "",
+        "description": "Invite a user to a leaderboard. Only members can do this.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaderboardInviteValidatorSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/leaderboards/{id}/join": {
+      "post": {
+        "operationId": "post-leaderboards-{id}-join",
+        "summary": "",
+        "description": "Join a leaderboard. If the leaderboard is private, it creates a join request.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
           }
         ],
         "responses": {
