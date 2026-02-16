@@ -54,7 +54,7 @@ const uniqueNumber = () => Date.now()?.toString()?.slice(-8);
  */
 function parseHttpError(error: any) {
   console.error(error);
-  if (error instanceof HttpException) {
+  if (error instanceof HttpException || error.statusCode) {
     return error.message;
   }
   return error?.response?.message || error?.cause || error?.toString();

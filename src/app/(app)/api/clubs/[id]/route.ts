@@ -25,6 +25,8 @@ import { NextResponse } from 'next/server';
  * @body UpdateClubValidatorSchema
  * @pathParams paramValidator
  * @description Updates an existing club for the authenticated user.
+ * @contentType multipart/form-data
+ * @auth bearer
  */
 export const PUT = withMiddleware<UpdateClubValidatorSchema>(
   async (request, { params }) => {
@@ -91,16 +93,10 @@ export const PUT = withMiddleware<UpdateClubValidatorSchema>(
       };
 
       return NextResponse.json(response);
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException ||
-        error instanceof ConflictException
-      ) {
-        throw error;
-      }
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while updating club: ${(error as Error).message}`
+        `An error occurred while updating club: ${error.message}`
       );
     }
   },
@@ -146,15 +142,10 @@ export const DELETE = withMiddleware<unknown>(
       };
 
       return NextResponse.json(response);
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException
-      ) {
-        throw error;
-      }
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while deleting club: ${(error as Error).message}`
+        `An error occurred while deleting club: ${error.message}`
       );
     }
   },
@@ -195,12 +186,10 @@ export const GET = withMiddleware<unknown>(
       };
 
       return NextResponse.json(response);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while fetching club: ${(error as Error).message}`
+        `An error occurred while fetching club: ${error.message}`
       );
     }
   },

@@ -20,9 +20,12 @@ import {
 import { type Club, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
+
 /**
  * @body ClubValidatorSchema
  * @description Creates a new club for the authenticated user.
+ * @contentType multipart/form-data
+ * @auth bearer
  */
 export const POST = withMiddleware<ClubValidatorSchema>(
     async (request) => {
@@ -30,7 +33,6 @@ export const POST = withMiddleware<ClubValidatorSchema>(
             const payload = request.validatedData!;
             const user = request.user!;
 
-            // Check if club with same name or slug already exists
             const existingClub = await db.club.findFirst({
                 where: {
                     OR: [{ name: payload.name }, { slug: payload.slug }],
@@ -59,7 +61,7 @@ export const POST = withMiddleware<ClubValidatorSchema>(
 
             if (payload.image instanceof File) {
                 const uploadResult = await cloudinaryService.uploadFile(payload.image, {
-                    folder: 'clubs',
+                    folder: 'strive/clubs',
                 });
                 data.image = uploadResult.secure_url;
             }
@@ -98,10 +100,10 @@ export const POST = withMiddleware<ClubValidatorSchema>(
             };
 
             return NextResponse.json(response, { status: 201 });
-        } catch (error) {
-            if (error instanceof ConflictException) throw error;
+        } catch (error: any) {
+            if (error instanceof ConflictException || error.statusCode) throw error;
             throw new InternalServerErrorException(
-                `An error occurred while creating club: ${(error as Error).message}`
+                `An error occurred while creating club: ${error.message}`
             );
         }
     },
@@ -169,10 +171,16 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
 
                 const count = data.length;
 
-                const response: PaginatedApiResponse<typeof data> = {
+                const mappedData = data.map(({ _count, memberCount, ...rest }) => ({
+                    ...rest,
+                    leaderboards: _count.leaderboards,
+                    members: _count.members
+                }));
+
+                const response: PaginatedApiResponse<typeof mappedData> = {
                     status: 200,
                     message: 'Clubs retrieved successfully',
-                    data,
+                    data: mappedData,
                     total: count,
                     page: 1,
                     size: count > 0 ? count : 1,
@@ -197,10 +205,16 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
                 }),
             ]);
 
-            const response: PaginatedApiResponse<typeof data> = {
+            const mappedData = data.map(({ _count, memberCount, ...rest }) => ({
+                ...rest,
+                leaderboards: _count.leaderboards,
+                members: _count.members
+            }));
+
+            const response: PaginatedApiResponse<typeof mappedData> = {
                 status: 200,
                 message: 'Clubs retrieved successfully',
-                data,
+                data: mappedData,
                 total: count,
                 page,
                 size,

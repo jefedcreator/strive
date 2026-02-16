@@ -70,10 +70,10 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
       };
 
       return NextResponse.json(response, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while creating leaderboard: ${(error as Error).message
-        }`
+        `An error occurred while creating leaderboard: ${error.message}`
       );
     }
   },
@@ -190,10 +190,10 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
       };
 
       return NextResponse.json(response);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while fetching leaderboards: ${(error as Error).message
-        }`
+        `An error occurred while fetching leaderboards: ${error.message}`
       );
     }
   },

@@ -101,9 +101,10 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         },
         { status: 201 }
       );
-    } catch (error) {
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while logging in: ${(error as Error).message}`
+        `An error occurred while logging in: ${error.message}`
       );
     }
   },

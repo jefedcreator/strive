@@ -71,17 +71,10 @@ export const PUT = withMiddleware<UpdateLeaderboardValidatorSchema>(
       };
 
       return NextResponse.json(response);
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException
-      ) {
-        throw error;
-      }
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while updating leaderboard: ${
-          (error as Error).message
-        }`
+        `An error occurred while updating leaderboard: ${error.message}`
       );
     }
   },
@@ -127,17 +120,10 @@ export const DELETE = withMiddleware<unknown>(
       };
 
       return NextResponse.json(response);
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException
-      ) {
-        throw error;
-      }
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while deleting leaderboard: ${
-          (error as Error).message
-        }`
+        `An error occurred while deleting leaderboard: ${error.message}`
       );
     }
   },
@@ -176,12 +162,10 @@ export const GET = withMiddleware<unknown>(
       };
 
       return NextResponse.json(response);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while fetching leaderboard: ${(error as Error).message}`
+        `An error occurred while fetching leaderboard: ${error.message}`
       );
     }
   },

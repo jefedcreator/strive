@@ -54,11 +54,10 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
       });
 
       return NextResponse.redirect(new URL('/home', request.url));
-    } catch (error) {
+    } catch (error: any) {
+      if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred during Strava authentication: ${
-          (error as Error).message
-        }`
+        `An error occurred during Strava authentication: ${error.message}`
       );
     }
   },

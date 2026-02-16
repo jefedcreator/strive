@@ -34,17 +34,15 @@ export const clubValidatorSchema = z
         'slug must only contain lowercase letters, numbers, and hyphens'
       ),
     isPublic: z
-      .boolean({
-        invalid_type_error: 'isPublic must be a boolean value',
-      })
-      .default(false)
-      .optional(),
+      .string()
+      .optional()
+      .transform((val) => val === 'true') 
+      .pipe(z.boolean().default(false)), 
     isActive: z
-      .boolean({
-        invalid_type_error: 'isActive must be a boolean value',
-      })
-      .default(true)
-      .optional(),
+      .string()
+      .optional()
+      .transform((val) => val === 'true')
+      .pipe(z.boolean().default(true)),
   })
   .strict();
 
