@@ -1,14 +1,32 @@
 import { db } from "@/server/db";
 import { parseHttpError } from "@/utils";
 import { NextResponse } from "next/server";
-import type z from "zod";
+import { z } from "zod";
 import jwt from "jsonwebtoken";
 import type {
   AuthRequest,
   I_JwtPayload,
   MiddlewareFunction,
   ValidationResult,
+  QueryParameters,
+  MiddlewareResponse,
 } from "./types";
+
+const querySchema = z
+  .object({
+    page: z.string().optional(),
+    size: z.string().optional(),
+    query: z.string().optional(),
+    limit: z.string().optional(),
+    search: z.string().optional(),
+    clubId: z.string().optional(),
+    createdById: z.string().optional(),
+    isPublic: z.string().optional(),
+    isActive: z.string().optional(),
+    sortBy: z.string().optional(),
+    sortOrder: z.string().optional(),
+  })
+  .strict();
 
 /**
  *
@@ -19,7 +37,11 @@ import type {
  * @returns
  */
 
-export const withMiddleware = <T = any, B = any, Q = any>(
+export const withMiddleware = <
+  T = unknown,
+  B = unknown,
+  Q = QueryParameters,
+>(
   handler: (
     request: AuthRequest<T, B, Q>,
     context: { params: Record<string, string> },
@@ -105,10 +127,13 @@ export const withMiddleware = <T = any, B = any, Q = any>(
  *
  * @returns
  */
-export const authMiddleware = async <T = any, B = any, Q = any>(
+export const authMiddleware = async <
+  T = unknown,
+  B = unknown,
+  Q = QueryParameters,
+>(
   request: AuthRequest<T, B, Q>,
-  context?: any,
-) => {
+): Promise<MiddlewareResponse> => {
   const token = request.headers.get("authorization")!;
 
   try {
@@ -178,16 +203,36 @@ export const authMiddleware = async <T = any, B = any, Q = any>(
  *
  * @returns
  */
-export const queryMiddleware = async <T = any, B = any, Q = any>(
+export const queryMiddleware = async <
+  T = unknown,
+  B = unknown,
+  Q = QueryParameters,
+>(
   request: AuthRequest<T, B, Q>,
-) => {
+): Promise<MiddlewareResponse> => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query: Record<string, string> = {};
     searchParams.forEach((value, key) => {
       query[key] = value;
     });
-    request.query = query as any;
+
+    const result = querySchema.safeParse(query);
+
+    if (!result.success) {
+      const firstError = result.error.issues[0];
+      const errorPath = firstError?.path.join(".");
+
+      return {
+        message: errorPath
+          ? `Invalid query parameter: ${errorPath}`
+          : "Invalid query parameters",
+        statusCode: 422,
+        next: false,
+      };
+    }
+
+    request.query = result.data as Q;
   } catch (error) {
     console.error(error);
     return {
@@ -211,13 +256,19 @@ export const queryMiddleware = async <T = any, B = any, Q = any>(
  */
 
 export const schemaValidatorMiddleware =
-  <T>(schema: z.ZodSchema<T>) =>
-  async (request: AuthRequest<T, any, any>): Promise<ValidationResult> => {
+  <T extends z.ZodTypeAny>(schema: T) =>
+  async (
+    request: AuthRequest<z.infer<T>, unknown, unknown>,
+  ): Promise<MiddlewareResponse> => {
     const body = request.parsedBody ?? {};
     const query = request.query ?? {};
-    const files = request.files ?? {};
+    const files = (request.files as Record<string, unknown>) ?? {};
 
-    const dataToValidate = { ...body, ...query, ...files };
+    const dataToValidate = {
+      ...(body as Record<string, unknown>),
+      ...(query as Record<string, unknown>),
+      ...files,
+    };
     const result = schema.safeParse(dataToValidate);
 
     if (result.success) {
@@ -226,7 +277,6 @@ export const schemaValidatorMiddleware =
       return {
         statusCode: 200,
         next: true,
-        validatedData: result.data,
       };
     } else {
       const firstError = result.error.issues[0];
@@ -234,10 +284,11 @@ export const schemaValidatorMiddleware =
       const errorMessage = firstError?.message;
 
       return {
-        message: errorPath ? `${errorPath}: ${errorMessage}` : errorMessage,
+        message: errorPath
+          ? `${errorPath}: ${errorMessage}`
+          : errorMessage ?? "Validation failed",
         statusCode: 422,
         next: false,
-        errors: result.error,
       };
     }
   };

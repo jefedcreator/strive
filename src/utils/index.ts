@@ -7,6 +7,7 @@ import { twMerge } from "tailwind-merge";
 import {
   generateUsername
 } from 'unique-username-generator';
+import z from "zod";
 
 const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -153,7 +154,9 @@ const genUsername = () => {
   return `${baseUsername}${randomChars}`.substring(0, 12).toLowerCase();
 }
 
-
+const mongoIdValidator = z
+  .string()
+  .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ID format");
 
 export {
   cn,
@@ -167,5 +170,6 @@ export {
   parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword
+  verifyPassword,
+  mongoIdValidator
 };

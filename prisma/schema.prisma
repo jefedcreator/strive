@@ -62,19 +62,19 @@ model Leaderboard {
     updatedAt   DateTime          @updatedAt
     isPublic    Boolean           @default(false)
     isActive    Boolean           @default(true)
+    expiryDate  DateTime?
     createdBy   User              @relation("LeaderboardCreator", fields: [createdById], references: [id], onDelete: Cascade)
     createdById String            @db.ObjectId
     club        Club?             @relation(fields: [clubId], references: [id], onDelete: SetNull)
     clubId      String?           @db.ObjectId
-    entries     UserLeaderBoard[]
-    user        User?             @relation(fields: [userId], references: [id])
-    userId      String?           @db.ObjectId
+    entries     UserLeaderboard[]
 
     @@index([name])
     @@index([createdById])
     @@index([clubId])
     @@index([isPublic, isActive])
     @@index([createdAt])
+    @@index([expiryDate])
     @@index([clubId, isPublic, isActive])
     @@map("leaderboards")
 }
@@ -94,8 +94,6 @@ model Club {
     createdById  String        @db.ObjectId
     members      UserClub[]
     leaderboards Leaderboard[]
-    user         User?         @relation(fields: [userId], references: [id])
-    userId       String?       @db.ObjectId
 
     // @@index([name])
     // @@index([slug])
@@ -128,7 +126,7 @@ model UserClub {
     @@map("user_clubs")
 }
 
-model UserLeaderBoard {
+model UserLeaderboard {
     id            String      @id @default(auto()) @map("_id") @db.ObjectId
     userId        String      @db.ObjectId
     leaderboardId String      @db.ObjectId
@@ -168,10 +166,8 @@ model User {
     sessions            Session[]
     createdLeaderboards Leaderboard[]     @relation("LeaderboardCreator")
     createdClubs        Club[]            @relation("ClubCreator")
-    clubMemberships     UserClub[]
-    leaderboardEntries  UserLeaderBoard[]
-    leaderboard         Leaderboard[]
-    club                Club[]
+    clubs               UserClub[]
+    leaderboards        UserLeaderboard[]
 
     // @@index([email])
     // @@index([username])

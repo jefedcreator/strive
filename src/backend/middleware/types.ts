@@ -1,11 +1,18 @@
-import { NextRequest } from "next/server";
-import type { DateRangeFilters } from "@/types";
-import type z from "zod";
 import type { User } from "@prisma/client";
+import { type NextRequest } from "next/server";
+import type z from "zod";
 
-export type MiddlewareFunction<T = any, B = any, Q = any> = (
-  req: AuthRequest<T, B, Q>,
-) => Promise<{ message?: string; statusCode: number; next: boolean }>;
+import type { LeaderboardQueryValidatorSchema } from "@/backend/validators/leaderboard.validator";
+
+export type MiddlewareResponse =
+  | { message: string; statusCode: number; next: boolean }
+  | { statusCode: number; next: boolean; message?: undefined };
+
+export type MiddlewareFunction<
+  T = unknown,
+  B = unknown,
+  Q = QueryParameters,
+> = (req: AuthRequest<T, B, Q>) => Promise<MiddlewareResponse>;
 
 export interface I_JwtPayload {
   workspaceId: string;
@@ -14,7 +21,10 @@ export interface I_JwtPayload {
   permissions: any;
 }
 
-export interface AuthRequest<T = any, B = any, Q = any> extends NextRequest {
+export type QueryParameters = LeaderboardQueryValidatorSchema;
+
+export interface AuthRequest<T = unknown, B = unknown, Q = QueryParameters>
+  extends NextRequest {
   parsedBody?: B;
   query?: Q;
   files?: Record<string, File>;
@@ -26,6 +36,6 @@ export interface ValidationResult {
   message?: string;
   statusCode: number;
   next: boolean;
-  validatedData?: any;
+  validatedData?: unknown;
   errors?: z.ZodError;
 }
