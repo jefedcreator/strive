@@ -10,11 +10,13 @@ import {
   type LeaderboardValidatorSchema,
 } from "@/backend/validators/leaderboard.validator";
 import { db } from "@/server/db";
-import { type Prisma } from "@prisma/client";
+import { type ApiResponse, type PaginatedApiResponse } from "@/types";
+import { type Leaderboard, type Prisma } from "@prisma/client";
+import { NextResponse } from "next/server";
 
 /**
  * @body leaderboardValidatorSchema
- * @bodyDescription Authenticates a user and returns a JWT token. Currently supports Nike (NRC) login via puppeteer
+ * @description Creates a new leaderboard for the authenticated user. Allows specifying a name, optional description, club association, visibility, and an optional expiry date.
  */
 export const POST = withMiddleware<LeaderboardValidatorSchema>(
   async (request) => {
@@ -58,20 +60,21 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
       data,
     });
 
-    return Response.json(
-      {
-        status: 201,
-        message: "Leaderboard created successfully",
-        data: leaderboard,
-      },
-      {
-        status: 201,
-      },
-    );
+    const response: ApiResponse<Leaderboard> = {
+      status: 201,
+      message: "Leaderboard created successfully",
+      data: leaderboard,
+    };
+
+    return NextResponse.json(response, { status: 201 });
   },
   [authMiddleware, schemaValidatorMiddleware(leaderboardValidatorSchema)],
 );
 
+/**
+ * @query leaderboardQueryValidatorSchema
+ * @description Retrieves leaderboards for the authenticated user. Supports search, pagination, and filtering by club, creator, or status.
+ */
 export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
   async (request) => {
     const payload = request.validatedData!;
@@ -109,48 +112,74 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
       ];
     }
 
+    const orderBy: Prisma.LeaderboardOrderByWithRelationInput = {
+      [payload.sortBy ?? "createdAt"]: payload.sortOrder ?? "desc",
+    };
+
+    const include: Prisma.LeaderboardInclude = {
+      club: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          slug: true,
+        },
+      },
+      _count: {
+        select: {
+          entries: true,
+        },
+      },
+    };
+
+    if (payload.all) {
+      const data = await db.leaderboard.findMany({
+        where,
+        include,
+        orderBy,
+      });
+
+      const count = data.length;
+
+      const response: PaginatedApiResponse<typeof data> = {
+        status: 200,
+        message: "Leaderboards retrieved successfully",
+        data,
+        total: count,
+        page: 1,
+        size: count > 0 ? count : 1,
+        totalPages: 1,
+      };
+
+      return NextResponse.json(response);
+    }
+
     const page = payload.page ?? 1;
-    const limit = payload.size ?? 10;
-    const skip = (page - 1) * limit;
+    const size = payload.size ?? 10;
+    const skip = (page - 1) * size;
 
     const [count, data] = await Promise.all([
       db.leaderboard.count({ where }),
       db.leaderboard.findMany({
         where,
-        take: limit,
+        take: size,
         skip,
-        orderBy: {
-          [payload.sortBy ?? "createdAt"]: payload.sortOrder ?? "desc",
-        },
-        include: {
-          club: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-              slug: true,
-            },
-          },
-          _count: {
-            select: {
-              entries: true,
-            },
-          },
-        },
+        orderBy,
+        include,
       }),
     ]);
 
-    return Response.json({
+    const response: PaginatedApiResponse<typeof data> = {
       status: 200,
       message: "Leaderboards retrieved successfully",
       data,
-      meta: {
-        total: count,
-        page,
-        limit,
-        totalPages: Math.ceil(count / limit),
-      },
-    });
+      total: count,
+      page,
+      size,
+      totalPages: Math.ceil(count / size),
+    };
+
+    return NextResponse.json(response);
   },
   [authMiddleware, schemaValidatorMiddleware(leaderboardQueryValidatorSchema)],
 );

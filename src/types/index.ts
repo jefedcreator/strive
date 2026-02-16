@@ -1,3 +1,20 @@
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  size: number;
+  totalPages: number;
+}
+
+export interface ApiResponse<T = unknown> {
+  status: number;
+  message: string;
+  data: T;
+}
+
+export interface PaginatedApiResponse<T = unknown>
+  extends ApiResponse<T>,
+    PaginationMeta {}
+
 interface ISubMenu {
   name: string;
   isActive: boolean;
@@ -27,4 +44,5 @@ enum DateRangeFilters {
   thisYear = "this-year",
 }
 
-export type { ISubMenu, Option, DateRangeFilters };
+export type { ISubMenu, Option };
+export { DateRangeFilters };

@@ -45,12 +45,12 @@ export const withMiddleware = <
   handler: (
     request: AuthRequest<T, B, Q>,
     context: { params: Record<string, string> },
-  ) => Promise<any>,
+  ) => Promise<Response>,
   middlewares: MiddlewareFunction<T, B, Q>[],
 ) => {
   return async (
     request: AuthRequest<T, B, Q>,
-    context: { params: Promise<any> },
+    context: { params: Promise<Record<string, string>> },
   ) => {
     try {
       // Parse Query Parameters
@@ -59,20 +59,20 @@ export const withMiddleware = <
       searchParams.forEach((value, key) => {
         query[key] = value;
       });
-      request.query = query as any;
+      request.query = query as Q;
 
       const contentType =
         request.headers.get("content-type") ?? "application/json";
 
       if (contentType.includes("application/json")) {
-        const body = await request.json().catch(() => null);
+        const body = (await request.json().catch(() => null)) as B;
         if (body) {
           request.parsedBody = body;
           request.files = {};
         }
       } else if (contentType.includes("multipart/form-data")) {
         const formData = await request.formData();
-        const parsedBody: Record<string, any> = {};
+        const parsedBody: Record<string, unknown> = {};
         const files: Record<string, File> = {};
 
         for (const [key, value] of formData.entries()) {
@@ -86,7 +86,7 @@ export const withMiddleware = <
         }
         console.log("parsedBody", parsedBody);
 
-        request.parsedBody = parsedBody as any;
+        request.parsedBody = parsedBody as B;
         request.files = files;
       }
     } catch (error) {
@@ -111,7 +111,7 @@ export const withMiddleware = <
     try {
       const resolvedParams = await context.params;
       return handler(request, { params: resolvedParams });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Handler error:", error);
       return NextResponse.json(
         { message: parseHttpError(error) ?? "Internal server error" },
