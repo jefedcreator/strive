@@ -15,7 +15,6 @@ import { NextResponse } from 'next/server';
 /**
  * @body LoginValidatorSchema
  * @bodyDescription Authenticates a user and returns a JWT token. Currently supports Nike (NRC) login via puppeteer
- * @tag login
  */
 export const POST = withMiddleware<LoginValidatorSchema>(
   async (request) => {

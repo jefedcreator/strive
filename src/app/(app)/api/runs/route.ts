@@ -5,7 +5,6 @@ import { stravaService } from '@/backend/services/strava';
 
 /**
  * @bodyDescription Get user's runs from connected platforms. Supports Nike Run Club (NRC) and Strava activities
- * @tag runs
  */
 export const GET = withMiddleware(
   async (request: AuthRequest) => {

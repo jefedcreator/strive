@@ -142,7 +142,21 @@ export const GET = withMiddleware<unknown>(
       const leaderboard = await db.leaderboard.findUnique({
         where: { id },
         include: {
-          entries: true,
+          entries: {
+            orderBy: {
+              score: 'desc',
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  avatar: true,
+                  type: true,
+                },
+              },
+            },
+          },
           _count: {
             select: {
               entries: true,

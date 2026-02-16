@@ -331,6 +331,17 @@
           "createdById"
         ]
       },
+      "StravaCallbackQuerySchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
       "LoginValidatorSchema": {
         "type": "object",
         "properties": {
@@ -350,16 +361,20 @@
           "type"
         ]
       },
-      "StravaCallbackQuerySchema": {
+      "UpdateUserValidatorSchema": {
         "type": "object",
         "properties": {
-          "code": {
-            "type": "string"
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 25,
+            "pattern": "^[a-zA-Z0-9_]+$",
+            "nullable": true
+          },
+          "avatar": {
+            "nullable": true
           }
-        },
-        "required": [
-          "code"
-        ]
+        }
       },
       "baseQueryValidatorSchema": {
         "type": "object",
@@ -784,6 +799,21 @@
         "required": [
           "type"
         ]
+      },
+      "updateUserValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 25,
+            "pattern": "^[a-zA-Z0-9_]+$",
+            "nullable": true
+          },
+          "avatar": {
+            "nullable": true
+          }
+        }
       }
     },
     "responses": {
@@ -1594,7 +1624,7 @@
         "summary": "",
         "description": "",
         "tags": [
-          "login"
+          "Login"
         ],
         "parameters": [],
         "requestBody": {
@@ -1617,9 +1647,9 @@
         }
       }
     },
-    "/login/strava/callback": {
+    "/login/callback": {
       "get": {
-        "operationId": "get-login-strava-callback",
+        "operationId": "get-login-callback",
         "summary": "",
         "description": "Strava OAuth callback handler. Exchanges the authorization code for an access token and establishes a user session.",
         "tags": [
@@ -1651,10 +1681,90 @@
         "summary": "",
         "description": "",
         "tags": [
-          "runs"
+          "Runs"
         ],
         "parameters": [],
         "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "get-users-me",
+        "summary": "",
+        "description": "Retrieves the authenticated user's profile, including clubs and leaderboards.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-users-me",
+        "summary": "",
+        "description": "Updates the authenticated user's username or avatar.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserValidatorSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-users-me",
+        "summary": "",
+        "description": "Deletes the authenticated user's account.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
           "400": {
             "$ref": "#/components/responses/400"
           },
