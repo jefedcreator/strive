@@ -1,13 +1,13 @@
-import type { DateRangeFilters } from "@/types";
-import { getChildId } from "@/utils/getChildId";
-import bcrypt from "bcryptjs";
-import { type ClassValue, clsx } from "clsx";
-import moment from "moment";
-import { twMerge } from "tailwind-merge";
-import {
-  generateUsername
-} from 'unique-username-generator';
-import z from "zod";
+import type { DateRangeFilters } from '@/types';
+import { getChildId } from '@/utils/getChildId';
+import bcrypt from 'bcryptjs';
+import { type ClassValue, clsx } from 'clsx';
+import moment from 'moment';
+import { twMerge } from 'tailwind-merge';
+import { generateUsername } from 'unique-username-generator';
+import z from 'zod';
+
+import { HttpException } from './exceptions';
 
 const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -23,9 +23,9 @@ const convertFileToBase64 = (file: File): Promise<string> => {
 };
 
 const convertBase64ToFile = (base64: string, fileName: string) => {
-  const arr = base64.split(",");
+  const arr = base64.split(',');
   const mime = arr?.[0]?.match(/:(.*?);/)?.[1];
-  const bstr = atob(arr?.[1] || "");
+  const bstr = atob(arr?.[1] || '');
   let n = bstr.length;
   const u8arr = new Uint8Array(n);
   while (n--) {
@@ -54,6 +54,9 @@ const uniqueNumber = () => Date.now()?.toString()?.slice(-8);
  */
 function parseHttpError(error: any) {
   console.error(error);
+  if (error instanceof HttpException) {
+    return error.message;
+  }
   return error?.response?.message || error?.cause || error?.toString();
 }
 
@@ -66,29 +69,29 @@ function getDateRange(filter: DateRangeFilters) {
   let startDate, endDate;
 
   switch (filter) {
-    case "this-week":
-      startDate = moment().startOf("week").toDate();
-      endDate = moment().endOf("week").toDate();
+    case 'this-week':
+      startDate = moment().startOf('week').toDate();
+      endDate = moment().endOf('week').toDate();
       break;
-    case "last-week":
-      startDate = moment().subtract(1, "week").startOf("week").toDate();
-      endDate = moment().subtract(1, "week").endOf("week").toDate();
+    case 'last-week':
+      startDate = moment().subtract(1, 'week').startOf('week').toDate();
+      endDate = moment().subtract(1, 'week').endOf('week').toDate();
       break;
-    case "this-month":
-      startDate = moment().startOf("month").toDate();
-      endDate = moment().endOf("month").toDate();
+    case 'this-month':
+      startDate = moment().startOf('month').toDate();
+      endDate = moment().endOf('month').toDate();
       break;
-    case "last-month":
-      startDate = moment().subtract(1, "month").startOf("month").toDate();
-      endDate = moment().subtract(1, "month").endOf("month").toDate();
+    case 'last-month':
+      startDate = moment().subtract(1, 'month').startOf('month').toDate();
+      endDate = moment().subtract(1, 'month').endOf('month').toDate();
       break;
-    case "this-year":
-      startDate = moment().startOf("year").toDate();
-      endDate = moment().endOf("year").toDate();
+    case 'this-year':
+      startDate = moment().startOf('year').toDate();
+      endDate = moment().endOf('year').toDate();
       break;
     default:
-      startDate = moment().startOf("month").toDate();
-      endDate = moment().endOf("month").toDate();
+      startDate = moment().startOf('month').toDate();
+      endDate = moment().endOf('month').toDate();
       filter = DateRangeFilters.thisMonth;
       break;
   }
@@ -108,12 +111,11 @@ const isValidObjectId = (q?: string) => {
 };
 
 const parseTransactionStatus = (status?: string) => {
-  if (status?.toLowerCase() != "all") {
+  if (status?.toLowerCase() != 'all') {
     return status?.toLowerCase();
   }
   return undefined;
 };
-
 
 const generateRandomString = (length = 6): string => {
   const characters =
@@ -125,7 +127,7 @@ const generateRandomString = (length = 6): string => {
   }
 
   return result;
-}
+};
 
 const genUsername = () => {
   // Try up to 5 times to generate a unique username
@@ -152,16 +154,19 @@ const genUsername = () => {
   const baseUsername = generateUsername('', 0, 6);
   const randomChars = generateRandomString();
   return `${baseUsername}${randomChars}`.substring(0, 12).toLowerCase();
-}
+};
 
 const mongoIdValidator = z
   .string()
-  .regex(/^[0-9a-fA-F]{24}$/, "Invalid MongoDB ID format");
+  .regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ID format');
 
 export {
   cn,
   convertBase64ToFile,
-  convertFileToBase64, generateRandomString, genUsername, getChildId,
+  convertFileToBase64,
+  generateRandomString,
+  genUsername,
+  getChildId,
   getDateRange,
   hashPassword,
   isFile,
@@ -171,5 +176,6 @@ export {
   twMerge,
   uniqueNumber,
   verifyPassword,
-  mongoIdValidator
+  mongoIdValidator,
+  HttpException,
 };

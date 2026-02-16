@@ -1,8 +1,8 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { db } from "@/server/db";
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { type DefaultSession, type NextAuthConfig } from 'next-auth';
+import DiscordProvider from 'next-auth/providers/discord';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { db } from '@/server/db';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -10,12 +10,12 @@ import { db } from "@/server/db";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string;
       username?: string | null;
-    } & DefaultSession["user"];
+    } & DefaultSession['user'];
   }
 
   interface User {
@@ -32,13 +32,13 @@ export const authConfig = {
   providers: [
     DiscordProvider,
     CredentialsProvider({
-      name: "Manual Auth",
+      name: 'Manual Auth',
       credentials: {
-        userId: { label: "User ID", type: "text" },
+        userId: { label: 'User ID', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.userId) return null;
-        
+
         const user = await db.user.findUnique({
           where: { id: credentials.userId as string },
         });
@@ -56,7 +56,7 @@ export const authConfig = {
   ],
   adapter: PrismaAdapter(db),
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
   },
   callbacks: {
     session: ({ session, token }) => ({

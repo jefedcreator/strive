@@ -37,11 +37,11 @@ type Option = {
 };
 
 enum DateRangeFilters {
-  thisWeek = "this-week",
-  lastWeek = "last-week",
-  thisMonth = "this-month",
-  lastMonth = "last-month",
-  thisYear = "this-year",
+  thisWeek = 'this-week',
+  lastWeek = 'last-week',
+  thisMonth = 'this-month',
+  lastMonth = 'last-month',
+  thisYear = 'this-year',
 }
 
 export type { ISubMenu, Option };
