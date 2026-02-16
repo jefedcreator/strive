@@ -11,10 +11,10 @@ export type MiddlewareResponse = {
 };
 
 export type MiddlewareFunction<
-  T = unknown,
+  // T = unknown,
   B = unknown,
   Q = QueryParameters,
-> = (req: AuthRequest<T, B, Q>) => Promise<MiddlewareResponse>;
+> = (req: AuthRequest<B, Q>) => Promise<MiddlewareResponse>;
 
 export interface I_JwtPayload {
   workspaceId: string;
@@ -25,13 +25,16 @@ export interface I_JwtPayload {
 
 export type QueryParameters = BaseQueryValidatorInput;
 
-export interface AuthRequest<T = unknown, B = unknown, Q = QueryParameters>
-  extends NextRequest {
-  parsedBody?: B;
+export interface AuthRequest<
+  B = unknown,
+  //  B = unknown
+  Q = QueryParameters,
+> extends NextRequest {
+  parsedBody?: any;
   query?: Q;
   params?: Record<string, string>;
   files?: Record<string, File>;
-  validatedData?: T;
+  validatedData?: B;
   user: User | null;
 }
 

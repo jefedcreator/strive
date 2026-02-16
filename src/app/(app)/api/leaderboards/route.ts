@@ -20,11 +20,7 @@ import { type QueryParameters } from '@/backend/middleware/types';
  * @body LeaderboardValidatorSchema
  * @description Creates a new leaderboard for the authenticated user. Allows specifying a name, optional description, club association, visibility, and an optional expiry date.
  */
-export const POST = withMiddleware<
-  LeaderboardValidatorSchema,
-  unknown,
-  QueryParameters
->(
+export const POST = withMiddleware<LeaderboardValidatorSchema, QueryParameters>(
   async (request) => {
     try {
       const payload = request.validatedData!;
@@ -91,7 +87,6 @@ export const POST = withMiddleware<
  */
 export const GET = withMiddleware<
   LeaderboardQueryValidatorSchema,
-  unknown,
   QueryParameters
 >(
   async (request) => {

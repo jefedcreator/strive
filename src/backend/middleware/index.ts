@@ -21,15 +21,15 @@ import type {
  * @returns
  */
 
-export const withMiddleware = <T = unknown, B = unknown, Q = QueryParameters>(
+export const withMiddleware = <B = unknown, Q = QueryParameters>(
   handler: (
-    request: AuthRequest<T, B, Q>,
+    request: AuthRequest<B, Q>,
     context: { params: Record<string, string> }
   ) => Promise<Response>,
-  middlewares: MiddlewareFunction<T, B, Q>[]
+  middlewares: MiddlewareFunction<B, Q>[]
 ) => {
   return async (
-    request: AuthRequest<T, B, Q>,
+    request: AuthRequest<B, Q>,
     context: { params: Promise<Record<string, string>> }
   ) => {
     try {
@@ -112,7 +112,7 @@ export const withMiddleware = <T = unknown, B = unknown, Q = QueryParameters>(
  */
 export const pathParamValidatorMiddleware =
   (schema: z.ZodObject<any>) =>
-  async (request: AuthRequest<any, any, any>): Promise<MiddlewareResponse> => {
+  async (request: AuthRequest<any, any>): Promise<MiddlewareResponse> => {
     const params = request.params ?? {};
     const result = schema.safeParse(params);
 
@@ -148,7 +148,7 @@ export const authMiddleware = async <
   B = unknown,
   Q = QueryParameters,
 >(
-  request: AuthRequest<T, B, Q>
+  request: AuthRequest<T, Q>
 ): Promise<MiddlewareResponse> => {
   const token = request.headers.get('authorization')!;
 
@@ -223,7 +223,7 @@ export const authMiddleware = async <
 export const queryMiddleware =
   <Q extends z.ZodTypeAny>(schema: Q) =>
   async (
-    request: AuthRequest<unknown, unknown, z.infer<Q>>
+    request: AuthRequest<unknown, z.infer<Q>>
   ): Promise<MiddlewareResponse> => {
     try {
       const searchParams = request.nextUrl.searchParams;
@@ -274,7 +274,7 @@ export const queryMiddleware =
 export const schemaValidatorMiddleware =
   <T extends z.ZodTypeAny>(schema: T) =>
   async (
-    request: AuthRequest<z.infer<T>, unknown, unknown>
+    request: AuthRequest<z.infer<T>, unknown>
   ): Promise<MiddlewareResponse> => {
     const body = request.parsedBody ?? {};
     const query = request.query ?? {};

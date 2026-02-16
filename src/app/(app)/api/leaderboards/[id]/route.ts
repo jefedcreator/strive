@@ -4,7 +4,6 @@ import {
   schemaValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
-import type { QueryParameters } from '@/backend/middleware/types';
 import { paramValidator } from '@/backend/validators/index.validator';
 import {
   updateLeaderboardValidatorSchema,
@@ -25,11 +24,7 @@ import { NextResponse } from 'next/server';
  * @body UpdateLeaderboardValidatorSchema
  * @description Updates an existing leaderboard for the authenticated user.
  */
-export const PUT = withMiddleware<
-  UpdateLeaderboardValidatorSchema,
-  unknown,
-  QueryParameters
->(
+export const PUT = withMiddleware<UpdateLeaderboardValidatorSchema>(
   async (request, { params }) => {
     try {
       const payload = request.validatedData!;
@@ -101,7 +96,7 @@ export const PUT = withMiddleware<
  * @pathParams paramValidator
  * @description Deletes an existing leaderboard for the authenticated user.
  */
-export const DELETE = withMiddleware<unknown, unknown>(
+export const DELETE = withMiddleware<unknown>(
   async (request, { params }) => {
     try {
       const user = request.user!;
