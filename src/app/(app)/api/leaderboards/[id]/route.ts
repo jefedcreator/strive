@@ -143,3 +143,46 @@ export const DELETE = withMiddleware<unknown>(
   },
   [authMiddleware, pathParamValidatorMiddleware(paramValidator)]
 );
+
+/**
+ * @description Retrieves a single club.
+ */
+export const GET = withMiddleware<unknown>(
+  async (request, { params }) => {
+    try {
+      const { id } = params;
+
+      const leaderboard = await db.leaderboard.findUnique({
+        where: { id },
+        include: {
+          entries: true,
+          _count: {
+            select: {
+              entries: true,
+            },
+          },
+        },
+      });
+
+      if (!leaderboard) {
+        throw new NotFoundException('Leaderboard not found');
+      }
+
+      const response: ApiResponse<typeof leaderboard> = {
+        status: 200,
+        message: 'Leaderboard retrieved successfully',
+        data: leaderboard,
+      };
+
+      return NextResponse.json(response);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `An error occurred while fetching leaderboard: ${(error as Error).message}`
+      );
+    }
+  },
+  [authMiddleware, pathParamValidatorMiddleware(paramValidator)]
+);
