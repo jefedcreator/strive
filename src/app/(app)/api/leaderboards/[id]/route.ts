@@ -2,11 +2,14 @@ import {
   authMiddleware,
   pathParamValidatorMiddleware,
   bodyValidatorMiddleware,
+  queryValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
 import { paramValidator } from '@/backend/validators/index.validator';
 import {
+  leaderboardEntriesQueryValidatorSchema,
   updateLeaderboardValidatorSchema,
+  type LeaderboardEntriesQueryValidatorSchema,
   type UpdateLeaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
 import { db } from '@/server/db';
@@ -132,24 +135,41 @@ export const DELETE = withMiddleware<unknown>(
 
 /**
  * @pathParams paramValidator
+ * @queryParams LeaderboardEntriesQueryValidatorSchema
  * @description Retrieves a single leaderboard.
  */
-export const GET = withMiddleware<unknown>(
+export const GET = withMiddleware<
+  unknown,
+  LeaderboardEntriesQueryValidatorSchema
+>(
   async (request, { params }) => {
     try {
       const { id } = params;
+      const query = request.query!;
+
+      const sortBy = query.sortBy ?? 'score';
+      const sortOrder = query.sortOrder ?? 'desc';
+
+      const orderBy: Prisma.UserLeaderboardOrderByWithRelationInput = {};
+
+      if (sortBy === 'fullname') {
+        orderBy.user = {
+          fullname: sortOrder,
+        };
+      } else {
+        orderBy[sortBy] = sortOrder;
+      }
 
       const leaderboard = await db.leaderboard.findUnique({
         where: { id },
         include: {
           entries: {
-            orderBy: {
-              score: 'desc',
-            },
+            orderBy,
             include: {
               user: {
                 select: {
                   id: true,
+                  fullname: true,
                   username: true,
                   avatar: true,
                   type: true,
@@ -183,5 +203,9 @@ export const GET = withMiddleware<unknown>(
       );
     }
   },
-  [authMiddleware, pathParamValidatorMiddleware(paramValidator)]
+  [
+    authMiddleware,
+    pathParamValidatorMiddleware(paramValidator),
+    queryValidatorMiddleware(leaderboardEntriesQueryValidatorSchema),
+  ]
 );

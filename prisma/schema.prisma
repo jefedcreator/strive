@@ -141,7 +141,6 @@ model UserLeaderboard {
     userId        String      @db.ObjectId
     leaderboardId String      @db.ObjectId
     score         Int         @default(0)
-    rank          Int?
     createdAt     DateTime    @default(now())
     updatedAt     DateTime    @updatedAt
     lastScoreDate DateTime?
@@ -153,9 +152,7 @@ model UserLeaderboard {
     @@index([userId])
     @@index([leaderboardId])
     @@index([score])
-    @@index([rank])
     @@index([leaderboardId, score])
-    @@index([leaderboardId, rank])
     @@index([userId, score])
     @@index([lastScoreDate])
     @@index([leaderboardId, isActive, score])

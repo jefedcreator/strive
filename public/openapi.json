@@ -234,6 +234,49 @@
           }
         }
       },
+      "LeaderboardEntriesQueryValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "default": "1",
+            "nullable": true
+          },
+          "size": {
+            "type": "string",
+            "default": "10",
+            "nullable": true
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "score",
+              "fullname",
+              "createdAt"
+            ],
+            "default": "score",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc",
+            "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "LeaderboardValidatorSchema": {
         "type": "object",
         "properties": {
@@ -816,6 +859,49 @@
           "clubId",
           "createdById"
         ]
+      },
+      "leaderboardEntriesQueryValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "default": "1",
+            "nullable": true
+          },
+          "size": {
+            "type": "string",
+            "default": "10",
+            "nullable": true
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "score",
+              "fullname",
+              "createdAt"
+            ],
+            "default": "score",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc",
+            "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
+          }
+        }
       },
       "mongoIdValidator": {
         "type": "string",
@@ -1588,6 +1674,63 @@
           "Leaderboards"
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "score",
+                "fullname",
+                "createdAt"
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "all",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
           {
             "in": "path",
             "name": "id",

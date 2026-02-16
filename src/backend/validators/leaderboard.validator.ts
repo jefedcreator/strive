@@ -82,6 +82,20 @@ export const acceptLeaderboardInviteValidatorSchema = z
   })
   .strict();
 
+export const leaderboardEntriesQueryValidatorSchema = baseQueryValidatorSchema
+  .partial()
+  .extend({
+    sortBy: z
+      .enum(['score', 'fullname', 'createdAt'], {
+        errorMap: () => ({
+          message: 'sortBy must be one of: score, fullname, createdAt',
+        }),
+      })
+      .default('score')
+      .optional(),
+  })
+  .strict();
+
 export type LeaderboardValidatorSchema = z.infer<
   typeof leaderboardValidatorSchema
 >;
@@ -96,4 +110,7 @@ export type LeaderboardInviteValidatorSchema = z.infer<
 >;
 export type AcceptLeaderboardInviteValidatorSchema = z.infer<
   typeof acceptLeaderboardInviteValidatorSchema
+>;
+export type LeaderboardEntriesQueryValidatorSchema = z.infer<
+  typeof leaderboardEntriesQueryValidatorSchema
 >;
