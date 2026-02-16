@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "API Documentation",
+    "title": "Strive Documentation",
     "version": "1.0.0",
     "description": "This is the OpenAPI specification for your project."
   },
@@ -20,16 +20,40 @@
       }
     },
     "schemas": {
-      "leaderboardValidatorSchema": {
+      "paramValidator": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "UpdateClubValidatorSchema": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 255
+            "maxLength": 255,
+            "nullable": true
           },
           "description": {
             "type": "string",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[a-z0-9-]+$",
             "nullable": true
           },
           "isPublic": {
@@ -41,117 +65,64 @@
             "type": "boolean",
             "default": true,
             "nullable": true
-          },
-          "createdById": {
-            "type": "string",
-            "minLength": 1
-          },
-          "clubId": {
-            "type": "integer",
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "nullable": true
-          },
-          "userId": {
-            "type": "string",
-            "nullable": true
           }
-        },
-        "required": [
-          "name",
-          "createdById"
-        ]
+        }
       },
-      "LoginValidatorSchema": {
+      "ClubValidatorSchema": {
         "type": "object",
         "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "strava",
-              "nrc"
-            ]
-          },
-          "code": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "updateLeaderboardValidatorSchema": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "minimum": 0,
-            "exclusiveMinimum": true
-          },
           "name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 255,
-            "nullable": true
+            "maxLength": 255
           },
           "description": {
             "type": "string",
             "nullable": true
           },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[a-z0-9-]+$"
+          },
           "isPublic": {
             "type": "boolean",
+            "default": false,
             "nullable": true
           },
           "isActive": {
             "type": "boolean",
-            "nullable": true
-          },
-          "clubId": {
-            "type": "integer",
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "nullable": true
-          },
-          "userId": {
-            "type": "string",
+            "default": true,
             "nullable": true
           }
         },
         "required": [
-          "id"
+          "name",
+          "slug"
         ]
       },
-      "leaderboardQueryValidatorSchema": {
+      "ClubQueryValidatorSchema": {
         "type": "object",
         "properties": {
           "page": {
             "type": "string",
-            "default": "1"
+            "default": "1",
+            "nullable": true
           },
-          "limit": {
+          "size": {
             "type": "string",
-            "default": "10"
+            "default": "10",
+            "nullable": true
           },
-          "search": {
+          "query": {
             "type": "string",
             "maxLength": 255,
-            "nullable": true
-          },
-          "isPublic": {
-            "type": "string",
-            "nullable": true
-          },
-          "isActive": {
-            "type": "string",
-            "nullable": true
-          },
-          "clubId": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdById": {
-            "type": "string",
             "nullable": true
           },
           "sortBy": {
@@ -172,31 +143,60 @@
             ],
             "default": "desc",
             "nullable": true
-          }
-        },
-        "required": [
-          "page",
-          "limit"
-        ]
-      },
-      "loginValidatorSchema": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "strava",
-              "nrc"
-            ]
           },
-          "code": {
+          "all": {
             "type": "string",
             "nullable": true
+          },
+          "isPublic": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdById": {
+            "type": "object"
           }
         },
         "required": [
-          "type"
+          "createdById"
         ]
+      },
+      "UpdateLeaderboardValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean",
+            "default": false,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "object",
+            "nullable": true
+          }
+        }
       },
       "LeaderboardValidatorSchema": {
         "type": "object",
@@ -220,65 +220,18 @@
             "default": true,
             "nullable": true
           },
-          "createdById": {
+          "expiryDate": {
             "type": "string",
-            "minLength": 1
-          },
-          "clubId": {
-            "type": "integer",
-            "minimum": 0,
-            "exclusiveMinimum": true,
+            "format": "date-time",
             "nullable": true
           },
-          "userId": {
-            "type": "string",
+          "clubId": {
+            "type": "object",
             "nullable": true
           }
         },
         "required": [
-          "name",
-          "createdById"
-        ]
-      },
-      "UpdateLeaderboardValidatorSchema": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "minimum": 0,
-            "exclusiveMinimum": true
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 255,
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "isPublic": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "isActive": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "clubId": {
-            "type": "integer",
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "nullable": true
-          },
-          "userId": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id"
+          "name"
         ]
       },
       "LeaderboardQueryValidatorSchema": {
@@ -286,31 +239,17 @@
         "properties": {
           "page": {
             "type": "string",
-            "default": "1"
+            "default": "1",
+            "nullable": true
           },
-          "limit": {
+          "size": {
             "type": "string",
-            "default": "10"
+            "default": "10",
+            "nullable": true
           },
-          "search": {
+          "query": {
             "type": "string",
             "maxLength": 255,
-            "nullable": true
-          },
-          "isPublic": {
-            "type": "string",
-            "nullable": true
-          },
-          "isActive": {
-            "type": "string",
-            "nullable": true
-          },
-          "clubId": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdById": {
-            "type": "string",
             "nullable": true
           },
           "sortBy": {
@@ -331,11 +270,425 @@
             ],
             "default": "desc",
             "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "string",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "object"
+          },
+          "createdById": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "clubId",
+          "createdById"
+        ]
+      },
+      "LoginValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "strava",
+              "nrc"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "baseQueryValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "default": "1"
+          },
+          "size": {
+            "type": "string",
+            "default": "10"
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "name",
+              "createdAt",
+              "updatedAt"
+            ],
+            "default": "createdAt",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc",
+            "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "page",
-          "limit"
+          "size"
+        ]
+      },
+      "clubValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "default": false,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "slug"
+        ]
+      },
+      "updateClubValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[a-z0-9-]+$",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean",
+            "default": false,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          }
+        }
+      },
+      "clubQueryValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "default": "1",
+            "nullable": true
+          },
+          "size": {
+            "type": "string",
+            "default": "10",
+            "nullable": true
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "name",
+              "createdAt",
+              "updatedAt"
+            ],
+            "default": "createdAt",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc",
+            "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdById": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "createdById"
+        ]
+      },
+      "BaseQueryValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "default": "1"
+          },
+          "size": {
+            "type": "string",
+            "default": "10"
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "name",
+              "createdAt",
+              "updatedAt"
+            ],
+            "default": "createdAt",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc",
+            "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "page",
+          "size"
+        ]
+      },
+      "leaderboardValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean",
+            "default": false,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "updateLeaderboardValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean",
+            "default": false,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "leaderboardQueryValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "default": "1",
+            "nullable": true
+          },
+          "size": {
+            "type": "string",
+            "default": "10",
+            "nullable": true
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "name",
+              "createdAt",
+              "updatedAt"
+            ],
+            "default": "createdAt",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc",
+            "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "string",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "object"
+          },
+          "createdById": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "clubId",
+          "createdById"
+        ]
+      },
+      "mongoIdValidator": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{24}$"
+      },
+      "loginValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "strava",
+              "nrc"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type"
         ]
       }
     },
@@ -463,25 +816,436 @@
     }
   },
   "paths": {
-    "/leaderboard": {
+    "/clubs": {
       "post": {
-        "operationId": "post-leaderboard",
+        "operationId": "post-clubs",
         "summary": "",
-        "description": "",
+        "description": "Creates a new club for the authenticated user.",
         "tags": [
-          "Leaderboard"
+          "Clubs"
         ],
         "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/leaderboardValidatorSchema"
+                "$ref": "#/components/schemas/ClubValidatorSchema"
               }
             }
-          },
-          "description": "Authenticates a user and returns a JWT token. Currently supports Nike (NRC) login via puppeteer"
+          }
         },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get-clubs",
+        "summary": "",
+        "description": "Retrieves clubs. Supports search, pagination, and filtering.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "createdAt",
+                "updatedAt"
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "all",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "isPublic",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "isActive",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "createdById",
+            "schema": {
+              "type": "object"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clubs/{id}": {
+      "put": {
+        "operationId": "put-clubs-{id}",
+        "summary": "",
+        "description": "Updates an existing club for the authenticated user.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClubValidatorSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-clubs-{id}",
+        "summary": "",
+        "description": "Deletes an existing club for the authenticated user.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get-clubs-{id}",
+        "summary": "",
+        "description": "Retrieves a single club.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/leaderboards": {
+      "post": {
+        "operationId": "post-leaderboards",
+        "summary": "",
+        "description": "Creates a new leaderboard for the authenticated user. Allows specifying a name, optional description, club association, visibility, and an optional expiry date.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaderboardValidatorSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get-leaderboards",
+        "summary": "",
+        "description": "Retrieves leaderboards for the authenticated user. Supports search, pagination, and filtering by club, creator, or status.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "createdAt",
+                "updatedAt"
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "all",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "isPublic",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "isActive",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "clubId",
+            "schema": {
+              "type": "object"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "createdById",
+            "schema": {
+              "type": "object"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/leaderboards/{id}": {
+      "put": {
+        "operationId": "put-leaderboards-{id}",
+        "summary": "",
+        "description": "Updates an existing leaderboard for the authenticated user.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLeaderboardValidatorSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-leaderboards-{id}",
+        "summary": "",
+        "description": "Deletes an existing leaderboard for the authenticated user.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get-leaderboards-{id}",
+        "summary": "",
+        "description": "Retrieves a single leaderboard.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
         "responses": {
           "400": {
             "$ref": "#/components/responses/400"

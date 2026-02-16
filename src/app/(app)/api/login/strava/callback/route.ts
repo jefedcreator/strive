@@ -1,51 +1,66 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { stravaService } from '@/backend/services/strava';
+import {
+  queryValidatorMiddleware,
+  withMiddleware,
+} from '@/backend/middleware';
 import { authService } from '@/backend/services/auth';
+import { stravaService } from '@/backend/services/strava';
 import { signIn } from '@/server/auth';
+import { InternalServerErrorException } from '@/utils/exceptions';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const code = searchParams.get('code');
+const stravaCallbackQuerySchema = z.object({
+  code: z.string({ required_error: 'code is required' }),
+});
 
-  if (!code) {
-    return NextResponse.redirect(new URL('/login?error=no_code', request.url));
-  }
+type StravaCallbackQuerySchema = z.infer<typeof stravaCallbackQuerySchema>;
 
-  try {
-    const { auth, user: stravaUser } = await stravaService.exchangeToken(code);
-    const user = await authService.findOrCreateUser({
-      type: 'STRAVA',
-      email: stravaUser.email,
-      username: stravaUser.fullName,
-      avatar: stravaUser.avatar,
-      token: auth.accessToken,
-    });
+/**
+ * @queryParams StravaCallbackQuerySchema
+ * @description Strava OAuth callback handler. Exchanges the authorization code for an access token and establishes a user session.
+ */
+export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
+  async (request) => {
+    try {
+      const { code } = request.query!;
 
-    const jwtPayload = { uid: user.id, email: user.email };
-    const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
-    const expiresAt = moment()
-      .add(jwtExpirationTimeInSec, 'seconds')
-      .toISOString();
+      const { auth, user: stravaUser } = await stravaService.exchangeToken(code);
+      const user = await authService.findOrCreateUser({
+        type: 'STRAVA',
+        email: stravaUser.email,
+        username: stravaUser.fullName,
+        avatar: stravaUser.avatar,
+        token: auth.accessToken,
+      });
 
-    const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
-      expiresIn: jwtExpirationTimeInSec,
-    });
+      const jwtPayload = { uid: user.id, email: user.email };
+      const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
+      const expiresAt = moment()
+        .add(jwtExpirationTimeInSec, 'seconds')
+        .toISOString();
 
-    console.log('accessToken', auth_token);
+      const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
+        expiresIn: jwtExpirationTimeInSec,
+      });
 
-    await signIn('credentials', {
-      userId: user.id,
-      token: auth_token,
-      redirect: false,
-    });
+      console.log('accessToken', auth_token);
 
-    return NextResponse.redirect(new URL('/home', request.url));
-  } catch (error) {
-    console.error('Login error:', error);
-    return NextResponse.redirect(
-      new URL('/login?error=auth_failed', request.url)
-    );
-  }
-}
+      await signIn('credentials', {
+        userId: user.id,
+        token: auth_token,
+        redirect: false,
+      });
+
+      return NextResponse.redirect(new URL('/home', request.url));
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `An error occurred during Strava authentication: ${
+          (error as Error).message
+        }`
+      );
+    }
+  },
+  [queryValidatorMiddleware(stravaCallbackQuerySchema)]
+);

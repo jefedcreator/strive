@@ -4,6 +4,7 @@ import {
   bodyValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
+import { cloudinaryService } from '@/backend/services/cloudinary';
 import {
   updateClubValidatorSchema,
   type UpdateClubValidatorSchema,
@@ -68,7 +69,12 @@ export const PUT = withMiddleware<UpdateClubValidatorSchema>(
 
       if (payload.name) data.name = payload.name;
       if (payload.description) data.description = payload.description;
-      if (payload.image) data.image = payload.image;
+      if (payload.image instanceof File) {
+        const uploadResult = await cloudinaryService.uploadFile(payload.image, {
+          folder: 'clubs',
+        });
+        data.image = uploadResult.secure_url;
+      }
       if (payload.slug) data.slug = payload.slug;
       if (payload.isActive !== undefined) data.isActive = payload.isActive;
       if (payload.isPublic !== undefined) data.isPublic = payload.isPublic;

@@ -18,10 +18,8 @@ export const clubValidatorSchema = z
       .nullable()
       .optional(),
     image: z
-      .string({
-        invalid_type_error: 'image must be a valid string',
-      })
-      .url('image must be a valid URL')
+      .any()
+      .refine((file) => file instanceof File, 'image must be a valid file')
       .nullable()
       .optional(),
     slug: z
