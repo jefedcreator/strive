@@ -361,6 +361,57 @@
           "type"
         ]
       },
+      "NotificationQueryValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "default": "1",
+            "nullable": true
+          },
+          "size": {
+            "type": "string",
+            "default": "10",
+            "nullable": true
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "name",
+              "createdAt",
+              "updatedAt"
+            ],
+            "default": "createdAt",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc",
+            "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "isRead": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "UpdateUserValidatorSchema": {
         "type": "object",
         "properties": {
@@ -811,6 +862,57 @@
             "nullable": true
           },
           "avatar": {
+            "nullable": true
+          }
+        }
+      },
+      "notificationQueryValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "string",
+            "default": "1",
+            "nullable": true
+          },
+          "size": {
+            "type": "string",
+            "default": "10",
+            "nullable": true
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "name",
+              "createdAt",
+              "updatedAt"
+            ],
+            "default": "createdAt",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc",
+            "nullable": true
+          },
+          "all": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "isRead": {
+            "type": "string",
             "nullable": true
           }
         }
@@ -1663,6 +1765,104 @@
               "type": "string"
             },
             "required": false
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "operationId": "get-notifications",
+        "summary": "",
+        "description": "Retrieves notifications for the authenticated user. Supports filtering by type, read status, and pagination.",
+        "tags": [
+          "Notifications"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "createdAt",
+                "updatedAt"
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "all",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "isRead",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
           }
         ],
         "responses": {
