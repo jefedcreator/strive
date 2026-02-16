@@ -18,15 +18,13 @@ import {
 import { type Club, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { type QueryParameters } from '@/backend/middleware/types';
+import type { LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
 
 /**
  * @body ClubValidatorSchema
  * @description Creates a new club for the authenticated user.
  */
-export const POST = withMiddleware<
-  ClubValidatorSchema,
-  QueryParameters
->(
+export const POST = withMiddleware<ClubValidatorSchema, QueryParameters>(
   async (request) => {
     try {
       const payload = request.validatedData!;
@@ -111,16 +109,20 @@ export const POST = withMiddleware<
  * @query ClubQueryValidatorSchema
  * @description Retrieves clubs. Supports search, pagination, and filtering.
  */
-export const GET = withMiddleware<
-  ClubQueryValidatorSchema,
-  QueryParameters
->(
+export const GET = withMiddleware<ClubQueryValidatorSchema>(
   async (request) => {
     try {
-      const payload = request.validatedData!;
+      const payload = request.query!;
       const user = request.user!;
 
-      const where: Prisma.ClubWhereInput = {};
+      const where: Prisma.ClubWhereInput = {
+        members: {
+          some: {
+            userId: user.id,
+            isActive: true,
+          },
+        },
+      };
 
       if (payload.isActive !== undefined) {
         where.isActive = payload.isActive;

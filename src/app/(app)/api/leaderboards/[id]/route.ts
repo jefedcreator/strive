@@ -145,7 +145,8 @@ export const DELETE = withMiddleware<unknown>(
 );
 
 /**
- * @description Retrieves a single club.
+ * @pathParams paramValidator
+ * @description Retrieves a single leaderboard.
  */
 export const GET = withMiddleware<unknown>(
   async (request, { params }) => {

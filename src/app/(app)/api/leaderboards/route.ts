@@ -15,6 +15,7 @@ import { InternalServerErrorException } from '@/utils/exceptions';
 import { type Leaderboard, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { type QueryParameters } from '@/backend/middleware/types';
+import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validator';
 
 /**
  * @body LeaderboardValidatorSchema
@@ -82,16 +83,13 @@ export const POST = withMiddleware<LeaderboardValidatorSchema, QueryParameters>(
 );
 
 /**
- * @query leaderboardQueryValidatorSchema
+ * @query LeaderboardQueryValidatorSchema
  * @description Retrieves leaderboards for the authenticated user. Supports search, pagination, and filtering by club, creator, or status.
  */
-export const GET = withMiddleware<
-  LeaderboardQueryValidatorSchema,
-  QueryParameters
->(
+export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
   async (request) => {
     try {
-      const payload = request.validatedData!;
+      const payload = request.query!;
       const user = request.user!;
 
       const where: Prisma.LeaderboardWhereInput = {

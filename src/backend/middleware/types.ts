@@ -1,8 +1,8 @@
 import type { User } from '@prisma/client';
 import { type NextRequest } from 'next/server';
 import type z from 'zod';
-
-import type { BaseQueryValidatorInput } from '@/backend/validators/index.validator';
+import type { ClubQueryValidatorSchema } from '../validators/club.validator';
+import type { LeaderboardQueryValidatorSchema } from '../validators/leaderboard.validator';
 
 export type MiddlewareResponse = {
   message: string;
@@ -10,11 +10,9 @@ export type MiddlewareResponse = {
   next: boolean;
 };
 
-export type MiddlewareFunction<
-  // T = unknown,
-  B = unknown,
-  Q = QueryParameters,
-> = (req: AuthRequest<B, Q>) => Promise<MiddlewareResponse>;
+export type MiddlewareFunction<B = unknown, Q = QueryParameters> = (
+  req: AuthRequest<B, Q>
+) => Promise<MiddlewareResponse>;
 
 export interface I_JwtPayload {
   workspaceId: string;
@@ -23,14 +21,17 @@ export interface I_JwtPayload {
   permissions: any;
 }
 
-export type QueryParameters = BaseQueryValidatorInput;
+type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
 
-export interface AuthRequest<
-  B = unknown,
-  //  B = unknown
-  Q = QueryParameters,
-> extends NextRequest {
-  parsedBody?: any;
+export type QueryParameters = Prettify<
+  LeaderboardQueryValidatorSchema & ClubQueryValidatorSchema
+>;
+
+export interface AuthRequest<B = unknown, Q = QueryParameters>
+  extends NextRequest {
+  parsedBody?: B;
   query?: Q;
   params?: Record<string, string>;
   files?: Record<string, File>;

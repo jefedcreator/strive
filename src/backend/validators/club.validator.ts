@@ -2,7 +2,7 @@ import { mongoIdValidator } from '@/utils';
 import { z } from 'zod';
 import { baseQueryValidatorSchema } from './index.validator';
 
-export const leaderboardValidatorSchema = z
+export const clubValidatorSchema = z
   .object({
     name: z
       .string({
@@ -17,6 +17,24 @@ export const leaderboardValidatorSchema = z
       })
       .nullable()
       .optional(),
+    image: z
+      .string({
+        invalid_type_error: 'image must be a valid string',
+      })
+      .url('image must be a valid URL')
+      .nullable()
+      .optional(),
+    slug: z
+      .string({
+        required_error: 'slug is required',
+        invalid_type_error: 'slug must be a valid string',
+      })
+      .min(1, 'slug cannot be empty')
+      .max(255, 'slug cannot exceed 255 characters')
+      .regex(
+        /^[a-z0-9-]+$/,
+        'slug must only contain lowercase letters, numbers, and hyphens'
+      ),
     isPublic: z
       .boolean({
         invalid_type_error: 'isPublic must be a boolean value',
@@ -29,22 +47,12 @@ export const leaderboardValidatorSchema = z
       })
       .default(true)
       .optional(),
-    expiryDate: z.coerce
-      .date({
-        invalid_type_error: 'expiryDate must be a valid date',
-      })
-      .min(new Date(), 'expiryDate cannot be in the past')
-      .nullable()
-      .optional(),
-    clubId: mongoIdValidator.nullable().optional(),
   })
   .strict();
 
-export const updateLeaderboardValidatorSchema = leaderboardValidatorSchema
-  .partial()
-  .strict();
+export const updateClubValidatorSchema = clubValidatorSchema.partial().strict();
 
-export const leaderboardQueryValidatorSchema = baseQueryValidatorSchema
+export const clubQueryValidatorSchema = baseQueryValidatorSchema
   .partial()
   .extend({
     isPublic: z
@@ -65,17 +73,12 @@ export const leaderboardQueryValidatorSchema = baseQueryValidatorSchema
         })
       )
       .optional(),
-    clubId: mongoIdValidator.optional(),
     createdById: mongoIdValidator.optional(),
   })
   .strict();
 
-export type LeaderboardValidatorSchema = z.infer<
-  typeof leaderboardValidatorSchema
+export type ClubValidatorSchema = z.infer<typeof clubValidatorSchema>;
+export type UpdateClubValidatorSchema = z.infer<
+  typeof updateClubValidatorSchema
 >;
-export type UpdateLeaderboardValidatorSchema = z.infer<
-  typeof updateLeaderboardValidatorSchema
->;
-export type LeaderboardQueryValidatorSchema = z.infer<
-  typeof leaderboardQueryValidatorSchema
->;
+export type ClubQueryValidatorSchema = z.infer<typeof clubQueryValidatorSchema>;
