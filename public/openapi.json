@@ -31,6 +31,28 @@
           "id"
         ]
       },
+      "AcceptInviteValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "ClubInviteValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
       "UpdateClubValidatorSchema": {
         "type": "object",
         "properties": {
@@ -395,6 +417,28 @@
         "required": [
           "name",
           "slug"
+        ]
+      },
+      "clubInviteValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "acceptInviteValidatorSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          }
+        },
+        "required": [
+          "userId"
         ]
       },
       "updateClubValidatorSchema": {
@@ -1036,6 +1080,120 @@
             "schema": {},
             "required": true,
             "example": "123"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clubs/{id}/accept": {
+      "post": {
+        "operationId": "post-clubs-{id}-accept",
+        "summary": "",
+        "description": "Accept a join request (invite) for a club. Only the owner can do this.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInviteValidatorSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clubs/{id}/invite": {
+      "post": {
+        "operationId": "post-clubs-{id}-invite",
+        "summary": "",
+        "description": "Invite a user to a club. Only the owner can do this.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClubInviteValidatorSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clubs/{id}/join": {
+      "post": {
+        "operationId": "post-clubs-{id}-join",
+        "summary": "",
+        "description": "Join a club. If the club is private, it creates an invite request.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
           }
         ],
         "responses": {

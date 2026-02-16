@@ -16,77 +16,79 @@ import { NextResponse } from 'next/server';
 
 /**
  * @pathParams paramValidator
- * @description Join a club. If the club is private, it creates an invite request.
+ * @description Join a leaderboard. If the leaderboard is private, it creates a join request.
  * @auth bearer
  */
 export const POST = withMiddleware<unknown>(
   async (request, { params }) => {
     try {
       const user = request.user!;
-      const { id: clubId = '' } = params;
+      const { id: leaderboardId = '' } = params;
 
-      const club = await db.club.findUnique({
-        where: { id: clubId },
+      const leaderboard = await db.leaderboard.findUnique({
+        where: { id: leaderboardId },
       });
 
-      if (!club) {
-        throw new NotFoundException('Club not found');
+      if (!leaderboard) {
+        throw new NotFoundException('Leaderboard not found');
+      }
+
+      // Check if leaderboard is expired
+      if (leaderboard.expiryDate && new Date() > leaderboard.expiryDate) {
+        throw new BadRequestException('Cannot join an expired leaderboard');
       }
 
       // Check if user is already a member
-      const existingMembership = await db.userClub.findUnique({
+      const existingMembership = await db.userLeaderboard.findUnique({
         where: {
-          userId_clubId: {
+          userId_leaderboardId: {
             userId: user.id,
-            clubId,
+            leaderboardId,
           },
         },
       });
 
       if (existingMembership) {
-        throw new ConflictException('You are already a member of this club');
+        throw new ConflictException(
+          'You are already a member of this leaderboard'
+        );
       }
 
-      if (club.isPublic) {
-        await db.$transaction([
-          db.userClub.create({
-            data: {
-              userId: user.id,
-              clubId,
-              role: 'MEMBER',
-            },
-          }),
-          db.club.update({
-            where: { id: clubId },
-            data: { memberCount: { increment: 1 } },
-          }),
-        ]);
+      if (leaderboard.isPublic) {
+        // Direct join for public leaderboards
+        await db.userLeaderboard.create({
+          data: {
+            userId: user.id,
+            leaderboardId,
+          },
+        });
 
         const response: ApiResponse<null> = {
           status: 200,
-          message: 'Successfully joined the club',
+          message: 'Successfully joined the leaderboard',
           data: null,
         };
 
         return NextResponse.json(response);
       } else {
-        const existingInvite = await db.clubInvites.findFirst({
+        // For private leaderboards, create a join request (invite)
+        const existingInvite = await db.leaderboardInvites.findFirst({
           where: {
             userId: user.id,
-            clubId,
+            leaderboardId,
           },
         });
 
         if (existingInvite) {
           throw new ConflictException(
-            'You have already requested to join this club'
+            'You have already requested to join this leaderboard'
           );
         }
 
-        await db.clubInvites.create({
+        await db.leaderboardInvites.create({
           data: {
             userId: user.id,
-            clubId,
+            leaderboardId,
           },
         });
 
@@ -102,7 +104,7 @@ export const POST = withMiddleware<unknown>(
     } catch (error: any) {
       if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while joining club: ${error.message}`
+        `An error occurred while joining leaderboard: ${error.message}`
       );
     }
   },

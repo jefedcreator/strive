@@ -29,7 +29,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
   async (request, { params }) => {
     try {
       const currentUser = request.user!;
-      const { id: clubId } = params;
+      const { id: clubId = '' } = params;
       const { userId: userToInviteId } = request.validatedData!;
 
       const club = await db.club.findUnique({
@@ -43,7 +43,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
       const requesterMembership = await db.userClub.findFirst({
         where: {
           userId: currentUser.id,
-          clubId: clubId!,
+          clubId,
         },
       });
 
@@ -63,7 +63,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
         where: {
           userId_clubId: {
             userId: userToInviteId,
-            clubId: clubId!,
+            clubId,
           },
         },
       });
@@ -89,7 +89,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
       await db.clubInvites.create({
         data: {
           userId: userToInviteId,
-          clubId: clubId!,
+          clubId,
         },
       });
 

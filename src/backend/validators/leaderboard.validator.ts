@@ -70,6 +70,18 @@ export const leaderboardQueryValidatorSchema = baseQueryValidatorSchema
   })
   .strict();
 
+export const leaderboardInviteValidatorSchema = z
+  .object({
+    userId: mongoIdValidator,
+  })
+  .strict();
+
+export const acceptLeaderboardInviteValidatorSchema = z
+  .object({
+    userId: mongoIdValidator,
+  })
+  .strict();
+
 export type LeaderboardValidatorSchema = z.infer<
   typeof leaderboardValidatorSchema
 >;
@@ -78,4 +90,10 @@ export type UpdateLeaderboardValidatorSchema = z.infer<
 >;
 export type LeaderboardQueryValidatorSchema = z.infer<
   typeof leaderboardQueryValidatorSchema
+>;
+export type LeaderboardInviteValidatorSchema = z.infer<
+  typeof leaderboardInviteValidatorSchema
+>;
+export type AcceptLeaderboardInviteValidatorSchema = z.infer<
+  typeof acceptLeaderboardInviteValidatorSchema
 >;
