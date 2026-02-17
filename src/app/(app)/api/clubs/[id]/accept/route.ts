@@ -78,7 +78,7 @@ export const POST = withMiddleware<AcceptInviteValidatorSchema>(
         db.notification.create({
           data: {
             userId: userToAcceptId,
-            message: `Your request to join the club ${club.name} has been accepted!`,
+            message: invite.isRequest ? `Your request to join the club ${club.name} has been accepted!` : `You have been added to the club ${club.name}`,
             type: 'info',
             clubId,
           },

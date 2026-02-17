@@ -82,7 +82,7 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
         db.notification.create({
           data: {
             userId: userToAcceptId,
-            message: `Your request to join the leaderboard ${leaderboard.name} has been accepted!`,
+            message: invite.isRequest ? `Your request to join the leaderboard ${leaderboard.name} has been accepted!` : `You have been added to the leaderboard ${leaderboard.name}`,
             type: 'info',
           },
         }),

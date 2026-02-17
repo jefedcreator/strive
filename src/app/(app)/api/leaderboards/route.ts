@@ -75,6 +75,13 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
         data,
       });
 
+      await db.userLeaderboard.create({
+        data: {
+          userId: user.id,
+          leaderboardId: leaderboard.id,
+        },
+      });
+
       const response: ApiResponse<Leaderboard> = {
         status: 201,
         message: 'Leaderboard created successfully',
