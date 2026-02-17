@@ -1,12 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/primitives";
-import { toast } from "sonner";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { LoginValidatorSchema } from "@/backend/validators/auth.validator";
-import { useSession } from "next-auth/react";
+import ToggleTheme from '@/components/toggle-theme';
+import { useMutation } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import { toast } from 'sonner';
 
 interface LoginResponse {
   status: number;
@@ -17,187 +16,205 @@ interface LoginResponse {
     token: string;
     expiresAt: string;
   };
-  action?: "redirect";
+  action?: 'redirect';
   url?: string;
 }
 
-// Strava Logo SVG
-const StravaLogo = () => (
-  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.599h4.172L10.463 0l-7 13.828h4.172" />
-  </svg>
-);
-
-// Nike Logo SVG (Swoosh)
-const NikeLogo = () => (
-  <svg
-    className="h-5 w-5"
-    viewBox="135.5 361.38 1000 356.39"
-    fill="currentColor"
-  >
-    <path d="M245.8075 717.62406c-29.79588-1.1837-54.1734-9.3368-73.23459-24.4796-3.63775-2.8928-12.30611-11.5663-15.21427-15.2245-7.72958-9.7193-12.98467-19.1785-16.48977-29.6734-10.7857-32.3061-5.23469-74.6989 15.87753-121.2243 18.0765-39.8316 45.96932-79.3366 94.63252-134.0508 7.16836-8.0511 28.51526-31.5969 28.65302-31.5969.051 0-1.11225 2.0153-2.57652 4.4694-12.65304 21.1938-23.47957 46.158-29.37751 67.7703-9.47448 34.6785-8.33163 64.4387 3.34693 87.5151 8.05611 15.898 21.86731 29.6684 37.3979 37.2806 27.18874 13.3214 66.9948 14.4235 115.60699 3.2245 3.34694-.7755 169.19363-44.801 368.55048-97.8366 199.35686-53.0408 362.49439-96.4029 362.51989-96.3672.056.046-463.16259 198.2599-703.62654 299.9999-240.46395 101.7401-437.2653 185.9948-437.3366 185.9948-.0713 0-1.29592-.5153-2.72448-1.1428z" />
-  </svg>
-);
-
-export default function HomePage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { status } = useSession();
 
-  // const { data: session, isLoading: isSessionLoading } = useQuery({
-  //   queryKey: ["session"],
-  //   queryFn: async () => {
-  //     const res = await fetch("/api/auth/session");
-  //     return res.json();
-  //   },
-  // });
-
-  const { data: session, status } = useSession();
-  // const user = session?.user;
-
-  // useEffect(() => {
-  //   if (session?.user) {
-  //     router.replace("/home");
-  //   }
-  // }, [session, router]);
-
+  // Mutation Logic
   const loginMutation = useMutation({
-    mutationFn: async (payload: LoginValidatorSchema) => {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    mutationFn: async (payload: any) => {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to authenticate");
-      }
-
-      return response.json() as Promise<LoginResponse>;
+      if (!response.ok) throw new Error('Failed to authenticate');
+      return response.json();
     },
-    onSuccess: (result, variables) => {
-      if (result.action === "redirect" && result.url) {
+    onSuccess: (result) => {
+      if (result.action === 'redirect' && result.url) {
         window.location.href = result.url;
-        return;
-      }
-
-      if (result.data?.username) {
-        toast.success(`Welcome back, ${result.data.username}!`);
-        router.push("/home");
+      } else {
+        toast.success(`Welcome back!`);
+        router.push('/home');
       }
     },
-    onError: (error) => {
-      toast.error(error.message);
-    },
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    onError: (error: any) => toast.error(error.message),
   });
 
-  const exchangeStravaToken = useCallback(
-    (code: string) => {
-      loginMutation.mutate({ type: "strava", code });
-    },
-    [loginMutation],
-  );
-
-  useEffect(() => {
-    const code = searchParams.get("code");
-    const state = searchParams.get("state");
-    if (state === "strava" && code) {
-      exchangeStravaToken(code);
-    }
-  }, [searchParams, exchangeStravaToken]);
-
-  const handleStravaLogin = () => {
-    loginMutation.mutate({ type: "strava" });
-  };
+  const handleStravaLogin = () => loginMutation.mutate({ type: 'strava' });
 
   const handleNRCLogin = () => {
-    toast.promise(loginMutation.mutateAsync({ type: "nrc" }), {
-      loading: "Opening Nike login window... Please log in there.",
-      success: (result) => {
-        router.push("/home");
-        return `Welcome, ${result.data.username}!`;
+    toast.promise(loginMutation.mutateAsync({ type: 'nrc' }), {
+      loading: 'Opening Nike login...',
+      success: () => {
+        router.push('/home');
+        return 'Welcome to Strive!';
       },
       error: (err) => err.message,
     });
   };
 
-  const isLoading = loginMutation.isPending;
-  const loadingType = loginMutation.variables?.type;
-
-  if (status == "loading") {
+  if (status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary" />
       </div>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[#F8FAFC] p-6 text-slate-900">
-      <div className="animate-in fade-in slide-in-from-bottom-4 w-full max-w-md space-y-8 text-center duration-1000">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-            STRIVE
-          </h1>
-          <p className="font-medium text-slate-500">
-            Sync your fitness journey across platforms.
-          </p>
-        </div>
-
-        <div className="relative rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/60 transition-all hover:shadow-slate-200/80">
-          <div className="absolute -top-12 left-1/2 -translate-x-1/2 rounded-2xl bg-slate-900 p-4 shadow-lg">
-            <div className="flex gap-2">
-              <div className="h-2 w-2 rounded-full bg-red-400" />
-              <div className="h-2 w-2 rounded-full bg-orange-400" />
-              <div className="h-2 w-2 rounded-full bg-green-400" />
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-4">
-            <Button
-              variant="primary"
-              isFullWidth
-              onClick={handleStravaLogin}
-              disabled={isLoading}
-              className="h-14 bg-[#FC6100] hover:bg-[#E35700] active:scale-[0.98]"
-            >
-              <StravaLogo />
-              <span>
-                {isLoading && loadingType === "strava"
-                  ? "Connecting..."
-                  : "Sign in with Strava"}
-              </span>
-            </Button>
-
-            <div className="flex items-center gap-4 py-2">
-              <div className="h-px flex-1 bg-slate-100" />
-              <span className="text-xs font-medium tracking-wider text-slate-400 uppercase">
-                or
-              </span>
-              <div className="h-px flex-1 bg-slate-100" />
-            </div>
-
-            <Button
-              variant="primary"
-              isFullWidth
-              onClick={handleNRCLogin}
-              disabled={isLoading}
-              className="h-14 bg-black hover:bg-zinc-800 active:scale-[0.98]"
-            >
-              <NikeLogo />
-              <span>
-                {isLoading && loadingType === "nrc"
-                  ? "Authenticating..."
-                  : "Sign in with NRC"}
-              </span>
-            </Button>
-          </div>
-
-          <p className="mt-8 text-xs text-slate-400">
-            By connecting, you agree to our Terms of Service and Privacy Policy.
-          </p>
-        </div>
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* Background Decoratives */}
+      <div className="absolute inset-0 z-0 opacity-5 pointer-events-none select-none">
+        <svg
+          className="absolute top-10 left-10 w-64 h-64 text-gray-900 dark:text-gray-100 bg-pattern-item"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="0.5"
+          />
+        </svg>
+        <svg
+          className="absolute bottom-20 right-20 w-96 h-96 text-gray-900 dark:text-gray-100 bg-pattern-item"
+          fill="none"
+          stroke="currentColor"
+          style={{ animationDelay: '2s' }}
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="0.2"
+          />
+        </svg>
+        <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-primary rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
       </div>
-    </main>
+      {/* Theme Toggle Button */}
+      <ToggleTheme />
+      {/* Screens */}
+      <main className="relative z-10 min-h-screen flex flex-col items-center py-12 px-4">
+        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="mb-12 text-center">
+            <div className="flex items-center justify-center mb-4">
+              <h1 className="text-6xl font-black tracking-tighter text-gray-900 dark:text-white relative">
+                STR
+                <span className="relative inline-block">
+                  I
+                  <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                    <span className="dot dot-red"></span>
+                    <span className="dot dot-green"></span>
+                    <span className="dot dot-blue"></span>
+                  </span>
+                </span>
+                VE
+              </h1>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">
+              Sync your fitness journey across platforms.
+            </p>
+          </div>
+
+          <div className="w-full bg-card-light dark:bg-card-dark rounded-2xl shadow-card border border-gray-100 dark:border-gray-800 overflow-hidden transform hover:scale-[1.01] transition-transform">
+            <div className="p-8 space-y-6">
+              {/* Strava Login */}
+              <button
+                // onClick={() => console.log("Strava Login")}
+                className="w-full group relative flex justify-center items-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-[#FC4C02] hover:bg-[#e34402] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FC4C02] transition-all duration-200 shadow-lg"
+              >
+                <span className="absolute left-0 inset-y-0 flex items-center pl-4">
+                  <svg
+                    className="h-5 w-5 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.477 0 4.5 13.828h4.172"></path>
+                  </svg>
+                </span>
+                Sign in with Strava
+              </button>
+
+              <div className="relative">
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 flex items-center"
+                >
+                  <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-3 bg-card-light dark:bg-card-dark text-gray-400 dark:text-gray-500 uppercase font-bold text-[10px] tracking-widest">
+                    OR
+                  </span>
+                </div>
+              </div>
+              {/* Nike Login */}
+              <button
+                // onClick={() => console.log("Nike Login")}
+                className="w-full group relative flex justify-center items-center py-4 px-4 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-xl text-white bg-black hover:bg-gray-900 dark:bg-black dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 shadow-lg"
+              >
+                <span className="absolute left-0 inset-y-0 flex items-center pl-4">
+                  <svg
+                    className="h-4 w-10 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M21 8.25c-5.75 0-9.25 3.5-12 8.75 5-6 10-6.75 12-6.5-5.5-2.5-14.5 0-21 13.5 1.75-8.5 10.5-15.75 21-15.75Z"></path>
+                  </svg>
+                </span>
+                Sign in with NRC
+              </button>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-900/40 px-8 py-5 border-t border-gray-100 dark:border-gray-800 text-center">
+              <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
+                By connecting, you agree to our
+                <a
+                  className="mx-1 font-semibold text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors underline decoration-dotted"
+                  href="#"
+                >
+                  Terms of Service
+                </a>
+                and
+                <a
+                  className="mx-1 font-semibold text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors underline decoration-dotted"
+                  href="#"
+                >
+                  Privacy Policy
+                </a>
+                .
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// --- Main Page Export ---
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-background-light">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary" />
+        </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }

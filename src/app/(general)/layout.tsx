@@ -1,32 +1,27 @@
-import { Provider } from "@/provider";
-import "@/styles/globals.css";
-import { type Metadata } from "next";
-import { Geist } from "next/font/google";
-import { Toaster } from "sonner";
+import { Provider } from '@/provider';
+import '@/styles/globals.css';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: "Strive | Connect Your Fitness",
-  description: "Sync your fitness journey across platforms.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: 'Strive - Sync Your Fitness Journey',
+  description:
+    'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
 };
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-});
-
-export default function MarketingLayout({
+export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en" className={`${geist.variable}`}>
-      <body>
-        <Provider>
-          {children}
-          <Toaster richColors position="top-center" closeButton />
-        </Provider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${inter.variable} font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300`}
+      >
+        <Provider>{children}</Provider>
       </body>
     </html>
   );
