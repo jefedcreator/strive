@@ -69,7 +69,7 @@ export const POST = withMiddleware<unknown>(
               userId: leaderboard.createdById,
               message: `${user.fullname} joined your leaderboard "${leaderboard.name}"`,
               type: 'info',
-              referenceId: leaderboard.id,
+              leaderboardId
             },
           })
         ]);
@@ -110,7 +110,7 @@ export const POST = withMiddleware<unknown>(
               userId: leaderboard.createdById,
               message: `${user.fullname} wants to join your leaderboard "${leaderboard.name}"`,
               type: 'leaderboard',
-              referenceId: leaderboard.id,
+              leaderboardId
             },
           })
         ]);

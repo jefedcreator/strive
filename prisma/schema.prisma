@@ -77,6 +77,7 @@ model Leaderboard {
     clubId             String?              @db.ObjectId
     entries            UserLeaderboard[]
     leaderboardInvites LeaderboardInvites[]
+    notifications      Notification[]
 
     @@index([name])
     @@index([createdById])
@@ -89,21 +90,22 @@ model Leaderboard {
 }
 
 model Club {
-    id           String        @id @default(auto()) @map("_id") @db.ObjectId
-    name         String        @unique
-    description  String?
-    image        String?
-    slug         String        @unique
-    createdAt    DateTime      @default(now())
-    updatedAt    DateTime      @updatedAt
-    isPublic     Boolean       @default(false)
-    isActive     Boolean       @default(true)
-    memberCount  Int           @default(0)
-    createdBy    User          @relation("ClubCreator", fields: [createdById], references: [id], onDelete: Cascade)
-    createdById  String        @db.ObjectId
-    members      UserClub[]
-    leaderboards Leaderboard[]
-    clubInvites  ClubInvites[]
+    id            String         @id @default(auto()) @map("_id") @db.ObjectId
+    name          String         @unique
+    description   String?
+    image         String?
+    slug          String         @unique
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    isPublic      Boolean        @default(false)
+    isActive      Boolean        @default(true)
+    memberCount   Int            @default(0)
+    createdBy     User           @relation("ClubCreator", fields: [createdById], references: [id], onDelete: Cascade)
+    createdById   String         @db.ObjectId
+    members       UserClub[]
+    leaderboards  Leaderboard[]
+    clubInvites   ClubInvites[]
+    notifications Notification[]
 
     // @@index([name])
     // @@index([slug])
@@ -210,15 +212,18 @@ model LeaderboardInvites {
 }
 
 model Notification {
-    id          String           @id @default(auto()) @map("_id") @db.ObjectId
-    userId      String           @db.ObjectId
-    user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-    message     String
-    type        NotificationType
-    referenceId String?          @db.ObjectId
-    isRead      Boolean          @default(false)
-    createdAt   DateTime         @default(now())
-    updatedAt   DateTime         @updatedAt
+    id            String           @id @default(auto()) @map("_id") @db.ObjectId
+    userId        String           @db.ObjectId
+    user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+    message       String
+    type          NotificationType
+    leaderboardId String?           @db.ObjectId
+    leaderboard   Leaderboard?      @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
+    clubId        String?           @db.ObjectId
+    club          Club?             @relation(fields: [clubId], references: [id], onDelete: Cascade)
+    isRead        Boolean          @default(false)
+    createdAt     DateTime         @default(now())
+    updatedAt     DateTime         @updatedAt
 }
 
 enum ClubRole {

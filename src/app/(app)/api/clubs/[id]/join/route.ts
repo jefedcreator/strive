@@ -12,6 +12,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@/utils/exceptions';
+import { connect } from 'http2';
 import { NextResponse } from 'next/server';
 
 /**
@@ -47,6 +48,8 @@ export const POST = withMiddleware<unknown>(
         throw new ConflictException('You are already a member of this club');
       }
 
+      console.log('club', club);
+
       if (club.isPublic) {
         await db.$transaction([
           db.userClub.create({
@@ -65,7 +68,6 @@ export const POST = withMiddleware<unknown>(
               userId: club.createdById,
               message: `${user.fullname} joined your club "${club.name}"`,
               type: 'info',
-              referenceId: club.id,
             },
           })
         ]);
@@ -103,7 +105,7 @@ export const POST = withMiddleware<unknown>(
               userId: club.createdById,
               message: `${user.fullname} wants to join your club "${club.name}"`,
               type: 'club',
-              referenceId: club.id,
+              clubId,
             },
           })
         ]);

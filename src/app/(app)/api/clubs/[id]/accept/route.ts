@@ -79,7 +79,7 @@ export const POST = withMiddleware<AcceptInviteValidatorSchema>(
             userId: userToAcceptId,
             message: `Your request to join the club "${club.name}" has been accepted!`,
             type: 'info',
-            referenceId: club.id,
+            clubId,
           },
         }),
       ]);

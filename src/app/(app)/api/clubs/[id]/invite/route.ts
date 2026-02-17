@@ -98,7 +98,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
             userId: userToInviteId,
             message: `Request sent to ${userToInvite.fullname} to join your club "${club.name}"`,
             type: 'club',
-            referenceId: club.id,
+            clubId,
           },
         })
       ]);

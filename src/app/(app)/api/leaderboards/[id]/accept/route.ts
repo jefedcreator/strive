@@ -82,7 +82,6 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
             userId: userToAcceptId,
             message: `Your request to join the leaderboard "${leaderboard.name}" has been accepted!`,
             type: 'info',
-            referenceId: leaderboard.id,
           },
         }),
       ]);

@@ -117,7 +117,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
             userId: userToInviteId,
             message: `Request sent to ${userToInvite.fullname} to join your leaderboard "${leaderboard.name}"`,
             type: 'leaderboard',
-            referenceId: leaderboard.id,
+            leaderboardId
           },
         })
       ]);
