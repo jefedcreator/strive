@@ -1,8 +1,6 @@
-import type { DateRangeFilters } from '@/types';
 import { getChildId } from '@/utils/getChildId';
 import bcrypt from 'bcryptjs';
 import { type ClassValue, clsx } from 'clsx';
-import moment from 'moment';
 import { twMerge } from 'tailwind-merge';
 import { generateUsername } from 'unique-username-generator';
 import z from 'zod';
@@ -18,6 +16,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result as string);
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
     reader.onerror = (error) => reject(error);
   });
 };
@@ -25,7 +24,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
 const convertBase64ToFile = (base64: string, fileName: string) => {
   const arr = base64.split(',');
   const mime = arr?.[0]?.match(/:(.*?);/)?.[1];
-  const bstr = atob(arr?.[1] || '');
+  const bstr = atob(arr?.[1] ?? '');
   let n = bstr.length;
   const u8arr = new Uint8Array(n);
   while (n--) {
@@ -57,51 +56,9 @@ function parseHttpError(error: any) {
   if (error instanceof HttpException || error.statusCode) {
     return error.message;
   }
-  return error?.response?.message || error?.cause || error?.toString();
+  return error?.response?.message ?? error?.cause ?? error?.toString();
 }
 
-/**
- *
- * @param filter
- * @returns
- */
-function getDateRange(filter: DateRangeFilters) {
-  let startDate, endDate;
-
-  switch (filter) {
-    case 'this-week':
-      startDate = moment().startOf('week').toDate();
-      endDate = moment().endOf('week').toDate();
-      break;
-    case 'last-week':
-      startDate = moment().subtract(1, 'week').startOf('week').toDate();
-      endDate = moment().subtract(1, 'week').endOf('week').toDate();
-      break;
-    case 'this-month':
-      startDate = moment().startOf('month').toDate();
-      endDate = moment().endOf('month').toDate();
-      break;
-    case 'last-month':
-      startDate = moment().subtract(1, 'month').startOf('month').toDate();
-      endDate = moment().subtract(1, 'month').endOf('month').toDate();
-      break;
-    case 'this-year':
-      startDate = moment().startOf('year').toDate();
-      endDate = moment().endOf('year').toDate();
-      break;
-    default:
-      startDate = moment().startOf('month').toDate();
-      endDate = moment().endOf('month').toDate();
-      filter = DateRangeFilters.thisMonth;
-      break;
-  }
-
-  return {
-    startDate: new Date(startDate),
-    endDate: new Date(endDate),
-    filter,
-  };
-}
 
 const isValidObjectId = (q?: string) => {
   if (!q) {
@@ -167,15 +124,11 @@ export {
   generateRandomString,
   genUsername,
   getChildId,
-  getDateRange,
-  hashPassword,
-  isFile,
-  isValidObjectId,
-  parseHttpError,
+  // getDateRange,
+  hashPassword, HttpException, isFile,
+  isValidObjectId, mongoIdValidator, parseHttpError,
   parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword,
-  mongoIdValidator,
-  HttpException,
+  verifyPassword
 };
