@@ -40,8 +40,19 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
         throw new NotFoundException('Leaderboard not found');
       }
 
+      const invite = await db.leaderboardInvites.findFirst({
+        where: {
+          userId: userToAcceptId,
+          leaderboardId,
+        },
+      });
+
+      if (!invite) {
+        throw new NotFoundException('Join request not found');
+      }
+
       // Check if current user is the creator
-      if (leaderboard.createdById !== currentUser.id) {
+      if (leaderboard.createdById !== currentUser.id && !invite.isRequest) {
         throw new ForbiddenException(
           'Only the leaderboard creator can accept join requests'
         );
@@ -55,16 +66,7 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
       }
 
       // Check if the invite/request exists
-      const invite = await db.leaderboardInvites.findFirst({
-        where: {
-          userId: userToAcceptId,
-          leaderboardId,
-        },
-      });
 
-      if (!invite) {
-        throw new NotFoundException('Join request not found');
-      }
 
       // Add user to leaderboard and remove invite
       await db.$transaction([
@@ -80,7 +82,7 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
         db.notification.create({
           data: {
             userId: userToAcceptId,
-            message: `Your request to join the leaderboard "${leaderboard.name}" has been accepted!`,
+            message: `Your request to join the leaderboard ${leaderboard.name} has been accepted!`,
             type: 'info',
           },
         }),

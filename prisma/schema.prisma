@@ -196,8 +196,9 @@ model ClubInvites {
     joinedAt  DateTime @default(now())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+    isRequest Boolean  @default(false)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
 }
 
 model LeaderboardInvites {
@@ -207,6 +208,7 @@ model LeaderboardInvites {
     joinedAt      DateTime    @default(now())
     createdAt     DateTime    @default(now())
     updatedAt     DateTime    @updatedAt
+    isRequest     Boolean     @default(false)
     user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
     leaderboard   Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
 }
@@ -217,10 +219,10 @@ model Notification {
     user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
     message       String
     type          NotificationType
-    leaderboardId String?           @db.ObjectId
-    leaderboard   Leaderboard?      @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
-    clubId        String?           @db.ObjectId
-    club          Club?             @relation(fields: [clubId], references: [id], onDelete: Cascade)
+    leaderboardId String?          @db.ObjectId
+    leaderboard   Leaderboard?     @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
+    clubId        String?          @db.ObjectId
+    club          Club?            @relation(fields: [clubId], references: [id], onDelete: Cascade)
     isRead        Boolean          @default(false)
     createdAt     DateTime         @default(now())
     updatedAt     DateTime         @updatedAt

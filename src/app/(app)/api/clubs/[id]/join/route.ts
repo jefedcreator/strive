@@ -7,12 +7,10 @@ import { paramValidator } from '@/backend/validators/index.validator';
 import { db } from '@/server/db';
 import { type ApiResponse } from '@/types';
 import {
-  BadRequestException,
   ConflictException,
   InternalServerErrorException,
-  NotFoundException,
+  NotFoundException
 } from '@/utils/exceptions';
-import { connect } from 'http2';
 import { NextResponse } from 'next/server';
 
 /**
@@ -66,7 +64,7 @@ export const POST = withMiddleware<unknown>(
           db.notification.create({
             data: {
               userId: club.createdById,
-              message: `${user.fullname} joined your club "${club.name}"`,
+              message: `${user.fullname} joined your club ${club.name}`,
               type: 'info',
             },
           })
@@ -103,7 +101,7 @@ export const POST = withMiddleware<unknown>(
           db.notification.create({
             data: {
               userId: club.createdById,
-              message: `${user.fullname} wants to join your club "${club.name}"`,
+              message: `${user.fullname} wants to join your club ${club.name}`,
               type: 'club',
               clubId,
             },

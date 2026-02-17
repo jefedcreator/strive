@@ -12,7 +12,7 @@ import {
 } from '@/backend/validators/leaderboard.validator';
 import { db } from '@/server/db';
 import { type ApiResponse, type PaginatedApiResponse } from '@/types';
-import { InternalServerErrorException } from '@/utils/exceptions';
+import { ConflictException, InternalServerErrorException } from '@/utils/exceptions';
 import { type Leaderboard, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
@@ -57,6 +57,18 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
 
       if (payload.expiryDate) {
         data.expiryDate = payload.expiryDate;
+      }
+
+      const existingLeaderboard = await db.leaderboard.findFirst({
+        where: {
+          name: payload.name
+        },
+      });
+
+      if (existingLeaderboard) {
+        throw new ConflictException(
+          'Leaderboard with this name already exists'
+        );
       }
 
       const leaderboard = await db.leaderboard.create({

@@ -39,13 +39,6 @@ export const POST = withMiddleware<AcceptInviteValidatorSchema>(
         throw new NotFoundException('Club not found');
       }
 
-      // Check if current user is the owner
-      if (club.createdById !== currentUser.id) {
-        throw new ForbiddenException(
-          'Only the club owner can accept join requests'
-        );
-      }
-
       // Check if the invite/request exists
       const invite = await db.clubInvites.findFirst({
         where: {
@@ -57,6 +50,14 @@ export const POST = withMiddleware<AcceptInviteValidatorSchema>(
       if (!invite) {
         throw new NotFoundException('Join request not found');
       }
+
+      // Check if current user is the owner
+      if (club.createdById !== currentUser.id && !invite.isRequest) {
+        throw new ForbiddenException(
+          'Only the club owner can accept join requests'
+        );
+      }
+
 
       // Add user to club and remove invite
       await db.$transaction([
@@ -77,7 +78,7 @@ export const POST = withMiddleware<AcceptInviteValidatorSchema>(
         db.notification.create({
           data: {
             userId: userToAcceptId,
-            message: `Your request to join the club "${club.name}" has been accepted!`,
+            message: `Your request to join the club ${club.name} has been accepted!`,
             type: 'info',
             clubId,
           },

@@ -110,12 +110,13 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           data: {
             userId: userToInviteId,
             leaderboardId,
+            isRequest: true
           },
         }),
         db.notification.create({
           data: {
             userId: userToInviteId,
-            message: `Request sent to ${userToInvite.fullname} to join your leaderboard "${leaderboard.name}"`,
+            message: `Request sent to ${userToInvite.fullname} to join the leaderboard ${leaderboard.name}`,
             type: 'leaderboard',
             leaderboardId
           },

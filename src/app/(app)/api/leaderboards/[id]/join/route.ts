@@ -67,7 +67,7 @@ export const POST = withMiddleware<unknown>(
           db.notification.create({
             data: {
               userId: leaderboard.createdById,
-              message: `${user.fullname} joined your leaderboard "${leaderboard.name}"`,
+              message: `${user.fullname} joined your leaderboard ${leaderboard.name}`,
               type: 'info',
               leaderboardId
             },
@@ -97,7 +97,6 @@ export const POST = withMiddleware<unknown>(
           );
         }
 
-
         await db.$transaction([
           db.leaderboardInvites.create({
             data: {
@@ -108,7 +107,7 @@ export const POST = withMiddleware<unknown>(
           db.notification.create({
             data: {
               userId: leaderboard.createdById,
-              message: `${user.fullname} wants to join your leaderboard "${leaderboard.name}"`,
+              message: `${user.fullname} wants to join your leaderboard ${leaderboard.name}`,
               type: 'leaderboard',
               leaderboardId
             },

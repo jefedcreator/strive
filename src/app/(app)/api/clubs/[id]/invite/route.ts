@@ -1,7 +1,7 @@
 import {
   authMiddleware,
-  pathParamValidatorMiddleware,
   bodyValidatorMiddleware,
+  pathParamValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
 import {
@@ -31,6 +31,10 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
       const currentUser = request.user!;
       const { id: clubId = '' } = params;
       const { userId: userToInviteId } = request.validatedData!;
+
+
+      console.log('userToInviteId', userToInviteId);
+
 
       const club = await db.club.findUnique({
         where: { id: clubId },
@@ -91,14 +95,15 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           data: {
             userId: userToInviteId,
             clubId,
+            isRequest: true
           },
         }),
         db.notification.create({
           data: {
             userId: userToInviteId,
-            message: `Request sent to ${userToInvite.fullname} to join your club "${club.name}"`,
+            message: `Request sent to ${userToInvite.fullname} to join your club ${club.name}`,
             type: 'club',
-            clubId,
+            clubId: clubId,
           },
         })
       ]);
