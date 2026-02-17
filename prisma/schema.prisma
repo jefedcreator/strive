@@ -161,11 +161,11 @@ model UserLeaderboard {
 
 model User {
     id                  String               @id @default(auto()) @map("_id") @db.ObjectId
-    email               String               @unique
+    email               String
     avatar              String?
     type                UserType
-    fullname            String               @unique
-    username            String?              @unique
+    fullname            String
+    username            String?
     createdAt           DateTime             @default(now())
     updatedAt           DateTime             @updatedAt
     lastLoginAt         DateTime?
@@ -210,14 +210,15 @@ model LeaderboardInvites {
 }
 
 model Notification {
-    id        String           @id @default(auto()) @map("_id") @db.ObjectId
-    userId    String           @db.ObjectId
-    user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-    message   String
-    type      NotificationType
-    isRead    Boolean          @default(false)
-    createdAt DateTime         @default(now())
-    updatedAt DateTime         @updatedAt
+    id          String           @id @default(auto()) @map("_id") @db.ObjectId
+    userId      String           @db.ObjectId
+    user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+    message     String
+    type        NotificationType
+    referenceId String?          @db.ObjectId
+    isRead      Boolean          @default(false)
+    createdAt   DateTime         @default(now())
+    updatedAt   DateTime         @updatedAt
 }
 
 enum ClubRole {

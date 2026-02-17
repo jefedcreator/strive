@@ -1,3 +1,4 @@
+import { ConflictException } from '@/utils/exceptions';
 import type { Prisma, User, UserType } from '@prisma/client';
 import prisma from 'prisma';
 import { generateUsername } from 'unique-username-generator';
@@ -16,13 +17,12 @@ class AuthService {
     fullname: string | null;
     avatar?: string | null;
   }): Promise<User> {
+
     const user = await prisma.user.findFirst({
       where: {
         email,
       },
     });
-
-    console.log('userData', user);
 
     const data: Prisma.UserUpdateInput = {
       fullname: fullname ?? (await this.generateUniqueUsername()),
@@ -32,7 +32,7 @@ class AuthService {
       avatar: avatar ?? user?.avatar,
     };
 
-    if (user) {
+    if (user?.type == type) {
       await prisma.user.update({
         where: {
           id: user.id,
@@ -41,6 +41,8 @@ class AuthService {
       });
       return user;
     }
+    
+    console.log('userData', user);
 
     try {
       const data: Prisma.UserCreateInput = {

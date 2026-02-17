@@ -77,6 +77,14 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
         db.leaderboardInvites.delete({
           where: { id: invite.id },
         }),
+        db.notification.create({
+          data: {
+            userId: userToAcceptId,
+            message: `Your request to join the leaderboard "${leaderboard.name}" has been accepted!`,
+            type: 'info',
+            referenceId: leaderboard.id,
+          },
+        }),
       ]);
 
       const response: ApiResponse<null> = {

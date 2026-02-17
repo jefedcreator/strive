@@ -56,12 +56,24 @@ export const POST = withMiddleware<unknown>(
 
       if (leaderboard.isPublic) {
         // Direct join for public leaderboards
-        await db.userLeaderboard.create({
-          data: {
-            userId: user.id,
-            leaderboardId,
-          },
-        });
+
+        await db.$transaction([
+          db.userLeaderboard.create({
+            data: {
+              userId: user.id,
+              leaderboardId,
+            },
+          }),
+          db.notification.create({
+            data: {
+              userId: leaderboard.createdById,
+              message: `${user.fullname} joined your leaderboard "${leaderboard.name}"`,
+              type: 'info',
+              referenceId: leaderboard.id,
+            },
+          })
+        ]);
+
 
         const response: ApiResponse<null> = {
           status: 200,
@@ -85,12 +97,23 @@ export const POST = withMiddleware<unknown>(
           );
         }
 
-        await db.leaderboardInvites.create({
-          data: {
-            userId: user.id,
-            leaderboardId,
-          },
-        });
+
+        await db.$transaction([
+          db.leaderboardInvites.create({
+            data: {
+              userId: user.id,
+              leaderboardId,
+            },
+          }),
+          db.notification.create({
+            data: {
+              userId: leaderboard.createdById,
+              message: `${user.fullname} wants to join your leaderboard "${leaderboard.name}"`,
+              type: 'leaderboard',
+              referenceId: leaderboard.id,
+            },
+          })
+        ]);
 
         const response: ApiResponse<null> = {
           status: 200,

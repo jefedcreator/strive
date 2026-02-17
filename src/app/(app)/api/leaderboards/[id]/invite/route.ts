@@ -105,12 +105,22 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
       }
 
       // Create invite
-      await db.leaderboardInvites.create({
-        data: {
-          userId: userToInviteId,
-          leaderboardId,
-        },
-      });
+      await db.$transaction([
+        db.leaderboardInvites.create({
+          data: {
+            userId: userToInviteId,
+            leaderboardId,
+          },
+        }),
+        db.notification.create({
+          data: {
+            userId: userToInviteId,
+            message: `Request sent to ${userToInvite.fullname} to join your leaderboard "${leaderboard.name}"`,
+            type: 'leaderboard',
+            referenceId: leaderboard.id,
+          },
+        })
+      ]);
 
       const response: ApiResponse<null> = {
         status: 201,

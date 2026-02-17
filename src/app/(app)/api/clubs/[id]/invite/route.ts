@@ -85,13 +85,23 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
         );
       }
 
-      // Create invite
-      await db.clubInvites.create({
-        data: {
-          userId: userToInviteId,
-          clubId,
-        },
-      });
+      // Create invite and notification in a transaction
+      await db.$transaction([
+        db.clubInvites.create({
+          data: {
+            userId: userToInviteId,
+            clubId,
+          },
+        }),
+        db.notification.create({
+          data: {
+            userId: userToInviteId,
+            message: `Request sent to ${userToInvite.fullname} to join your club "${club.name}"`,
+            type: 'club',
+            referenceId: club.id,
+          },
+        })
+      ]);
 
       const response: ApiResponse<null> = {
         status: 201,

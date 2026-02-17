@@ -60,6 +60,14 @@ export const POST = withMiddleware<unknown>(
             where: { id: clubId },
             data: { memberCount: { increment: 1 } },
           }),
+          db.notification.create({
+            data: {
+              userId: club.createdById,
+              message: `${user.fullname} joined your club "${club.name}"`,
+              type: 'info',
+              referenceId: club.id,
+            },
+          })
         ]);
 
         const response: ApiResponse<null> = {
@@ -83,12 +91,22 @@ export const POST = withMiddleware<unknown>(
           );
         }
 
-        await db.clubInvites.create({
-          data: {
-            userId: user.id,
-            clubId,
-          },
-        });
+        await db.$transaction([
+          db.clubInvites.create({
+            data: {
+              userId: user.id,
+              clubId,
+            },
+          }),
+          db.notification.create({
+            data: {
+              userId: club.createdById,
+              message: `${user.fullname} wants to join your club "${club.name}"`,
+              type: 'club',
+              referenceId: club.id,
+            },
+          })
+        ]);
 
         const response: ApiResponse<null> = {
           status: 200,

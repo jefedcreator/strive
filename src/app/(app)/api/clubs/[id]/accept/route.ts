@@ -74,6 +74,14 @@ export const POST = withMiddleware<AcceptInviteValidatorSchema>(
           where: { id: clubId },
           data: { memberCount: { increment: 1 } },
         }),
+        db.notification.create({
+          data: {
+            userId: userToAcceptId,
+            message: `Your request to join the club "${club.name}" has been accepted!`,
+            type: 'info',
+            referenceId: club.id,
+          },
+        }),
       ]);
 
       const response: ApiResponse<null> = {
