@@ -1,7 +1,7 @@
-"use client";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+'use client';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
 
 const StravaOAuthApp = () => {
   const [user, setUser] = useState<any>(null);
@@ -13,10 +13,10 @@ const StravaOAuthApp = () => {
   const searchParams = useSearchParams();
 
   // Replace these with your actual Strava app credentials
-  const CLIENT_ID = process.env.AUTH_STRAVA_CLIENT_ID ?? "your_client_id_here";
+  const CLIENT_ID = process.env.AUTH_STRAVA_CLIENT_ID ?? 'your_client_id_here';
   const REDIRECT_URI =
-    typeof window !== "undefined" ? window.location.origin : "";
-  const SCOPE = "read,activity:read_all";
+    typeof window !== 'undefined' ? window.location.origin : '';
+  const SCOPE = 'read,activity:read_all';
   // Step 2: Exchange authorization code for access token via backend
   const exchangeToken = useCallback(
     async (code: string) => {
@@ -24,13 +24,13 @@ const StravaOAuthApp = () => {
       setError(null);
 
       try {
-        const response = await fetch("/api/login", {
-          method: "POST",
+        const response = await fetch('/api/login', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            type: "strava",
+            type: 'strava',
             code: code,
           }),
         });
@@ -38,7 +38,8 @@ const StravaOAuthApp = () => {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(
-            errorData.message || `HTTP error! status: ${response.status}`,
+            (errorData.message as string) ??
+              `HTTP error! status: ${response.status}`
           );
         }
 
@@ -50,30 +51,30 @@ const StravaOAuthApp = () => {
         setUser(data);
 
         // Clean up URL after successful authentication
-        router.replace("/");
+        router.replace('/');
       } catch (err: any) {
-        setError("Failed to exchange token: " + err.message);
+        setError('Failed to exchange token: ' + err.message);
       } finally {
         setIsLoading(false);
       }
     },
-    [router],
+    [router]
   );
 
   // Check for OAuth callback on component mount
   useEffect(() => {
-    const code = searchParams.get("code");
-    const error = searchParams.get("error");
-    const state = searchParams.get("state");
+    const code = searchParams.get('code');
+    const error = searchParams.get('error');
+    const state = searchParams.get('state');
 
-    if (state === "strava") {
+    if (state === 'strava') {
       if (error) {
-        setError("Authentication failed: " + error);
+        setError('Authentication failed: ' + error);
         // Clean up URL
-        router.replace("/");
+        router.replace('/');
       } else if (code) {
         exchangeToken(code).catch((err) => {
-          setError("Authentication failed: " + err.message);
+          setError('Authentication failed: ' + err.message);
         });
       }
     }
@@ -81,7 +82,7 @@ const StravaOAuthApp = () => {
 
   // Step 1: Redirect to Strava authorization
   const initiateStravaAuth = () => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
 
     const authUrl =
       `https://www.strava.com/oauth/authorize?` +
@@ -160,14 +161,14 @@ const StravaOAuthApp = () => {
             <div className="text-center">
               <div className="mb-6">
                 <Image
-                  src={user.avatar ?? "/placeholder-avatar.png"}
+                  src={user.avatar ?? '/placeholder-avatar.png'}
                   alt="Profile"
                   className="mx-auto mb-4 h-20 w-20 rounded-full border-4 border-orange-200"
                   width={100}
                   height={100}
                 />
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {user.name || user.username}
+                  {user.name ?? user.username}
                 </h2>
                 <p className="text-gray-600">@{user.username}</p>
                 {user.city && (

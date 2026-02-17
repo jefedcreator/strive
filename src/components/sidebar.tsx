@@ -1,32 +1,9 @@
 "use client";
 
-import {
-  useState,
-  type ForwardRefExoticComponent,
-  type RefAttributes,
-} from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  BarChart2,
-  Building2,
-  Folder,
-  Wallet,
-  Receipt,
-  CreditCard,
-  Users2,
-  Shield,
-  MessagesSquare,
-  Video,
-  Settings,
-  HelpCircle,
-  Menu,
-  ChevronLeft,
-  type LucideProps,
-} from "lucide-react";
 import { cn } from "@/utils";
-import { Button } from "@/primitives";
 import {
   Tooltip,
   TooltipContent,
@@ -37,130 +14,157 @@ import {
 interface NavItemProps {
   name: string;
   href: string;
-  icon: ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
-  >;
+  icon: string;
+  badge?: string;
 }
 
-const navigation: NavItemProps[] = [
-  { name: "Dashboard", href: "/", icon: Home },
-  { name: "Analytics", href: "/analytics", icon: BarChart2 },
-  { name: "Organization", href: "/organization", icon: Building2 },
-  { name: "Projects", href: "/projects", icon: Folder },
-  { name: "Transactions", href: "/transactions", icon: Wallet },
-  { name: "Invoices", href: "/invoices", icon: Receipt },
-  { name: "Payments", href: "/payments", icon: CreditCard },
-  { name: "Members", href: "/members", icon: Users2 },
-  { name: "Permissions", href: "/permissions", icon: Shield },
-  { name: "Chat", href: "/chat", icon: MessagesSquare },
-  { name: "Meetings", href: "/meetings", icon: Video },
+const platformNavigation: NavItemProps[] = [
+  { name: "Dashboard", href: "/", icon: "dashboard" },
+  { name: "Analytics", href: "/analytics", icon: "analytics" },
+  { name: "Clubs", href: "/organization", icon: "groups" },
+  { name: "Leaderboards", href: "/leaderboards", icon: "emoji_events" },
 ];
 
-const bottomNavigation = [
-  { name: "Settings", href: "/settings", icon: Settings },
-  { name: "Help", href: "/help", icon: HelpCircle },
+const managementNavigation: NavItemProps[] = [
+  { name: "Projects", href: "/projects", icon: "folder_open" },
+  { name: "Invoices", href: "/invoices", icon: "receipt_long" },
+  { name: "Chat", href: "/chat", icon: "chat_bubble_outline", badge: "2" },
+];
+
+const bottomNavigation: NavItemProps[] = [
+  { name: "Settings", href: "/settings", icon: "settings" },
+  { name: "Help Center", href: "/help", icon: "help_outline" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const NavItem = ({
-    item,
-    isBottom = false,
-  }: {
-    item: NavItemProps;
-    isBottom?: boolean;
-  }) => (
-    <Tooltip delayDuration={0}>
-      <TooltipTrigger asChild>
-        <Link
-          href={item.href}
-          className={cn(
-            "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            pathname === item.href
-              ? "bg-secondary text-secondary-foreground"
-              : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
-            isCollapsed && "justify-center px-2",
-          )}
-        >
-          <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-          {!isCollapsed && <span>{item.name}</span>}
-        </Link>
-      </TooltipTrigger>
-      {isCollapsed && (
-        <TooltipContent side="right" className="flex items-center gap-4">
-          {item.name}
-        </TooltipContent>
-      )}
-    </Tooltip>
-  );
+  const NavItem = ({ item }: { item: NavItemProps }) => {
+    const isActive = pathname === item.href;
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <Link
+            href={item.href}
+            className={cn(
+              "flex items-center px-4 py-2.5 rounded-lg group transition-colors mb-1",
+              isActive
+                ? "bg-primary-custom text-white dark:bg-white dark:text-black"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+              isCollapsed && "justify-center px-2"
+            )}
+          >
+            <span className={cn("material-symbols-outlined text-[20px]", !isCollapsed && "mr-3")}>
+              {item.icon}
+            </span>
+            {!isCollapsed && <span className="text-sm font-medium">{item.name}</span>}
+            {!isCollapsed && item.badge && (
+              <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">
+                {item.badge}
+              </span>
+            )}
+          </Link>
+        </TooltipTrigger>
+        {isCollapsed && (
+          <TooltipContent side="right" className="flex items-center gap-4">
+            {item.name}
+          </TooltipContent>
+        )}
+      </Tooltip>
+    );
+  };
 
   return (
     <TooltipProvider>
       <>
-        <button
-          className="bg-background fixed top-4 left-4 z-50 rounded-md p-2 shadow-md lg:hidden"
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          aria-label="Toggle sidebar"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-        <div
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between p-4 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark fixed w-full z-50 top-0 left-0">
+          <div className="font-bold text-xl tracking-tight">Strive</div>
+          <button
+            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+          >
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+
+        {/* Sidebar */}
+        <aside
           className={cn(
-            "bg-background fixed inset-y-0 z-20 flex flex-col transition-all duration-300 ease-in-out lg:static",
-            isCollapsed ? "w-[72px]" : "w-72",
-            isMobileOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0",
+            "hidden lg:flex flex-col bg-card-light dark:bg-card-dark border-r border-border-light dark:border-border-dark h-full transition-all duration-300",
+            isCollapsed ? "w-20" : "w-64"
           )}
         >
-          <div className="border-border border-b">
-            <div
+          <div className="h-16 flex items-center px-6 border-b border-border-light dark:border-border-dark">
+            {!isCollapsed && (
+              <span className="font-display font-bold text-2xl tracking-tighter">
+                Strive
+              </span>
+            )}
+            <span
               className={cn(
-                "flex h-16 items-center gap-2 px-4",
-                isCollapsed && "justify-center px-2",
+                "material-symbols-outlined text-gray-400 cursor-pointer text-sm hover:text-gray-600 dark:hover:text-gray-200 transition-colors",
+                isCollapsed ? "mx-auto" : "ml-auto"
               )}
+              onClick={() => setIsCollapsed(!isCollapsed)}
             >
-              {!isCollapsed && (
-                <Link href="/" className="flex items-center font-semibold">
-                  <span className="text-lg">Strive</span>
-                </Link>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn("ml-auto h-8 w-8", isCollapsed && "ml-0")}
-                onClick={() => setIsCollapsed(!isCollapsed)}
-              >
-                <ChevronLeft
-                  className={cn(
-                    "h-4 w-4 transition-transform",
-                    isCollapsed && "rotate-180",
-                  )}
-                />
-                <span className="sr-only">
-                  {isCollapsed ? "Expand" : "Collapse"} Sidebar
-                </span>
-              </Button>
-            </div>
+              {isCollapsed ? "chevron_right" : "chevron_left"}
+            </span>
           </div>
-          <div className="flex-1 overflow-auto">
-            <nav className="flex-1 space-y-1 px-2 py-4">
-              {navigation.map((item) => (
-                <NavItem key={item.name} item={item} />
-              ))}
-            </nav>
+
+          <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 no-scrollbar">
+            {!isCollapsed && (
+              <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                Platform
+              </p>
+            )}
+            {platformNavigation.map((item) => (
+              <NavItem key={item.name} item={item} />
+            ))}
+
+            {!isCollapsed && (
+              <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-8 mb-2">
+                Management
+              </p>
+            )}
+            {managementNavigation.map((item) => (
+              <NavItem key={item.name} item={item} />
+            ))}
           </div>
-          <div className="border-border border-t p-2">
-            <nav className="space-y-1">
-              {bottomNavigation.map((item) => (
-                <NavItem key={item.name} item={item} isBottom />
-              ))}
-            </nav>
+
+          <div className="p-4 border-t border-border-light dark:border-border-dark">
+            {bottomNavigation.map((item) => (
+              <NavItem key={item.name} item={item} />
+            ))}
           </div>
-        </div>
+        </aside>
+
+        {/* Mobile Drawer (simplified implementation based on state, could be improved) */}
+        {isMobileOpen && (
+           <div className="fixed inset-0 z-40 lg:hidden">
+             <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileOpen(false)} />
+             <div className="fixed inset-y-0 left-0 w-64 bg-card-light dark:bg-card-dark z-50 overflow-y-auto">
+               <div className="h-16 flex items-center justify-between px-6 border-b border-border-light dark:border-border-dark">
+                 <span className="font-display font-bold text-2xl tracking-tighter">Strive</span>
+                 <button onClick={() => setIsMobileOpen(false)}>
+                   <span className="material-symbols-outlined">close</span>
+                 </button>
+               </div>
+               <div className="py-6 px-4 space-y-1">
+                 <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Platform</p>
+                 {platformNavigation.map((item) => <NavItem key={item.name} item={item} />)}
+                 <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-8 mb-2">Management</p>
+                 {managementNavigation.map((item) => <NavItem key={item.name} item={item} />)}
+                 <div className="border-t border-border-light dark:border-border-dark mt-4 pt-4">
+                  {bottomNavigation.map((item) => <NavItem key={item.name} item={item} />)}
+                 </div>
+               </div>
+             </div>
+           </div>
+        )}
       </>
     </TooltipProvider>
   );
