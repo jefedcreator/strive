@@ -1,7 +1,7 @@
-"use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,112 +9,173 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/primitives/dropdown-menu";
-import React from "react";
+} from '@/primitives/dropdown-menu';
+import React from 'react';
 // import { Button } from "@/primitives"; // Using custom buttons elements from home.html for exact match, or adapt.
-import { useTheme } from "next-themes";
+import { useTheme } from 'next-themes';
+import ToggleTheme from './toggle-theme';
 
 export function TopNav() {
   const pathname = usePathname();
-  const pathSegments = pathname.split("/").filter(Boolean);
+  const pathSegments = pathname.split('/').filter(Boolean);
   const { data: session } = useSession();
   const user = session?.user;
   const { setTheme, theme } = useTheme();
 
   return (
-    <header className="h-16 flex items-center justify-between px-8 bg-background-light dark:bg-background-dark sticky top-0 z-10">
-      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-        <span>Home</span>
-        {pathSegments.length > 0 && <span className="mx-2">/</span>}
+    <header className="h-[70px] flex items-center justify-between px-6 lg:px-8 bg-background-light dark:bg-background-dark sticky top-0 z-30 transition-colors duration-300">
+      {/* --- Breadcrumbs --- */}
+      <nav className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+        <Link
+          href="/"
+          className="hover:text-primary dark:hover:text-primary transition-colors flex items-center gap-1"
+        >
+          <span className="material-symbols-outlined text-[18px]">home</span>
+          <span className="hidden sm:inline">Home</span>
+        </Link>
+
+        {pathSegments.length > 0 && (
+          <span className="material-symbols-outlined text-[16px] mx-2 text-gray-400">
+            chevron_right
+          </span>
+        )}
+
         {pathSegments.map((segment, index) => {
-           const isLast = index === pathSegments.length - 1;
-           return (
-             <React.Fragment key={segment}>
-               <Link 
-                 href={`/${pathSegments.slice(0, index + 1).join("/")}`}
-                 className={isLast ? "font-medium text-gray-900 dark:text-gray-100" : ""}
-               >
-                 {segment.charAt(0).toUpperCase() + segment.slice(1)}
-               </Link>
-               {!isLast && <span className="mx-2">/</span>}
-             </React.Fragment>
-           )
+          const isLast = index === pathSegments.length - 1;
+          const href = `/${pathSegments.slice(0, index + 1).join('/')}`;
+
+          return (
+            <React.Fragment key={segment}>
+              <Link
+                href={href}
+                className={`capitalize hover:text-gray-900 dark:hover:text-white transition-colors ${
+                  isLast
+                    ? 'text-gray-900 dark:text-white font-bold pointer-events-none'
+                    : ''
+                }`}
+              >
+                {segment}
+              </Link>
+              {!isLast && (
+                <span className="material-symbols-outlined text-[16px] mx-2 text-gray-400">
+                  chevron_right
+                </span>
+              )}
+            </React.Fragment>
+          );
         })}
+
+        {/* Default Dashboard Breadcrumb if on root */}
         {pathSegments.length === 0 && (
-           <>
-            <span className="mx-2">/</span>
-            <span className="font-medium text-gray-900 dark:text-gray-100">
+          <>
+            <span className="material-symbols-outlined text-[16px] mx-2 text-gray-400">
+              chevron_right
+            </span>
+            <span className="text-gray-900 dark:text-white font-bold">
               Dashboard
             </span>
-           </>
+          </>
         )}
-      </div>
+      </nav>
 
-      <div className="flex items-center space-x-4">
-        <div className="hidden md:flex items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-full px-4 py-1.5 shadow-sm">
-          <span className="material-symbols-outlined text-gray-400 text-[18px]">
+      {/* --- Right Actions --- */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Search Bar (Hidden on mobile) */}
+        <div className="hidden md:flex items-center bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
+          <span className="material-symbols-outlined text-gray-400 text-[20px]">
             search
           </span>
           <input
-            className="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200 w-64 placeholder-gray-400 focus:outline-none ml-2"
+            className="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200 w-48 lg:w-64 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none ml-2"
             placeholder="Search activities..."
             type="text"
           />
         </div>
-        
-        <button className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors relative">
-          <span className="material-symbols-outlined">notifications</span>
-          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></span>
+
+        {/* Notifications */}
+        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors relative group">
+          <span className="material-symbols-outlined group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+            notifications
+          </span>
+          <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></span>
         </button>
 
-        <button
-          className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+        {/* Theme Toggle */}
+        {/* <button
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors group"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         >
-          <span className="material-symbols-outlined hidden dark:block">
+          <span className="material-symbols-outlined hidden dark:block group-hover:text-yellow-400 transition-colors">
             light_mode
           </span>
-          <span className="material-symbols-outlined block dark:hidden">
+          <span className="material-symbols-outlined block dark:hidden group-hover:text-purple-600 transition-colors">
             dark_mode
           </span>
-        </button>
+        </button> */}
+        <ToggleTheme />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-             <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold border border-border-light dark:border-border-dark cursor-pointer">
-              {user?.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.image} alt={user.name ?? "User"} className="h-8 w-8 rounded-full" />
-              ) : (
-                (user?.username?.[0] ?? user?.name?.[0] ?? "R").toUpperCase()
-              )}
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm leading-none font-medium">
-                  {user?.name ?? user?.username}
-                </p>
-                <p className="text-muted-foreground text-xs leading-none">
-                  {user?.email}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/settings">Profile</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/settings">Settings</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* User Menu */}
+        <div className="pl-2 border-l border-gray-200 dark:border-gray-800">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-xs font-bold text-white shadow-md border-2 border-background-light dark:border-background-dark">
+                  {user?.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.image}
+                      alt={user.name ?? 'User'}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    (
+                      user?.username?.[0] ??
+                      user?.name?.[0] ??
+                      'U'
+                    ).toUpperCase()
+                  )}
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-56 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+              align="end"
+              forceMount
+            >
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">
+                    {user?.name ?? user?.username}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-none">
+                    {user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+              <DropdownMenuItem
+                asChild
+                className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer"
+              >
+                <Link href="/settings">Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                asChild
+                className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer"
+              >
+                <Link href="/settings">Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+              <DropdownMenuItem
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer"
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );
 }
-

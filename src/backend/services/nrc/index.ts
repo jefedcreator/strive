@@ -15,7 +15,7 @@ interface Summary {
 
 interface Activity {
   id: string;
-  type: 'run' | 'walk' | string;
+  type: 'run';
   start_epoch_ms: number;
   active_duration_ms: number;
   summaries: Summary[];

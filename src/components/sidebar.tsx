@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/utils";
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/utils';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
   TooltipProvider,
-} from "@/primitives/tooltip";
+} from '@/primitives/tooltip';
 
 interface NavItemProps {
   name: string;
@@ -19,27 +19,27 @@ interface NavItemProps {
 }
 
 const platformNavigation: NavItemProps[] = [
-  { name: "Dashboard", href: "/", icon: "dashboard" },
-  { name: "Analytics", href: "/analytics", icon: "analytics" },
-  { name: "Clubs", href: "/organization", icon: "groups" },
-  { name: "Leaderboards", href: "/leaderboards", icon: "emoji_events" },
+  { name: 'Dashboard', href: '/', icon: 'dashboard' },
+  { name: 'Analytics', href: '/analytics', icon: 'analytics' },
+  { name: 'Clubs', href: '/organization', icon: 'groups' },
+  { name: 'Leaderboards', href: '/leaderboards', icon: 'emoji_events' },
 ];
 
 const managementNavigation: NavItemProps[] = [
-  { name: "Projects", href: "/projects", icon: "folder_open" },
-  { name: "Invoices", href: "/invoices", icon: "receipt_long" },
-  { name: "Chat", href: "/chat", icon: "chat_bubble_outline", badge: "2" },
+  { name: 'Projects', href: '/projects', icon: 'folder_open' },
+  { name: 'Invoices', href: '/invoices', icon: 'receipt_long' },
+  { name: 'Chat', href: '/chat', icon: 'chat_bubble_outline', badge: '2' },
 ];
 
 const bottomNavigation: NavItemProps[] = [
-  { name: "Settings", href: "/settings", icon: "settings" },
-  { name: "Help Center", href: "/help", icon: "help_outline" },
+  { name: 'Settings', href: '/settings', icon: 'settings' },
+  { name: 'Help Center', href: '/help', icon: 'help_outline' },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const NavItem = ({ item }: { item: NavItemProps }) => {
@@ -50,17 +50,24 @@ export function Sidebar() {
           <Link
             href={item.href}
             className={cn(
-              "flex items-center px-4 py-2.5 rounded-lg group transition-colors mb-1",
+              'flex items-center px-4 py-2.5 rounded-lg group transition-colors mb-1',
               isActive
-                ? "bg-primary-custom text-white dark:bg-white dark:text-black"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
-              isCollapsed && "justify-center px-2"
+                ? 'bg-primary-custom text-white dark:bg-white dark:text-black'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
+              isCollapsed && 'justify-center px-2'
             )}
           >
-            <span className={cn("material-symbols-outlined text-[20px]", !isCollapsed && "mr-3")}>
+            <span
+              className={cn(
+                'material-symbols-outlined text-[20px]',
+                !isCollapsed && 'mr-3'
+              )}
+            >
               {item.icon}
             </span>
-            {!isCollapsed && <span className="text-sm font-medium">{item.name}</span>}
+            {!isCollapsed && (
+              <span className="text-sm font-medium">{item.name}</span>
+            )}
             {!isCollapsed && item.badge && (
               <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">
                 {item.badge}
@@ -80,44 +87,56 @@ export function Sidebar() {
   return (
     <TooltipProvider>
       <>
-        {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between p-4 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark fixed w-full z-50 top-0 left-0">
-          <div className="font-bold text-xl tracking-tight">Strive</div>
+        {/* --- Mobile Header (Visible only on lg and below) --- */}
+        <div className="lg:hidden flex items-center justify-between p-4 bg-card-light dark:bg-card-dark border-b border-gray-200 dark:border-gray-800 fixed w-full z-50 top-0 left-0">
+          <div className="font-black text-xl tracking-tighter text-gray-900 dark:text-white flex items-center gap-1">
+            STRIVE{' '}
+            <span className="w-2 h-2 rounded-full bg-primary inline-block"></span>
+          </div>
           <button
-            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors"
             onClick={() => setIsMobileOpen(!isMobileOpen)}
           >
             <span className="material-symbols-outlined">menu</span>
           </button>
         </div>
 
-        {/* Sidebar */}
+        {/* --- Desktop Sidebar --- */}
         <aside
           className={cn(
-            "hidden lg:flex flex-col bg-card-light dark:bg-card-dark border-r border-border-light dark:border-border-dark h-full transition-all duration-300",
-            isCollapsed ? "w-20" : "w-64"
+            'hidden lg:flex flex-col bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-800 h-screen sticky top-0 transition-all duration-300 z-40',
+            isCollapsed ? 'w-20' : 'w-64'
           )}
         >
-          <div className="h-16 flex items-center px-6 border-b border-border-light dark:border-border-dark">
+          {/* Logo Area */}
+          <div className="h-20 flex items-center px-6 border-b border-gray-100 dark:border-gray-800">
             {!isCollapsed && (
-              <span className="font-display font-bold text-2xl tracking-tighter">
-                Strive
+              <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white flex items-center gap-1">
+                STRIVE
+                <span className="flex space-x-1 ml-1">
+                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                </span>
               </span>
             )}
-            <span
+            <button
               className={cn(
-                "material-symbols-outlined text-gray-400 cursor-pointer text-sm hover:text-gray-600 dark:hover:text-gray-200 transition-colors",
-                isCollapsed ? "mx-auto" : "ml-auto"
+                'w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors',
+                isCollapsed ? 'mx-auto' : 'ml-auto'
               )}
               onClick={() => setIsCollapsed(!isCollapsed)}
             >
-              {isCollapsed ? "chevron_right" : "chevron_left"}
-            </span>
+              <span className="material-symbols-outlined text-[20px]">
+                {isCollapsed ? 'chevron_right' : 'chevron_left'}
+              </span>
+            </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 no-scrollbar">
+          {/* Navigation Items */}
+          <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1 scrollbar-hide">
             {!isCollapsed && (
-              <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+              <p className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 mt-2">
                 Platform
               </p>
             )}
@@ -126,7 +145,7 @@ export function Sidebar() {
             ))}
 
             {!isCollapsed && (
-              <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-8 mb-2">
+              <p className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-8 mb-3">
                 Management
               </p>
             )}
@@ -135,35 +154,84 @@ export function Sidebar() {
             ))}
           </div>
 
-          <div className="p-4 border-t border-border-light dark:border-border-dark">
+          {/* Bottom Actions */}
+          <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-black/20">
             {bottomNavigation.map((item) => (
               <NavItem key={item.name} item={item} />
             ))}
+
+            {/* User Profile Snippet */}
+            <div
+              className={cn(
+                'mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-card-light dark:bg-card-dark',
+                isCollapsed ? 'justify-center p-2' : ''
+              )}
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                J
+              </div>
+              {!isCollapsed && (
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                    Jace M.
+                  </p>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
+                    Pro Member
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </aside>
 
-        {/* Mobile Drawer (simplified implementation based on state, could be improved) */}
+        {/* --- Mobile Drawer --- */}
         {isMobileOpen && (
-           <div className="fixed inset-0 z-40 lg:hidden">
-             <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileOpen(false)} />
-             <div className="fixed inset-y-0 left-0 w-64 bg-card-light dark:bg-card-dark z-50 overflow-y-auto">
-               <div className="h-16 flex items-center justify-between px-6 border-b border-border-light dark:border-border-dark">
-                 <span className="font-display font-bold text-2xl tracking-tighter">Strive</span>
-                 <button onClick={() => setIsMobileOpen(false)}>
-                   <span className="material-symbols-outlined">close</span>
-                 </button>
-               </div>
-               <div className="py-6 px-4 space-y-1">
-                 <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Platform</p>
-                 {platformNavigation.map((item) => <NavItem key={item.name} item={item} />)}
-                 <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-8 mb-2">Management</p>
-                 {managementNavigation.map((item) => <NavItem key={item.name} item={item} />)}
-                 <div className="border-t border-border-light dark:border-border-dark mt-4 pt-4">
-                  {bottomNavigation.map((item) => <NavItem key={item.name} item={item} />)}
-                 </div>
-               </div>
-             </div>
-           </div>
+          <div className="fixed inset-0 z-50 lg:hidden">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+              onClick={() => setIsMobileOpen(false)}
+            />
+
+            {/* Drawer Content */}
+            <div className="absolute inset-y-0 left-0 w-72 bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
+              <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-gray-800">
+                <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white">
+                  STRIVE
+                </span>
+                <button
+                  onClick={() => setIsMobileOpen(false)}
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <span className="material-symbols-outlined text-gray-500">
+                    close
+                  </span>
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+                <p className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                  Platform
+                </p>
+                {platformNavigation.map((item) => (
+                  <NavItem key={item.name} item={item} />
+                ))}
+
+                <p className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-8 mb-3">
+                  Management
+                </p>
+                {managementNavigation.map((item) => (
+                  <NavItem key={item.name} item={item} />
+                ))}
+              </div>
+
+              <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+                {bottomNavigation.map((item) => (
+                  <NavItem key={item.name} item={item} />
+                ))}
+              </div>
+            </div>
+          </div>
         )}
       </>
     </TooltipProvider>

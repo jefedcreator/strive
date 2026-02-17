@@ -4,10 +4,7 @@ import promptSync from 'prompt-sync';
 
 const prompt = promptSync({ sigint: true });
 
-"mb6.q%ZF.DeW_LN"
 
-"https://accounts.nike.com/lookup?client_id=4fd2d5e7db76e0f85a6bb56721bd51df&redirect_uri=https://www.nike.com/auth/login&response_type=code&scope=openid%20nike.digital%20profile%20email%20phone%20flow%20country&state=f70d9fe3bd5845b091acca1efde3b0e3&ui_locales=en-SE&code_challenge=Mj3lfHUoEGDeJAnCTzzOH3uRu9FyxgDOk2yl2Y6TAFI&code_challenge_method=S256"
-    LOGIN_URL= "https://www.nike.com/se/en/nrc-app", // URL used in Python script
 
 // Configuration from the Python script
 const CONFIG = {
