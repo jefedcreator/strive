@@ -1,7 +1,11 @@
-"use client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { SessionProvider } from "next-auth/react";
-import type { ReactNode } from "react";
+'use client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SessionProvider } from 'next-auth/react';
+import type { ReactNode } from 'react';
+import {
+  ThemeProvider as NextThemesProvider,
+  type ThemeProviderProps,
+} from 'next-themes';
 
 interface QueryProviderProps {
   children: ReactNode;
@@ -11,16 +15,29 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 5000,
-      refetchOnMount: "always",
-      refetchOnWindowFocus: "always",
+      refetchOnMount: 'always',
+      refetchOnWindowFocus: 'always',
     },
   },
 });
 
+function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
+
 export const Provider = ({ children }: QueryProviderProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </SessionProvider>
     </QueryClientProvider>
   );
 };
