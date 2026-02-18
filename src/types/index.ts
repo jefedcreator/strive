@@ -13,7 +13,7 @@ export interface ApiResponse<T = unknown> {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-    PaginationMeta {}
+  PaginationMeta { }
 
 interface ISubMenu {
   name: string;
@@ -29,11 +29,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-    | {
-        1: string;
-        2?: string | undefined;
-      }
-    | undefined;
+  | {
+    1: string;
+    2?: string | undefined;
+  }
+  | undefined;
 };
 
 enum DateRangeFilters {
@@ -44,5 +44,24 @@ enum DateRangeFilters {
   thisYear = 'this-year',
 }
 
-export type { ISubMenu, Option };
+interface LeaderboardEntry {
+  rank: number;
+  athlete: string;
+  distance: string;
+  avgPace: string;
+  initials: string;
+  color: string;
+}
+
+interface Activity {
+  id: string;
+  club: string;
+  description: string;
+  time: string;
+  initials: string;
+  color: string;
+}
+
+
+export type { ISubMenu, Option, LeaderboardEntry, Activity };
 export { DateRangeFilters };

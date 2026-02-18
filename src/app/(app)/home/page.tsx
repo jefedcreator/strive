@@ -1,56 +1,80 @@
 import { auth } from '@/server/auth';
 import { redirect } from 'next/navigation';
-// import { StatCard } from '@/components/stat-card';
-import { Leaderboard } from '@/components/leaderboard';
-import { WeeklyChart } from '@/components/weekly-chart';
-import { ActivityList } from '@/components/activity-list';
 import Background from '@/components/background';
+import { type User } from '@prisma/client';
 
-const StatCard = ({ label, value, unit, icon, trend }: any) => (
-  <div className="bg-card-light dark:bg-card-dark p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between h-full hover:border-gray-300 dark:hover:border-gray-700 transition-colors">
-    <div className="flex justify-between items-start">
-      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <span className="material-symbols-outlined text-primary text-[20px]">
-          {icon}
-        </span>
-      </div>
-      {trend && (
-        <span className="text-xs font-medium text-green-500 flex items-center bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">
-          +{trend}%
-        </span>
-      )}
-    </div>
-    <div className="mt-4">
-      <h4 className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-semibold">
-        {label}
-      </h4>
-      <div className="flex items-baseline mt-1 gap-1">
-        <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-          {value}
-        </span>
-        <span className="text-sm text-gray-400 font-medium">{unit}</span>
-      </div>
-    </div>
-  </div>
-);
+const leaderboard = [
+  {
+    rank: 1,
+    athlete: 'James Miller',
+    distance: '84.5 km',
+    avgPace: '4\'45" /km',
+    initials: 'JM',
+    color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+  },
+  {
+    rank: 2,
+    athlete: 'Sarah Jenkins',
+    distance: '72.1 km',
+    avgPace: '5\'02" /km',
+    initials: 'SJ',
+    color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
+  },
+  {
+    rank: 3,
+    athlete: 'You',
+    distance: '68.4 km',
+    avgPace: '5\'10" /km',
+    initials: 'R',
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400',
+  },
+  {
+    rank: 4,
+    athlete: 'Mike K.',
+    distance: '65.0 km',
+    avgPace: '5\'22" /km',
+    initials: 'MK',
+    color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+  },
+  {
+    rank: 5,
+    athlete: 'Anna Lee',
+    distance: '61.8 km',
+    avgPace: '5\'15" /km',
+    initials: 'AL',
+    color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+  },
+];
 
-const ActivityItem = ({ icon, title, sub, date }: any) => (
-  <div className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-colors cursor-pointer group">
-    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700 group-hover:border-primary/50 transition-colors">
-      <span className="material-symbols-outlined text-gray-500 dark:text-gray-400 text-[20px] group-hover:text-primary">
-        {icon}
-      </span>
-    </div>
-    <div className="flex-1 min-w-0">
-      <h5 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-        {title}
-      </h5>
-      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{sub}</p>
-    </div>
-    <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
-      {date}
-    </span>
-  </div>
+const activities = [
+  {
+    id: '1',
+    club: 'The Runners Club',
+    description: 'Alex just finished a 10k run',
+    time: '2 mins ago',
+    initials: 'TR',
+    color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+  },
+  {
+    id: '2',
+    club: 'NRC Chicago',
+    description: 'New challenge posted: "Winter Warrior"',
+    time: '1 hour ago',
+    initials: 'NRC',
+    color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+  },
+  {
+    id: '3',
+    club: 'Mountain Trail',
+    description: 'Sarah commented on your route.',
+    time: '3 hours ago',
+    initials: 'MT',
+    color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
+  },
+];
+
+const Icon = ({ name, className = '' }: { name: string; className?: string }) => (
+  <span className={`material-symbols-outlined ${className}`}>{name}</span>
 );
 
 export default async function HomePage() {
@@ -61,179 +85,246 @@ export default async function HomePage() {
   }
 
   const { user } = session;
-  const username = user.username ?? user.name ?? 'Runner';
+  const username = (user as User).fullname || user.name || 'Runner';
 
   return (
-    <div className="flex relative flex-col h-full lg:h-[calc(100vh-140px)] gap-6 overflow-hidden">
-      {/* Header Section */}
+    <div className="max-w-7xl mx-auto space-y-10 pb-10 relative">
       <Background />
 
-      <div className="flex justify-between items-end flex-shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Overview
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Welcome back, Jace. Youre on a 3-day streak! 🔥
-          </p>
-        </div>
-        <div className="hidden sm:flex gap-3">
-          <button className="px-4 py-2 bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-            Weekly View
-          </button>
-          <button className="px-4 py-2 bg-primary hover:bg-orange-600 text-white text-sm font-medium rounded-lg shadow-lg shadow-orange-500/20 transition-colors flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Log Activity
-          </button>
-        </div>
-      </div>
+      {/* Welcome Message */}
+      <section>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          Welcome back, {username.split(' ')[0]}
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 font-medium">
+          You are successfully connected. Here is your fitness overview for this
+          week.
+        </p>
+      </section>
 
-      {/* Main Grid Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
-        {/* LEFT COLUMN (Stats & Chart) - Spans 8 cols */}
-        <div className="lg:col-span-8 flex flex-col gap-6 h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0">
-            <StatCard
-              label="Distance"
-              value="24.5"
-              unit="km"
-              icon="directions_run"
-              trend="12"
-            />
-            <StatCard
-              label="Duration"
-              value="2:15"
-              unit="hrs"
-              icon="timer"
-              trend="5"
-            />
-            <StatCard
-              label="Calories"
-              value="1,240"
-              unit="kcal"
-              icon="local_fire_department"
-            />
-            <StatCard label="Elevation" value="340" unit="m" icon="landscape" />
-          </div>
-
-          {/* Main Chart Card */}
-          <div className="flex-1 min-h-[300px] bg-card-light dark:bg-card-dark rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col relative overflow-hidden">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                Activity Volume
-              </h3>
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <span className="w-2 h-2 rounded-full bg-primary"></span>
-                <span>Running</span>
-                <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-700 ml-2"></span>
-                <span>Cycling</span>
-              </div>
-            </div>
-
-            {/* Chart Placeholder / Visual */}
-            <div className="flex-1 w-full bg-gray-50 dark:bg-black/20 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 flex items-center justify-center relative">
-              <div className="absolute inset-0 flex items-end justify-between px-8 pb-0 opacity-80">
-                {/* Fake Bars for visual */}
-                {[40, 65, 30, 85, 55, 45, 70].map((h, i) => (
-                  <div
-                    key={i}
-                    className="w-[8%] bg-primary/20 hover:bg-primary/40 transition-colors rounded-t-sm relative group"
-                  >
-                    <div
-                      style={{ height: `${h}%` }}
-                      className="absolute bottom-0 w-full bg-primary rounded-t-sm"
-                    ></div>
-                    {/* Tooltip on hover */}
-                    <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded transition-opacity">
-                      {h}km
-                    </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Left Column: Stats & Leaderboard */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Main Activity Card */}
+          <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden transition-transform duration-300 hover:scale-[1.005]">
+            <div className="p-8 pb-4">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                    Morning Run
+                  </h2>
+                  <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 text-sm font-medium">
+                    <Icon name="location_on" className="text-base" />
+                    <span>Central Park Loop • Today at 7:00 AM</span>
                   </div>
-                ))}
+                </div>
+                <div className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-3 py-1 rounded text-[10px] font-black uppercase tracking-tighter">
+                  Strava
+                </div>
               </div>
-              {/* Grid lines */}
-              <div className="absolute inset-0 flex flex-col justify-between py-4 px-4 pointer-events-none">
-                <div className="w-full h-px bg-gray-200 dark:bg-gray-800/50"></div>
-                <div className="w-full h-px bg-gray-200 dark:bg-gray-800/50"></div>
-                <div className="w-full h-px bg-gray-200 dark:bg-gray-800/50"></div>
-                <div className="w-full h-px bg-gray-200 dark:bg-gray-800/50"></div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8">
+                <div className="space-y-1">
+                  <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+                    Distance
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                    5.2{' '}
+                    <span className="text-lg font-medium text-gray-400 dark:text-gray-500">
+                      km
+                    </span>
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+                    Duration
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">28:45</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+                    Avg Pace
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">5&apos;31&quot;</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
+                    Calories
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">420</p>
+                </div>
               </div>
+            </div>
+
+            <div className="bg-gray-50/50 dark:bg-white/5 px-8 py-5 flex items-center justify-between border-t border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500">
+                  <Icon name="local_fire_department" className="text-xl" />
+                </div>
+                <span className="font-bold text-gray-900 dark:text-white text-sm">
+                  New 5k Record!
+                </span>
+              </div>
+              <button className="flex items-center gap-1.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                View Details <Icon name="arrow_forward" className="text-base" />
+              </button>
+            </div>
+          </div>
+
+          {/* Leaderboard Table */}
+          <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden">
+            <div className="p-8 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                  Leaderboard Overview
+                </h2>
+                <p className="text-gray-400 dark:text-gray-500 text-sm font-medium">
+                  Top performers in The Runners Club (This Week)
+                </p>
+              </div>
+              <button className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-left sm:text-right">
+                View Full Leaderboard
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-widest">
+                      <th className="px-8 py-4">Rank</th>
+                      <th className="px-8 py-4">Athlete</th>
+                      <th className="px-8 py-4">Distance</th>
+                      <th className="px-8 py-4 text-right">Avg Pace</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+                    {leaderboard.map((row) => (
+                      <tr
+                        key={row.rank}
+                        className={`group transition-colors ${row.athlete === 'You' ? 'bg-gray-50/50 dark:bg-white/5' : 'hover:bg-gray-50/30 dark:hover:bg-white/5'}`}
+                      >
+                        <td className="px-8 py-5">
+                          <div
+                            className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
+                              row.rank === 1
+                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                                : row.rank === 2
+                                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                                  : row.rank === 3
+                                    ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300'
+                                    : 'text-gray-400 dark:text-gray-500'
+                            }`}
+                          >
+                            {row.rank}
+                          </div>
+                        </td>
+                        <td className="px-8 py-5">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold ${row.color}`}
+                            >
+                              {row.initials}
+                            </div>
+                            <span
+                              className={`text-sm font-bold ${row.athlete === 'You' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                            >
+                              {row.athlete}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-8 py-5">
+                          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                            {row.distance}
+                          </span>
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                          <span className="text-sm font-medium text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                            {row.avgPace}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN (Sidebar items) - Spans 4 cols */}
-        <div className="lg:col-span-4 flex flex-col gap-6 h-full min-h-0">
-          {/* Recent Activity List */}
-          <div className="flex-1 bg-card-light dark:bg-card-dark rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm overflow-hidden flex flex-col">
-            <div className="flex justify-between items-center mb-4 flex-shrink-0">
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                Recent Activities
-              </h3>
-              <button className="text-xs text-primary font-medium hover:underline">
+        {/* Right Column: Activity & Quick Actions */}
+        <div className="space-y-8">
+          {/* Club Activity */}
+          <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft p-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Club Activity</h2>
+              <button className="text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                 View All
               </button>
             </div>
 
-            <div className="space-y-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
-              <ActivityItem
-                icon="directions_run"
-                title="Morning Run"
-                sub="Central Park • 5k"
-                date="2h ago"
-              />
-              <ActivityItem
-                icon="pedal_bike"
-                title="Afternoon Ride"
-                sub="Riverside • 20k"
-                date="Yesterday"
-              />
-              <ActivityItem
-                icon="fitness_center"
-                title="Strength Training"
-                sub="Gym • 45m"
-                date="Mon"
-              />
-              <ActivityItem
-                icon="hiking"
-                title="Weekend Hike"
-                sub="Bear Mountain • 12k"
-                date="Sun"
-              />
+            <div className="space-y-8">
+              {activities.map((act) => (
+                <div key={act.id} className="flex gap-4 group">
+                  <div
+                    className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${act.color}`}
+                  >
+                    {act.initials}
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors cursor-pointer">
+                      {act.club}
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                      {act.description}
+                    </p>
+                    <p className="text-[10px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-widest">
+                      {act.time}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Connected Apps Status (Replacing generic Pro box for better utility) */}
-          <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 shadow-lg relative overflow-hidden flex-shrink-0 border border-gray-800">
-            {/* Background decorative */}
-            <div className="absolute top-0 right-0 p-4 opacity-5">
-              <span className="material-symbols-outlined text-9xl text-white">
-                sync
-              </span>
+          {/* Quick Actions */}
+          <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft p-8">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
+              Quick Actions
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200 group">
+                <Icon
+                  name="add_circle"
+                  className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white text-2xl"
+                />
+                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  Manual Entry
+                </span>
+              </button>
+              <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200 group">
+                <Icon
+                  name="share"
+                  className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white text-2xl"
+                />
+                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  Export Data
+                </span>
+              </button>
             </div>
+          </div>
 
-            <h3 className="text-white font-bold text-lg mb-4 relative z-10 flex items-center gap-2">
-              Sync Status
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            </h3>
-
-            <div className="space-y-3 relative z-10">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-[#FC4C02]">STRAVA</span>
-                </div>
-                <span className="material-symbols-outlined text-green-500 text-sm">
-                  check_circle
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-white">NRC</span>
-                </div>
-                <span className="material-symbols-outlined text-green-500 text-sm">
-                  check_circle
-                </span>
-              </div>
+          {/* Pro Insights CTA */}
+          <div className="relative overflow-hidden bg-gray-900 dark:bg-white rounded-3xl p-8 group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 -rotate-12 transition-transform duration-500 group-hover:scale-110 text-white dark:text-gray-900">
+              <Icon name="award" className="text-[160px]" />
+            </div>
+            <div className="relative z-10 space-y-4">
+              <h2 className="text-xl font-bold text-white dark:text-gray-900">Pro Insights</h2>
+              <p className="text-gray-400 dark:text-gray-600 text-sm font-medium leading-relaxed">
+                Unlock advanced analytics and training plans with Strive Pro.
+              </p>
+              <button className="w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-bold py-3.5 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all transform active:scale-95">
+                Upgrade Now
+              </button>
             </div>
           </div>
         </div>
