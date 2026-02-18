@@ -8,7 +8,7 @@ const Textarea = React.forwardRef<
   return (
     <textarea
       className={cn(
-        "border-bca-grey-5 border-opacity-40 text-bca-grey-4 h-15 min-h-15 w-full resize-none rounded-md border px-3 py-[0.69rem] text-sm font-semibold focus:outline-none focus-visible:rounded-md disabled:opacity-50", // Added resize-none to disable resizing
+        "min-h-[100px] w-full resize-none rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/5 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all disabled:opacity-50",
         className,
       )}
       draggable="false"

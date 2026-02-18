@@ -23,13 +23,13 @@ const Field = ({
   return (
     <div
       className={twMerge(
-        "font-outfit relative flex flex-col gap-1",
+        "relative flex flex-col gap-1.5",
         formClassName,
       )}
     >
       <label
         className={twMerge(
-          "text-bca-grey-1 block text-sm font-semibold",
+          "block text-sm font-semibold text-gray-700 dark:text-gray-300",
           className,
         )}
         htmlFor={fieldId}
@@ -38,7 +38,7 @@ const Field = ({
       </label>
       {children}
       {error && (
-        <small className="absolute top-0 right-0 text-xs text-red-500">
+        <small className="absolute top-0 right-0 text-[10px] font-bold uppercase tracking-wider text-red-500">
           {error}
         </small>
       )}

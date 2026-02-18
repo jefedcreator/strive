@@ -13,12 +13,11 @@ const Input = forwardRef<Ref, InputProps>((props, ref) => {
   return (
     <input
       className={twMerge(
-        "border-bca-grey-5 text-bca-grey-4 border-opacity-40 h-12 w-full rounded-md border px-3 py-[0.69rem] text-sm font-semibold focus:outline-none focus-visible:rounded-md disabled:opacity-50",
+        "h-11 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/5 px-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all disabled:opacity-50",
         className,
       )}
       ref={ref}
       {...rest}
-      // role="presentation"
       autoComplete="off"
     />
   );
