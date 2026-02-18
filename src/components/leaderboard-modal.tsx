@@ -6,9 +6,8 @@ import {
 } from '@/backend/validators/leaderboard.validator';
 import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Modal } from '@/primitives/Modal';
-import { type ApiResponse as CustomApiResponse } from '@/types';
+import { type ApiResponse, type ClubListItem } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type Club } from '@prisma/client';
 import * as Switch from '@radix-ui/react-switch';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -55,9 +54,9 @@ export const CreateLeaderboardModal: React.FC<Props> = ({
 
   // Fetch clubs for the dropdown
   const { data: clubs = [] } = useQuery<
-    CustomApiResponse<Club[]>,
+    ApiResponse<ClubListItem[]>,
     Error,
-    Club[]
+    ClubListItem[]
   >({
     queryKey: ['clubs'],
     queryFn: async () => {

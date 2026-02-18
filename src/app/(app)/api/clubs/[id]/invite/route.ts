@@ -32,9 +32,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
       const { id: clubId = '' } = params;
       const { userId: userToInviteId } = request.validatedData!;
 
-
       console.log('userToInviteId', userToInviteId);
-
 
       const club = await db.club.findUnique({
         where: { id: clubId },
@@ -95,7 +93,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           data: {
             userId: userToInviteId,
             clubId,
-            isRequest: true
+            isRequest: true,
           },
         }),
         db.notification.create({
@@ -105,7 +103,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
             type: 'club',
             clubId: clubId,
           },
-        })
+        }),
       ]);
 
       const response: ApiResponse<null> = {

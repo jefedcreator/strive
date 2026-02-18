@@ -67,7 +67,6 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
 
       // Check if the invite/request exists
 
-
       // Add user to leaderboard and remove invite
       await db.$transaction([
         db.userLeaderboard.create({
@@ -82,7 +81,9 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
         db.notification.create({
           data: {
             userId: userToAcceptId,
-            message: invite.isRequest ? `Your request to join the leaderboard ${leaderboard.name} has been accepted!` : `You have been added to the leaderboard ${leaderboard.name}`,
+            message: invite.isRequest
+              ? `Your request to join the leaderboard ${leaderboard.name} has been accepted!`
+              : `You have been added to the leaderboard ${leaderboard.name}`,
             type: 'info',
           },
         }),

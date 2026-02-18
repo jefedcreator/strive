@@ -59,7 +59,6 @@ function parseHttpError(error: any) {
   return error?.response?.message ?? error?.cause ?? error?.toString();
 }
 
-
 const isValidObjectId = (q?: string) => {
   if (!q) {
     return false;
@@ -125,10 +124,14 @@ export {
   genUsername,
   getChildId,
   // getDateRange,
-  hashPassword, HttpException, isFile,
-  isValidObjectId, mongoIdValidator, parseHttpError,
+  hashPassword,
+  HttpException,
+  isFile,
+  isValidObjectId,
+  mongoIdValidator,
+  parseHttpError,
   parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword
+  verifyPassword,
 };

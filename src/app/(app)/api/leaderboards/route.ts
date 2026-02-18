@@ -11,8 +11,15 @@ import {
   type LeaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
 import { db } from '@/server/db';
-import { type ApiResponse, type PaginatedApiResponse } from '@/types';
-import { ConflictException, InternalServerErrorException } from '@/utils/exceptions';
+import {
+  type ApiResponse,
+  type LeaderboardListItem,
+  type PaginatedApiResponse,
+} from '@/types';
+import {
+  ConflictException,
+  InternalServerErrorException,
+} from '@/utils/exceptions';
 import { type Leaderboard, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
@@ -61,7 +68,7 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
 
       const existingLeaderboard = await db.leaderboard.findFirst({
         where: {
-          name: payload.name
+          name: payload.name,
         },
       });
 
@@ -170,7 +177,7 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
 
         const count = data.length;
 
-        const response: PaginatedApiResponse<typeof data> = {
+        const response: PaginatedApiResponse<LeaderboardListItem[]> = {
           status: 200,
           message: 'Leaderboards retrieved successfully',
           data,
@@ -198,7 +205,7 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
         }),
       ]);
 
-      const response: PaginatedApiResponse<typeof data> = {
+      const response: PaginatedApiResponse<LeaderboardListItem[]> = {
         status: 200,
         message: 'Leaderboards retrieved successfully',
         data,

@@ -1,18 +1,8 @@
 import React from 'react';
-import { type Leaderboard, type Club, type User, type UserLeaderboard } from '@prisma/client';
-
-export type LeaderboardWithRelations = Leaderboard & {
-  club: Club | null;
-  entries: (UserLeaderboard & {
-    user: User;
-  })[];
-  _count?: {
-    entries: number;
-  };
-};
+import { type LeaderboardListItem } from '@/types';
 
 export interface LeaderboardCardProps {
-  data: LeaderboardWithRelations;
+  data: LeaderboardListItem;
 }
 
 export const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => {
@@ -21,8 +11,7 @@ export const Icon: React.FC<{ name: string; className?: string }> = ({ name, cla
 
 export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const isCompleted = data.expiryDate ? new Date(data.expiryDate) < new Date() : false;
-  const participantsCount = data.entries.length;
-  const topParticipants = data.entries.slice(0, 3).map(e => e.user);
+  const participantsCount = data._count?.entries ?? 0;
 
   return (
     <div
@@ -72,30 +61,11 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       </div>
 
       <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-        <div className="flex -space-x-2">
-          {topParticipants.map((user) => (
-            <div key={user.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-900 bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                {user.avatar ? (
-                    <img
-                        src={user.avatar}
-                        alt={user.fullname}
-                        className="h-full w-full object-cover"
-                    />
-                ) : (
-                    <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-gray-400">
-                        {user.fullname[0]}
-                    </div>
-                )}
-            </div>
-          ))}
-          {participantsCount > 3 && (
-            <div className="h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-900 bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-500 dark:text-gray-300">
-              +{participantsCount - 3}
-            </div>
-          )}
-          {participantsCount === 0 && (
-              <span className="text-[10px] text-gray-400 italic">No participants</span>
-          )}
+        <div className="flex items-center gap-2">
+          <Icon name="people" className="text-base text-gray-400" />
+          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            {participantsCount} {participantsCount === 1 ? 'participant' : 'participants'}
+          </span>
         </div>
 
         <a

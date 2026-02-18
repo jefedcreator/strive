@@ -44,7 +44,7 @@ export class PuppeteerService {
 
     const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
 
-    const browser = (await (puppeteer).launch({
+    const browser = (await puppeteer.launch({
       headless,
       executablePath: chromePath,
       userDataDir,
@@ -129,7 +129,9 @@ export class PuppeteerService {
 
         const capture = () => {
           if (emailInput && (emailInput as HTMLInputElement).value) {
-            (window as any).sendEmailToNode((emailInput as HTMLInputElement).value.trim());
+            (window as any).sendEmailToNode(
+              (emailInput as HTMLInputElement).value.trim()
+            );
           }
         };
 

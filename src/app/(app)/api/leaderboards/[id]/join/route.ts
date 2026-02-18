@@ -69,11 +69,10 @@ export const POST = withMiddleware<unknown>(
               userId: leaderboard.createdById,
               message: `${user.fullname} joined your leaderboard ${leaderboard.name}`,
               type: 'info',
-              leaderboardId
+              leaderboardId,
             },
-          })
+          }),
         ]);
-
 
         const response: ApiResponse<null> = {
           status: 200,
@@ -109,9 +108,9 @@ export const POST = withMiddleware<unknown>(
               userId: leaderboard.createdById,
               message: `${user.fullname} wants to join your leaderboard ${leaderboard.name}`,
               type: 'leaderboard',
-              leaderboardId
+              leaderboardId,
             },
-          })
+          }),
         ]);
 
         const response: ApiResponse<null> = {

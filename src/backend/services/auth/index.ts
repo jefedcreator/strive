@@ -17,7 +17,6 @@ class AuthService {
     fullname: string | null;
     avatar?: string | null;
   }): Promise<User> {
-
     const user = await prisma.user.findFirst({
       where: {
         email,
@@ -41,7 +40,7 @@ class AuthService {
       });
       return user;
     }
-    
+
     console.log('userData', user);
 
     try {

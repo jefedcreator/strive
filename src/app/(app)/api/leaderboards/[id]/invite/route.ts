@@ -110,7 +110,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           data: {
             userId: userToInviteId,
             leaderboardId,
-            isRequest: true
+            isRequest: true,
           },
         }),
         db.notification.create({
@@ -118,9 +118,9 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
             userId: userToInviteId,
             message: `Request sent to ${userToInvite.fullname} to join the leaderboard ${leaderboard.name}`,
             type: 'leaderboard',
-            leaderboardId
+            leaderboardId,
           },
-        })
+        }),
       ]);
 
       const response: ApiResponse<null> = {

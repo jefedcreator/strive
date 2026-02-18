@@ -9,7 +9,7 @@ import { type ApiResponse } from '@/types';
 import {
   ConflictException,
   InternalServerErrorException,
-  NotFoundException
+  NotFoundException,
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 
@@ -67,7 +67,7 @@ export const POST = withMiddleware<unknown>(
               message: `${user.fullname} joined your club ${club.name}`,
               type: 'info',
             },
-          })
+          }),
         ]);
 
         const response: ApiResponse<null> = {
@@ -105,7 +105,7 @@ export const POST = withMiddleware<unknown>(
               type: 'club',
               clubId,
             },
-          })
+          }),
         ]);
 
         const response: ApiResponse<null> = {

@@ -12,7 +12,11 @@ import {
   type ClubValidatorSchema,
 } from '@/backend/validators/club.validator';
 import { db } from '@/server/db';
-import { type ApiResponse, type PaginatedApiResponse } from '@/types';
+import {
+  type ApiResponse,
+  type ClubListItem,
+  type PaginatedApiResponse,
+} from '@/types';
 import {
   ConflictException,
   InternalServerErrorException,
@@ -176,7 +180,7 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
           members: _count.members,
         }));
 
-        const response: PaginatedApiResponse<typeof mappedData> = {
+        const response: PaginatedApiResponse<ClubListItem[]> = {
           status: 200,
           message: 'Clubs retrieved successfully',
           data: mappedData,
@@ -210,7 +214,7 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
         members: _count.members,
       }));
 
-      const response: PaginatedApiResponse<typeof mappedData> = {
+      const response: PaginatedApiResponse<ClubListItem[]> = {
         status: 200,
         message: 'Clubs retrieved successfully',
         data: mappedData,

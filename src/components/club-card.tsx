@@ -1,9 +1,9 @@
 import React from 'react';
-import { type Club } from '@prisma/client';
+import { type ClubListItem } from '@/types';
 import { StatusBadge, PrivacyBadge } from '@/primitives/badge';
 
 interface ClubCardProps {
-  club: Club;
+  club: ClubListItem;
 }
 
 export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
@@ -48,7 +48,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           <PrivacyBadge privacy={club.isPublic} />
           <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
             <span className="material-symbols-outlined text-sm">group</span>{' '}
-            {club.memberCount.toLocaleString()}
+            {club.members.toLocaleString()}
           </span>
         </div>
 

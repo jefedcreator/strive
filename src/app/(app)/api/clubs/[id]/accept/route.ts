@@ -58,7 +58,6 @@ export const POST = withMiddleware<AcceptInviteValidatorSchema>(
         );
       }
 
-
       // Add user to club and remove invite
       await db.$transaction([
         db.userClub.create({
@@ -78,7 +77,9 @@ export const POST = withMiddleware<AcceptInviteValidatorSchema>(
         db.notification.create({
           data: {
             userId: userToAcceptId,
-            message: invite.isRequest ? `Your request to join the club ${club.name} has been accepted!` : `You have been added to the club ${club.name}`,
+            message: invite.isRequest
+              ? `Your request to join the club ${club.name} has been accepted!`
+              : `You have been added to the club ${club.name}`,
             type: 'info',
             clubId,
           },

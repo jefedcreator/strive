@@ -1,3 +1,5 @@
+import { type Club, type Leaderboard } from '@prisma/client';
+
 export interface PaginationMeta {
   total: number;
   page: number;
@@ -13,7 +15,29 @@ export interface ApiResponse<T = unknown> {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-  PaginationMeta { }
+    PaginationMeta {}
+
+/** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
+export type ClubListItem = Omit<Club, 'memberCount'> & {
+  leaderboards: number;
+  members: number;
+};
+
+/** Partial club included in leaderboard responses */
+export interface LeaderboardClubSummary {
+  id: string;
+  name: string;
+  image: string | null;
+  slug: string;
+}
+
+/** Shape returned by GET /api/leaderboards — Leaderboard with partial club and entry count */
+export type LeaderboardListItem = Leaderboard & {
+  club: LeaderboardClubSummary | null;
+  _count: {
+    entries: number;
+  };
+};
 
 interface ISubMenu {
   name: string;
@@ -29,11 +53,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-  | {
-    1: string;
-    2?: string | undefined;
-  }
-  | undefined;
+    | {
+        1: string;
+        2?: string | undefined;
+      }
+    | undefined;
 };
 
 enum DateRangeFilters {
@@ -61,7 +85,6 @@ interface Activity {
   initials: string;
   color: string;
 }
-
 
 export type { ISubMenu, Option, LeaderboardEntry, Activity };
 export { DateRangeFilters };
