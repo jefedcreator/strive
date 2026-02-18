@@ -46,6 +46,17 @@ export type NotificationWithRelations = Notification & {
   leaderboard?: Leaderboard;
 };
 
+/** Normalized run data returned by both NRC and Strava services */
+export interface RunData {
+  id: string;
+  date: string;
+  distance: number;  // in km
+  duration: number;  // in minutes
+  pace: string;      // in min/km (e.g. "5:30")
+  type: string;      // e.g. "run", "Run", "Trail Run"
+  name: string;      // activity name
+}
+
 interface ISubMenu {
   name: string;
   isActive: boolean;

@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import FilterPanel from './filterpanel';
 import { NotificationCard } from './notification-card';
+import { getNotifications } from '@/server';
 
 interface NotificationsPageClientProps {
   initialData: PaginatedApiResponse<NotificationWithRelations[]>;
@@ -21,11 +22,9 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({ initi
 
   const { data: notificationsResponse } = useQuery<PaginatedApiResponse<NotificationWithRelations[]>>({
     queryKey: ['notifications'],
-    queryFn: async () => {
-      const res = await axios.get<PaginatedApiResponse<NotificationWithRelations[]>>('/api/notifications');
-      return res.data;
-    },
+    queryFn:()=>getNotifications(),
     initialData,
+    select:(data)=>data
   });
 
   const notifications = notificationsResponse.data;

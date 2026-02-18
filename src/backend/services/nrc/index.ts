@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { type RunData } from '@/types';
 
 const CONFIG = {
   // ACTIVITY_LIST_URL: 'https://api.nike.com/sport/v3/me/activities',
@@ -21,15 +22,7 @@ interface Activity {
   summaries: Summary[];
 }
 
-export interface RunData {
-  id: string;
-  date: string;
-  distance: number; // in km
-  duration: number; // in minutes
-  pace: string; // in min/km
-  type: string;
-  name: string;
-}
+
 
 interface ActivitiesResponse {
   activities: Activity[];

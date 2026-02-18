@@ -1,9 +1,11 @@
 import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validator';
+import type { LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
+import type { NotificationQueryValidatorSchema } from '@/backend/validators/notification.validator';
 import type {
-    PaginatedApiResponse,
     ClubListItem,
     LeaderboardListItem,
     NotificationWithRelations,
+    PaginatedApiResponse,
 } from '@/types';
 import { headers } from 'next/headers';
 
@@ -56,7 +58,7 @@ async function getClubs(
 }
 
 async function getLeaderboards(
-    params?: Partial<ClubQueryValidatorSchema>
+    params?: Partial<LeaderboardQueryValidatorSchema>
 ): Promise<PaginatedApiResponse<LeaderboardListItem[]>> {
     try {
         const headersList = await headers();
@@ -95,7 +97,7 @@ async function getLeaderboards(
 }
 
 async function getNotifications(
-    params?: Partial<ClubQueryValidatorSchema>
+    params?: Partial<NotificationQueryValidatorSchema>
 ): Promise<PaginatedApiResponse<NotificationWithRelations[]>> {
     try {
         const headersList = await headers();

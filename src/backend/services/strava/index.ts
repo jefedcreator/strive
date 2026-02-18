@@ -1,3 +1,5 @@
+import { type RunData } from '@/types';
+
 export interface StravaAuthResult {
   auth: {
     accessToken: string;
@@ -107,7 +109,7 @@ export class StravaService {
     accessToken: string,
     page = 1,
     perPage = 30
-  ): Promise<any[]> {
+  ): Promise<RunData[]> {
     const response = await fetch(
       `${this.API_BASE_URL}/athlete/activities?page=${page}&per_page=${perPage}`,
       {
@@ -127,7 +129,7 @@ export class StravaService {
     const activities = await response.json();
 
     // Return normalized data similar to NRC
-    return activities.map((activity: any) => {
+    return activities.map((activity: any): RunData => {
       const distanceKm = activity.distance / 1000;
       const durationMin = activity.moving_time / 60;
 
@@ -156,8 +158,8 @@ export class StravaService {
    * Fetch all activities for the authenticated athlete by iterating through all pages.
    * @param accessToken Valid Strava access token
    */
-  async fetchAllActivities(accessToken: string): Promise<any[]> {
-    let allActivities: any[] = [];
+  async fetchAllActivities(accessToken: string): Promise<RunData[]> {
+    let allActivities: RunData[] = [];
     let page = 1;
     const perPage = 100;
     let hasMore = true;
