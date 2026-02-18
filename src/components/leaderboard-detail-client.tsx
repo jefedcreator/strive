@@ -1,0 +1,238 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
+import axios from 'axios';
+import Link from 'next/link';
+import { LeaderboardModal } from '@/components/leaderboard-modal';
+import { type ApiResponse, type LeaderboardDetail } from '@/types';
+
+const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
+  <span className={`material-symbols-outlined ${className}`}>{name}</span>
+);
+
+interface LeaderboardDetailClientProps {
+  initialData: ApiResponse<LeaderboardDetail | null>;
+}
+
+export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = ({ initialData }) => {
+  const { data: session } = useSession();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const { data: response } = useQuery<ApiResponse<LeaderboardDetail | null>>({
+    queryKey: ['leaderboard', initialData.data?.id],
+    queryFn: async () => {
+      const { data } = await axios.get<ApiResponse<LeaderboardDetail>>(
+        `/api/leaderboards/${initialData.data!.id}`,
+        { headers: { Authorization: `Bearer ${session?.user.token}` } }
+      );
+      return data;
+    },
+    initialData,
+    staleTime: Infinity,
+  });
+
+  const leaderboard = response.data!;
+  const entries = leaderboard.entries ?? [];
+  const isCompleted = leaderboard.expiryDate
+    ? new Date(leaderboard.expiryDate) < new Date()
+    : false;
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Back link */}
+      <Link
+        href="/leaderboards"
+        className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
+      >
+        <Icon name="arrow_back" className="text-base" />
+        Back to Leaderboards
+      </Link>
+
+      {/* Header */}
+      <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="h-14 w-14 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white shrink-0">
+              <Icon name="emoji_events" className="text-2xl" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {leaderboard.name}
+                </h1>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
+                    leaderboard.isPublic
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'
+                  }`}
+                >
+                  {leaderboard.isPublic ? 'Public' : 'Private'}
+                </span>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
+                    isCompleted
+                      ? 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+                      : 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+                  }`}
+                >
+                  {isCompleted ? 'Ended' : 'Active'}
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl">
+                {leaderboard.description || 'No description provided.'}
+              </p>
+              <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+                {leaderboard.club && (
+                  <div className="flex items-center gap-1">
+                    <Icon name="groups" className="text-sm" />
+                    <span>{leaderboard.club.name}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1">
+                  <Icon name="people" className="text-sm" />
+                  <span>
+                    {leaderboard._count.entries}{' '}
+                    {leaderboard._count.entries === 1 ? 'participant' : 'participants'}
+                  </span>
+                </div>
+                {leaderboard.expiryDate && (
+                  <div className="flex items-center gap-1">
+                    <Icon name="calendar_today" className="text-sm" />
+                    <span>
+                      {isCompleted ? 'Ended' : 'Expires'}{' '}
+                      {new Date(leaderboard.expiryDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsEditModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shrink-0"
+          >
+            <Icon name="edit" className="text-base" />
+            Edit
+          </button>
+        </div>
+      </div>
+
+      {/* Entries Table */}
+      <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <h2 className="font-bold text-gray-900 dark:text-white">Rankings</h2>
+          <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+            {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+          </span>
+        </div>
+
+        {entries.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+              <Icon name="leaderboard" className="text-2xl text-gray-400 dark:text-gray-500" />
+            </div>
+            <h3 className="font-bold text-gray-900 dark:text-white mb-1">No entries yet</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+              This leaderboard doesn&apos;t have any participants yet. Share it to get started!
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-[10px] font-bold tracking-wider">
+                <tr>
+                  <th className="px-6 py-3 w-16">Rank</th>
+                  <th className="px-6 py-3">Athlete</th>
+                  <th className="px-6 py-3 text-right">Score</th>
+                  <th className="px-6 py-3 text-right">Last Activity</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {entries.map((entry, index) => {
+                  const rank = index + 1;
+                  return (
+                    <tr
+                      key={entry.id}
+                      className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div
+                          className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
+                            rank === 1
+                              ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                              : rank === 2
+                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                                : rank === 3
+                                  ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300'
+                                  : 'text-gray-400 dark:text-gray-500'
+                          }`}
+                        >
+                          {rank}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden shrink-0">
+                            {entry.user.avatar ? (
+                              <img
+                                src={entry.user.avatar}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center font-bold text-xs text-gray-400 dark:text-gray-500">
+                                {entry.user.fullname?.[0]?.toUpperCase() ?? '?'}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {entry.user.fullname ?? entry.user.username ?? 'Unknown'}
+                            </span>
+                            {entry.user.username && entry.user.fullname && (
+                              <p className="text-xs text-gray-400 dark:text-gray-500">
+                                @{entry.user.username}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="font-bold text-gray-900 dark:text-white tabular-nums">
+                          {entry.score.toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right text-gray-500 dark:text-gray-400 text-xs">
+                        {entry.lastScoreDate
+                          ? new Date(entry.lastScoreDate).toLocaleDateString()
+                          : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <LeaderboardModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        type="edit"
+        data={{
+          name: leaderboard.name,
+          description: leaderboard.description,
+          isPublic: leaderboard.isPublic,
+          isActive: leaderboard.isActive,
+          expiryDate: leaderboard.expiryDate ? new Date(leaderboard.expiryDate) : undefined,
+          clubId: leaderboard.clubId ?? undefined,
+        }}
+      />
+    </div>
+  );
+};

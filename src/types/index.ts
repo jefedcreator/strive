@@ -46,6 +46,37 @@ export type NotificationWithRelations = Notification & {
   leaderboard?: Leaderboard;
 };
 
+/** User fields included in leaderboard entries */
+export interface LeaderboardEntryUser {
+  id: string;
+  fullname: string | null;
+  username: string | null;
+  avatar: string | null;
+  type: string | null;
+}
+
+/** A single entry in a leaderboard */
+export interface LeaderboardEntryRecord {
+  id: string;
+  userId: string;
+  leaderboardId: string;
+  score: number;
+  createdAt: string;
+  updatedAt: string;
+  lastScoreDate: string | null;
+  isActive: boolean;
+  user: LeaderboardEntryUser;
+}
+
+/** Full leaderboard detail returned by GET /api/leaderboards/[id] */
+export type LeaderboardDetail = Leaderboard & {
+  club: LeaderboardClubSummary | null;
+  entries: LeaderboardEntryRecord[];
+  _count: {
+    entries: number;
+  };
+};
+
 /** Normalized run data returned by both NRC and Strava services */
 export interface RunData {
   id: string;

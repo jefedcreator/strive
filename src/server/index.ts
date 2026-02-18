@@ -2,7 +2,9 @@ import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validat
 import type { LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import type { NotificationQueryValidatorSchema } from '@/backend/validators/notification.validator';
 import type {
+    ApiResponse,
     ClubListItem,
+    LeaderboardDetail,
     LeaderboardListItem,
     NotificationWithRelations,
     PaginatedApiResponse,
@@ -93,6 +95,26 @@ async function getLeaderboards(
     }
 }
 
+async function getLeaderboard(id: string): Promise<ApiResponse<LeaderboardDetail | null>> {
+    try {
+        const url = `${baseUrl}/api/leaderboards/${id}`;
+        const res = await fetcher(url);
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch leaderboard: ${res.statusText}`);
+        }
+
+        return res.json() as Promise<ApiResponse<LeaderboardDetail>>;
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        return {
+            status: 500,
+            message: 'Failed to fetch leaderboard',
+            data: null,
+        };
+    }
+}
+
 async function getNotifications(
     params?: Partial<NotificationQueryValidatorSchema>
 ): Promise<PaginatedApiResponse<NotificationWithRelations[]>> {
@@ -129,4 +151,5 @@ async function getNotifications(
     }
 }
 
-export { getClubs, getLeaderboards, getNotifications };
+export { getClubs, getLeaderboards, getLeaderboard, getNotifications };
+
