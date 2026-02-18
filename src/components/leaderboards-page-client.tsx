@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { type PaginatedApiResponse, type LeaderboardListItem } from '@/types';
 import { type User } from '@prisma/client';
+import { getLeaderboards } from '@/server';
 
 const ActivityTable: React.FC<{ activities: Activity[] }> = ({ activities }) => (
     <div className="mt-12 bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-soft">
@@ -73,11 +74,9 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
 
   const { data: leaderboardsResponse } = useQuery<PaginatedApiResponse<LeaderboardListItem[]>>({
     queryKey: ['leaderboards'],
-    queryFn: async () => {
-      const res = await axios.get<PaginatedApiResponse<LeaderboardListItem[]>>('/api/leaderboards');
-      return res.data;
-    },
+     queryFn: () => getLeaderboards(),
     initialData,
+    select: (data) => data,
   });
 
   const leaderboards = leaderboardsResponse.data;

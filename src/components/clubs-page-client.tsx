@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
 import { ClubCard } from '@/components/club-card';
 import { CreateClubModal } from '@/components/club-modal';
 import { Button } from '@/primitives/Button';
+import { getClubs } from '@/server';
+import { type ClubListItem, type PaginatedApiResponse } from '@/types';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { type PaginatedApiResponse, type ClubListItem } from '@/types';
+import React, { useMemo, useState } from 'react';
 
 interface ClubsPageClientProps {
   initialData: PaginatedApiResponse<ClubListItem[]>;
@@ -18,11 +18,9 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
 
   const { data: clubsResponse } = useQuery<PaginatedApiResponse<ClubListItem[]>>({
     queryKey: ['clubs'],
-    queryFn: async () => {
-      const res = await axios.get<PaginatedApiResponse<ClubListItem[]>>('/api/clubs');
-      return res.data;
-    },
+    queryFn: () => getClubs(),
     initialData,
+    select: (data) => data,
   });
 
   const clubs = clubsResponse.data;
