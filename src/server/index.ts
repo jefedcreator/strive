@@ -1,96 +1,136 @@
 import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validator';
 import type {
-  PaginatedApiResponse,
-  ClubListItem,
-  LeaderboardListItem,
+    PaginatedApiResponse,
+    ClubListItem,
+    LeaderboardListItem,
+    NotificationWithRelations,
 } from '@/types';
 import { headers } from 'next/headers';
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
 const fetcher = async (url: string, token: string): Promise<Response> => {
-  return await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
+    return await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+    });
 };
 
 async function getClubs(
-  params?: Partial<ClubQueryValidatorSchema>
+    params?: Partial<ClubQueryValidatorSchema>
 ): Promise<PaginatedApiResponse<ClubListItem[]>> {
-  try {
-    const headersList = await headers();
-    const cookie = headersList.get('cookie') ?? '';
+    try {
+        const headersList = await headers();
+        const cookie = headersList.get('cookie') ?? '';
 
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.set(key, String(value));
+        const searchParams = new URLSearchParams();
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    searchParams.set(key, String(value));
+                }
+            });
         }
-      });
+
+        const url = `${baseUrl}/api/clubs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+
+        const res = await fetcher(url, cookie);
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch clubs: ${res.statusText}`);
+        }
+
+        return res.json() as Promise<PaginatedApiResponse<ClubListItem[]>>;
+    } catch (error) {
+        console.error('Error fetching clubs:', error);
+        return {
+            status: 500,
+            message: 'Failed to fetch clubs',
+            data: [],
+            total: 0,
+            page: 1,
+            size: 1,
+            totalPages: 0,
+        };
     }
-
-    const url = `${baseUrl}/api/clubs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-
-    const res = await fetcher(url, cookie);
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch clubs: ${res.statusText}`);
-    }
-
-    return res.json() as Promise<PaginatedApiResponse<ClubListItem[]>>;
-  } catch (error) {
-    console.error('Error fetching clubs:', error);
-    return {
-      status: 500,
-      message: 'Failed to fetch clubs',
-      data: [],
-      total: 0,
-      page: 1,
-      size: 1,
-      totalPages: 0,
-    };
-  }
 }
 
 async function getLeaderboards(
-  params?: Partial<ClubQueryValidatorSchema>
+    params?: Partial<ClubQueryValidatorSchema>
 ): Promise<PaginatedApiResponse<LeaderboardListItem[]>> {
-  try {
-    const headersList = await headers();
-    const cookie = headersList.get('cookie') ?? '';
+    try {
+        const headersList = await headers();
+        const cookie = headersList.get('cookie') ?? '';
 
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.set(key, String(value));
+        const searchParams = new URLSearchParams();
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    searchParams.set(key, String(value));
+                }
+            });
         }
-      });
+
+        const url = `${baseUrl}/api/leaderboards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+
+        const res = await fetcher(url, cookie);
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch leaderboards: ${res.statusText}`);
+        }
+
+        return res.json() as Promise<PaginatedApiResponse<LeaderboardListItem[]>>;
+    } catch (error) {
+        console.error('Error fetching leaderboards:', error);
+        return {
+            status: 500,
+            message: 'Failed to fetch leaderboards',
+            data: [],
+            total: 0,
+            page: 1,
+            size: 1,
+            totalPages: 0,
+        };
     }
-
-    const url = `${baseUrl}/api/leaderboards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-
-    const res = await fetcher(url, cookie);
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch leaderboards: ${res.statusText}`);
-    }
-
-    return res.json() as Promise<PaginatedApiResponse<LeaderboardListItem[]>>;
-  } catch (error) {
-    console.error('Error fetching leaderboards:', error);
-    return {
-      status: 500,
-      message: 'Failed to fetch leaderboards',
-      data: [],
-      total: 0,
-      page: 1,
-      size: 1,
-      totalPages: 0,
-    };
-  }
 }
 
-export { getClubs, getLeaderboards };
+async function getNotifications(
+    params?: Partial<ClubQueryValidatorSchema>
+): Promise<PaginatedApiResponse<NotificationWithRelations[]>> {
+    try {
+        const headersList = await headers();
+        const cookie = headersList.get('cookie') ?? '';
+
+        const searchParams = new URLSearchParams();
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    searchParams.set(key, String(value));
+                }
+            });
+        }
+
+        const url = `${baseUrl}/api/notifications${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+
+        const res = await fetcher(url, cookie);
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch notifications: ${res.statusText}`);
+        }
+
+        return res.json() as Promise<PaginatedApiResponse<NotificationWithRelations[]>>;
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return {
+            status: 500,
+            message: 'Failed to fetch notifications',
+            data: [],
+            total: 0,
+            page: 1,
+            size: 1,
+            totalPages: 0,
+        };
+    }
+}
+
+export { getClubs, getLeaderboards, getNotifications };

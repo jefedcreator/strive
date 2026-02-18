@@ -85,7 +85,7 @@ export default async function HomePage() {
   }
 
   const { user } = session;
-  const username = (user as User).fullname || user.name || 'Runner';
+  const username = (user as User).fullname ?? user.name ?? 'Runner';
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-10 relative">

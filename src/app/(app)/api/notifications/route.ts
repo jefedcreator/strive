@@ -8,7 +8,7 @@ import {
   type NotificationQueryValidatorSchema,
 } from '@/backend/validators/notification.validator';
 import { db } from '@/server/db';
-import { type PaginatedApiResponse } from '@/types';
+import { type NotificationWithRelations, type PaginatedApiResponse } from '@/types';
 import { InternalServerErrorException } from '@/utils/exceptions';
 import { type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
@@ -59,7 +59,7 @@ export const GET = withMiddleware<unknown, NotificationQueryValidatorSchema>(
 
         const count = data.length;
 
-        const response: PaginatedApiResponse<typeof data> = {
+        const response: PaginatedApiResponse<NotificationWithRelations[]> = {
           status: 200,
           message: 'Notifications retrieved successfully',
           data,
@@ -82,7 +82,7 @@ export const GET = withMiddleware<unknown, NotificationQueryValidatorSchema>(
         }),
       ]);
 
-      const response: PaginatedApiResponse<typeof data> = {
+      const response: PaginatedApiResponse<NotificationWithRelations[]> = {
         status: 200,
         message: 'Notifications retrieved successfully',
         data,

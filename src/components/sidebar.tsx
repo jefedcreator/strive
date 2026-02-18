@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -23,6 +22,7 @@ const platformNavigation: NavItemProps[] = [
   { name: 'Analytics', href: '/analytics', icon: 'analytics' },
   { name: 'Clubs', href: '/clubs', icon: 'groups' },
   { name: 'Leaderboards', href: '/leaderboards', icon: 'emoji_events' },
+  { name: 'Notifications', href: '/notifications', icon: 'notifications' },
 ];
 
 const managementNavigation: NavItemProps[] = [
