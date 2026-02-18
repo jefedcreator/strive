@@ -4,15 +4,16 @@ import { type FilterOption, type NotificationWithRelations, type PaginatedApiRes
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { useSession } from 'next-auth/react';
 import FilterPanel from './filterpanel';
 import { NotificationCard } from './notification-card';
-import { getNotifications } from '@/server';
 
 interface NotificationsPageClientProps {
   initialData: PaginatedApiResponse<NotificationWithRelations[]>;
 }
 
 const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({ initialData }) => {
+  const { data: session } = useSession();
   const [filters, setFilters] = useState<FilterOption[]>([
     { id: 'all', label: 'All Notifications', checked: true },
     { id: 'info', label: 'General Info', checked: false },
@@ -22,7 +23,12 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({ initi
 
   const { data: notificationsResponse } = useQuery<PaginatedApiResponse<NotificationWithRelations[]>>({
     queryKey: ['notifications'],
-    queryFn:()=>getNotifications(),
+    queryFn: async () => {
+      const { data } = await axios.get<PaginatedApiResponse<NotificationWithRelations[]>>('/api/notifications', {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return data;
+    },
     initialData,
     select:(data)=>data
   });

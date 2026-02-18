@@ -15,11 +15,15 @@ declare module 'next-auth' {
     user: {
       id: string;
       username?: string | null;
+      fullname?: string | null;
+      token?: string | null;
     } & DefaultSession['user'];
   }
 
   interface User {
     username?: string | null;
+    fullname?: string | null;
+    token?: string | null;
   }
 }
 
@@ -35,6 +39,7 @@ export const authConfig = {
       name: 'Manual Auth',
       credentials: {
         userId: { label: 'User ID', type: 'text' },
+        token: { label: 'Token', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.userId) return null;
@@ -49,7 +54,9 @@ export const authConfig = {
           id: user.id,
           email: user.email,
           username: user.username,
+          fullname: user.fullname,
           avatar: user.avatar,
+          token: (credentials.token as string) ?? null,
         };
       },
     }),
@@ -65,11 +72,15 @@ export const authConfig = {
         ...session.user,
         id: token.sub!,
         username: token.username as string | null,
+        fullname: token.fullname as string | null,
+        token: token.accessToken as string | null,
       },
     }),
     jwt: ({ token, user }) => {
       if (user) {
         token.username = user.username;
+        token.fullname = user.fullname;
+        token.accessToken = user.token;
       }
       return token;
     },

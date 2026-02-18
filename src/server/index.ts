@@ -7,13 +7,16 @@ import type {
     NotificationWithRelations,
     PaginatedApiResponse,
 } from '@/types';
-import { headers } from 'next/headers';
+import { uncachedAuth } from './auth';
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
-const fetcher = async (url: string, token: string): Promise<Response> => {
+const fetcher = async (url: string): Promise<Response> => {
+    const session = await uncachedAuth();
+    console.log('fetcher session', session?.user);
+
     return await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${session?.user.token}` },
         cache: 'no-store',
     });
 };
@@ -22,9 +25,6 @@ async function getClubs(
     params?: Partial<ClubQueryValidatorSchema>
 ): Promise<PaginatedApiResponse<ClubListItem[]>> {
     try {
-        const headersList = await headers();
-        const cookie = headersList.get('cookie') ?? '';
-
         const searchParams = new URLSearchParams();
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
@@ -36,7 +36,7 @@ async function getClubs(
 
         const url = `${baseUrl}/api/clubs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
-        const res = await fetcher(url, cookie);
+        const res = await fetcher(url);
 
         if (!res.ok) {
             throw new Error(`Failed to fetch clubs: ${res.statusText}`);
@@ -61,9 +61,6 @@ async function getLeaderboards(
     params?: Partial<LeaderboardQueryValidatorSchema>
 ): Promise<PaginatedApiResponse<LeaderboardListItem[]>> {
     try {
-        const headersList = await headers();
-        const cookie = headersList.get('cookie') ?? '';
-
         const searchParams = new URLSearchParams();
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
@@ -75,7 +72,7 @@ async function getLeaderboards(
 
         const url = `${baseUrl}/api/leaderboards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
-        const res = await fetcher(url, cookie);
+        const res = await fetcher(url);
 
         if (!res.ok) {
             throw new Error(`Failed to fetch leaderboards: ${res.statusText}`);
@@ -100,9 +97,6 @@ async function getNotifications(
     params?: Partial<NotificationQueryValidatorSchema>
 ): Promise<PaginatedApiResponse<NotificationWithRelations[]>> {
     try {
-        const headersList = await headers();
-        const cookie = headersList.get('cookie') ?? '';
-
         const searchParams = new URLSearchParams();
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
@@ -114,7 +108,7 @@ async function getNotifications(
 
         const url = `${baseUrl}/api/notifications${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
-        const res = await fetcher(url, cookie);
+        const res = await fetcher(url);
 
         if (!res.ok) {
             throw new Error(`Failed to fetch notifications: ${res.statusText}`);

@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { type PaginatedApiResponse, type LeaderboardListItem } from '@/types';
 import { type User } from '@prisma/client';
-import { getLeaderboards } from '@/server';
+import { useSession } from 'next-auth/react';
 
 const ActivityTable: React.FC<{ activities: Activity[] }> = ({ activities }) => (
     <div className="mt-12 bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-soft">
@@ -69,12 +69,18 @@ interface LeaderboardsPageClientProps {
 }
 
 export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ initialData }) => {
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState('All Active');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: leaderboardsResponse } = useQuery<PaginatedApiResponse<LeaderboardListItem[]>>({
     queryKey: ['leaderboards'],
-     queryFn: () => getLeaderboards(),
+     queryFn: async () => {
+      const { data } = await axios.get<PaginatedApiResponse<LeaderboardListItem[]>>('/api/leaderboards', {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return data;
+    },
     initialData,
     select: (data) => data,
   });

@@ -131,7 +131,7 @@ function LoginPageContent() {
             <div className="p-8 space-y-6">
               {/* Strava Login */}
               <button
-                // onClick={() => console.log("Strava Login")}
+                onClick={handleStravaLogin}
                 className="w-full group relative flex justify-center items-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-[#FC4C02] hover:bg-[#e34402] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FC4C02] transition-all duration-200 shadow-lg"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-4">
@@ -161,7 +161,7 @@ function LoginPageContent() {
               </div>
               {/* Nike Login */}
               <button
-                // onClick={() => console.log("Nike Login")}
+                onClick={handleNRCLogin}
                 className="w-full group relative flex justify-center items-center py-4 px-4 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-xl text-white bg-black hover:bg-gray-900 dark:bg-black dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 shadow-lg"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-4">
