@@ -1,108 +1,71 @@
 'use client';
 
 import {
-  leaderboardValidatorSchema,
   type LeaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
 import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Modal } from '@/primitives/Modal';
-import { type ApiResponse, type ClubListItem } from '@/types';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { type ClubListItem } from '@/types';
 import * as Switch from '@radix-ui/react-switch';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { useSession } from 'next-auth/react';
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+  type UseFormHandleSubmit,
+} from 'react-hook-form';
 
-interface Props {
+export type { LeaderboardValidatorSchema as LeaderboardFormValues };
+
+interface LeaderboardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type:"create"|"edit",
-  data?:LeaderboardValidatorSchema
+  type: 'create' | 'edit';
+  /** react-hook-form register */
+  register: UseFormRegister<LeaderboardValidatorSchema>;
+  /** react-hook-form control (for Controller fields) */
+  control: Control<LeaderboardValidatorSchema>;
+  /** react-hook-form errors */
+  errors: FieldErrors<LeaderboardValidatorSchema>;
+  /** react-hook-form handleSubmit */
+  handleSubmit: UseFormHandleSubmit<LeaderboardValidatorSchema>;
+  /** Called with validated form data */
+  onSubmit: (data: LeaderboardValidatorSchema) => void;
+  /** Whether the mutation is currently in progress */
+  isPending: boolean;
+  /** List of clubs for the dropdown */
+  clubs: ClubListItem[];
+  /** Called when user selects a thumbnail file */
+  onThumbnailChange: (file: File) => void;
 }
 
-export const Icon: React.FC<{ name: string; className?: string }> = ({
+const Icon: React.FC<{ name: string; className?: string }> = ({
   name,
   className = '',
-}) => {
-  return (
-    <span className={`material-symbols-outlined ${className}`}>{name}</span>
-  );
-};
+}) => (
+  <span className={`material-symbols-outlined ${className}`}>{name}</span>
+);
 
-export const LeaderboardModal: React.FC<Props> = ({
-  type,
+export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   isOpen,
   onClose,
-  data
+  type,
+  register,
+  control,
+  errors,
+  handleSubmit,
+  onSubmit,
+  isPending,
+  clubs,
+  onThumbnailChange,
 }) => {
-  const queryClient = useQueryClient();
-  const { data: session } = useSession();
-  const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-    reset,
-    setValue,
-  } = useForm<LeaderboardValidatorSchema>({
-    resolver: zodResolver(leaderboardValidatorSchema),
-    defaultValues: {
-      ...data,
-      isPublic: data?.isPublic?? true,
-      isActive: data?.isActive?? true,
-    },
-  });
-
-  // Fetch clubs for the dropdown
-  const { data: clubs = [] } = useQuery<
-    ApiResponse<ClubListItem[]>,
-    Error,
-    ClubListItem[]
-  >({
-    queryKey: ['clubs'],
-    queryFn: async () => {
-      const res = await axios.get('/api/clubs', {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      });
-      return res.data;
-    },
-    select: (response) => response?.data ?? [],
-  });
-
-  const createLeaderboardMutation = useMutation({
-    mutationFn: async (data: LeaderboardValidatorSchema) => {
-      const res = await axios.post('/api/leaderboards', data, {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      });
-      return res.data;
-    },
-    onSuccess: async () => {
-      toast.success('Leaderboard created successfully!');
-      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
-      onClose();
-      reset();
-    },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to create leaderboard'
-      );
-    },
-  });
-
-  const onSubmit = (data: LeaderboardValidatorSchema) => {
-    createLeaderboardMutation.mutate(data);
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setThumbnail(file);
+      onThumbnailChange(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setThumbnailPreview(reader.result as string);
@@ -113,11 +76,9 @@ export const LeaderboardModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (!isOpen) {
-      reset();
-      setThumbnail(null);
       setThumbnailPreview(null);
     }
-  }, [isOpen, reset]);
+  }, [isOpen]);
 
   return (
     <Modal open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -131,18 +92,18 @@ export const LeaderboardModal: React.FC<Props> = ({
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Fill in the details to {type === 'create' ? 'launch' : 'update'} your leaderboard.
               </p>
-            </div>    
+            </div>
             <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
               <Icon name="close" />
             </Modal.Close>
           </div>
-          
+
           <Form
             onSubmit={handleSubmit(onSubmit)}
             className="overflow-y-auto p-6 space-y-6 flex-1"
           >
-            {/* Thumbnail Upload Placeholder */}
-            <div>
+            {/* Thumbnail Upload */}
+            {/* <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Leaderboard Thumbnail
               </label>
@@ -183,7 +144,7 @@ export const LeaderboardModal: React.FC<Props> = ({
                   onChange={handleFileChange}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Name & Club Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -276,20 +237,17 @@ export const LeaderboardModal: React.FC<Props> = ({
 
           {/* Footer */}
           <div className="flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 p-6 bg-gray-50/50 dark:bg-white/5">
-            <Button
-              variant="secondary"
-              onClick={onClose}
-            >
+            <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
             <Button
               onClick={handleSubmit(onSubmit)}
-              disabled={createLeaderboardMutation.isPending}
+              disabled={isPending}
             >
-              {createLeaderboardMutation.isPending && (
+              {isPending && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
-              {type === 'create' ? 'Create Leaderboard' : 'Edit Leaderboard'}
+              {type === 'create' ? 'Create Leaderboard' : 'Save Changes'}
             </Button>
           </div>
         </Modal.Content>

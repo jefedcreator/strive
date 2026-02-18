@@ -2,6 +2,7 @@ import { LeaderboardsPageClient } from '@/components/leaderboards-page-client';
 import { getLeaderboards } from '@/server';
 import { auth } from '@/server/auth';
 import { redirect } from 'next/navigation';
+import Background from '@/components/background';
 
 
 export default async function LeaderboardsPage() {
@@ -14,5 +15,10 @@ console.log('session',session);
 
   const initialData = await getLeaderboards();
 
-  return <LeaderboardsPageClient initialData={initialData} />;
+  return (
+    <div className="relative">
+      <Background />
+      <LeaderboardsPageClient initialData={initialData} />
+    </div>
+  );
 }

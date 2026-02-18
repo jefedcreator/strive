@@ -2,13 +2,20 @@
 
 import React, { useState } from 'react';
 import { LeaderboardCard, Icon } from '@/components/leaderboard-card';
-import { LeaderboardModal } from '@/components/leaderboard-modal';
+import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
+import { FadeInStagger, FadeInItem } from '@/components/fade-in';
 import { Button } from '@/primitives/Button';
-import { useQuery } from '@tanstack/react-query';
+import {
+  leaderboardValidatorSchema,
+} from '@/backend/validators/leaderboard.validator';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { type PaginatedApiResponse, type LeaderboardListItem } from '@/types';
+import { type ApiResponse, type PaginatedApiResponse, type LeaderboardListItem, type ClubListItem } from '@/types';
 import { type User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const ActivityTable: React.FC<{ activities: Activity[] }> = ({ activities }) => (
     <div className="mt-12 bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-soft">
@@ -70,8 +77,10 @@ interface LeaderboardsPageClientProps {
 
 export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ initialData }) => {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('All Active');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const { data: leaderboardsResponse } = useQuery<PaginatedApiResponse<LeaderboardListItem[]>>({
     queryKey: ['leaderboards'],
@@ -84,6 +93,65 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
     initialData,
     staleTime: Infinity,
   });
+
+  // Fetch clubs for the modal dropdown
+  const { data: clubs = [] } = useQuery<
+    ApiResponse<ClubListItem[]>,
+    Error,
+    ClubListItem[]
+  >({
+    queryKey: ['clubs'],
+    queryFn: async () => {
+      const res = await axios.get('/api/clubs', {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    select: (response) => response?.data ?? [],
+  });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<LeaderboardFormValues>({
+    resolver: zodResolver(leaderboardValidatorSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      isPublic: true,
+      isActive: true,
+      clubId: undefined,
+      expiryDate: undefined,
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (data: LeaderboardFormValues) => {
+      const res = await axios.post('/api/leaderboards', data, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('Leaderboard created successfully!');
+      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      setIsModalOpen(false);
+      reset();
+      setThumbnail(null);
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to create leaderboard'
+      );
+    },
+  });
+
+  const onSubmit = (data: LeaderboardFormValues) => {
+    createMutation.mutate(data);
+  };
 
   const leaderboards = leaderboardsResponse.data;
 
@@ -136,33 +204,45 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {leaderboards.map((board) => (
-          <LeaderboardCard key={board.id} data={board} />
+          <FadeInItem key={board.id}>
+            <LeaderboardCard data={board} />
+          </FadeInItem>
         ))}
         
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-gray-800/50 hover:border-primary dark:hover:border-gray-600 transition-all group min-h-[220px]"
-        >
-          <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mb-3 transition-colors">
-            <Icon name="add" className="text-2xl" />
-          </div>
-          <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">
-            Create New Leaderboard
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
-            Start a new competition with friends or your club.
-          </p>
-        </button>
-      </div>
+        <FadeInItem>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-gray-800/50 hover:border-primary dark:hover:border-gray-600 transition-all group min-h-[220px] w-full h-full"
+          >
+            <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mb-3 transition-colors">
+              <Icon name="add" className="text-2xl" />
+            </div>
+            <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">
+              Create New Leaderboard
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
+              Start a new competition with friends or your club.
+            </p>
+          </button>
+        </FadeInItem>
+      </FadeInStagger>
 
       <ActivityTable activities={recentActivities} />
 
-      <LeaderboardModal 
+      <LeaderboardModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        type='create'
+        type="create"
+        register={register}
+        control={control}
+        errors={errors}
+        handleSubmit={handleSubmit}
+        onSubmit={onSubmit}
+        isPending={createMutation.isPending}
+        clubs={clubs}
+        onThumbnailChange={(file) => setThumbnail(file)}
       />
     </div>
   );

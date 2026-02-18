@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import FilterPanel from './filterpanel';
 import { NotificationCard } from './notification-card';
+import { FadeInStagger, FadeInItem } from '@/components/fade-in';
 
 interface NotificationsPageClientProps {
   initialData: PaginatedApiResponse<NotificationWithRelations[]>;
@@ -97,41 +98,45 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({ initi
           {/* Today Section */}
           {todayNotifications.length > 0 && (
             <>
-              <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800 mb-4">
+              <FadeInItem className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800 mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Today</h3>
                 <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
                   Mark all as read
                 </button>
-              </div>
-              <div className="space-y-4">
+              </FadeInItem>
+              <FadeInStagger className="space-y-4">
                 {todayNotifications.map(notification => (
-                  <NotificationCard key={notification.id} notification={notification} />
+                  <FadeInItem key={notification.id}>
+                    <NotificationCard notification={notification} />
+                  </FadeInItem>
                 ))}
-              </div>
+              </FadeInStagger>
             </>
           )}
 
           {/* Earlier Section */}
           {olderNotifications.length > 0 && (
             <>
-              <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800 mt-8 mb-4">
+              <FadeInItem className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800 mt-8 mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Earlier</h3>
-              </div>
-              <div className="space-y-4">
+              </FadeInItem>
+              <FadeInStagger className="space-y-4">
                 {olderNotifications.map(notification => (
-                  <NotificationCard key={notification.id} notification={notification} />
+                  <FadeInItem key={notification.id}>
+                    <NotificationCard notification={notification} />
+                  </FadeInItem>
                 ))}
-              </div>
+              </FadeInStagger>
             </>
           )}
 
           {todayNotifications.length === 0 && olderNotifications.length === 0 && (
-            <div className="text-center py-12 bg-white dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800">
+            <FadeInItem className="text-center py-12 bg-white dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800">
               <span className="material-symbols-outlined text-4xl mb-2 text-gray-300 dark:text-gray-600">
                 notifications_none
               </span>
               <p className="text-gray-500 dark:text-gray-400">No notifications found for the selected filters.</p>
-            </div>
+            </FadeInItem>
           )}
         </div>
 

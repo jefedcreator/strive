@@ -1,6 +1,7 @@
 import { ClubDetailClient } from '@/components/club-detail-client';
 import { getClub } from '@/server';
 import { notFound } from 'next/navigation';
+import Background from '@/components/background';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -14,5 +15,10 @@ export default async function ClubDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <ClubDetailClient initialData={initialData} />;
+  return (
+    <div className="relative">
+      <Background />
+      <ClubDetailClient initialData={initialData} />
+    </div>
+  );
 }

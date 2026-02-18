@@ -1,6 +1,7 @@
 import { LeaderboardDetailClient } from '@/components/leaderboard-detail-client';
 import { getLeaderboard } from '@/server';
 import { notFound } from 'next/navigation';
+import Background from '@/components/background';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -14,5 +15,10 @@ export default async function LeaderboardDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <LeaderboardDetailClient initialData={initialData} />;
+  return (
+    <div className="relative">
+      <Background />
+      <LeaderboardDetailClient initialData={initialData} />
+    </div>
+  );
 }

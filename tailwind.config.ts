@@ -18,8 +18,8 @@ const config: Config = {
                 "card-dark": "#161B22",
             },
             fontFamily: {
-                display: ["var(--font-inter)", "sans-serif"],
-                body: ["var(--font-inter)", "sans-serif"],
+                display: ["sans-serif"],
+                body: ["sans-serif"],
             },
             boxShadow: {
                 'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
@@ -86,7 +86,7 @@ const config: Config = {
                 exitToLeft: "exitToLeft 250ms ease",
                 exitToRight: "exitToRight 250ms ease",
                 fadeIn: "fadeIn 200ms ease",
-                fadeOut: "fadeOut 200ms ease", 
+                fadeOut: "fadeOut 200ms ease",
             },
         },
     },

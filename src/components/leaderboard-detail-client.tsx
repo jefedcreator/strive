@@ -1,12 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { leaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import axios from 'axios';
 import Link from 'next/link';
-import { LeaderboardModal } from '@/components/leaderboard-modal';
-import { type ApiResponse, type LeaderboardDetail } from '@/types';
+import { toast } from 'sonner';
+import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
+import { type ApiResponse, type LeaderboardDetail, type ClubListItem } from '@/types';
 
 const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -18,7 +22,9 @@ interface LeaderboardDetailClientProps {
 
 export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = ({ initialData }) => {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const { data: response } = useQuery<ApiResponse<LeaderboardDetail | null>>({
     queryKey: ['leaderboard', initialData.data?.id],
@@ -38,6 +44,65 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
   const isCompleted = leaderboard.expiryDate
     ? new Date(leaderboard.expiryDate) < new Date()
     : false;
+
+  // Fetch clubs for the modal dropdown
+  const { data: clubs = [] } = useQuery<
+    ApiResponse<ClubListItem[]>,
+    Error,
+    ClubListItem[]
+  >({
+    queryKey: ['clubs'],
+    queryFn: async () => {
+      const res = await axios.get('/api/clubs', {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    select: (response) => response?.data ?? [],
+  });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<LeaderboardFormValues>({
+    resolver: zodResolver(leaderboardValidatorSchema),
+    defaultValues: {
+      name: leaderboard.name,
+      description: leaderboard.description ?? '',
+      isPublic: leaderboard.isPublic,
+      isActive: leaderboard.isActive,
+      expiryDate: leaderboard.expiryDate ? new Date(leaderboard.expiryDate) : undefined,
+      clubId: leaderboard.clubId ?? undefined,
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: async (data: LeaderboardFormValues) => {
+      const res = await axios.put(`/api/leaderboards/${leaderboard.id}`, data, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('Leaderboard updated successfully!');
+      await queryClient.invalidateQueries({ queryKey: ['leaderboard', leaderboard.id] });
+      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      setIsEditModalOpen(false);
+      setThumbnail(null);
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to update leaderboard'
+      );
+    },
+  });
+
+  const onSubmit = (data: LeaderboardFormValues) => {
+    editMutation.mutate(data);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -224,14 +289,14 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         type="edit"
-        data={{
-          name: leaderboard.name,
-          description: leaderboard.description,
-          isPublic: leaderboard.isPublic,
-          isActive: leaderboard.isActive,
-          expiryDate: leaderboard.expiryDate ? new Date(leaderboard.expiryDate) : undefined,
-          clubId: leaderboard.clubId ?? undefined,
-        }}
+        register={register}
+        control={control}
+        errors={errors}
+        handleSubmit={handleSubmit}
+        onSubmit={onSubmit}
+        isPending={editMutation.isPending}
+        clubs={clubs}
+        onThumbnailChange={(file) => setThumbnail(file)}
       />
     </div>
   );

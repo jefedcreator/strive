@@ -5,6 +5,7 @@ import {
 } from '@/backend/validators/club.validator';
 import { ClubCard } from '@/components/club-card';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
+import { FadeInStagger, FadeInItem } from '@/components/fade-in';
 import { Button } from '@/primitives/Button';
 import { type ClubListItem, type PaginatedApiResponse } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -162,9 +163,13 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
       </div>
 
       {/* Grid Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
+      <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
         {filteredClubs.length > 0 ? (
-          filteredClubs.map((club) => <ClubCard key={club.id} club={club} />)
+          filteredClubs.map((club) => (
+            <FadeInItem key={club.id}>
+              <ClubCard club={club} />
+            </FadeInItem>
+          ))
         ) : (
           <div className="col-span-full py-12 text-center text-gray-500 dark:text-gray-400">
             <span className="material-symbols-outlined text-4xl mb-2 opacity-50">
@@ -173,7 +178,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
             <p>No clubs found matching &quot;{searchTerm}&quot;</p>
           </div>
         )}
-      </div>
+      </FadeInStagger>
 
       <ClubModal
         isOpen={isModalOpen}

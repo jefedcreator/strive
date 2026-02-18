@@ -1,13 +1,15 @@
 import * as React from "react";
-
+import { motion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@/utils";
 
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  HTMLMotionProps<"div">
 >(({ className, ...props }, ref) => (
-  <div
+  <motion.div
     ref={ref}
+    whileHover={{ y: -5, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
+    transition={{ type: "spring", stiffness: 300, damping: 20 }}
     className={cn(
       "bg-card text-card-foreground rounded-lg border shadow-sm",
       className,

@@ -16,8 +16,6 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
 const fetcher = async (url: string): Promise<Response> => {
     const session = await uncachedAuth();
-    console.log('fetcher session', session?.user);
-
     return await fetch(url, {
         headers: { Authorization: `Bearer ${session?.user.token}` },
         cache: 'no-store',

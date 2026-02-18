@@ -1,11 +1,9 @@
-import Background from '@/components/background';
 import { Sidebar } from '@/components/sidebar';
 import { TooltipProvider } from '@/components/tooltip';
 import { TopNav } from '@/components/top-nav';
 import { Provider } from '@/provider';
 import '@/styles/globals.css';
 import { type Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from 'sonner';
 
@@ -15,11 +13,6 @@ export const metadata: Metadata = {
   icons: [{ rel: 'icon', url: '/favicon.ico' }],
 };
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
 
 export default function RootLayout({
   children,
@@ -27,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
@@ -35,7 +28,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative  overflow-x-hidden`}
+        className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden"
       >
         <NextTopLoader showSpinner={false} color="#ff014e" />
         <Provider>

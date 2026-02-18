@@ -1,5 +1,7 @@
 import { twMerge } from "@/utils";
 import * as Dialog from "@radix-ui/react-dialog";
+import { motion } from "framer-motion";
+import * as React from "react";
 
 interface ModalProps {
   open?: boolean;
@@ -18,24 +20,27 @@ const Modal = ({ open, onOpenChange, children }: ModalProps) => {
 interface ModalPortalProps {
   container?: HTMLElement;
   children: React.ReactNode;
-  closeModal?: () => void;
   className?: string;
 }
 
 const ModalPortal = ({
   container,
   children,
-  closeModal,
   className,
 }: ModalPortalProps) => {
   return (
     <Dialog.Portal container={container}>
-      <Dialog.Overlay
-        className={twMerge(
-          "data-[state=open]:animate-overlayShow fixed inset-0",
-          className,
-        )}
-      />
+      <Dialog.Overlay asChild>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className={twMerge(
+            "fixed inset-0 bg-black/50 backdrop-blur-sm z-50",
+            className,
+          )}
+        />
+      </Dialog.Overlay>
       {children}
     </Dialog.Portal>
   );
@@ -45,24 +50,28 @@ const ModalCover = ({ container, children }: ModalPortalProps) => {
   return <Dialog.Portal container={container}>{children}</Dialog.Portal>;
 };
 
-interface ModalTitleProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-const ModalTitle = ({ children, className }: ModalTitleProps) => {
-  return (
-    <div>
-      <Dialog.Title className={className}>{children}</Dialog.Title>
-    </div>
-  );
-};
+const MotionContent = React.forwardRef<
+  React.ElementRef<typeof Dialog.Content>,
+  React.ComponentPropsWithoutRef<typeof Dialog.Content>
+>(({ children, className, ...props }, ref) => (
+  <Dialog.Content ref={ref} asChild {...props}>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  </Dialog.Content>
+));
+MotionContent.displayName = Dialog.Content.displayName;
 
 Modal.Portal = ModalPortal;
 Modal.Cover = ModalCover;
 Modal.Button = Dialog.Trigger;
-Modal.Content = Dialog.Content;
-// Modal.Title = ModalTitle;
+Modal.Content = MotionContent;
 Modal.Title = Dialog.Title;
 Modal.Close = Dialog.Close;
 
