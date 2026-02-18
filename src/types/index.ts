@@ -23,6 +23,28 @@ export type ClubListItem = Omit<Club, 'memberCount'> & {
   members: number;
 };
 
+/** A member record in a club */
+export interface ClubMember {
+  id: string;
+  userId: string;
+  clubId: string;
+  role: string;
+  joinedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+}
+
+/** Full club detail returned by GET /api/clubs/[id] */
+export type ClubDetail = Club & {
+  members: ClubMember[];
+  leaderboards: Leaderboard[];
+  _count: {
+    members: number;
+    leaderboards: number;
+  };
+};
+
 /** Partial club included in leaderboard responses */
 export interface LeaderboardClubSummary {
   id: string;

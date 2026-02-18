@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { type ClubListItem } from '@/types';
 import { StatusBadge, PrivacyBadge } from '@/primitives/badge';
 
@@ -56,14 +57,18 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           <button className="text-sm text-red-600 dark:text-red-400 font-medium hover:text-red-700 transition-colors">
             {isInactive ? 'Delete' : 'Leave'}
           </button>
-          <button className="text-sm font-medium text-primary dark:text-white flex items-center hover:underline group">
+          <Link
+            href={`/clubs/${club.id}`}
+            className="text-sm font-medium text-primary dark:text-white flex items-center hover:underline group"
+          >
             View Details
             <span className="material-symbols-outlined text-sm ml-0.5 transform group-hover:translate-x-0.5 transition-transform">
               arrow_forward
             </span>
-          </button>
+          </Link>
         </div>
       </div>
     </div>
   );
 };
+

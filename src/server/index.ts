@@ -3,6 +3,7 @@ import type { LeaderboardQueryValidatorSchema } from '@/backend/validators/leade
 import type { NotificationQueryValidatorSchema } from '@/backend/validators/notification.validator';
 import type {
     ApiResponse,
+    ClubDetail,
     ClubListItem,
     LeaderboardDetail,
     LeaderboardListItem,
@@ -55,6 +56,26 @@ async function getClubs(
             page: 1,
             size: 1,
             totalPages: 0,
+        };
+    }
+}
+
+async function getClub(id: string): Promise<ApiResponse<ClubDetail | null>> {
+    try {
+        const url = `${baseUrl}/api/clubs/${id}`;
+        const res = await fetcher(url);
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch club: ${res.statusText}`);
+        }
+
+        return res.json() as Promise<ApiResponse<ClubDetail>>;
+    } catch (error) {
+        console.error('Error fetching club:', error);
+        return {
+            status: 500,
+            message: 'Failed to fetch club',
+            data: null,
         };
     }
 }
@@ -151,5 +172,5 @@ async function getNotifications(
     }
 }
 
-export { getClubs, getLeaderboards, getLeaderboard, getNotifications };
+export { getClubs, getClub, getLeaderboards, getLeaderboard, getNotifications };
 
