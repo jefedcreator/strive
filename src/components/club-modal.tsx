@@ -12,6 +12,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
 import { type z } from 'zod';
 
 interface Props {
@@ -32,6 +33,7 @@ type ClubValidatorSchema = z.input<typeof clubValidatorSchema>;
 
 export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
@@ -81,6 +83,7 @@ export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
       const res = await axios.post('/api/clubs', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${session?.user.token}`,
         },
       });
       return res.data;

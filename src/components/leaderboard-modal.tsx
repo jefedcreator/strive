@@ -14,6 +14,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
 
 interface Props {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export const CreateLeaderboardModal: React.FC<Props> = ({
   onClose,
 }) => {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
@@ -60,7 +62,9 @@ export const CreateLeaderboardModal: React.FC<Props> = ({
   >({
     queryKey: ['clubs'],
     queryFn: async () => {
-      const res = await axios.get('/api/clubs');
+      const res = await axios.get('/api/clubs', {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
       return res.data;
     },
     select: (response) => response?.data ?? [],
@@ -68,7 +72,9 @@ export const CreateLeaderboardModal: React.FC<Props> = ({
 
   const createLeaderboardMutation = useMutation({
     mutationFn: async (data: LeaderboardValidatorSchema) => {
-      const res = await axios.post('/api/leaderboards', data);
+      const res = await axios.post('/api/leaderboards', data, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
       return res.data;
     },
     onSuccess: async () => {

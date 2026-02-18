@@ -82,7 +82,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
       return data;
     },
     initialData,
-    select: (data) => data,
+    staleTime: Infinity,
   });
 
   const leaderboards = leaderboardsResponse.data;

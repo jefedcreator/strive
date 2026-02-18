@@ -30,7 +30,7 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({ initi
       return data;
     },
     initialData,
-    select:(data)=>data
+    staleTime: Infinity,
   });
 
   const notifications = notificationsResponse.data;

@@ -29,7 +29,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
       return data;
     },
     initialData,
-    select: (data) => data,
+    staleTime: Infinity,
   });
 
   const clubs = clubsResponse.data;
