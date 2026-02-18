@@ -1,11 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { clubValidatorSchema } from '@/backend/validators/club.validator';
 import axios from 'axios';
 import Link from 'next/link';
-import { ClubModal } from '@/components/club-modal';
+import { toast } from 'sonner';
+import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { type ApiResponse, type ClubDetail } from '@/types';
 
 const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
@@ -18,7 +22,9 @@ interface ClubDetailClientProps {
 
 export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData }) => {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const { data: response } = useQuery<ApiResponse<ClubDetail | null>>({
     queryKey: ['club', initialData.data?.id],
@@ -34,6 +40,73 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
   });
 
   const club = response.data!;
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+    setValue,
+    watch,
+  } = useForm<ClubFormValues>({
+    resolver: zodResolver(clubValidatorSchema),
+    defaultValues: {
+      name: club.name,
+      slug: club.slug,
+      description: club.description ?? '',
+      isPublic: club.isPublic,
+      isActive: club.isActive,
+    },
+  });
+
+  const nameValue = watch('name');
+  useEffect(() => {
+    if (nameValue) {
+      const generatedSlug = nameValue
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      setValue('slug', generatedSlug, { shouldValidate: true });
+    }
+  }, [nameValue, setValue]);
+
+  const editClubMutation = useMutation({
+    mutationFn: async (data: ClubFormValues) => {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('slug', data.slug);
+      if (data.description) formData.append('description', data.description);
+      formData.append('isPublic', String(data.isPublic));
+      formData.append('isActive', String(data.isActive));
+
+      if (thumbnail) {
+        formData.append('image', thumbnail);
+      }
+
+      const res = await axios.put(`/api/clubs/${club.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${session?.user.token}`,
+        },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('Club updated successfully!');
+      await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
+      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      setIsEditModalOpen(false);
+      setThumbnail(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message ?? 'Failed to update club');
+    },
+  });
+
+  const onSubmit = (data: ClubFormValues) => {
+    editClubMutation.mutate(data);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -241,13 +314,14 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         type="edit"
-        data={{
-          name: club.name,
-          slug: club.slug,
-          description: club.description,
-          isPublic: club.isPublic,
-          isActive: club.isActive,
-        }}
+        register={register}
+        control={control}
+        errors={errors}
+        handleSubmit={handleSubmit}
+        onSubmit={onSubmit}
+        isPending={editClubMutation.isPending}
+        existingImageUrl={club.image}
+        onThumbnailChange={(file) => setThumbnail(file)}
       />
     </div>
   );

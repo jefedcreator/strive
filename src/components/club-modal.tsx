@@ -1,117 +1,71 @@
 'use client';
 
-import {
-  clubValidatorSchema,
-} from '@/backend/validators/club.validator';
+import { type clubValidatorSchema } from '@/backend/validators/club.validator';
 import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Modal } from '@/primitives/Modal';
-import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { useSession } from 'next-auth/react';
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+  type UseFormHandleSubmit,
+} from 'react-hook-form';
 import { type z } from 'zod';
 
-interface Props {
+export type ClubFormValues = z.input<typeof clubValidatorSchema>;
+
+interface ClubModalProps {
   isOpen: boolean;
   onClose: () => void;
-    type:"create"|"edit",
-    data?:ClubValidatorSchema
+  type: 'create' | 'edit';
+  /** react-hook-form register */
+  register: UseFormRegister<ClubFormValues>;
+  /** react-hook-form control (for Controller fields) */
+  control: Control<ClubFormValues>;
+  /** react-hook-form errors */
+  errors: FieldErrors<ClubFormValues>;
+  /** react-hook-form handleSubmit */
+  handleSubmit: UseFormHandleSubmit<ClubFormValues>;
+  /** Called with validated form data */
+  onSubmit: (data: ClubFormValues) => void;
+  /** Whether the mutation is currently in progress */
+  isPending: boolean;
+  /** Existing image URL for edit mode preview */
+  existingImageUrl?: string | null;
+  /** Called when user selects a thumbnail file */
+  onThumbnailChange: (file: File) => void;
 }
 
-export const Icon: React.FC<{ name: string; className?: string }> = ({
+const Icon: React.FC<{ name: string; className?: string }> = ({
   name,
   className = '',
+}) => (
+  <span className={`material-symbols-outlined ${className}`}>{name}</span>
+);
+
+export const ClubModal: React.FC<ClubModalProps> = ({
+  isOpen,
+  onClose,
+  type,
+  register,
+  control,
+  errors,
+  handleSubmit,
+  onSubmit,
+  isPending,
+  existingImageUrl,
+  onThumbnailChange,
 }) => {
-  return (
-    <span className={`material-symbols-outlined ${className}`}>{name}</span>
-  );
-};
-
-type ClubValidatorSchema = z.input<typeof clubValidatorSchema>;
-
-export const ClubModal: React.FC<Props> = ({ isOpen, onClose,type,data }) => {
-  const queryClient = useQueryClient();
-  const { data: session } = useSession();
-  const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
-    typeof data?.image === 'string' ? data.image : null
+    existingImageUrl ?? null
   );
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-    reset,
-    setValue,
-    watch,
-  } = useForm<ClubValidatorSchema>({
-    resolver: zodResolver(clubValidatorSchema),
-    defaultValues: {
-      ...data,
-      name: data?.name ?? '',
-      slug: data?.slug ?? '',
-      description: data?.description ?? '',
-      isPublic: data?.isPublic ?? true,
-      isActive: data?.isActive ?? true,
-    },
-  });
-
-  const nameValue = watch('name');
-  useEffect(() => {
-    if (nameValue) {
-      const generatedSlug = nameValue
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      setValue('slug', generatedSlug, { shouldValidate: true });
-    }
-  }, [nameValue, setValue]);
-
-  const createClubMutation = useMutation({
-    mutationFn: async (data: ClubValidatorSchema) => {
-      const formData = new FormData();
-      formData.append('name', data.name);
-      formData.append('slug', data.slug);
-      if (data.description) formData.append('description', data.description);
-      formData.append('isPublic', String(data.isPublic));
-      formData.append('isActive', String(data.isActive));
-
-      if (thumbnail) {
-        formData.append('image', thumbnail);
-      }
-
-      const res = await axios.post('/api/clubs', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${session?.user.token}`,
-        },
-      });
-      return res.data;
-    },
-    onSuccess: async () => {
-      toast.success('Club created successfully!');
-      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
-      onClose();
-      reset();
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message ?? 'Failed to create club');
-    },
-  });
-
-  const onSubmit = (data: ClubValidatorSchema) => {
-    createClubMutation.mutate(data);
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setThumbnail(file);
+      onThumbnailChange(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setThumbnailPreview(reader.result as string);
@@ -122,11 +76,9 @@ export const ClubModal: React.FC<Props> = ({ isOpen, onClose,type,data }) => {
 
   useEffect(() => {
     if (!isOpen) {
-      reset();
-      setThumbnail(null);
-      setThumbnailPreview(null);
+      setThumbnailPreview(existingImageUrl ?? null);
     }
-  }, [isOpen, reset]);
+  }, [isOpen, existingImageUrl]);
 
   return (
     <Modal open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -138,7 +90,9 @@ export const ClubModal: React.FC<Props> = ({ isOpen, onClose,type,data }) => {
                 {type === 'create' ? 'Create New Club' : 'Edit Club'}
               </Modal.Title>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {type === 'create' ? 'Set up a new community for your athletes.' : 'Edit your club.'}
+                {type === 'create'
+                  ? 'Set up a new community for your athletes.'
+                  : 'Edit your club.'}
               </p>
             </div>
             <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
@@ -267,20 +221,17 @@ export const ClubModal: React.FC<Props> = ({ isOpen, onClose,type,data }) => {
 
           {/* Footer */}
           <div className="flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 p-6 bg-gray-50/50 dark:bg-white/5">
-            <Button
-              variant="secondary"
-              onClick={onClose}
-            >
+            <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
             <Button
               onClick={handleSubmit(onSubmit)}
-              disabled={createClubMutation.isPending}
+              disabled={isPending}
             >
-              {createClubMutation.isPending && (
+              {isPending && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
-              {type === 'create' ? 'Create Club' : 'Edit Club'}
+              {type === 'create' ? 'Create Club' : 'Save Changes'}
             </Button>
           </div>
         </Modal.Content>

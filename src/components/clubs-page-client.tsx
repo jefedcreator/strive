@@ -1,24 +1,30 @@
 'use client';
 
+import {
+  clubValidatorSchema,
+} from '@/backend/validators/club.validator';
 import { ClubCard } from '@/components/club-card';
-import { ClubModal } from '@/components/club-modal';
+import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { Button } from '@/primitives/Button';
 import { type ClubListItem, type PaginatedApiResponse } from '@/types';
-import { useQuery } from '@tanstack/react-query';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface ClubsPageClientProps {
   initialData: PaginatedApiResponse<ClubListItem[]>;
 }
 
 export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData }) => {
-    console.log('initialData',initialData);
-    
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const { data: clubsResponse } = useQuery<PaginatedApiResponse<ClubListItem[]>>({
     queryKey: ['clubs'],
@@ -31,6 +37,73 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
     initialData,
     staleTime: Infinity,
   });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+    setValue,
+    watch,
+  } = useForm<ClubFormValues>({
+    resolver: zodResolver(clubValidatorSchema),
+    defaultValues: {
+      name: '',
+      slug: '',
+      description: '',
+      isPublic: true,
+      isActive: true,
+    },
+  });
+
+  const nameValue = watch('name');
+  useEffect(() => {
+    if (nameValue) {
+      const generatedSlug = nameValue
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      setValue('slug', generatedSlug, { shouldValidate: true });
+    }
+  }, [nameValue, setValue]);
+
+  const createClubMutation = useMutation({
+    mutationFn: async (data: ClubFormValues) => {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('slug', data.slug);
+      if (data.description) formData.append('description', data.description);
+      formData.append('isPublic', String(data.isPublic));
+      formData.append('isActive', String(data.isActive));
+
+      if (thumbnail) {
+        formData.append('image', thumbnail);
+      }
+
+      const res = await axios.post('/api/clubs', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${session?.user.token}`,
+        },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('Club created successfully!');
+      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      setIsModalOpen(false);
+      reset();
+      setThumbnail(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message ?? 'Failed to create club');
+    },
+  });
+
+  const onSubmit = (data: ClubFormValues) => {
+    createClubMutation.mutate(data);
+  };
 
   const clubs = clubsResponse.data;
 
@@ -102,10 +175,17 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
         )}
       </div>
 
-      <ClubModal 
+      <ClubModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        type='create'
+        type="create"
+        register={register}
+        control={control}
+        errors={errors}
+        handleSubmit={handleSubmit}
+        onSubmit={onSubmit}
+        isPending={createClubMutation.isPending}
+        onThumbnailChange={(file) => setThumbnail(file)}
       />
     </div>
   );
