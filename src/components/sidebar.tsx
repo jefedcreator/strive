@@ -21,7 +21,7 @@ interface NavItemProps {
 const platformNavigation: NavItemProps[] = [
   { name: 'Dashboard', href: '/', icon: 'dashboard' },
   { name: 'Analytics', href: '/analytics', icon: 'analytics' },
-  { name: 'Clubs', href: '/organization', icon: 'groups' },
+  { name: 'Clubs', href: '/clubs', icon: 'groups' },
   { name: 'Leaderboards', href: '/leaderboards', icon: 'emoji_events' },
 ];
 

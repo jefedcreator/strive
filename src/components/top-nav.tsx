@@ -1,7 +1,4 @@
 'use client';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +7,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
+import { signOut, useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import React from 'react';
 // import { Button } from "@/primitives"; // Using custom buttons elements from home.html for exact match, or adapt.
-import { useTheme } from 'next-themes';
 import ToggleTheme from './toggle-theme';
 
 export function TopNav() {
@@ -20,7 +19,6 @@ export function TopNav() {
   const pathSegments = pathname.split('/').filter(Boolean);
   const { data: session } = useSession();
   const user = session?.user;
-  const { setTheme, theme } = useTheme();
 
   return (
     <header className="h-[70px] flex items-center justify-between px-6 lg:px-8 bg-background-light dark:bg-background-dark sticky top-0 z-30 transition-colors duration-300">
