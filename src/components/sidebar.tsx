@@ -51,7 +51,7 @@ export function Sidebar() {
             className={cn(
               'flex items-center px-4 py-2.5 rounded-lg group transition-colors mb-1',
               isActive
-                ? 'bg-primary-custom text-white dark:bg-white dark:text-black'
+                ? 'bg-primary text-white dark:bg-white dark:text-black'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
               isCollapsed && 'justify-center px-2'
             )}

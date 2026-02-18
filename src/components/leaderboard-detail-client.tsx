@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
 import { type ApiResponse, type LeaderboardDetail, type ClubListItem } from '@/types';
+import { FadeInStagger, FadeInItem } from '@/components/fade-in';
 
 const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -105,18 +106,21 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <FadeInStagger className="flex flex-col h-full">
       {/* Back link */}
-      <Link
-        href="/leaderboards"
-        className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
-      >
-        <Icon name="arrow_back" className="text-base" />
-        Back to Leaderboards
-      </Link>
+      <FadeInItem>
+        <Link
+          href="/leaderboards"
+          className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
+        >
+          <Icon name="arrow_back" className="text-base" />
+          Back to Leaderboards
+        </Link>
+      </FadeInItem>
 
       {/* Header */}
-      <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
+      <FadeInItem>
+        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="h-14 w-14 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white shrink-0">
@@ -185,9 +189,11 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
           </button>
         </div>
       </div>
+      </FadeInItem>
 
       {/* Entries Table */}
-      <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
+      <FadeInItem>
+        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
           <h2 className="font-bold text-gray-900 dark:text-white">Rankings</h2>
           <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
@@ -284,6 +290,7 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
           </div>
         )}
       </div>
+      </FadeInItem>
 
       <LeaderboardModal
         isOpen={isEditModalOpen}
@@ -298,6 +305,6 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
         clubs={clubs}
         onThumbnailChange={(file) => setThumbnail(file)}
       />
-    </div>
+    </FadeInStagger>
   );
 };

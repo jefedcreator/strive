@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { type ApiResponse, type ClubDetail } from '@/types';
+import { FadeInStagger, FadeInItem } from '@/components/fade-in';
 
 const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -109,18 +110,21 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <FadeInStagger className="flex flex-col h-full">
       {/* Back link */}
-      <Link
-        href="/clubs"
-        className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
-      >
-        <Icon name="arrow_back" className="text-base" />
-        Back to Clubs
-      </Link>
+      <FadeInItem>
+        <Link
+          href="/clubs"
+          className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
+        >
+          <Icon name="arrow_back" className="text-base" />
+          Back to Clubs
+        </Link>
+      </FadeInItem>
 
       {/* Header */}
-      <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
+      <FadeInItem>
+        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="flex items-start gap-4">
             {club.image ? (
@@ -193,10 +197,12 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
           </button>
         </div>
       </div>
+      </FadeInItem>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <FadeInStagger className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Leaderboards */}
-        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
+        <FadeInItem>
+          <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <h2 className="font-bold text-gray-900 dark:text-white">Leaderboards</h2>
             <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
@@ -251,10 +257,12 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
               })}
             </div>
           )}
-        </div>
+          </div>
+        </FadeInItem>
 
         {/* Members */}
-        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
+        <FadeInItem>
+          <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <h2 className="font-bold text-gray-900 dark:text-white">Members</h2>
             <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
@@ -307,8 +315,9 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
               ))}
             </div>
           )}
-        </div>
-      </div>
+          </div>
+        </FadeInItem>
+      </FadeInStagger>
 
       <ClubModal
         isOpen={isEditModalOpen}
@@ -323,6 +332,6 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
         existingImageUrl={club.image}
         onThumbnailChange={(file) => setThumbnail(file)}
       />
-    </div>
+    </FadeInStagger>
   );
 };

@@ -56,9 +56,9 @@ const MotionContent = React.forwardRef<
 >(({ children, className, ...props }, ref) => (
   <Dialog.Content ref={ref} asChild {...props}>
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
+      animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+      exit={{ opacity: 0, scale: 0.95, x: "-50%", y: "-50%" }}
       transition={{ duration: 0.2 }}
       className={className}
     >
