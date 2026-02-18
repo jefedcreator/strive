@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { LeaderboardCard, Icon } from '@/components/leaderboard-card';
-import { CreateLeaderboardModal } from '@/components/leaderboard-modal';
+import { LeaderboardModal } from '@/components/leaderboard-modal';
 import { Button } from '@/primitives/Button';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -159,9 +159,10 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
 
       <ActivityTable activities={recentActivities} />
 
-      <CreateLeaderboardModal 
+      <LeaderboardModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        type='create'
       />
     </div>
   );

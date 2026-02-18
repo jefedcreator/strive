@@ -1,7 +1,7 @@
 'use client';
 
 import { ClubCard } from '@/components/club-card';
-import { CreateClubModal } from '@/components/club-modal';
+import { ClubModal } from '@/components/club-modal';
 import { Button } from '@/primitives/Button';
 import { type ClubListItem, type PaginatedApiResponse } from '@/types';
 import { useQuery } from '@tanstack/react-query';
@@ -102,9 +102,10 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
         )}
       </div>
 
-      <CreateClubModal 
+      <ClubModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        type='create'
       />
     </div>
   );

@@ -19,6 +19,8 @@ import { useSession } from 'next-auth/react';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  type:"create"|"edit",
+  data?:LeaderboardValidatorSchema
 }
 
 export const Icon: React.FC<{ name: string; className?: string }> = ({
@@ -30,9 +32,11 @@ export const Icon: React.FC<{ name: string; className?: string }> = ({
   );
 };
 
-export const CreateLeaderboardModal: React.FC<Props> = ({
+export const LeaderboardModal: React.FC<Props> = ({
+  type,
   isOpen,
   onClose,
+  data
 }) => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
@@ -49,8 +53,9 @@ export const CreateLeaderboardModal: React.FC<Props> = ({
   } = useForm<LeaderboardValidatorSchema>({
     resolver: zodResolver(leaderboardValidatorSchema),
     defaultValues: {
-      isPublic: true,
-      isActive: true,
+      ...data,
+      isPublic: data?.isPublic?? true,
+      isActive: data?.isActive?? true,
     },
   });
 
@@ -121,12 +126,12 @@ export const CreateLeaderboardModal: React.FC<Props> = ({
           <div className="flex items-start justify-between border-b border-gray-100 dark:border-gray-800 p-6">
             <div>
               <Modal.Title className="text-xl font-bold text-gray-900 dark:text-white">
-                Create New Leaderboard
+                {type === 'create' ? 'Create New Leaderboard' : 'Edit Leaderboard'}
               </Modal.Title>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Fill in the details to launch your new competition.
+                Fill in the details to {type === 'create' ? 'launch' : 'update'} your leaderboard.
               </p>
-            </div>
+            </div>    
             <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
               <Icon name="close" />
             </Modal.Close>
@@ -284,7 +289,7 @@ export const CreateLeaderboardModal: React.FC<Props> = ({
               {createLeaderboardMutation.isPending && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
-              Create Leaderboard
+              {type === 'create' ? 'Create Leaderboard' : 'Edit Leaderboard'}
             </Button>
           </div>
         </Modal.Content>

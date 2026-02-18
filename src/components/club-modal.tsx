@@ -18,6 +18,8 @@ import { type z } from 'zod';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+    type:"create"|"edit",
+    data?:ClubValidatorSchema
 }
 
 export const Icon: React.FC<{ name: string; className?: string }> = ({
@@ -31,11 +33,13 @@ export const Icon: React.FC<{ name: string; className?: string }> = ({
 
 type ClubValidatorSchema = z.input<typeof clubValidatorSchema>;
 
-export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const ClubModal: React.FC<Props> = ({ isOpen, onClose,type,data }) => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+    typeof data?.image === 'string' ? data.image : null
+  );
 
   const {
     register,
@@ -48,11 +52,12 @@ export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
   } = useForm<ClubValidatorSchema>({
     resolver: zodResolver(clubValidatorSchema),
     defaultValues: {
-      name: '',
-      slug: '',
-      description: '',
-      isPublic: true,
-      isActive: true,
+      ...data,
+      name: data?.name ?? '',
+      slug: data?.slug ?? '',
+      description: data?.description ?? '',
+      isPublic: data?.isPublic ?? true,
+      isActive: data?.isActive ?? true,
     },
   });
 
@@ -130,10 +135,10 @@ export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <div className="flex items-start justify-between border-b border-gray-100 dark:border-gray-800 p-6">
             <div>
               <Modal.Title className="text-xl font-bold text-gray-900 dark:text-white">
-                Create New Club
+                {type === 'create' ? 'Create New Club' : 'Edit Club'}
               </Modal.Title>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Set up a new community for your athletes.
+                  {type === 'create' ? 'Set up a new community for your athletes.' : 'Edit your club.'}
               </p>
             </div>
             <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
@@ -275,7 +280,7 @@ export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
               {createClubMutation.isPending && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
-              Create Club
+              {type === 'create' ? 'Create Club' : 'Edit Club'}
             </Button>
           </div>
         </Modal.Content>
