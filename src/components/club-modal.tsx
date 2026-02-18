@@ -2,9 +2,8 @@
 
 import {
   clubValidatorSchema,
-  type ClubValidatorSchema,
 } from '@/backend/validators/club.validator';
-import { Form, Field, Input, Textarea } from '@/primitives';
+import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Modal } from '@/primitives/Modal';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
@@ -29,8 +28,7 @@ export const Icon: React.FC<{ name: string; className?: string }> = ({
   );
 };
 
-// Define the input type for the form which expects strings for boolean transforms
-type ClubFormInput = z.input<typeof clubValidatorSchema>;
+type ClubValidatorSchema = z.input<typeof clubValidatorSchema>;
 
 export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const queryClient = useQueryClient();
@@ -45,18 +43,17 @@ export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
     reset,
     setValue,
     watch,
-  } = useForm<ClubFormInput>({
+  } = useForm<ClubValidatorSchema>({
     resolver: zodResolver(clubValidatorSchema),
     defaultValues: {
       name: '',
       slug: '',
       description: '',
-      isPublic: 'true',
-      isActive: 'true',
+      isPublic: true,
+      isActive: true,
     },
   });
 
-  // Auto-generate slug from name
   const nameValue = watch('name');
   useEffect(() => {
     if (nameValue) {
@@ -99,9 +96,8 @@ export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
     },
   });
 
-  const onSubmit = (data: any) => {
-    // zodResolver returns the transformed data (output type)
-    createClubMutation.mutate(data as ClubValidatorSchema);
+  const onSubmit = (data: ClubValidatorSchema) => {
+    createClubMutation.mutate(data);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -246,10 +242,8 @@ export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   control={control}
                   render={({ field }) => (
                     <Switch.Root
-                      checked={field.value === 'true'}
-                      onCheckedChange={(checked) =>
-                        field.onChange(String(checked))
-                      }
+                      checked={Boolean(field.value)}
+                      onCheckedChange={field.onChange}
                       className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full relative data-[state=checked]:bg-primary outline-none cursor-pointer transition-colors"
                     >
                       <Switch.Thumb className="block w-4 h-4 bg-white rounded-full transition-transform duration-100 translate-x-1 will-change-transform data-[state=checked]:translate-x-6" />
@@ -265,23 +259,21 @@ export const CreateClubModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
           {/* Footer */}
           <div className="flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 p-6 bg-gray-50/50 dark:bg-white/5">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
               onClick={onClose}
-              className="rounded-xl px-6 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSubmit(onSubmit)}
               disabled={createClubMutation.isPending}
-              className="rounded-xl bg-primary hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-primary px-6 py-2.5 text-sm font-bold shadow-soft transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createClubMutation.isPending && (
-                <div className="w-4 h-4 border-2 border-white dark:border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
               Create Club
-            </button>
+            </Button>
           </div>
         </Modal.Content>
       </Modal.Portal>

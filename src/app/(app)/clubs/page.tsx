@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { type Club } from '@prisma/client';
 import { ClubCard } from '@/components/club-card';
 import { CreateClubModal } from '@/components/club-modal';
+import { Button } from '@/primitives/Button';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { type PaginatedApiResponse } from '@/types';
@@ -85,13 +86,13 @@ const ClubsPage: React.FC = () => {
             </p>
           </div>
 
-          <button 
+          <Button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-primary hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-primary px-4 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 shadow-soft transition-all w-full sm:w-auto"
+            className="w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-lg">add</span>
             Create Club
-          </button>
+          </Button>
         </div>
       </div>
 

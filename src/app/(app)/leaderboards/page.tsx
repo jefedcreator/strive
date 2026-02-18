@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { type User, type UserType } from '@prisma/client';
 import { LeaderboardCard, type LeaderboardWithRelations, Icon } from '@/components/leaderboard-card';
 import { CreateLeaderboardModal } from '@/components/leaderboard-modal';
+import { Button } from '@/primitives/Button';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { type CustomApiResponse } from '@/types';
@@ -93,7 +94,7 @@ const ActivityTable: React.FC<{ activities: Activity[] }> = ({ activities }) => 
     <div className="mt-12 bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-soft">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
             <h3 className="font-bold text-gray-900 dark:text-white">Recent Activity</h3>
-            <button className="text-xs font-semibold text-primary dark:text-white hover:underline">View All</button>
+            <Button variant="ghost" size="sm">View All</Button>
         </div>
         <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -179,13 +180,13 @@ const LeaderboardPage = () => {
           </p>
         </div>
         <div>
-          <button 
+          <Button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-primary hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-primary px-5 py-2.5 rounded-lg text-sm font-bold flex items-center shadow-soft transition-all w-full sm:w-auto justify-center"
+            className="w-full sm:w-auto"
           >
             <Icon name="add" className="text-sm mr-2" />
             Create Leaderboard
-          </button>
+          </Button>
         </div>
       </div>
 

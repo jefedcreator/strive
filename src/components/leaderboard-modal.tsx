@@ -4,7 +4,7 @@ import {
   leaderboardValidatorSchema,
   type LeaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
-import { Form, Field, Input, Textarea } from '@/primitives';
+import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Modal } from '@/primitives/Modal';
 import { type ApiResponse as CustomApiResponse } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -266,23 +266,21 @@ export const CreateLeaderboardModal: React.FC<Props> = ({
 
           {/* Footer */}
           <div className="flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 p-6 bg-gray-50/50 dark:bg-white/5">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
               onClick={onClose}
-              className="rounded-xl px-6 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSubmit(onSubmit)}
               disabled={createLeaderboardMutation.isPending}
-              className="rounded-xl bg-primary hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-primary px-6 py-2.5 text-sm font-bold shadow-soft transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createLeaderboardMutation.isPending && (
-                <div className="w-4 h-4 border-2 border-white dark:border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
               Create Leaderboard
-            </button>
+            </Button>
           </div>
         </Modal.Content>
       </Modal.Portal>

@@ -18,8 +18,9 @@ export const clubValidatorSchema = z
       .nullable()
       .optional(),
     image: z
-      .any()
-      .refine((file) => file instanceof File, 'image must be a valid file')
+      .custom<File>((file) => file instanceof File, {
+        message: 'image must be a valid file',
+      })
       .nullable()
       .optional(),
     slug: z
@@ -34,15 +35,11 @@ export const clubValidatorSchema = z
         'slug must only contain lowercase letters, numbers, and hyphens'
       ),
     isPublic: z
-      .string()
-      .optional()
-      .transform((val) => val === 'true')
-      .pipe(z.boolean().default(false)),
+      .union([z.boolean(), z.string().transform((val) => val === 'true')])
+      .default(true),
     isActive: z
-      .string()
-      .optional()
-      .transform((val) => val === 'true')
-      .pipe(z.boolean().default(true)),
+      .union([z.boolean(), z.string().transform((val) => val === 'true')])
+      .default(true),
   })
   .strict();
 
@@ -52,22 +49,16 @@ export const clubQueryValidatorSchema = baseQueryValidatorSchema
   .partial()
   .extend({
     isPublic: z
-      .string()
-      .transform((val) => val === 'true')
-      .pipe(
-        z.boolean({
-          invalid_type_error: 'isPublic must be a boolean value',
-        })
-      )
+      .preprocess((val) => {
+        if (typeof val === 'string') return val === 'true';
+        return val;
+      }, z.boolean())
       .optional(),
     isActive: z
-      .string()
-      .transform((val) => val === 'true')
-      .pipe(
-        z.boolean({
-          invalid_type_error: 'isActive must be a boolean value',
-        })
-      )
+      .preprocess((val) => {
+        if (typeof val === 'string') return val === 'true';
+        return val;
+      }, z.boolean())
       .optional(),
     createdById: mongoIdValidator.optional(),
   })
