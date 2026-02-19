@@ -125,6 +125,9 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
         },
       };
 
+      console.log('payload', payload);
+
+
       if (payload.isActive !== undefined) {
         where.isActive = payload.isActive;
       }

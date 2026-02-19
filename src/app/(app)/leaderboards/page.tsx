@@ -1,34 +1,30 @@
 import { LeaderboardsPageClient } from '@/components/leaderboards-page-client';
 import { getLeaderboards } from '@/server';
 import { auth } from '@/server/auth';
-import { redirect } from 'next/navigation';
 import Background from '@/components/background';
+import { loadLeaderboardSearchParams } from '@/components/leaderboards/searchparams';
+import type { SearchParams } from 'nuqs/server';
 
 interface PageProps {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<SearchParams>;
 }
 
 export default async function LeaderboardsPage({ searchParams }: PageProps) {
   const session = await auth();
+  const { isActive, isPublic } = loadLeaderboardSearchParams.parse(await searchParams);
 
-  // if (!session?.user) {
-  //   redirect('/');
-  // }
+  const initialData = await getLeaderboards({
+    isActive: isActive ?? undefined,
+    isPublic: isPublic ?? undefined,
+  });
 
-  const { tab } = await searchParams;
-
-  const params: Record<string, any> = {};
-  if (tab === 'active') params.isActive = true;
-  else if (tab === 'inactive') params.isActive = false;
-  else if (tab === 'public') params.isPublic = true;
-  else if (tab === 'private') params.isPublic = false;
-
-  const initialData = await getLeaderboards(params);
+  console.log('initialData',initialData);
+  
 
   return (
     <div className="relative">
       <Background />
-      <LeaderboardsPageClient initialData={initialData} />
+      <LeaderboardsPageClient currentFilters={{ isActive, isPublic }} initialData={initialData} />
     </div>
   );
 }
