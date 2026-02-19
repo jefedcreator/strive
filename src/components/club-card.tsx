@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '@/primitives/Modal';
 import { Button } from '@/primitives/Button';
+import { useRouter } from 'next/navigation';
 
 interface ClubCardProps {
   club: ClubListItem;
@@ -25,6 +26,7 @@ const Icon: React.FC<{ name: string; className?: string }> = ({ name, className 
 
 export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   const { data: session } = useSession();
+    const router = useRouter();
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId ? club.createdById === currentUserId : false;
   const isInactive = !club.isActive;
@@ -86,7 +88,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
     },
     onSuccess: async () => {
       toast.success('Club deleted successfully!');
-      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      router.refresh();
       setIsDeleteModalOpen(false);
     },
     onError: (error: any) => {
@@ -161,6 +163,15 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
                 Invite
               </DropdownMenuItem>
             )}
+                {isCreator && (
+                          <DropdownMenuItem
+                            onClick={() => setIsDeleteModalOpen(true)}
+                            className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
+                          >
+                            <Icon name="delete" className="text-base" />
+                            Delete
+                          </DropdownMenuItem>
+                        )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

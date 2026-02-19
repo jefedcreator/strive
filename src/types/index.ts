@@ -4,6 +4,7 @@ import {
   type Notification,
   type User,
 } from '@prisma/client';
+import type { SearchParams } from 'nuqs/server';
 
 export interface PaginationMeta {
   total: number;
@@ -20,7 +21,7 @@ export interface ApiResponse<T = unknown> {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-    PaginationMeta {}
+  PaginationMeta { }
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -129,11 +130,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-    | {
-        1: string;
-        2?: string | undefined;
-      }
-    | undefined;
+  | {
+    1: string;
+    2?: string | undefined;
+  }
+  | undefined;
 };
 
 enum DateRangeFilters {
@@ -168,5 +169,9 @@ interface FilterOption {
   checked: boolean;
 }
 
-export type { ISubMenu, Option, LeaderboardEntry, Activity, FilterOption };
+interface PageProps {
+  searchParams: Promise<SearchParams>;
+}
+
+export type { ISubMenu, Option, LeaderboardEntry, Activity, FilterOption, PageProps };
 export { DateRangeFilters };

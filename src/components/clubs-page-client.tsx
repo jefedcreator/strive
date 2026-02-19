@@ -5,39 +5,49 @@ import {
 } from '@/backend/validators/club.validator';
 import { ClubCard } from '@/components/club-card';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
-import { FadeInStagger, FadeInItem } from '@/components/fade-in';
+import { FadeInItem, FadeInStagger } from '@/components/fade-in';
 import { Button } from '@/primitives/Button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import { type ClubListItem, type PaginatedApiResponse } from '@/types';
+import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useQueryStates } from 'nuqs';
 import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface ClubsPageClientProps {
   initialData: PaginatedApiResponse<ClubListItem[]>;
+    currentFilters: {
+    isActive: boolean | null;
+    isPublic: boolean | null;
+  };
 }
 
-export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData }) => {
+export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,currentFilters }) => {
   const { data: session } = useSession();
-  const queryClient = useQueryClient();
+    const router = useRouter();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [{ isActive, isPublic }, setStates] = useQueryStates(parseParams, { shallow: false });
 
-  const { data: clubsResponse } = useQuery<PaginatedApiResponse<ClubListItem[]>>({
-    queryKey: ['clubs'],
-    queryFn: async () => {
-      const { data } = await axios.get<PaginatedApiResponse<ClubListItem[]>>('/api/clubs', {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      });
-      return data;
-    },
-    initialData,
-    staleTime: Infinity,
-  });
+    const tab = React.useMemo(() => {
+      if (isActive === true) return 'active';
+      if (isActive === false) return 'inactive';
+      if (isPublic === true) return 'public';
+      if (isPublic === false) return 'private';
+      return 'all';
+    }, [isActive, isPublic]);
+
+      const isLoading = 
+    (isActive !== currentFilters.isActive) || 
+    (isPublic !== currentFilters.isPublic);
 
   const {
     register,
@@ -93,7 +103,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
     },
     onSuccess: async () => {
       toast.success('Club created successfully!');
-      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+            router.refresh();
       setIsModalOpen(false);
       reset();
       setThumbnail(null);
@@ -107,7 +117,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
     createClubMutation.mutate(data);
   };
 
-  const clubs = clubsResponse.data;
+  const clubs = initialData.data;
 
   const filteredClubs = useMemo(() => {
     return clubs.filter(
@@ -164,22 +174,64 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
       </div>
 
       {/* Grid Content */}
-      <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
-        {filteredClubs.length > 0 ? (
-          filteredClubs.map((club) => (
-            <FadeInItem key={club.id}>
-              <ClubCard club={club} />
-            </FadeInItem>
-          ))
-        ) : (
-          <div className="col-span-full py-12 text-center text-gray-500 dark:text-gray-400">
-            <span className="material-symbols-outlined text-4xl mb-2 opacity-50">
-              search_off
-            </span>
-            <p>No clubs found matching &quot;{searchTerm}&quot;</p>
-          </div>
-        )}
-      </FadeInStagger>
+      <Tabs 
+        value={tab} 
+        className="flex flex-col" 
+        onValueChange={(value) => {
+          if (value === 'active') setStates({ isActive: true, isPublic: null });
+          else if (value === 'inactive') setStates({ isActive: false, isPublic: null });
+          else if (value === 'public') setStates({ isPublic: true, isActive: null });
+          else if (value === 'private') setStates({ isPublic: false, isActive: null });
+          else setStates({ isActive: null, isPublic: null });
+        }}
+      >
+        <TabsList className="mb-8">
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="inactive">Inactive</TabsTrigger>
+          <TabsTrigger value="public">Public</TabsTrigger>
+          <TabsTrigger value="private">Private</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={tab} className="mt-6 outline-none">
+          {isLoading ? (
+             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
+               {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 h-[220px] animate-pulse">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700" />
+                      <div className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 w-20 h-6" />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                    </div>
+                  </div>
+               ))}
+            </div>
+          ) : (filteredClubs.length > 0) ? (
+            <FadeInStagger key={`${tab}-${filteredClubs.length}`} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
+              {filteredClubs.map((club) => (
+                <FadeInItem key={club.id}>
+                  <ClubCard club={club} />
+                </FadeInItem>
+              ))}
+            </FadeInStagger>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <span className="material-symbols-outlined text-4xl mb-2 opacity-50 text-gray-400 dark:text-gray-500">
+                search_off
+              </span>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-1">
+                No clubs found
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+                 Try adjusting your filters or search term.
+              </p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       <ClubModal
         isOpen={isModalOpen}

@@ -4,7 +4,10 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { generateUsername } from 'unique-username-generator';
 import z from 'zod';
-
+import {
+  createSearchParamsCache,
+  parseAsBoolean
+} from 'nuqs/server'
 import { HttpException } from './exceptions';
 
 const cn = (...inputs: ClassValue[]) => {
@@ -116,6 +119,16 @@ const mongoIdValidator = z
   .string()
   .regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ID format');
 
+
+
+const parseParams = {
+  isActive: parseAsBoolean,
+  isPublic: parseAsBoolean,
+}
+
+const loadParams = createSearchParamsCache(parseParams)
+
+
 export {
   cn,
   convertBase64ToFile,
@@ -133,5 +146,5 @@ export {
   parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword,
+  verifyPassword, parseParams, loadParams
 };

@@ -1,24 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
-import { LeaderboardCard, Icon } from '@/components/leaderboard-card';
-import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
-import { FadeInStagger, FadeInItem } from '@/components/fade-in';
-import { Button } from '@/primitives/Button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/primitives/Tabs';
 import {
   leaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
+import { FadeInItem, FadeInStagger } from '@/components/fade-in';
+import { Icon, LeaderboardCard } from '@/components/leaderboard-card';
+import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
+import { Button } from '@/primitives/Button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
+import { type ApiResponse, type ClubListItem, type LeaderboardListItem, type PaginatedApiResponse } from '@/types';
+import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-import { type ApiResponse, type PaginatedApiResponse, type LeaderboardListItem, type ClubListItem } from '@/types';
 import { type User } from '@prisma/client';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useQueryStates } from 'nuqs';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { useQueryState, useQueryStates } from 'nuqs';
-import { leaderboardSearchParams } from './leaderboards/searchparams';
 
 const ActivityTable: React.FC<{ activities: Activity[] }> = ({ activities }) => (
     <div className="mt-12 bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-soft">
@@ -84,9 +85,10 @@ interface LeaderboardsPageClientProps {
 
 export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ initialData, currentFilters }) => {
   const { data: session } = useSession();
-  const queryClient = useQueryClient();
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [{ isActive, isPublic }, setStates] = useQueryStates(leaderboardSearchParams, { shallow: false });
+  const [{ isActive, isPublic }, setStates] = useQueryStates(parseParams, { shallow: false });
 
   const tab = React.useMemo(() => {
     if (isActive === true) return 'active';
@@ -103,23 +105,18 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
     (isActive !== currentFilters.isActive) || 
     (isPublic !== currentFilters.isPublic);
 
-  const { data: leaderboardsResponse } = useQuery<PaginatedApiResponse<LeaderboardListItem[]>>({
-    queryKey: ['leaderboards', isActive, isPublic],
-    queryFn: async () => {
-      const params: Record<string, any> = {};
-      if (isActive !== null) params.isActive = String(isActive);
-      if (isPublic !== null) params.isPublic = String(isPublic);
-      
-      const res = await axios.get('/api/leaderboards', {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-        params,
-      });
-      return res.data;
-    },
-    initialData: isLoading ? undefined : initialData,
-    enabled: !isLoading,
-    staleTime: Infinity,
-  });
+  // We rely on server-side data (initialData) passed via props.
+  // When tabs change, the URL updates (nuqs), triggering a server re-render.
+  // The isLoading state handles the visual transition until new props arrive.
+  const leaderboards = initialData.data;
+
+  const filteredLeaderboards = React.useMemo(() => {
+    return leaderboards.filter(
+      (board) =>
+        board.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (board.description && board.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [leaderboards, searchTerm]);
 
   // Fetch clubs for the modal dropdown
   const { data: clubs = [] } = useQuery<
@@ -164,7 +161,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
     },
     onSuccess: async () => {
       toast.success('Leaderboard created successfully!');
-      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      router.refresh();
       setIsModalOpen(false);
       reset();
     },
@@ -178,8 +175,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
   const onSubmit = (data: LeaderboardFormValues) => {
     createMutation.mutate(data);
   };
-
-  const leaderboards = leaderboardsResponse?.data ?? [];
 
   const recentActivities: Activity[] = [];
 
@@ -206,6 +201,20 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
         </div>
       </div>
 
+      {/* Filter Bar */}
+      <div className="relative mb-6">
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+          <span className="material-symbols-outlined text-xl">search</span>
+        </span>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card-dark text-sm focus:ring-2 focus:ring-primary dark:focus:ring-white focus:border-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 shadow-sm transition-shadow"
+          placeholder="Search your leaderboards..."
+        />
+      </div>
+
       <Tabs 
         value={tab} 
         className="flex flex-col" 
@@ -214,11 +223,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
           else if (value === 'inactive') setStates({ isActive: false, isPublic: null });
           else if (value === 'public') setStates({ isPublic: true, isActive: null });
           else if (value === 'private') setStates({ isPublic: false, isActive: null });
-          else if (value === 'invitations') {
-             // 'invitations' clears URL params, inherently resetting to 'all' view logic for now
-             // pending user decision on how to persist 'invitations' state (e.g. ?type=invitations)
-             setStates({ isActive: null, isPublic: null });
-          }
           else setStates({ isActive: null, isPublic: null });
         }}
       >
@@ -228,12 +232,12 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
           <TabsTrigger value="inactive">Inactive</TabsTrigger>
           <TabsTrigger value="public">Public</TabsTrigger>
           <TabsTrigger value="private">Private</TabsTrigger>
-          <TabsTrigger value="invitations">
+          {/* <TabsTrigger value="invitations">
             Invitations
             <span className="ml-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-0.5 px-2 rounded-full text-[10px] font-bold">
               2
             </span>
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 outline-none">
@@ -252,9 +256,9 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
                   </div>
                ))}
             </div>
-          ) : (!isLoading && leaderboards.length > 0) ? (
-            <FadeInStagger key={`${tab}-${leaderboards.length}`} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 container-query">
-              {leaderboards.map((board) => (
+          ) : (!isLoading && filteredLeaderboards.length > 0) ? (
+            <FadeInStagger key={`${tab}-${filteredLeaderboards.length}`} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 container-query">
+              {filteredLeaderboards.map((board) => (
                 <FadeInItem key={board.id}>
                   <LeaderboardCard data={board} />
                 </FadeInItem>
@@ -277,19 +281,19 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
                 </button>
               </FadeInItem>
             </FadeInStagger>
-          ) : (
+           ) : (!isLoading) ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-                <Icon name="emoji_events" className="text-2xl text-gray-400 dark:text-gray-500" />
-              </div>
+              <span className="material-symbols-outlined text-4xl mb-2 opacity-50 text-gray-400 dark:text-gray-500">
+                search_off
+              </span>
               <h3 className="font-bold text-gray-900 dark:text-white mb-1">
                 No leaderboards found
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-                Try adjusting your filters or create a new leaderboard.
+                 Try adjusting your filters or search term.
               </p>
             </div>
-          )}
+          ) : null}
         </TabsContent>
       </Tabs>
 

@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '@/primitives/Modal';
 import { Button } from '@/primitives/Button';
+import { useRouter } from 'next/navigation';
 
 export interface LeaderboardCardProps {
   data: LeaderboardListItem;
@@ -25,13 +26,13 @@ export const Icon: React.FC<{ name: string; className?: string }> = ({ name, cla
 
 export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const { data: session } = useSession();
+    const router = useRouter();
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId ? data.createdById === currentUserId : false;
   const isCompleted = data.expiryDate ? new Date(data.expiryDate) < new Date() : false;
   const participantsCount = data._count?.entries ?? 0;
   const queryClient = useQueryClient();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-console.log('leaderboard data',data);
 
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -54,7 +55,6 @@ console.log('leaderboard data',data);
       );
     },
   });
-
 
     const inviteMutation = useMutation({
     mutationFn: async () => {
@@ -88,8 +88,9 @@ console.log('leaderboard data',data);
     },
     onSuccess: async () => {
       toast.success('Leaderboard deleted successfully!');
-      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      // await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
       setIsDeleteModalOpen(false);
+            router.refresh();
     },
     onError: (error: any) => {
       toast.error(
