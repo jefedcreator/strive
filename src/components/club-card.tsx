@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { type ClubListItem } from '@/types';
+import { type ApiError, type ClubListItem } from '@/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,6 +16,7 @@ import { Modal } from '@/primitives/Modal';
 import { Button } from '@/primitives/Button';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface ClubCardProps {
   club: ClubListItem;
@@ -52,7 +53,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
       );
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message ?? 'Failed to join club');
     },
   });
@@ -70,13 +71,14 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
       toast.promise(promise, {
         loading: 'Generating invite...',
         success: (data) => {
-          handleInvite(data.data.data.id);
+          handleInvite(String(data.data.data.id));
           return club.isPublic
             ? 'Successfully invited to the club!'
             : 'Join request sent. Waiting for owner approval.';
         },
-        error: (error: any) =>
-          error.response?.data?.message ?? 'Failed to invite to club',
+        error: (error: AxiosError<ApiError>) => {
+          return error.response?.data?.message ?? 'Failed to invite to club';
+        },
       });
 
       const res = await promise;
@@ -111,7 +113,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
       router.refresh();
       setIsDeleteModalOpen(false);
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message ?? 'Failed to delete club');
     },
   });
@@ -129,8 +131,10 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
         <div className="flex items-center space-x-4">
           <div className="h-14 w-14 rounded-2xl overflow-hidden shrink-0 border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex flex-col justify-center items-center">
             {club.image ? (
-              <img
+              <Image
                 alt={club.name}
+                width={56}
+                height={56}
                 className={`h-full w-full object-cover group-hover:scale-110 transition-transform duration-500 ${isInactive ? 'grayscale' : ''}`}
                 src={club.image}
               />
@@ -193,7 +197,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
       </div>
 
       <p className="relative z-10 text-[13px] text-gray-500 dark:text-gray-400/90 mb-6 leading-relaxed line-clamp-2 min-h-[44px]">
-        {club.description || 'No description provided.'}
+        {club.description ?? 'No description provided.'}
       </p>
 
       <div className="relative z-10 flex items-center text-xs font-semibold text-gray-500 dark:text-gray-400/80 mb-6 space-x-4">
@@ -239,7 +243,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Are you sure you want to delete{' '}
                 <span className="font-bold text-gray-900 dark:text-white">
-                  "{club.name}"
+                  &quot;{club.name}&quot;
                 </span>
                 ? This action cannot be undone and all data will be lost.
               </p>

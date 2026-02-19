@@ -1,24 +1,11 @@
 'use client';
 
-
+import type { ApiError } from '@/types';
 import { useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { toast } from 'sonner';
-
-interface LoginResponse {
-  status: number;
-  data: {
-    id: string;
-    username: string;
-    email: string;
-    token: string;
-    expiresAt: string;
-  };
-  action?: 'redirect';
-  url?: string;
-}
 
 function LoginPageContent() {
   const router = useRouter();
@@ -44,8 +31,7 @@ function LoginPageContent() {
         router.push('/home');
       }
     },
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    onError: (error: any) => toast.error(error.message),
+    onError: (error: ApiError) => toast.error(error.message),
   });
 
   const handleStravaLogin = () => {
@@ -59,16 +45,24 @@ function LoginPageContent() {
     const clubId = searchParams.get('clubId') ?? undefined;
     const leaderboardId = searchParams.get('leaderboardId') ?? undefined;
     const inviteId = searchParams.get('inviteId') ?? undefined;
-    toast.promise(loginMutation.mutateAsync({ type: 'nrc', clubId, leaderboardId, inviteId }), {
-      loading: 'Opening Nike login...',
-      success: () => {
-        if (!clubId && !leaderboardId) {
-          router.push('/home');
-        }
-        return 'Welcome to Strive!';
-      },
-      error: (err) => err.message,
-    });
+    toast.promise(
+      loginMutation.mutateAsync({
+        type: 'nrc',
+        clubId,
+        leaderboardId,
+        inviteId,
+      }),
+      {
+        loading: 'Opening Nike login...',
+        success: () => {
+          if (!clubId && !leaderboardId) {
+            router.push('/home');
+          }
+          return 'Welcome to Strive!';
+        },
+        error: (err) => err.message,
+      }
+    );
   };
 
   if (status === 'loading') {

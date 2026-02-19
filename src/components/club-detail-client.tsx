@@ -3,16 +3,17 @@
 import { clubValidatorSchema } from '@/backend/validators/club.validator';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
-import { type ApiResponse, type ClubDetail } from '@/types';
+import { type ApiError, type ApiResponse, type ClubDetail } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 import { ArrowLeft, Users, Trophy, Calendar, LogOut, Edit2, ArrowRight, User } from 'lucide-react';
 
@@ -26,7 +27,6 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const currentUserId = session?.user?.id;
 
   const isCreator = currentUserId
@@ -102,7 +102,6 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
     handleSubmit,
     control,
     formState: { errors },
-    reset,
     setValue,
   } = useForm<ClubFormValues>({
     resolver: zodResolver(clubValidatorSchema),
@@ -156,7 +155,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
       setIsEditModalOpen(false);
       setThumbnail(null);
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message ?? 'Failed to update club');
     },
   });
@@ -174,7 +173,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
       router.push('/clubs');
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message ?? 'Failed to leave club');
     },
   });
@@ -202,10 +201,12 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex items-start gap-4">
               {club.image ? (
-                <img
+                <Image
                   src={club.image}
                   alt={club.name}
-                  className="w-16 h-16 rounded-xl object-cover bg-gray-100 dark:bg-gray-800 shrink-0"
+                  width={64}
+                  height={64}
+                  className="rounded-xl object-cover bg-gray-100 dark:bg-gray-800 shrink-0"
                 />
               ) : (
                 <div className="w-16 h-16 rounded-xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center shrink-0">

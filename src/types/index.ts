@@ -19,6 +19,10 @@ export interface ApiResponse<T = unknown> {
   data: T;
 }
 
+export interface ApiError {
+  message: string;
+}
+
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
   PaginationMeta { }

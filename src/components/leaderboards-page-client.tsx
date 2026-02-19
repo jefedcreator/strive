@@ -10,6 +10,7 @@ import {
 import { Button } from '@/primitives/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
+  type ApiError,
   type ApiResponse,
   type ClubListItem,
   type LeaderboardListItem,
@@ -19,7 +20,7 @@ import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type User } from '@prisma/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useQueryStates } from 'nuqs';
@@ -27,6 +28,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Plus, Search, SearchX } from 'lucide-react';
+import Image from 'next/image';
 
 const ActivityTable: React.FC<{ activities: Activity[] }> = ({
   activities,
@@ -57,11 +59,13 @@ const ActivityTable: React.FC<{ activities: Activity[] }> = ({
               className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
             >
               <td className="px-6 py-4 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden relative">
                   {activity.user.avatar ? (
-                    <img
+                    <Image
                       src={activity.user.avatar}
-                      alt=""
+                      alt={activity.user.fullname ?? 'User avatar'}
+                      width={32}
+                      height={32}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -195,10 +199,8 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
       setIsModalOpen(false);
       reset();
     },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to create leaderboard'
-      );
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message ?? 'Failed to create leaderboard');
     },
   });
 
@@ -249,14 +251,14 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         value={tab}
         className="flex flex-col"
         onValueChange={(value) => {
-          if (value === 'active') setStates({ isActive: true, isPublic: null });
+          if (value === 'active') void setStates({ isActive: true, isPublic: null });
           else if (value === 'inactive')
-            setStates({ isActive: false, isPublic: null });
+            void setStates({ isActive: false, isPublic: null });
           else if (value === 'public')
-            setStates({ isPublic: true, isActive: null });
+            void setStates({ isPublic: true, isActive: null });
           else if (value === 'private')
-            setStates({ isPublic: false, isActive: null });
-          else setStates({ isActive: null, isPublic: null });
+            void setStates({ isPublic: false, isActive: null });
+          else void setStates({ isActive: null, isPublic: null });
         }}
       >
         <TabsList className="mb-8">

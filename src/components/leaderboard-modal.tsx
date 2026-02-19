@@ -7,7 +7,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/primitives/Popover';
 import { Modal } from '@/primitives/Modal';
 import { type ClubListItem } from '@/types';
 import * as Switch from '@radix-ui/react-switch';
-import React, { useState } from 'react';
+import React from 'react';
+import Image from 'next/image';
 import { format } from 'date-fns';
 import {
   Controller,
@@ -56,19 +57,19 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   clubs,
   // onThumbnailChange,
 }) => {
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  // const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // onThumbnailChange(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setThumbnailPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     // onThumbnailChange(file);
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setThumbnailPreview(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   // console.log('field.value',field.value);
 
@@ -77,7 +78,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
-          setThumbnailPreview(null);
+          // setThumbnailPreview(null);
           onClose();
         }
       }}
@@ -117,10 +118,11 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 }
               >
                 {thumbnailPreview ? (
-                  <img
+                  <Image
                     src={thumbnailPreview}
                     alt="Preview"
-                    className="absolute inset-0 w-full h-full object-cover opacity-50"
+                    fill
+                    className="object-cover opacity-50"
                   />
                 ) : (
                   <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-3 group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">

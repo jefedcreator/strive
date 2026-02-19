@@ -6,11 +6,11 @@ import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
 import { Button } from '@/primitives/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
-import { type ClubListItem, type PaginatedApiResponse } from '@/types';
+import { type ApiError, type ClubListItem, type PaginatedApiResponse } from '@/types';
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useQueryStates } from 'nuqs';
@@ -35,7 +35,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
   const { data: session } = useSession();
   const router = useRouter();
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [{ isActive, isPublic, query }, setStates] = useQueryStates(
@@ -118,7 +118,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
       reset();
       setThumbnail(null);
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message ?? 'Failed to create club');
     },
   });
@@ -188,14 +188,14 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
         value={tab}
         className="flex flex-col"
         onValueChange={(value) => {
-          if (value === 'active') setStates({ isActive: true, isPublic: null });
+          if (value === 'active') void setStates({ isActive: true, isPublic: null });
           else if (value === 'inactive')
-            setStates({ isActive: false, isPublic: null });
+            void setStates({ isActive: false, isPublic: null });
           else if (value === 'public')
-            setStates({ isPublic: true, isActive: null });
+            void setStates({ isPublic: true, isActive: null });
           else if (value === 'private')
-            setStates({ isPublic: false, isActive: null });
-          else setStates({ isActive: null, isPublic: null });
+            void setStates({ isPublic: false, isActive: null });
+          else void setStates({ isActive: null, isPublic: null });
         }}
       >
         <TabsList className="mb-8">

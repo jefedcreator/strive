@@ -163,7 +163,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         token: auth_token,
       });
 
-      let responsePayload: any = {
+      const responsePayload: any = {
         status: 201,
         data: {
           ...user,

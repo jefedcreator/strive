@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { type LeaderboardListItem } from '@/types';
+import { type ApiError, type LeaderboardListItem } from '@/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -54,10 +54,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       );
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
     },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to join leaderboard'
-      );
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message ?? 'Failed to join leaderboard');
     },
   });
 
@@ -74,13 +72,14 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       toast.promise(promise, {
         loading: 'Generating invite...',
         success: (res) => {
-          handleInvite(res.data.data.id);
+          handleInvite(String(res.data.data.id));
           return data.isPublic
             ? 'Successfully invited to the leaderboard!'
             : 'Join request sent. Waiting for owner approval.';
         },
-        error: (error: any) =>
-          error.response?.data?.message ?? 'Failed to invite to leaderboard',
+        error: (error: AxiosError<ApiError>) => {
+          return error.response?.data?.message ?? 'Failed to invite to leaderboard';
+        },
       });
 
       const res = await promise;
@@ -104,10 +103,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       setIsDeleteModalOpen(false);
       router.refresh();
     },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to delete leaderboard'
-      );
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message ?? 'Failed to delete leaderboard');
     },
   });
 
@@ -192,13 +189,13 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       </div>
 
       <p className="relative z-10 text-[13px] text-gray-500 dark:text-gray-400/90 mb-6 leading-relaxed line-clamp-2 min-h-[44px]">
-        {data.description || 'No description provided.'}
+        {data.description ?? 'No description provided.'}
       </p>
 
       <div className="relative z-10 flex items-center text-xs font-semibold text-gray-500 dark:text-gray-400/80 mb-6 space-x-4">
         <div className="flex items-center">
           <Users className="w-4 h-4 mr-1" />
-          {data.club?.name || 'General'}
+          {data.club?.name ?? 'General'}
         </div>
         <div className="flex items-center">
           {isCompleted ? <Calendar className="w-4 h-4 mr-1" /> : <Clock className="w-4 h-4 mr-1" />}
@@ -239,7 +236,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Are you sure you want to delete{' '}
                 <span className="font-bold text-gray-900 dark:text-white">
-                  "{data.name}"
+                  &quot;{data.name}&quot;
                 </span>
                 ? This action cannot be undone and all data will be lost.
               </p>

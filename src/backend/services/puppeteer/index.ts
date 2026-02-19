@@ -105,7 +105,7 @@ export class PuppeteerService {
               );
               emailValue = possibleEmail;
             }
-          } catch (e) {
+          } catch (_e) {
             // Ignore parsing errors
           }
         }

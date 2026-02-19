@@ -1,7 +1,7 @@
 import { ClubsPageClient } from '@/components/clubs-page-client';
 import { getClubs } from '@/server';
 import Background from '@/components/background';
-import type { SearchParams } from 'nuqs/server';
+
 import { loadParams } from '@/utils';
 import type { PageProps } from '@/types';
 

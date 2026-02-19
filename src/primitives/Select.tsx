@@ -121,7 +121,7 @@ const Select = forwardRef<SelectRef, SelectProps>(
                 );
               }}
               styles={{
-                control: (base, state) => ({
+                control: (_base, _state) => ({
                   border: '1px solid',
                   borderRadius: '0',
                   padding: '0.75rem 0.75rem',
@@ -142,7 +142,7 @@ const Select = forwardRef<SelectRef, SelectProps>(
                   color: '#525C76',
                   paddingLeft: 0,
                 }),
-                indicatorsContainer: (base, props) => ({
+                indicatorsContainer: (base, _props) => ({
                   ...base,
                   '& > div': {
                     paddingLeft: 0,

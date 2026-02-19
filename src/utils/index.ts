@@ -95,7 +95,7 @@ const genUsername = () => {
   const maxAttempts = 5;
 
   while (attempts < maxAttempts) {
-    const username = generateUsername('', 0, 8);
+    // const username = generateUsername('', 0, 8);
     // const userExists = await this.prisma.user.count({
     //   where: {
     //     username,

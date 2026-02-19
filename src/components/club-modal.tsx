@@ -5,6 +5,7 @@ import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Modal } from '@/primitives/Modal';
 import * as Switch from '@radix-ui/react-switch';
 import React, { useState } from 'react';
+import Image from 'next/image';
 import {
   Controller,
   type Control,
@@ -119,10 +120,11 @@ export const ClubModal: React.FC<ClubModalProps> = ({
                 }
               >
                 {thumbnailPreview ? (
-                  <img
+                  <Image
                     src={thumbnailPreview}
                     alt="Preview"
-                    className="absolute inset-0 w-full h-full object-cover opacity-50"
+                    fill
+                    className="object-cover opacity-50"
                   />
                 ) : (
                   <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-3 group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">

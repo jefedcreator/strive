@@ -85,19 +85,17 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
     return notifications.filter((n) => activeFilterIds.includes(n.type));
   }, [notifications, isAllFilter, activeFilterIds]);
 
-  // Split notifications into today vs. earlier
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const todayNotifications = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return filteredNotifications.filter((n) => new Date(n.createdAt) >= today);
+  }, [filteredNotifications]);
 
-  const todayNotifications = useMemo(
-    () => filteredNotifications.filter((n) => new Date(n.createdAt) >= today),
-    [filteredNotifications, today]
-  );
-
-  const olderNotifications = useMemo(
-    () => filteredNotifications.filter((n) => new Date(n.createdAt) < today),
-    [filteredNotifications, today]
-  );
+  const olderNotifications = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return filteredNotifications.filter((n) => new Date(n.createdAt) < today);
+  }, [filteredNotifications]);
 
   return (
     <div className="flex flex-col h-full">

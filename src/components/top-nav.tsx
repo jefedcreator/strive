@@ -14,6 +14,7 @@ import React from 'react';
 // import { Button } from "@/primitives"; // Using custom buttons elements from home.html for exact match, or adapt.
 import ToggleTheme from './toggle-theme';
 import { Home, ChevronRight, Search, Bell } from 'lucide-react';
+import Image from 'next/image';
 
 export function TopNav() {
   const pathname = usePathname();
@@ -111,10 +112,11 @@ export function TopNav() {
               <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-xs font-bold text-white shadow-md border-2 border-background-light dark:border-background-dark">
                   {user?.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={user.image}
                       alt={user.name ?? 'User'}
+                      width={36}
+                      height={36}
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (

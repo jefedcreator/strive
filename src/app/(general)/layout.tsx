@@ -1,4 +1,4 @@
-import ToggleTheme from '@/components/toggle-theme';
+
 import { Provider } from '@/provider';
 import '@/styles/globals.css';
 import type { Metadata } from 'next';

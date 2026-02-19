@@ -1,7 +1,7 @@
 import { auth } from '@/server/auth';
 import { redirect } from 'next/navigation';
 import Background from '@/components/background';
-import { type User } from '@prisma/client';
+
 import { getRuns } from '@/server';
 import { type RunData } from '@/types';
 import { Clock, CheckCircle2, ArrowRight, Activity, PlusCircle, Share2, Award } from 'lucide-react';

@@ -7,19 +7,21 @@ import {
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
 import {
+  type ApiError,
   type ApiResponse,
   type ClubListItem,
   type LeaderboardDetail,
 } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 import { ArrowLeft, Trophy, Users, Calendar, LogOut, Edit2, ListOrdered } from 'lucide-react';
 
@@ -81,7 +83,6 @@ export const LeaderboardDetailClient: React.FC<
     handleSubmit,
     control,
     formState: { errors },
-    reset,
   } = useForm<LeaderboardFormValues>({
     resolver: zodResolver(leaderboardValidatorSchema),
     defaultValues: {
@@ -112,10 +113,8 @@ export const LeaderboardDetailClient: React.FC<
       setIsEditModalOpen(false);
       // setThumbnail(null);
     },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to update leaderboard'
-      );
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message ?? 'Failed to update leaderboard');
     },
   });
 
@@ -137,10 +136,8 @@ export const LeaderboardDetailClient: React.FC<
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
       router.push('/leaderboards');
     },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to leave leaderboard'
-      );
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message ?? 'Failed to leave leaderboard');
     },
   });
 
@@ -194,7 +191,7 @@ export const LeaderboardDetailClient: React.FC<
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl">
-                  {leaderboard.description || 'No description provided.'}
+                  {leaderboard.description ?? 'No description provided.'}
                 </p>
                 <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
                   {leaderboard.club && (
@@ -311,11 +308,13 @@ export const LeaderboardDetailClient: React.FC<
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden shrink-0 relative">
                               {entry.user.avatar ? (
-                                <img
+                                <Image
                                   src={entry.user.avatar}
-                                  alt=""
+                                  alt={entry.user.fullname ?? entry.user.username ?? 'User avatar'}
+                                  width={32}
+                                  height={32}
                                   className="w-full h-full object-cover"
                                 />
                               ) : (

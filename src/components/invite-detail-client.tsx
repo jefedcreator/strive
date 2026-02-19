@@ -8,6 +8,7 @@ import { Button } from '@/primitives/Button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/primitives/avatar';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const InviteDetailClient = ({
   initialData,
@@ -60,7 +61,7 @@ const InviteDetailClient = ({
   const inviter = invite.inviter;
 
   const entityImage = isClub 
-    ? ((invite as ClubInviteDetail).club.image || null) 
+    ? ((invite as ClubInviteDetail).club.image ?? null) 
     : `/api/leaderboards/og?name=${encodeURIComponent(entityName)}`;
 
   const inviterName = inviter?.fullname ?? inviter?.username ?? 'A member';
@@ -127,11 +128,11 @@ const InviteDetailClient = ({
           className="relative w-full h-[220px] rounded-[1.5rem] overflow-hidden mb-8 bg-muted shadow-inner group/image"
         >
           {entityImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={entityImage}
               alt={entityName}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover/image:scale-105"
+              fill
+              className="object-cover transition-transform duration-700 group-hover/image:scale-105"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
