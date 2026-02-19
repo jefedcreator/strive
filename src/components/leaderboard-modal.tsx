@@ -4,6 +4,7 @@ import {
   type LeaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
 import { Form, Field, Input, Textarea, Button } from '@/primitives';
+import { Calendar } from '@/primitives/Calendar';
 import { Modal } from '@/primitives/Modal';
 import { type ClubListItem } from '@/types';
 import * as Switch from '@radix-ui/react-switch';
@@ -187,7 +188,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
 
             {/* Expiration Date */}
             <Field id="expiryDate" label="Expiration Date" error={errors.expiryDate?.message}>
-              <div className="relative">
+              {/* <div className="relative">
                 <Input
                   {...register('expiryDate')}
                   type="date"
@@ -197,7 +198,19 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
                   <Icon name="calendar_today" className="text-sm" />
                 </div>
-              </div>
+              </div> */}
+                <Controller
+                  name="expiryDate"
+                  control={control}
+                  render={({ field }) => (
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date) => field.onChange(date ?? undefined)}
+                      className="rounded-lg border"
+                    />
+                  )}
+                />
             </Field>
 
             {/* Visibility Switch */}

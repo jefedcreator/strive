@@ -1,9 +1,37 @@
-import React from 'react'
+import * as React from "react"
+import { Button } from "@/primitives/Button"
+import { Calendar } from "@/primitives/Calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/primitives/Popover"
+import { format } from "date-fns"
+import { ChevronDownIcon } from "lucide-react"
 
-const DatePicker = () => {
+export function DatePickerDemo() {
+  const [date, setDate] = React.useState<Date>()
+
   return (
-    <div>DatePicker</div>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          data-empty={!date}
+          className="data-[empty=true]:text-muted-foreground w-[212px] justify-between text-left font-normal"
+        >
+          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          <ChevronDownIcon />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          defaultMonth={date}
+        />
+      </PopoverContent>
+    </Popover>
   )
 }
-
-export default DatePicker
