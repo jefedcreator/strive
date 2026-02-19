@@ -20,14 +20,7 @@ export interface LeaderboardCardProps {
   data: LeaderboardListItem;
 }
 
-export const Icon: React.FC<{ name: string; className?: string }> = ({
-  name,
-  className = '',
-}) => {
-  return (
-    <span className={`material-symbols-outlined ${className}`}>{name}</span>
-  );
-};
+import { Trophy, MoreVertical, LogIn, UserPlus, Trash2, Users, Calendar, Clock, ArrowRight, AlertTriangle } from 'lucide-react';
 
 export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const { data: session } = useSession();
@@ -129,22 +122,22 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
 
   return (
     <div
-      className={`bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-soft border border-gray-200 dark:border-gray-800 hover:shadow-md transition-all group ${!data.isActive || isCompleted ? 'opacity-75 hover:opacity-100' : ''}`}
+      className={`bg-card-light dark:bg-card-dark rounded-3xl p-6 shadow-sm border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 group ${!data.isActive || isCompleted ? 'opacity-75 hover:opacity-100' : ''}`}
     >
       <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center space-x-3">
-          <div
-            className={`h-12 w-12 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white`}
-          >
-            <Icon name="emoji_events" />
+        <div className="flex items-center space-x-4">
+          <div className="h-14 w-14 rounded-2xl overflow-hidden shrink-0 border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex flex-col justify-center items-center">
+            <div className="h-full w-full bg-gradient-to-br from-primary/10 to-primary/5 dark:from-white/10 dark:to-white/5 flex items-center justify-center text-primary dark:text-white group-hover:scale-110 transition-transform duration-500">
+              <Trophy className="w-6 h-6" />
+            </div>
           </div>
-          <div>
+          <div className="flex flex-col justify-center">
             <span
               className={`text-[10px] font-bold ${data.isPublic ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'} px-2 py-0.5 rounded-full uppercase tracking-wide`}
             >
               {data.isPublic ? 'Public' : 'Private'}
             </span>
-            <h3 className="font-bold text-lg text-gray-900 dark:text-white mt-0.5 truncate max-w-[180px]">
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white mt-1 truncate max-w-[180px] group-hover:text-primary transition-colors">
               {data.name}
             </h3>
           </div>
@@ -152,7 +145,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 outline-none">
-              <Icon name="more_vert" className="text-lg" />
+              <MoreVertical className="w-5 h-5" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -164,7 +157,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
               disabled={joinMutation.isPending || isCompleted}
               className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
             >
-              <Icon name="login" className="text-base" />
+              <LogIn className="w-4 h-4" />
               {joinMutation.isPending ? 'Joining...' : 'Join'}
             </DropdownMenuItem>
             {isCreator && (
@@ -173,7 +166,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
                 disabled={inviteMutation.isPending || isCompleted}
                 className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
               >
-                <Icon name="person_add" className="text-base" />
+                <UserPlus className="w-4 h-4" />
                 Invite
               </DropdownMenuItem>
             )}
@@ -182,7 +175,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
                 onClick={() => setIsDeleteModalOpen(true)}
                 className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
               >
-                <Icon name="delete" className="text-base" />
+                <Trash2 className="w-4 h-4" />
                 Delete
               </DropdownMenuItem>
             )}
@@ -190,27 +183,24 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
         </DropdownMenu>
       </div>
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 min-h-[40px]">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed line-clamp-2 min-h-[44px]">
         {data.description || 'No description provided.'}
       </p>
 
-      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-5 space-x-4">
+      <div className="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-6 space-x-4">
         <div className="flex items-center">
-          <Icon name="groups" className="text-base mr-1" />
+          <Users className="w-4 h-4 mr-1" />
           {data.club?.name || 'General'}
         </div>
         <div className="flex items-center">
-          <Icon
-            name={isCompleted ? 'event' : 'schedule'}
-            className="text-base mr-1"
-          />
+          {isCompleted ? <Calendar className="w-4 h-4 mr-1" /> : <Clock className="w-4 h-4 mr-1" />}
           {isCompleted ? 'Ended' : 'Active'}
         </div>
       </div>
 
       <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icon name="people" className="text-base text-gray-400" />
+          <Users className="w-4 h-4 text-gray-400" />
           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
             {participantsCount}{' '}
             {participantsCount === 1 ? 'participant' : 'participants'}
@@ -219,10 +209,9 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
 
         <a
           href={`/leaderboards/${data.id}`}
-          className="text-sm font-semibold text-gray-900 dark:text-white flex items-center hover:underline"
+          className="group/link text-sm font-bold text-gray-900 dark:text-white flex items-center hover:text-primary dark:hover:text-primary transition-colors"
         >
-          {isCompleted ? 'Results' : 'View Board'}{' '}
-          <Icon name="arrow_forward" className="text-sm ml-1" />
+          {isCompleted ? 'Results' : 'View Board'} <ArrowRight className="w-4 h-4 ml-1 text-gray-400 group-hover/link:text-primary group-hover/link:translate-x-1 transition-all" />
         </a>
       </div>
 
@@ -232,7 +221,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
                 <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-                  <Icon name="warning" className="text-xl" />
+                  <AlertTriangle className="w-5 h-5" />
                 </div>
                 <Modal.Title className="text-lg font-bold">
                   Delete Leaderboard

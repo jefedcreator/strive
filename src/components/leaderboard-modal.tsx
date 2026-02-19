@@ -41,10 +41,7 @@ interface LeaderboardModalProps {
   // onThumbnailChange: (file: File) => void;
 }
 
-const Icon: React.FC<{ name: string; className?: string }> = ({
-  name,
-  className = '',
-}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
+import { X, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
 
 export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   isOpen,
@@ -100,7 +97,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               </p>
             </div>
             <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-              <Icon name="close" />
+              <X className="w-5 h-5" />
             </Modal.Close>
           </div>
 
@@ -177,7 +174,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                     ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
-                    <Icon name="expand_more" className="text-lg" />
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
                   </div>
                 </div>
               </Field>
@@ -230,10 +227,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                         {field.value
                           ? format(new Date(field.value), 'PPP')
                           : 'Pick an expiration date'}
-                        <Icon
-                          name="calendar_today"
-                          className="text-sm text-gray-400"
-                        />
+                        <CalendarIcon className="w-4 h-4 text-gray-400" />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">

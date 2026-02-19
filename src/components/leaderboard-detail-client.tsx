@@ -21,10 +21,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-const Icon: React.FC<{ name: string; className?: string }> = ({
-  name,
-  className = '',
-}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
+import { ArrowLeft, Trophy, Users, Calendar, LogOut, Edit2, ListOrdered } from 'lucide-react';
 
 interface LeaderboardDetailClientProps {
   initialData: ApiResponse<LeaderboardDetail | null>;
@@ -160,7 +157,7 @@ export const LeaderboardDetailClient: React.FC<
           href="/leaderboards"
           className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
         >
-          <Icon name="arrow_back" className="text-base" />
+          <ArrowLeft className="w-4 h-4 mr-1" />
           Back to Leaderboards
         </Link>
       </FadeInItem>
@@ -171,7 +168,7 @@ export const LeaderboardDetailClient: React.FC<
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="h-14 w-14 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white shrink-0">
-                <Icon name="emoji_events" className="text-2xl" />
+                <Trophy className="w-6 h-6" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -203,12 +200,12 @@ export const LeaderboardDetailClient: React.FC<
                 <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
                   {leaderboard.club && (
                     <div className="flex items-center gap-1">
-                      <Icon name="groups" className="text-sm" />
+                      <Users className="w-4 h-4" />
                       <span>{leaderboard.club.name}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1">
-                    <Icon name="people" className="text-sm" />
+                    <Users className="w-4 h-4" />
                     <span>
                       {leaderboard._count.entries}{' '}
                       {leaderboard._count.entries === 1
@@ -218,7 +215,7 @@ export const LeaderboardDetailClient: React.FC<
                   </div>
                   {leaderboard.expiryDate && (
                     <div className="flex items-center gap-1">
-                      <Icon name="calendar_today" className="text-sm" />
+                      <Calendar className="w-4 h-4" />
                       <span>
                         {isCompleted ? 'Ended' : 'Expires'}{' '}
                         {new Date(leaderboard.expiryDate).toLocaleDateString()}
@@ -236,7 +233,7 @@ export const LeaderboardDetailClient: React.FC<
                 disabled={exitMutation.isPending}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 dark:border-red-800/50 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
               >
-                <Icon name="logout" className="text-base" />
+                <LogOut className="w-4 h-4" />
                 {exitMutation.isPending ? 'Leaving...' : 'Leave'}
               </button>
               {/* )} */}
@@ -245,7 +242,7 @@ export const LeaderboardDetailClient: React.FC<
                   onClick={() => setIsEditModalOpen(true)}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                 >
-                  <Icon name="edit" className="text-base" />
+                  <Edit2 className="w-4 h-4" />
                   Edit
                 </button>
               )}
@@ -269,10 +266,7 @@ export const LeaderboardDetailClient: React.FC<
           {entries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-                <Icon
-                  name="leaderboard"
-                  className="text-2xl text-gray-400 dark:text-gray-500"
-                />
+                <ListOrdered className="w-6 h-6 text-gray-400 dark:text-gray-500" />
               </div>
               <h3 className="font-bold text-gray-900 dark:text-white mb-1">
                 No entries yet

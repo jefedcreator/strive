@@ -42,10 +42,7 @@ interface ClubModalProps {
   onNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const Icon: React.FC<{ name: string; className?: string }> = ({
-  name,
-  className = '',
-}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
+import { X, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
 
 export const ClubModal: React.FC<ClubModalProps> = ({
   isOpen,
@@ -102,7 +99,7 @@ export const ClubModal: React.FC<ClubModalProps> = ({
               </p>
             </div>
             <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-              <Icon name="close" />
+              <X className="w-5 h-5" />
             </Modal.Close>
           </div>
 
@@ -129,10 +126,7 @@ export const ClubModal: React.FC<ClubModalProps> = ({
                   />
                 ) : (
                   <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-3 group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">
-                    <Icon
-                      name="image"
-                      className="text-gray-500 dark:text-gray-400"
-                    />
+                    <ImageIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                   </div>
                 )}
                 <div className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400 relative z-10">
@@ -173,7 +167,7 @@ export const ClubModal: React.FC<ClubModalProps> = ({
                     placeholder="nyc-runners-club"
                   />
                   <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                    <Icon name="link" className="text-gray-400 text-sm" />
+                    <LinkIcon className="text-gray-400 w-4 h-4" />
                   </div>
                 </div>
               </Field>

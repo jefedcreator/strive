@@ -13,6 +13,7 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 // import { Button } from "@/primitives"; // Using custom buttons elements from home.html for exact match, or adapt.
 import ToggleTheme from './toggle-theme';
+import { Home, ChevronRight, Search, Bell } from 'lucide-react';
 
 export function TopNav() {
   const pathname = usePathname();
@@ -29,14 +30,12 @@ export function TopNav() {
           href="/"
           className="hover:text-primary dark:hover:text-primary transition-colors flex items-center gap-1"
         >
-          <span className="material-symbols-outlined text-[18px]">home</span>
+          <Home className="w-[18px] h-[18px]" />
           <span className="hidden sm:inline">Home</span>
         </Link>
 
         {pathSegments.length > 0 && (
-          <span className="material-symbols-outlined text-[16px] mx-2 text-gray-400">
-            chevron_right
-          </span>
+          <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
         )}
 
         {pathSegments.map((segment, index) => {
@@ -56,9 +55,7 @@ export function TopNav() {
                 {segment}
               </Link>
               {!isLast && (
-                <span className="material-symbols-outlined text-[16px] mx-2 text-gray-400">
-                  chevron_right
-                </span>
+                <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
               )}
             </React.Fragment>
           );
@@ -67,9 +64,7 @@ export function TopNav() {
         {/* Default Dashboard Breadcrumb if on root */}
         {pathSegments.length === 0 && (
           <>
-            <span className="material-symbols-outlined text-[16px] mx-2 text-gray-400">
-              chevron_right
-            </span>
+            <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
             <span className="text-gray-900 dark:text-white font-bold">
               Dashboard
             </span>
@@ -81,9 +76,7 @@ export function TopNav() {
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Search Bar (Hidden on mobile) */}
         <div className="hidden md:flex items-center bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
-          <span className="material-symbols-outlined text-gray-400 text-[20px]">
-            search
-          </span>
+          <Search className="w-5 h-5 text-gray-400" />
           <input
             className="bg-transparent border-none text-sm focus:ring-0 text-gray-700 dark:text-gray-200 w-48 lg:w-64 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none ml-2"
             placeholder="Search activities..."
@@ -93,9 +86,7 @@ export function TopNav() {
 
         {/* Notifications */}
         <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors relative group">
-          <span className="material-symbols-outlined group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-            notifications
-          </span>
+          <Bell className="w-6 h-6 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
           <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></span>
         </button>
 

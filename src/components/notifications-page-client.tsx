@@ -12,6 +12,7 @@ import { useSession } from 'next-auth/react';
 import FilterPanel from './filterpanel';
 import { NotificationCard } from './notification-card';
 import { FadeInStagger, FadeInItem } from '@/components/fade-in';
+import { Bell } from 'lucide-react';
 
 interface NotificationsPageClientProps {
   initialData: PaginatedApiResponse<NotificationWithRelations[]>;
@@ -154,9 +155,7 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
           {todayNotifications.length === 0 &&
             olderNotifications.length === 0 && (
               <FadeInItem className="text-center py-12 bg-white dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800">
-                <span className="material-symbols-outlined text-4xl mb-2 text-gray-300 dark:text-gray-600">
-                  notifications_none
-                </span>
+                <Bell className="w-10 h-10 mb-2 text-gray-300 dark:text-gray-600" />
                 <p className="text-gray-500 dark:text-gray-400">
                   No notifications found for the selected filters.
                 </p>

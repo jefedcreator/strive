@@ -5,28 +5,29 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/utils';
 import {
   Tooltip,
-  TooltipContent,
   TooltipTrigger,
   TooltipProvider,
+  TooltipContent,
 } from '@/primitives/tooltip';
+import { LayoutDashboard, Users, Trophy, Bell, Settings, HelpCircle, Menu, ChevronRight, ChevronLeft, X } from 'lucide-react';
 
 interface NavItemProps {
   name: string;
   href: string;
-  icon: string;
+  icon: React.ElementType;
   badge?: string;
 }
 
 const platformNavigation: NavItemProps[] = [
-  { name: 'Dashboard', href: '/home', icon: 'dashboard' },
-  { name: 'Clubs', href: '/clubs', icon: 'groups' },
-  { name: 'Leaderboards', href: '/leaderboards', icon: 'emoji_events' },
-  { name: 'Notifications', href: '/notifications', icon: 'notifications' },
+  { name: 'Dashboard', href: '/home', icon: LayoutDashboard },
+  { name: 'Clubs', href: '/clubs', icon: Users },
+  { name: 'Leaderboards', href: '/leaderboards', icon: Trophy },
+  { name: 'Notifications', href: '/notifications', icon: Bell },
 ];
 
 const bottomNavigation: NavItemProps[] = [
-  { name: 'Settings', href: '/settings', icon: 'settings' },
-  { name: 'Help Center', href: '/help', icon: 'help_outline' },
+  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Help Center', href: '/help', icon: HelpCircle },
 ];
 
 export function Sidebar() {
@@ -49,14 +50,7 @@ export function Sidebar() {
               isCollapsed && 'justify-center px-2'
             )}
           >
-            <span
-              className={cn(
-                'material-symbols-outlined text-[20px]',
-                !isCollapsed && 'mr-3'
-              )}
-            >
-              {item.icon}
-            </span>
+            <item.icon className={cn('w-5 h-5 shrink-0', !isCollapsed && 'mr-3')} />
             {!isCollapsed && (
               <span className="text-sm font-medium">{item.name}</span>
             )}
@@ -89,7 +83,7 @@ export function Sidebar() {
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors"
             onClick={() => setIsMobileOpen(!isMobileOpen)}
           >
-            <span className="material-symbols-outlined">menu</span>
+            <Menu className="w-6 h-6" />
           </button>
         </div>
 
@@ -119,9 +113,7 @@ export function Sidebar() {
               )}
               onClick={() => setIsCollapsed(!isCollapsed)}
             >
-              <span className="material-symbols-outlined text-[20px]">
-                {isCollapsed ? 'chevron_right' : 'chevron_left'}
-              </span>
+              {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
             </button>
           </div>
 
@@ -186,9 +178,7 @@ export function Sidebar() {
                   onClick={() => setIsMobileOpen(false)}
                   className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
-                  <span className="material-symbols-outlined text-gray-500">
-                    close
-                  </span>
+                  <X className="w-6 h-6 text-gray-500" />
                 </button>
               </div>
 

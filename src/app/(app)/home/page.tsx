@@ -4,6 +4,7 @@ import Background from '@/components/background';
 import { type User } from '@prisma/client';
 import { getRuns } from '@/server';
 import { type RunData } from '@/types';
+import { Clock, CheckCircle2, ArrowRight, Activity, PlusCircle, Share2, Award } from 'lucide-react';
 
 const leaderboard = [
   {
@@ -79,14 +80,6 @@ const activities = [
   },
 ];
 
-const Icon = ({
-  name,
-  className = '',
-}: {
-  name: string;
-  className?: string;
-}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-
 function formatDuration(minutes: number): string {
   const mins = Math.floor(minutes);
   const secs = Math.round((minutes - mins) * 60);
@@ -122,7 +115,7 @@ function LastRunCard({ run }: { run: RunData }) {
               {run.name}
             </h2>
             <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 text-sm font-medium">
-              <Icon name="schedule" className="text-base" />
+              <Clock className="w-4 h-4" />
               <span>{formatRunDate(run.date)}</span>
             </div>
           </div>
@@ -169,14 +162,14 @@ function LastRunCard({ run }: { run: RunData }) {
       <div className="bg-gray-50/50 dark:bg-white/5 px-8 py-5 flex items-center justify-between border-t border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-500">
-            <Icon name="check_circle" className="text-xl" />
+            <CheckCircle2 className="w-5 h-5" />
           </div>
           <span className="font-bold text-gray-900 dark:text-white text-sm">
             Latest Activity
           </span>
         </div>
         <button className="flex items-center gap-1.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-          View Details <Icon name="arrow_forward" className="text-base" />
+          View Details <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -188,10 +181,7 @@ function NoRunsCard() {
     <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden p-8">
       <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
         <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-          <Icon
-            name="directions_run"
-            className="text-3xl text-gray-400 dark:text-gray-500"
-          />
+          <Activity className="w-8 h-8 text-gray-400 dark:text-gray-500" />
         </div>
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
@@ -365,19 +355,13 @@ export default async function HomePage() {
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200 group">
-                <Icon
-                  name="add_circle"
-                  className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white text-2xl"
-                />
+                <PlusCircle className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white w-6 h-6" />
                 <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                   Manual Entry
                 </span>
               </button>
               <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200 group">
-                <Icon
-                  name="share"
-                  className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white text-2xl"
-                />
+                <Share2 className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white w-6 h-6" />
                 <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                   Export Data
                 </span>
@@ -388,7 +372,7 @@ export default async function HomePage() {
           {/* Pro Insights CTA */}
           <div className="relative overflow-hidden bg-gray-900 dark:bg-white rounded-3xl p-8 group">
             <div className="absolute top-0 right-0 p-4 opacity-10 -rotate-12 transition-transform duration-500 group-hover:scale-110 text-white dark:text-gray-900">
-              <Icon name="award" className="text-[160px]" />
+              <Award className="w-40 h-40" />
             </div>
             <div className="relative z-10 space-y-4">
               <h2 className="text-xl font-bold text-white dark:text-gray-900">

@@ -2,7 +2,7 @@
 
 import { leaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
-import { Icon, LeaderboardCard } from '@/components/leaderboard-card';
+import { LeaderboardCard } from '@/components/leaderboard-card';
 import {
   LeaderboardModal,
   type LeaderboardFormValues,
@@ -26,6 +26,7 @@ import { useQueryStates } from 'nuqs';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { Plus, Search, SearchX } from 'lucide-react';
 
 const ActivityTable: React.FC<{ activities: Activity[] }> = ({
   activities,
@@ -222,9 +223,9 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         <div>
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto overflow-hidden relative group"
           >
-            <Icon name="add" className="text-sm mr-2" />
+            <Plus className="w-5 h-5 mr-1 group-hover:scale-110 transition-transform" />
             Create Leaderboard
           </Button>
         </div>
@@ -233,7 +234,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
       {/* Filter Bar */}
       <div className="relative mb-6">
         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-          <span className="material-symbols-outlined text-xl">search</span>
+          <Search className="w-5 h-5 text-gray-400" />
         </span>
         <input
           type="text"
@@ -308,7 +309,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
                   className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-gray-800/50 hover:border-primary dark:hover:border-gray-600 transition-all group min-h-[220px] w-full h-full"
                 >
                   <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mb-3 transition-colors">
-                    <Icon name="add" className="text-2xl" />
+                    <Plus className="w-6 h-6" />
                   </div>
                   <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">
                     Create New Leaderboard
@@ -321,9 +322,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
             </FadeInStagger>
           ) : !isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <span className="material-symbols-outlined text-4xl mb-2 opacity-50 text-gray-400 dark:text-gray-500">
-                search_off
-              </span>
+              <SearchX className="w-10 h-10 mb-2 opacity-50 text-gray-400 dark:text-gray-500" />
               <h3 className="font-bold text-gray-900 dark:text-white mb-1">
                 No leaderboards found
               </h3>

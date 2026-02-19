@@ -17,6 +17,7 @@ import { useQueryStates } from 'nuqs';
 import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { Plus, Search, SearchX } from 'lucide-react';
 
 interface ClubsPageClientProps {
   initialData: PaginatedApiResponse<ClubListItem[]>;
@@ -160,9 +161,9 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
 
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto overflow-hidden relative group"
           >
-            <span className="material-symbols-outlined text-lg">add</span>
+            <Plus className="w-5 h-5 mr-1 group-hover:scale-110 transition-transform" />
             Create Club
           </Button>
         </div>
@@ -171,7 +172,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
       {/* Filter Bar */}
       <div className="relative mb-6">
         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-          <span className="material-symbols-outlined text-xl">search</span>
+          <Search className="w-5 h-5 text-gray-400" />
         </span>
         <input
           type="text"
@@ -237,9 +238,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
             </FadeInStagger>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <span className="material-symbols-outlined text-4xl mb-2 opacity-50 text-gray-400 dark:text-gray-500">
-                search_off
-              </span>
+              <SearchX className="w-10 h-10 mb-2 opacity-50 text-gray-400 dark:text-gray-500" />
               <h3 className="font-bold text-gray-900 dark:text-white mb-1">
                 No clubs found
               </h3>

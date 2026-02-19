@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/primitives/Button';
 import React from 'react';
 
-const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
-  <span className={`material-symbols-outlined ${className}`}>{name}</span>
-);
+import { Compass, Home } from 'lucide-react';
 
 export default function NotFoundPage() {
   const router = useRouter();
@@ -31,7 +29,7 @@ export default function NotFoundPage() {
           }}
           className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-8 shadow-inner"
         >
-          <Icon name="explore_off" className="text-5xl text-gray-400 dark:text-gray-500" />
+          <Compass className="w-12 h-12 text-gray-400 dark:text-gray-500" />
         </motion.div>
 
         <h1 className="text-8xl font-black tracking-tighter text-gray-900 dark:text-white mb-4">
@@ -51,8 +49,7 @@ export default function NotFoundPage() {
           onClick={() => router.push('/home')}
           className="group shadow-lg hover:shadow-xl transition-all w-full sm:w-auto overflow-hidden relative"
         >
-          <div className="absolute inset-0 bg-white/20 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-          <Icon name="home" className="mr-2 text-lg group-hover:scale-110 transition-transform relative z-10" />
+          <Home className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform relative z-10" />
           <span className="relative z-10">Go Home</span>
         </Button>
       </motion.div>

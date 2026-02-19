@@ -14,10 +14,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-const Icon: React.FC<{ name: string; className?: string }> = ({
-  name,
-  className = '',
-}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
+import { ArrowLeft, Users, Trophy, Calendar, LogOut, Edit2, ArrowRight, User } from 'lucide-react';
 
 interface ClubDetailClientProps {
   initialData: ApiResponse<ClubDetail | null>;
@@ -194,7 +191,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
           href="/clubs"
           className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
         >
-          <Icon name="arrow_back" className="text-base" />
+          <ArrowLeft className="w-4 h-4 mr-1" />
           Back to Clubs
         </Link>
       </FadeInItem>
@@ -212,10 +209,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                 />
               ) : (
                 <div className="w-16 h-16 rounded-xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                  <Icon
-                    name="groups"
-                    className="text-2xl text-gray-400 dark:text-gray-500"
-                  />
+                  <Users className="w-6 h-6 text-gray-400 dark:text-gray-500" />
                 </div>
               )}
               <div>
@@ -250,14 +244,14 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                 </p>
                 <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-1">
-                    <Icon name="people" className="text-sm" />
+                    <Users className="w-4 h-4" />
                     <span>
                       {club._count.members}{' '}
                       {club._count.members === 1 ? 'member' : 'members'}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Icon name="emoji_events" className="text-sm" />
+                    <Trophy className="w-4 h-4" />
                     <span>
                       {club._count.leaderboards}{' '}
                       {club._count.leaderboards === 1
@@ -266,7 +260,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Icon name="calendar_today" className="text-sm" />
+                    <Calendar className="w-4 h-4" />
                     <span>
                       Created {new Date(club.createdAt).toLocaleDateString()}
                     </span>
@@ -282,7 +276,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                 disabled={exitMutation.isPending}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 dark:border-red-800/50 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
               >
-                <Icon name="logout" className="text-base" />
+                <LogOut className="w-4 h-4" />
                 {exitMutation.isPending ? 'Leaving...' : 'Leave'}
               </button>
               {/* )} */}
@@ -291,7 +285,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                   onClick={() => setIsEditModalOpen(true)}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                 >
-                  <Icon name="edit" className="text-base" />
+                  <Edit2 className="w-4 h-4" />
                   Edit
                 </button>
               )}
@@ -316,10 +310,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
             {club.leaderboards.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-                  <Icon
-                    name="emoji_events"
-                    className="text-xl text-gray-400 dark:text-gray-500"
-                  />
+                  <Trophy className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
                   No leaderboards yet
@@ -342,7 +333,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-lg bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white">
-                          <Icon name="emoji_events" className="text-lg" />
+                          <Trophy className="w-5 h-5" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors">
@@ -355,10 +346,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                           </p>
                         </div>
                       </div>
-                      <Icon
-                        name="arrow_forward"
-                        className="text-base text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors"
-                      />
+                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                     </Link>
                   );
                 })}
@@ -382,10 +370,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
             {club.members.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-                  <Icon
-                    name="people"
-                    className="text-xl text-gray-400 dark:text-gray-500"
-                  />
+                  <Users className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
                   No members yet
@@ -403,10 +388,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-                        <Icon
-                          name="person"
-                          className="text-lg text-gray-400 dark:text-gray-500"
-                        />
+                        <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">

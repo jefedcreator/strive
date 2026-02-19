@@ -1,6 +1,7 @@
 import React from 'react';
 import { type NotificationWithRelations } from '@/types';
 import { type NotificationType } from '@prisma/client';
+import { Info, Users, Trophy, ArrowRight } from 'lucide-react';
 
 interface NotificationCardProps {
   notification: NotificationWithRelations;
@@ -8,22 +9,22 @@ interface NotificationCardProps {
 
 const typeConfig: Record<
   NotificationType,
-  { icon: string; iconBg: string; iconText: string; label: string }
+  { icon: React.ElementType; iconBg: string; iconText: string; label: string }
 > = {
   info: {
-    icon: 'info',
+    icon: Info,
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
     iconText: 'text-blue-600 dark:text-blue-400',
     label: 'Info',
   },
   club: {
-    icon: 'groups',
+    icon: Users,
     iconBg: 'bg-green-100 dark:bg-green-900/30',
     iconText: 'text-green-600 dark:text-green-400',
     label: 'Club',
   },
   leaderboard: {
-    icon: 'emoji_events',
+    icon: Trophy,
     iconBg: 'bg-orange-100 dark:bg-orange-900/30',
     iconText: 'text-orange-600 dark:text-orange-400',
     label: 'Leaderboard',
@@ -64,9 +65,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         <div
           className={`h-12 w-12 rounded-full ${config.iconBg} flex items-center justify-center ${config.iconText}`}
         >
-          <span className="material-symbols-outlined text-xl">
-            {config.icon}
-          </span>
+          <config.icon className="w-6 h-6" />
         </div>
       </div>
 
@@ -94,17 +93,13 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
             {/* Related entity */}
             {notification.club && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-xs">
-                  groups
-                </span>
+                <Users className="w-3 h-3" />
                 {notification.club.name}
               </p>
             )}
             {notification.leaderboard && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-xs">
-                  emoji_events
-                </span>
+                <Trophy className="w-3 h-3" />
                 {notification.leaderboard.name}
               </p>
             )}
@@ -138,9 +133,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
               className="text-xs text-gray-900 dark:text-white font-medium hover:underline flex items-center group"
             >
               View Leaderboard
-              <span className="material-symbols-outlined text-sm ml-1 group-hover:translate-x-0.5 transition-transform">
-                arrow_forward
-              </span>
+              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
             </a>
           </div>
         )}
