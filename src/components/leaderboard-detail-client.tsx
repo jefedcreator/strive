@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { leaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
+import { FadeInItem, FadeInStagger } from '@/components/fade-in';
+import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
+import { type ApiResponse, type ClubListItem, type LeaderboardDetail } from '@/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
-import { type ApiResponse, type LeaderboardDetail, type ClubListItem } from '@/types';
-import { FadeInStagger, FadeInItem } from '@/components/fade-in';
 
 const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>

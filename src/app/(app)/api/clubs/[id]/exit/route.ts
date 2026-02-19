@@ -15,69 +15,67 @@ import { NextResponse } from 'next/server';
 
 /**
  * @pathParams paramValidator
- * @description Exit (leave) a leaderboard. The creator cannot leave their own leaderboard.
+ * @description Exit (leave) a club. The creator cannot leave their own club.
  * @auth bearer
  */
 export const DELETE = withMiddleware<unknown>(
   async (request, { params }) => {
     try {
       const user = request.user!;
-      const { id: leaderboardId = '' } = params;
+      const { id: clubId = '' } = params;
 
-      const leaderboard = await db.leaderboard.findUnique({
-        where: { id: leaderboardId },
+      const club = await db.club.findUnique({
+        where: { id: clubId },
       });
 
-      if (!leaderboard) {
-        throw new NotFoundException('Leaderboard not found');
+      if (!club) {
+        throw new NotFoundException('Club not found');
       }
 
       // Prevent the creator from leaving their own leaderboard
-      // if (leaderboard.createdById === user.id) {
+      // if (club.createdById === user.id) {
       //     throw new ForbiddenException(
-      //         'The leaderboard creator cannot leave their own leaderboard'
+      //         'The club creator cannot leave their own club'
       //     );
       // }
 
       // Check if user is actually a member
-      const membership = await db.userLeaderboard.findUnique({
+      const membership = await db.userClub.findUnique({
         where: {
-          userId_leaderboardId: {
+          userId_clubId: {
             userId: user.id,
-            leaderboardId,
+            clubId,
           },
         },
       });
 
       if (!membership) {
-        throw new BadRequestException(
-          'You are not a member of this leaderboard'
-        );
+        throw new BadRequestException('You are not a member of this club');
       }
 
       // Remove membership and notify the creator
       await db.$transaction([
-        db.userLeaderboard.delete({
+        db.userClub.delete({
           where: {
-            userId_leaderboardId: {
+            userId_clubId: {
               userId: user.id,
-              leaderboardId,
+              clubId,
             },
           },
         }),
         db.notification.create({
           data: {
-            userId: leaderboard.createdById,
-            message: `${user.fullname} left your leaderboard ${leaderboard.name}`,
+            userId: club.createdById,
+            message: `${user.fullname} left your club ${club.name}`,
             type: 'info',
-            leaderboardId,
+            clubId,
           },
         }),
       ]);
 
       const response: ApiResponse<null> = {
         status: 200,
-        message: 'Successfully left the leaderboard',
+        message: 'Successfully left the club',
         data: null,
       };
 
@@ -85,7 +83,7 @@ export const DELETE = withMiddleware<unknown>(
     } catch (error: any) {
       if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while leaving leaderboard: ${error.message}`
+        `An error occurred while leaving club: ${error.message}`
       );
     }
   },

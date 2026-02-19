@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { clubValidatorSchema } from '@/backend/validators/club.validator';
-import axios from 'axios';
-import Link from 'next/link';
-import { toast } from 'sonner';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
+import { FadeInItem, FadeInStagger } from '@/components/fade-in';
 import { type ApiResponse, type ClubDetail } from '@/types';
-import { FadeInStagger, FadeInItem } from '@/components/fade-in';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -24,6 +25,11 @@ interface ClubDetailClientProps {
 export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData }) => {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
+    const router = useRouter();
+      const currentUserId = session?.user?.id;
+
+      const isCreator = currentUserId ? initialData.data?.createdById === currentUserId : false;
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
 
@@ -103,6 +109,26 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message ?? 'Failed to update club');
+    },
+  });
+
+    const exitMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.delete(`/api/clubs/${club.id}/exit`, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('You have left the club.');
+      await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
+      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      router.push('/clubs');
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to leave club'
+      );
     },
   });
 
@@ -189,13 +215,26 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
             </div>
           </div>
 
-          <button
-            onClick={() => setIsEditModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shrink-0"
-          >
-            <Icon name="edit" className="text-base" />
-            Edit
-          </button>
+       
+          <div className="flex items-center gap-2 shrink-0">
+            {/* {!isCreator && ( */}
+              <button
+                onClick={() => exitMutation.mutate()}
+                disabled={exitMutation.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 dark:border-red-800/50 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+              >
+                <Icon name="logout" className="text-base" />
+                {exitMutation.isPending ? 'Leaving...' : 'Leave'}
+              </button>
+             {/* )} */}
+   {     isCreator &&    <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+            >
+              <Icon name="edit" className="text-base" />
+              Edit
+            </button>}
+          </div>
         </div>
       </div>
       </FadeInItem>
