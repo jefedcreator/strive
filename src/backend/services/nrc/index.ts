@@ -22,8 +22,6 @@ interface Activity {
   summaries: Summary[];
 }
 
-
-
 interface ActivitiesResponse {
   activities: Activity[];
 }

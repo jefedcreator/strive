@@ -1,4 +1,9 @@
-import { type Club, type Leaderboard, type Notification, type User } from '@prisma/client';
+import {
+  type Club,
+  type Leaderboard,
+  type Notification,
+  type User,
+} from '@prisma/client';
 
 export interface PaginationMeta {
   total: number;
@@ -15,7 +20,7 @@ export interface ApiResponse<T = unknown> {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-  PaginationMeta { }
+    PaginationMeta {}
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -103,11 +108,11 @@ export type LeaderboardDetail = Leaderboard & {
 export interface RunData {
   id: string;
   date: string;
-  distance: number;  // in km
-  duration: number;  // in minutes
-  pace: string;      // in min/km (e.g. "5:30")
-  type: string;      // e.g. "run", "Run", "Trail Run"
-  name: string;      // activity name
+  distance: number; // in km
+  duration: number; // in minutes
+  pace: string; // in min/km (e.g. "5:30")
+  type: string; // e.g. "run", "Run", "Trail Run"
+  name: string; // activity name
 }
 
 interface ISubMenu {
@@ -124,11 +129,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-  | {
-    1: string;
-    2?: string | undefined;
-  }
-  | undefined;
+    | {
+        1: string;
+        2?: string | undefined;
+      }
+    | undefined;
 };
 
 enum DateRangeFilters {

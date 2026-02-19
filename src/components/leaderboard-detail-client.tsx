@@ -217,13 +217,13 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
                 {exitMutation.isPending ? 'Leaving...' : 'Leave'}
               </button>
              {/* )} */}
-            <button
+   {     isCreator &&    <button
               onClick={() => setIsEditModalOpen(true)}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
             >
               <Icon name="edit" className="text-base" />
               Edit
-            </button>
+            </button>}
           </div>
         </div>
       </div>

@@ -8,9 +8,8 @@ import { db } from '@/server/db';
 import { type ApiResponse } from '@/types';
 import {
     BadRequestException,
-    ForbiddenException,
     InternalServerErrorException,
-    NotFoundException,
+    NotFoundException
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 

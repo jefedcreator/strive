@@ -8,7 +8,10 @@ import {
   type NotificationQueryValidatorSchema,
 } from '@/backend/validators/notification.validator';
 import { db } from '@/server/db';
-import { type NotificationWithRelations, type PaginatedApiResponse } from '@/types';
+import {
+  type NotificationWithRelations,
+  type PaginatedApiResponse,
+} from '@/types';
 import { InternalServerErrorException } from '@/utils/exceptions';
 import { type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
