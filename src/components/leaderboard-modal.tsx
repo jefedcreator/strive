@@ -40,7 +40,7 @@ interface LeaderboardModalProps {
   /** List of clubs for the dropdown */
   clubs: ClubListItem[];
   /** Called when user selects a thumbnail file */
-  onThumbnailChange: (file: File) => void;
+  // onThumbnailChange: (file: File) => void;
 }
 
 const Icon: React.FC<{ name: string; className?: string }> = ({
@@ -61,14 +61,14 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   onSubmit,
   isPending,
   clubs,
-  onThumbnailChange,
+  // onThumbnailChange,
 }) => {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      onThumbnailChange(file);
+      // onThumbnailChange(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setThumbnailPreview(reader.result as string);

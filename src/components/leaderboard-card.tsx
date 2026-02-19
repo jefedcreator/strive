@@ -12,6 +12,8 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Modal } from '@/primitives/Modal';
+import { Button } from '@/primitives/Button';
 
 export interface LeaderboardCardProps {
   data: LeaderboardListItem;
@@ -28,6 +30,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const isCompleted = data.expiryDate ? new Date(data.expiryDate) < new Date() : false;
   const participantsCount = data._count?.entries ?? 0;
   const queryClient = useQueryClient();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
 console.log('leaderboard data',data);
 
   const joinMutation = useMutation({
@@ -72,6 +75,25 @@ console.log('leaderboard data',data);
     onError: (error: any) => {
       toast.error(
         error.response?.data?.message ?? 'Failed to invite to leaderboard'
+      );
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.delete(`/api/leaderboards/${data.id}`, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('Leaderboard deleted successfully!');
+      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      setIsDeleteModalOpen(false);
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to delete leaderboard'
       );
     },
   });
@@ -137,6 +159,15 @@ console.log('leaderboard data',data);
                 Invite
               </DropdownMenuItem>
             )}
+            {isCreator && (
+              <DropdownMenuItem
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
+              >
+                <Icon name="delete" className="text-base" />
+                Delete
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -175,6 +206,43 @@ console.log('leaderboard data',data);
           <Icon name="arrow_forward" className="text-sm ml-1" />
         </a>
       </div>
+
+      <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <Modal.Portal>
+          <Modal.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-[400px] bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-xl z-[100]">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                  <Icon name="warning" className="text-xl" />
+                </div>
+                <Modal.Title className="text-lg font-bold">Delete Leaderboard</Modal.Title>
+              </div>
+              
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Are you sure you want to delete <span className="font-bold text-gray-900 dark:text-white">"{data.name}"</span>? 
+                This action cannot be undone and all data will be lost.
+              </p>
+
+              <div className="flex gap-3 justify-end mt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  disabled={deleteMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => deleteMutation.mutate()}
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                </Button>
+              </div>
+            </div>
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal>
     </div>
   );
 };

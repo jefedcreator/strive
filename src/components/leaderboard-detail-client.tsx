@@ -29,7 +29,7 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId ? initialData.data?.createdById === currentUserId : false;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [thumbnail, setThumbnail] = useState<File | null>(null);
+  // const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const { data: response } = useQuery<ApiResponse<LeaderboardDetail | null>>({
     queryKey: ['leaderboard', initialData.data?.id],
@@ -98,7 +98,7 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
       await queryClient.invalidateQueries({ queryKey: ['leaderboard', leaderboard.id] });
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
       setIsEditModalOpen(false);
-      setThumbnail(null);
+      // setThumbnail(null);
     },
     onError: (error: any) => {
       toast.error(
@@ -341,7 +341,7 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
         onSubmit={onSubmit}
         isPending={editMutation.isPending}
         clubs={clubs}
-        onThumbnailChange={(file) => setThumbnail(file)}
+        // onThumbnailChange={(file) => setThumbnail(file)}
       />
     </FadeInStagger>
   );

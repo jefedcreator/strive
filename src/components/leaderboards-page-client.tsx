@@ -5,6 +5,7 @@ import { LeaderboardCard, Icon } from '@/components/leaderboard-card';
 import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
 import { FadeInStagger, FadeInItem } from '@/components/fade-in';
 import { Button } from '@/primitives/Button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/primitives/Tabs';
 import {
   leaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
@@ -16,6 +17,7 @@ import { type User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { useQueryState } from 'nuqs';
 
 const ActivityTable: React.FC<{ activities: Activity[] }> = ({ activities }) => (
     <div className="mt-12 bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-soft">
@@ -78,20 +80,19 @@ interface LeaderboardsPageClientProps {
 export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ initialData }) => {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('All Active');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [tab, setTab] = useQueryState('tab', { defaultValue: 'all', shallow: false });
 
   const { data: leaderboardsResponse } = useQuery<PaginatedApiResponse<LeaderboardListItem[]>>({
-    queryKey: ['leaderboards'],
-     queryFn: async () => {
-      const { data } = await axios.get<PaginatedApiResponse<LeaderboardListItem[]>>('/api/leaderboards', {
+    queryKey: ['leaderboards', tab],
+    queryFn: async () => {
+      const res = await axios.get('/api/leaderboards', {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
-      return data;
+      return res.data;
     },
     initialData,
-    staleTime: Infinity,
+    staleTime:Infinity
   });
 
   // Fetch clubs for the modal dropdown
@@ -140,7 +141,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
       setIsModalOpen(false);
       reset();
-      setThumbnail(null);
     },
     onError: (error: any) => {
       toast.error(
@@ -180,54 +180,111 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
         </div>
       </div>
 
-      <div className="flex items-center space-x-1 mb-8 border-b border-gray-200 dark:border-gray-800 overflow-x-auto scrollbar-hide">
-        {['All Active', 'Pending', 'Completed', 'Invitations'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap relative ${
-              activeTab === tab
-                ? 'text-gray-900 dark:text-white'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            {tab}
-            {tab === 'Invitations' && (
-              <span className="ml-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-0.5 px-2 rounded-full text-[10px] font-bold">
-                2
-              </span>
-            )}
-            {activeTab === tab && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary dark:bg-white" />
-            )}
-          </button>
-        ))}
-      </div>
+      <Tabs value={tab} className="flex flex-col" onValueChange={(value) => setTab(value === 'all' ? null : value)}>
+        <TabsList className="mb-8">
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="inactive">Inactive</TabsTrigger>
+          <TabsTrigger value="public">Public</TabsTrigger>
+          <TabsTrigger value="private">Private</TabsTrigger>
+          <TabsTrigger value="invitations">
+            Invitations
+            <span className="ml-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-0.5 px-2 rounded-full text-[10px] font-bold">
+              2
+            </span>
+          </TabsTrigger>
+        </TabsList>
 
-      <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {leaderboards.map((board) => (
-          <FadeInItem key={board.id}>
-            <LeaderboardCard data={board} />
-          </FadeInItem>
-        ))}
-        
-        <FadeInItem>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-gray-800/50 hover:border-primary dark:hover:border-gray-600 transition-all group min-h-[220px] w-full h-full"
-          >
-            <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mb-3 transition-colors">
-              <Icon name="add" className="text-2xl" />
+        <TabsContent value="all">
+          <FadeInStagger key={leaderboards.length} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {leaderboards.map((board) => (
+              <FadeInItem key={board.id}>
+                <LeaderboardCard data={board} />
+              </FadeInItem>
+            ))}
+            
+            <FadeInItem>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-gray-800/50 hover:border-primary dark:hover:border-gray-600 transition-all group min-h-[220px] w-full h-full"
+              >
+                <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mb-3 transition-colors">
+                  <Icon name="add" className="text-2xl" />
+                </div>
+                <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">
+                  Create New Leaderboard
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
+                  Start a new competition with friends or your club.
+                </p>
+              </button>
+            </FadeInItem>
+          </FadeInStagger>
+        </TabsContent>
+
+        <TabsContent value="active">
+          <FadeInStagger key={leaderboards.length} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {leaderboards.map((board) => (
+              <FadeInItem key={board.id}>
+                <LeaderboardCard data={board} />
+              </FadeInItem>
+            ))}
+            
+            <FadeInItem>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-gray-800/50 hover:border-primary dark:hover:border-gray-600 transition-all group min-h-[220px] w-full h-full"
+              >
+                <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mb-3 transition-colors">
+                  <Icon name="add" className="text-2xl" />
+                </div>
+                <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">
+                  Create New Leaderboard
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
+                  Start a new competition with friends or your club.
+                </p>
+              </button>
+            </FadeInItem>
+          </FadeInStagger>
+        </TabsContent>
+
+        <TabsContent value="inactive">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+              <Icon name="hourglass_empty" className="text-2xl text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">
-              Create New Leaderboard
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
-              Start a new competition with friends or your club.
+            <h3 className="font-bold text-gray-900 dark:text-white mb-1">No inactive leaderboards</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+              Leaderboards awaiting approval will appear here.
             </p>
-          </button>
-        </FadeInItem>
-      </FadeInStagger>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="completed">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+              <Icon name="emoji_events" className="text-2xl text-gray-400 dark:text-gray-500" />
+            </div>
+            <h3 className="font-bold text-gray-900 dark:text-white mb-1">No completed leaderboards</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+              Finished competitions will appear here.
+            </p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="invitations">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+              <Icon name="mail" className="text-2xl text-gray-400 dark:text-gray-500" />
+            </div>
+            <h3 className="font-bold text-gray-900 dark:text-white mb-1">No invitations</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+              Invitations to join leaderboards will appear here.
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <ActivityTable activities={recentActivities} />
 
@@ -242,7 +299,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
         onSubmit={onSubmit}
         isPending={createMutation.isPending}
         clubs={clubs}
-        onThumbnailChange={(file) => setThumbnail(file)}
+        // onThumbnailChange={(file) => setThumbnail(file)}
       />
     </div>
   );

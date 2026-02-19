@@ -209,3 +209,5 @@ export const GET = withMiddleware<
     queryValidatorMiddleware(leaderboardEntriesQueryValidatorSchema),
   ]
 );
+
+
