@@ -27,7 +27,10 @@ export const POST = withMiddleware<LoginValidatorSchema>(
       // ---------------------------------------------------------
       if (payload?.type === 'strava') {
         if (!payload.code) {
-          const authorizationUrl = stravaService.getAuthorizationUrl();
+          const authorizationUrl = stravaService.getAuthorizationUrl({
+            clubId: payload.clubId,
+            inviteId: payload.inviteId,
+          });
           return NextResponse.json({
             status: 200,
             action: 'redirect',

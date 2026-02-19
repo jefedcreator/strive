@@ -53,8 +53,7 @@ const InviteDetailClient = ({
 
   const handleAccept = async () => {
     setIsAccepting(true);
-    const callbackUrl = `/clubs/${club.id}?inviteId=${invite.id}&action=join`;
-    router.push(`/?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    router.push(`/?clubId=${club.id}&inviteId=${invite.id}`);
   };
 
   const handleDecline = async () => {

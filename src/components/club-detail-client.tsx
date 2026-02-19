@@ -54,51 +54,51 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
 
   const club = response.data!;
 
-  const joinViaInviteMutation = useMutation({
-    mutationFn: async (inviteId: string) => {
-      const res = await axios.post(
-        `/api/clubs/${club.id}/invites/${inviteId}/join`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${session?.user.token}` },
-        }
-      );
-      return res.data;
-    },
-    onSuccess: async () => {
-      toast.success('Successfully joined the club via invite!');
-      await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
-      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
-      // Remove query params
-      router.replace(`/clubs/${club.id}`);
-    },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to join club via invite'
-      );
-      // Remove query params
-      router.replace(`/clubs/${club.id}`);
-    },
-  });
+  // const joinViaInviteMutation = useMutation({
+  //   mutationFn: async (inviteId: string) => {
+  //     const res = await axios.post(
+  //       `/api/clubs/${club.id}/invites/${inviteId}/join`,
+  //       {},
+  //       {
+  //         headers: { Authorization: `Bearer ${session?.user.token}` },
+  //       }
+  //     );
+  //     return res.data;
+  //   },
+  //   onSuccess: async () => {
+  //     toast.success('Successfully joined the club via invite!');
+  //     await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
+  //     await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+  //     // Remove query params
+  //     router.replace(`/clubs/${club.id}`);
+  //   },
+  //   onError: (error: any) => {
+  //     toast.error(
+  //       error.response?.data?.message ?? 'Failed to join club via invite'
+  //     );
+  //     // Remove query params
+  //     router.replace(`/clubs/${club.id}`);
+  //   },
+  // });
 
-  useEffect(() => {
-    const action = searchParams.get('action');
-    const inviteId = searchParams.get('inviteId');
+  // useEffect(() => {
+  //   const action = searchParams.get('action');
+  //   const inviteId = searchParams.get('inviteId');
 
-    if (
-      action === 'join' &&
-      inviteId &&
-      session?.user &&
-      !joinViaInviteMutation.isPending
-    ) {
-      if (club.members.some((m) => m.userId === session.user.id)) {
-        toast.info('You are already a member of this club.');
-        router.replace(`/clubs/${club.id}`);
-        return;
-      }
-      joinViaInviteMutation.mutate(inviteId);
-    }
-  }, [searchParams, session]);
+  //   if (
+  //     action === 'join' &&
+  //     inviteId &&
+  //     session?.user &&
+  //     !joinViaInviteMutation.isPending
+  //   ) {
+  //     if (club.members.some((m) => m.userId === session.user.id)) {
+  //       toast.info('You are already a member of this club.');
+  //       router.replace(`/clubs/${club.id}`);
+  //       return;
+  //     }
+  //     joinViaInviteMutation.mutate(inviteId);
+  //   }
+  // }, [searchParams, session]);
 
   const {
     register,
@@ -246,7 +246,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                   /{club.slug}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl">
-                  {club.description || 'No description provided.'}
+                  {club.description ?? 'No description provided.'}
                 </p>
                 <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-1">

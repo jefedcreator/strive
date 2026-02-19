@@ -48,7 +48,11 @@ function LoginPageContent() {
     onError: (error: any) => toast.error(error.message),
   });
 
-  const handleStravaLogin = () => loginMutation.mutate({ type: 'strava' });
+  const handleStravaLogin = () => {
+    const clubId = searchParams.get('clubId') ?? undefined;
+    const inviteId = searchParams.get('inviteId') ?? undefined;
+    loginMutation.mutate({ type: 'strava', clubId, inviteId });
+  };
 
   const handleNRCLogin = () => {
     toast.promise(loginMutation.mutateAsync({ type: 'nrc' }), {

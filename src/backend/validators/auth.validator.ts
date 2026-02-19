@@ -7,6 +7,8 @@ export const loginValidatorSchema = z
       invalid_type_error: 'type must be a valid string',
     }),
     code: z.string().optional(),
+    clubId: z.string().optional(),
+    inviteId: z.string().optional(),
   })
   .strict();
 
