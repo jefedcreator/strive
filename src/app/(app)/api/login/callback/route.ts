@@ -25,12 +25,19 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
     try {
       const { code, state } = request.query!;
       let clubId: string | undefined;
+      let leaderboardId: string | undefined;
       let inviteId: string | undefined;
+
+
+      console.log('leaderboardId', leaderboardId);
+      console.log('inviteId', inviteId);
+
 
       if (state) {
         try {
           const parsedState = JSON.parse(state);
           clubId = parsedState.clubId;
+          leaderboardId = parsedState.leaderboardId;
           inviteId = parsedState.inviteId;
         } catch (e) {
           console.error('Failed to parse state:', e);
@@ -97,6 +104,32 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         }
       }
 
+      // Handle Leaderboard Join if invite info is present
+      if (leaderboardId && inviteId && user) {
+        const existingEntry = await db.userLeaderboard.findUnique({
+          where: {
+            userId_leaderboardId: {
+              userId: user.id,
+              leaderboardId,
+            },
+          },
+        });
+
+        if (!existingEntry) {
+          await db.$transaction([
+            db.userLeaderboard.create({
+              data: {
+                userId: user.id,
+                leaderboardId,
+              },
+            }),
+            db.leaderboardInvites.delete({
+              where: { id: inviteId },
+            }),
+          ]);
+        }
+      }
+
       const jwtPayload = { uid: user.id, email: user.email };
       const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
       const expiresAt = moment()
@@ -117,6 +150,8 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
 
       if (clubId) {
         return NextResponse.redirect(new URL(`/clubs/${clubId}`, request.url));
+      } else if (leaderboardId) {
+        return NextResponse.redirect(new URL(`/leaderboards/${leaderboardId}`, request.url));
       }
 
       return NextResponse.redirect(new URL('/home', request.url));

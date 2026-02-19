@@ -23,7 +23,7 @@ export async function generateMetadata({
   const leaderboardName = invite.leaderboard.name;
   const inviterName = invite.inviter?.fullname ?? 'Someone';
   const description = invite.leaderboard.description ?? `Join ${leaderboardName} on Strive!`;
-  const image = invite.leaderboard.image ?? `/api/leaderboards/og?name=${encodeURIComponent(leaderboardName)}`;
+  const image = `/api/og/leaderboard?name=${encodeURIComponent(leaderboardName)}`;
 
   return {
     title: `Join ${leaderboardName} | Invited by ${inviterName}`,

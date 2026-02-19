@@ -54,7 +54,6 @@ export const LeaderboardDetailClient: React.FC<
   });
 
   const leaderboard = response.data!;
-  console.log('leaderboard', leaderboard);
 
   const entries = leaderboard.entries ?? [];
   const isCompleted = leaderboard.expiryDate

@@ -187,11 +187,11 @@ const InviteDetailClient = ({
                 className="flex items-center relative z-10"
               >
                 <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3" />
-                Joining Club...
+                {isAccepting ? `Joining ${type === 'club' ? 'Club' : 'Team'}...` : 'Accept Invitation'}
               </motion.div>
             ) : (
               <span className="flex items-center relative z-10">
-                Accept Invitation
+                {`Accept Invitation to ${entityName}`}
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover/btn:translate-x-1" />
               </span>
             )}

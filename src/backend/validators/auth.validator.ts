@@ -8,6 +8,7 @@ export const loginValidatorSchema = z
     }),
     code: z.string().optional(),
     clubId: z.string().optional(),
+    leaderboardId: z.string().optional(),
     inviteId: z.string().optional(),
   })
   .strict();

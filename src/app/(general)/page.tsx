@@ -50,17 +50,19 @@ function LoginPageContent() {
 
   const handleStravaLogin = () => {
     const clubId = searchParams.get('clubId') ?? undefined;
+    const leaderboardId = searchParams.get('leaderboardId') ?? undefined;
     const inviteId = searchParams.get('inviteId') ?? undefined;
-    loginMutation.mutate({ type: 'strava', clubId, inviteId });
+    loginMutation.mutate({ type: 'strava', clubId, leaderboardId, inviteId });
   };
 
   const handleNRCLogin = () => {
     const clubId = searchParams.get('clubId') ?? undefined;
+    const leaderboardId = searchParams.get('leaderboardId') ?? undefined;
     const inviteId = searchParams.get('inviteId') ?? undefined;
-    toast.promise(loginMutation.mutateAsync({ type: 'nrc', clubId, inviteId }), {
+    toast.promise(loginMutation.mutateAsync({ type: 'nrc', clubId, leaderboardId, inviteId }), {
       loading: 'Opening Nike login...',
       success: () => {
-        if (!clubId) {
+        if (!clubId && !leaderboardId) {
           router.push('/home');
         }
         return 'Welcome to Strive!';

@@ -5,7 +5,8 @@ import type {
   ApiResponse,
   ClubDetail,
   ClubListItem,
-  InviteDetail,
+  ClubInviteDetail,
+  LeaderboardInviteDetail,
   LeaderboardDetail,
   LeaderboardListItem,
   NotificationWithRelations,
@@ -199,7 +200,7 @@ async function getRuns(): Promise<ApiResponse<RunData[]>> {
 async function getClubInvite(
   id: string,
   invitesId: string
-): Promise<ApiResponse<InviteDetail | null>> {
+): Promise<ApiResponse<ClubInviteDetail | null>> {
   try {
     const url = `${baseUrl}/api/clubs/${id}/invites/${invitesId}`;
     const res = await fetcher(url);
@@ -208,7 +209,7 @@ async function getClubInvite(
       throw new Error(`Failed to fetch club invite: ${res.statusText}`);
     }
 
-    return res.json() as Promise<ApiResponse<InviteDetail>>;
+    return res.json() as Promise<ApiResponse<ClubInviteDetail>>;
   } catch (error) {
     console.error('Error fetching club invite:', error);
     return {
@@ -222,7 +223,7 @@ async function getClubInvite(
 async function getLeaderboardInvite(
   id: string,
   invitesId: string
-): Promise<ApiResponse<InviteDetail | null>> {
+): Promise<ApiResponse<LeaderboardInviteDetail | null>> {
   try {
     const url = `${baseUrl}/api/leaderboards/${id}/invites/${invitesId}`;
     const res = await fetcher(url);
@@ -231,7 +232,7 @@ async function getLeaderboardInvite(
       throw new Error(`Failed to fetch leaderboard invite: ${res.statusText}`);
     }
 
-    return res.json() as Promise<ApiResponse<InviteDetail>>;
+    return res.json() as Promise<ApiResponse<LeaderboardInviteDetail>>;
   } catch (error) {
     console.error('Error fetching leaderboard invite:', error);
     return {

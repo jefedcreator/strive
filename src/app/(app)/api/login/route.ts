@@ -30,6 +30,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         if (!payload.code) {
           const authorizationUrl = stravaService.getAuthorizationUrl({
             clubId: payload.clubId,
+            leaderboardId: payload.leaderboardId,
             inviteId: payload.inviteId,
           });
           return NextResponse.json({
@@ -60,7 +61,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
           fullname: username,
         });
 
-        const { clubId, inviteId } = payload;
+        const { clubId, leaderboardId, inviteId } = payload;
         if (clubId && inviteId && user) {
           const existingMember = await db.userClub.findUnique({
             where: {
@@ -107,6 +108,31 @@ export const POST = withMiddleware<LoginValidatorSchema>(
             ]);
           }
         }
+
+        if (leaderboardId && inviteId && user) {
+          const existingEntry = await db.userLeaderboard.findUnique({
+            where: {
+              userId_leaderboardId: {
+                userId: user.id,
+                leaderboardId,
+              },
+            },
+          });
+
+          if (!existingEntry) {
+            await db.$transaction([
+              db.userLeaderboard.create({
+                data: {
+                  userId: user.id,
+                  leaderboardId,
+                },
+              }),
+              db.leaderboardInvites.delete({
+                where: { id: inviteId },
+              }),
+            ]);
+          }
+        }
       } else {
         throw new Error('Invalid login type provided.');
       }
@@ -146,9 +172,14 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         },
       };
 
-      if (payload?.type === 'nrc' && payload?.clubId) {
-        responsePayload.action = 'redirect';
-        responsePayload.url = `/clubs/${payload.clubId}`;
+      if (payload?.type === 'nrc') {
+        if (payload?.clubId) {
+          responsePayload.action = 'redirect';
+          responsePayload.url = `/clubs/${payload.clubId}`;
+        } else if (payload?.leaderboardId) {
+          responsePayload.action = 'redirect';
+          responsePayload.url = `/leaderboards/${payload.leaderboardId}`;
+        }
       }
 
       return NextResponse.json(responsePayload, { status: 201 });
