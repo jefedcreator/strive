@@ -1,6 +1,6 @@
 'use client';
 
-import { type ApiResponse, type InviteDetail } from '@/types';
+import { type ApiResponse, type ClubInviteDetail, type LeaderboardInviteDetail } from '@/types';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, ShieldCheck, ArrowRight, X } from 'lucide-react';
@@ -11,10 +11,12 @@ import { useRouter } from 'next/navigation';
 
 const InviteDetailClient = ({
   initialData,
+  type,
 }: {
-  initialData: ApiResponse<InviteDetail | null>;
+  initialData: ApiResponse<ClubInviteDetail | LeaderboardInviteDetail | null>;
+  type: 'club' | 'leaderboard';
 }) => {
-  const router = useRouter();
+  const router = useRouter(); 
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
 
@@ -48,12 +50,24 @@ const InviteDetailClient = ({
     );
   }
 
-  const { club, inviter } = invite;
+  const isClub = type === 'club';
+  
+  // Extract entity based on type
+  const entityName = isClub ? (invite as ClubInviteDetail).club.name : (invite as LeaderboardInviteDetail).leaderboard.name;
+  const entityDescription = isClub ? (invite as ClubInviteDetail).club.description : (invite as LeaderboardInviteDetail).leaderboard.description;
+  const entityId = isClub ? (invite as ClubInviteDetail).club.id : (invite as LeaderboardInviteDetail).leaderboard.id;
+  const entityMemberCount = isClub ? (invite as ClubInviteDetail).club.memberCount : (invite as LeaderboardInviteDetail).leaderboard._count.entries;
+  const inviter = invite.inviter;
+
+  const entityImage = isClub 
+    ? ((invite as ClubInviteDetail).club.image || null) 
+    : `/api/leaderboards/og?name=${encodeURIComponent(entityName)}`;
+
   const inviterName = inviter?.fullname ?? inviter?.username ?? 'A member';
 
   const handleAccept = async () => {
     setIsAccepting(true);
-    router.push(`/?clubId=${club.id}&inviteId=${invite.id}`);
+    router.push(type === 'club' ? `/?clubId=${entityId}&inviteId=${invite.id}` : `/?leaderboardId=${entityId}&inviteId=${invite.id}`);
   };
 
   const handleDecline = async () => {
@@ -105,18 +119,18 @@ const InviteDetailClient = ({
           </div>
         </motion.div>
 
-        {/* Club Image / Initial */}
+        {/* Entity Image / Initial */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, type: 'spring' }}
           className="relative w-full h-[220px] rounded-[1.5rem] overflow-hidden mb-8 bg-muted shadow-inner group/image"
         >
-          {club.image ? (
+          {entityImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={club.image}
-              alt={club.name}
+              src={entityImage}
+              alt={entityName}
               className="w-full h-full object-cover transition-transform duration-700 group-hover/image:scale-105"
             />
           ) : (
@@ -127,17 +141,19 @@ const InviteDetailClient = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6">
             <h1 className="text-white text-3xl font-black tracking-tight leading-none mb-2">
-              {club.name}
+              {entityName}
             </h1>
-            <div className="flex items-center text-white/80 text-sm font-semibold tracking-wide">
-              <Users size={16} className="mr-2 opacity-80" />
-              {club.memberCount} Athlete{club.memberCount !== 1 ? 's' : ''}
-            </div>
+            {entityMemberCount !== null && (
+              <div className="flex items-center text-white/80 text-sm font-semibold tracking-wide">
+                <Users size={16} className="mr-2 opacity-80" />
+                {entityMemberCount} Athlete{entityMemberCount !== 1 ? 's' : ''}
+              </div>
+            )}
           </div>
         </motion.div>
 
-        {/* Club Description */}
-        {club.description && (
+        {/* Entity Description */}
+        {entityDescription && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -145,7 +161,7 @@ const InviteDetailClient = ({
             className="mb-8"
           >
             <p className="text-muted-foreground text-sm leading-relaxed text-center font-medium px-4">
-              &quot;{club.description}&quot;
+              &quot;{entityDescription}&quot;
             </p>
           </motion.div>
         )}

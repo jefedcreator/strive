@@ -37,6 +37,11 @@ export const GET = withMiddleware<unknown>(
               id: true,
               name: true,
               description: true,
+              _count: {
+                select: {
+                  entries: true,
+                }
+              }
             },
           },
           inviter: {
@@ -54,7 +59,7 @@ export const GET = withMiddleware<unknown>(
         throw new NotFoundException('Invite not found');
       }
 
-      if (invite.leaderboardId !==  leaderboardId) {
+      if (invite.leaderboardId !== leaderboardId) {
         throw new ForbiddenException('Invite does not belong to this leaderboard');
       }
 

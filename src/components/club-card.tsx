@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Modal } from '@/primitives/Modal';
 import { Button } from '@/primitives/Button';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 interface ClubCardProps {
   club: ClubListItem;
@@ -116,10 +117,15 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   });
 
   return (
-    <div
-      className={`bg-card-light dark:bg-card-dark rounded-3xl p-6 shadow-sm border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 group ${isInactive ? 'opacity-75 hover:opacity-100' : ''}`}
+    <motion.div
+      whileHover={{ y: -4, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+      whileTap={{ scale: 0.98, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+      className={`relative bg-[#FAFAFA] dark:bg-[#0A0A0A] rounded-[24px] p-6 shadow-sm border border-black/5 dark:border-white/[0.08] hover:shadow-xl hover:shadow-primary/10 transition-shadow duration-300 group overflow-hidden ${isInactive ? 'opacity-75 hover:opacity-100' : ''}`}
     >
-      <div className="flex justify-between items-start mb-4">
+      {/* Subtle Inner Glow on Hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+      <div className="relative z-10 flex justify-between items-start mb-5">
         <div className="flex items-center space-x-4">
           <div className="h-14 w-14 rounded-2xl overflow-hidden shrink-0 border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex flex-col justify-center items-center">
             {club.image ? (
@@ -136,18 +142,18 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           </div>
           <div className="flex flex-col justify-center">
             <span
-              className={`text-[10px] font-bold ${club.isPublic ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'} px-2 py-0.5 rounded-full uppercase tracking-wide`}
+              className={`text-[10px] font-bold ${club.isPublic ? 'text-blue-600 dark:text-blue-400 bg-blue-500/10' : 'text-purple-600 dark:text-purple-400 bg-purple-500/10'} px-2.5 py-0.5 rounded-full uppercase tracking-wider w-fit`}
             >
               {club.isPublic ? 'Public' : 'Private'}
             </span>
-            <h3 className="font-bold text-lg text-gray-900 dark:text-white mt-1 truncate max-w-[180px] group-hover:text-primary transition-colors">
+            <h3 className="font-extrabold tracking-tight text-lg text-gray-900 dark:text-white mt-1.5 truncate max-w-[170px] group-hover:text-primary transition-colors duration-300">
               {club.name}
             </h3>
           </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 outline-none">
+            <button className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 outline-none backdrop-blur-sm">
               <MoreVertical className="w-5 h-5" />
             </button>
           </DropdownMenuTrigger>
@@ -186,11 +192,11 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
         </DropdownMenu>
       </div>
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed line-clamp-2 min-h-[44px]">
+      <p className="relative z-10 text-[13px] text-gray-500 dark:text-gray-400/90 mb-6 leading-relaxed line-clamp-2 min-h-[44px]">
         {club.description || 'No description provided.'}
       </p>
 
-      <div className="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-6 space-x-4">
+      <div className="relative z-10 flex items-center text-xs font-semibold text-gray-500 dark:text-gray-400/80 mb-6 space-x-4">
         <div className="flex items-center">
           <Users className="w-4 h-4 mr-1" />
           {club.slug}
@@ -201,19 +207,19 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
         </div>
       </div>
 
-      <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+      <div className="relative z-10 pt-4 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-gray-400" />
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+          <Users className="w-4 h-4 text-gray-400/70" />
+          <span className="text-[13px] font-semibold tracking-tight text-gray-500 dark:text-gray-400">
             {memberCount} {memberCount === 1 ? 'member' : 'members'}
           </span>
         </div>
 
         <a
           href={`/clubs/${club.id}`}
-          className="group/link text-sm font-bold text-gray-900 dark:text-white flex items-center hover:text-primary dark:hover:text-primary transition-colors"
+          className="group/link text-[13px] font-bold text-gray-900 dark:text-white flex items-center bg-gray-100 dark:bg-white/5 hover:bg-primary hover:text-white dark:hover:bg-primary px-3 py-1.5 rounded-full transition-all duration-300"
         >
-          View Details <ArrowRight className="w-4 h-4 ml-1 text-gray-400 group-hover/link:text-primary group-hover/link:translate-x-1 transition-all" />
+          Details <ArrowRight className="w-3.5 h-3.5 ml-1 text-gray-400 group-hover/link:text-white group-hover/link:translate-x-1 transition-all" />
         </a>
       </div>
 
@@ -258,6 +264,6 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           </Modal.Content>
         </Modal.Portal>
       </Modal>
-    </div>
+    </motion.div>
   );
 };

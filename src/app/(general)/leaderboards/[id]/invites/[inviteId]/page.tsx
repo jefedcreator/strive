@@ -1,6 +1,6 @@
 import Background from '@/components/background';
 import InviteDetailClient from '@/components/invite-detail-client';
-import { getClubInvite } from '@/server';
+import { getLeaderboardInvite } from '@/server';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -12,7 +12,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id, inviteId } = await params;
-  const { data: invite } = await getClubInvite(id, inviteId);
+  const { data: invite } = await getLeaderboardInvite(id, inviteId);
 
   if (!invite) {
     return {
@@ -20,30 +20,30 @@ export async function generateMetadata({
     };
   }
 
-  const clubName = invite.club.name;
+  const leaderboardName = invite.leaderboard.name;
   const inviterName = invite.inviter?.fullname ?? 'Someone';
-  const description = invite.club.description ?? `Join ${clubName} on Strive!`;
-  const image = invite.club.image ?? '/favicon.ico';
+  const description = invite.leaderboard.description ?? `Join ${leaderboardName} on Strive!`;
+  const image = invite.leaderboard.image ?? `/api/leaderboards/og?name=${encodeURIComponent(leaderboardName)}`;
 
   return {
-    title: `Join ${clubName} | Invited by ${inviterName}`,
+    title: `Join ${leaderboardName} | Invited by ${inviterName}`,
     description,
     openGraph: {
-      title: `You're invited to join ${clubName}`,
+      title: `You're invited to join ${leaderboardName}`,
       description,
       images: [
         {
           url: image,
           width: 1200,
           height: 630,
-          alt: clubName,
+          alt: leaderboardName,
         },
       ],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Join ${clubName} on Strive`,
+      title: `Join ${leaderboardName} on Strive`,
       description,
       images: [image],
     },
@@ -52,7 +52,7 @@ export async function generateMetadata({
 
 export default async function InviteDetailPage({ params }: PageProps) {
   const { id, inviteId } = await params;
-  const initialData = await getClubInvite(id, inviteId);
+  const initialData = await getLeaderboardInvite(id, inviteId);
 
   if (!initialData.data) {
     notFound();
@@ -62,7 +62,7 @@ export default async function InviteDetailPage({ params }: PageProps) {
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
       <Background />
       <div className="z-10 w-full max-w-2xl">
-        <InviteDetailClient initialData={initialData} type='club'/>
+        <InviteDetailClient initialData={initialData} type="leaderboard" />
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import {
 } from '@/backend/middleware';
 import { paramValidator } from '@/backend/validators/index.validator';
 import { db } from '@/server/db';
-import { type ApiResponse, type InviteDetail } from '@/types';
+import { type ApiResponse, type ClubInviteDetail } from '@/types';
 import { mongoIdValidator } from '@/utils';
 import {
   ForbiddenException,
@@ -65,7 +65,7 @@ export const GET = withMiddleware<unknown>(
         throw new ForbiddenException('This invite was sent to another user');
       }
 
-      const response: ApiResponse<InviteDetail> = {
+      const response: ApiResponse<ClubInviteDetail> = {
         status: 200,
         message: 'Invite retrieved successfully',
         data: invite,

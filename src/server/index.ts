@@ -196,7 +196,7 @@ async function getRuns(): Promise<ApiResponse<RunData[]>> {
   }
 }
 
-async function getInvite(
+async function getClubInvite(
   id: string,
   invitesId: string
 ): Promise<ApiResponse<InviteDetail | null>> {
@@ -205,26 +205,50 @@ async function getInvite(
     const res = await fetcher(url);
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch leaderboard: ${res.statusText}`);
+      throw new Error(`Failed to fetch club invite: ${res.statusText}`);
     }
 
     return res.json() as Promise<ApiResponse<InviteDetail>>;
   } catch (error) {
-    console.error('Error fetching leaderboard:', error);
+    console.error('Error fetching club invite:', error);
     return {
       status: 500,
-      message: 'Failed to fetch leaderboard',
+      message: 'Failed to fetch club invite',
+      data: null,
+    };
+  }
+}
+
+async function getLeaderboardInvite(
+  id: string,
+  invitesId: string
+): Promise<ApiResponse<InviteDetail | null>> {
+  try {
+    const url = `${baseUrl}/api/leaderboards/${id}/invites/${invitesId}`;
+    const res = await fetcher(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch leaderboard invite: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<ApiResponse<InviteDetail>>;
+  } catch (error) {
+    console.error('Error fetching leaderboard invite:', error);
+    return {
+      status: 500,
+      message: 'Failed to fetch leaderboard invite',
       data: null,
     };
   }
 }
 
 export {
-  getInvite,
+  getClubInvite,
   getClubs,
   getClub,
   getLeaderboards,
   getLeaderboard,
   getNotifications,
   getRuns,
+  getLeaderboardInvite,
 };
