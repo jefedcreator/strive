@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
@@ -49,7 +49,6 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
     formState: { errors },
     reset,
     setValue,
-    watch,
   } = useForm<ClubFormValues>({
     resolver: zodResolver(clubValidatorSchema),
     defaultValues: {
@@ -61,16 +60,18 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
     },
   });
 
-  const nameValue = watch('name');
-  useEffect(() => {
-    if (nameValue) {
-      const generatedSlug = nameValue
+  const nameRegister = register('name');
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    void nameRegister.onChange(e);
+    const value = e.target.value;
+    if (value) {
+      const generatedSlug = value
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
       setValue('slug', generatedSlug, { shouldValidate: true });
     }
-  }, [nameValue, setValue]);
+  };
 
   const editClubMutation = useMutation({
     mutationFn: async (data: ClubFormValues) => {
@@ -331,6 +332,8 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({ initialData 
         isPending={editClubMutation.isPending}
         existingImageUrl={club.image}
         onThumbnailChange={(file) => setThumbnail(file)}
+        nameRegister={nameRegister}
+        onNameChange={handleNameChange}
       />
     </FadeInStagger>
   );

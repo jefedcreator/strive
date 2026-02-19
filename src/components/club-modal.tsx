@@ -4,7 +4,7 @@ import { type clubValidatorSchema } from '@/backend/validators/club.validator';
 import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Modal } from '@/primitives/Modal';
 import * as Switch from '@radix-ui/react-switch';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Controller,
   type Control,
@@ -36,6 +36,10 @@ interface ClubModalProps {
   existingImageUrl?: string | null;
   /** Called when user selects a thumbnail file */
   onThumbnailChange: (file: File) => void;
+  /** Custom name field registration (for slug auto-generation) */
+  nameRegister: ReturnType<UseFormRegister<ClubFormValues>>;
+  /** Custom onChange handler for the name field */
+  onNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const Icon: React.FC<{ name: string; className?: string }> = ({
@@ -57,6 +61,8 @@ export const ClubModal: React.FC<ClubModalProps> = ({
   isPending,
   existingImageUrl,
   onThumbnailChange,
+  nameRegister,
+  onNameChange,
 }) => {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     existingImageUrl ?? null
@@ -74,14 +80,13 @@ export const ClubModal: React.FC<ClubModalProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      setThumbnailPreview(existingImageUrl ?? null);
-    }
-  }, [isOpen, existingImageUrl]);
-
   return (
-    <Modal open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Modal open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        setThumbnailPreview(existingImageUrl ?? null);
+        onClose();
+      }
+    }}>
       <Modal.Portal className="bg-[#F9FAFC] opacity-70">
         <Modal.Content className="fixed top-1/2 left-1/2 w-full max-w-2xl bg-card-light dark:bg-card-dark rounded-2xl shadow-2xl z-[101] border border-gray-100 dark:border-gray-800 focus:outline-none overflow-hidden max-h-[90vh] flex flex-col">
           <div className="flex items-start justify-between border-b border-gray-100 dark:border-gray-800 p-6">
@@ -152,7 +157,8 @@ export const ClubModal: React.FC<ClubModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Field id="name" label="Club Name" error={errors.name?.message}>
                 <Input
-                  {...register('name')}
+                  {...nameRegister}
+                  onChange={onNameChange}
                   id="name"
                   placeholder="e.g. NYC Runners Club"
                 />

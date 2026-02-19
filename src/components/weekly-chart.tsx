@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,22 +24,12 @@ ChartJS.register(
 
 export function WeeklyChart() {
   const { theme } = useTheme();
-  // We need to wait for hydration to know the theme correctly, or default to checking system/class
-  // But useTheme handles it.
-  
-  const [chartData, setChartData] = useState<any>({
-    datasets: [],
-  });
-  const [chartOptions, setChartOptions] = useState<any>({});
 
-  useEffect(() => {
-    const isDark = theme === "dark" || (theme === "system" && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    
-    const gridColor = isDark ? '#333333' : '#f3f4f6';
-    const textColor = isDark ? '#9ca3af' : '#6b7280';
+  const chartData = useMemo(() => {
+    const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const barColor = isDark ? '#FFFFFF' : '#111111';
 
-    setChartData({
+    return {
       labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       datasets: [
         {
@@ -50,9 +40,15 @@ export function WeeklyChart() {
           barThickness: 24,
         },
       ],
-    });
+    };
+  }, [theme]);
 
-    setChartOptions({
+  const chartOptions = useMemo(() => {
+    const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const gridColor = isDark ? '#333333' : '#f3f4f6';
+    const textColor = isDark ? '#9ca3af' : '#6b7280';
+
+    return {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -85,7 +81,7 @@ export function WeeklyChart() {
           }
         },
       },
-    });
+    };
   }, [theme]);
 
   return (

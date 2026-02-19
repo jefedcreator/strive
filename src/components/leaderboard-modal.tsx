@@ -7,7 +7,7 @@ import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Modal } from '@/primitives/Modal';
 import { type ClubListItem } from '@/types';
 import * as Switch from '@radix-ui/react-switch';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Controller,
   type Control,
@@ -74,14 +74,13 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      setThumbnailPreview(null);
-    }
-  }, [isOpen]);
-
   return (
-    <Modal open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Modal open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        setThumbnailPreview(null);
+        onClose();
+      }
+    }}>
       <Modal.Portal className="bg-[#F9FAFC] opacity-70">
         <Modal.Content className="fixed top-1/2 left-1/2 w-full max-w-2xl bg-card-light dark:bg-card-dark rounded-2xl shadow-2xl z-[101] border border-gray-100 dark:border-gray-800 focus:outline-none overflow-hidden max-h-[90vh] flex flex-col">
           <div className="flex items-start justify-between border-b border-gray-100 dark:border-gray-800 p-6">

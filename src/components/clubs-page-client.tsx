@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -46,7 +46,6 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
     formState: { errors },
     reset,
     setValue,
-    watch,
   } = useForm<ClubFormValues>({
     resolver: zodResolver(clubValidatorSchema),
     defaultValues: {
@@ -58,16 +57,18 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
     },
   });
 
-  const nameValue = watch('name');
-  useEffect(() => {
-    if (nameValue) {
-      const generatedSlug = nameValue
+  const nameRegister = register('name');
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    void nameRegister.onChange(e);
+    const value = e.target.value;
+    if (value) {
+      const generatedSlug = value
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
       setValue('slug', generatedSlug, { shouldValidate: true });
     }
-  }, [nameValue, setValue]);
+  };
 
   const createClubMutation = useMutation({
     mutationFn: async (data: ClubFormValues) => {
@@ -191,6 +192,8 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData })
         onSubmit={onSubmit}
         isPending={createClubMutation.isPending}
         onThumbnailChange={(file) => setThumbnail(file)}
+        nameRegister={nameRegister}
+        onNameChange={handleNameChange}
       />
     </div>
   );
