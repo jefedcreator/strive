@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 interface ActivityItem {
   id: string;
@@ -11,42 +11,42 @@ interface ActivityItem {
 
 const activities: ActivityItem[] = [
   {
-    id: "1",
-    clubInitials: "TR",
-    clubName: "The Runners Club",
-    clubColor: "blue",
-    description: "Alex just finished a 10k run",
-    timeAgo: "2 mins ago",
+    id: '1',
+    clubInitials: 'TR',
+    clubName: 'The Runners Club',
+    clubColor: 'blue',
+    description: 'Alex just finished a 10k run',
+    timeAgo: '2 mins ago',
   },
   {
-    id: "2",
-    clubInitials: "NRC",
-    clubName: "NRC Chicago",
-    clubColor: "orange",
-    description: "New challenge posted: \"Winter Warrior\"",
-    timeAgo: "1 hour ago",
+    id: '2',
+    clubInitials: 'NRC',
+    clubName: 'NRC Chicago',
+    clubColor: 'orange',
+    description: 'New challenge posted: "Winter Warrior"',
+    timeAgo: '1 hour ago',
   },
   {
-    id: "3",
-    clubInitials: "MT",
-    clubName: "Mountain Trail",
-    clubColor: "green",
-    description: "Sarah commented on your route.",
-    timeAgo: "3 hours ago",
+    id: '3',
+    clubInitials: 'MT',
+    clubName: 'Mountain Trail',
+    clubColor: 'green',
+    description: 'Sarah commented on your route.',
+    timeAgo: '3 hours ago',
   },
 ];
 
 export function ActivityList() {
   const getColorClasses = (color: string) => {
     switch (color) {
-      case "blue":
-        return "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400";
-      case "orange":
-        return "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400";
-      case "green":
-        return "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400";
+      case 'blue':
+        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
+      case 'orange':
+        return 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400';
+      case 'green':
+        return 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400';
       default:
-        return "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400";
+        return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
     }
   };
 
@@ -83,7 +83,9 @@ export function ActivityList() {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {activity.description}
               </p>
-              <p className="text-[10px] text-gray-400 mt-1">{activity.timeAgo}</p>
+              <p className="text-[10px] text-gray-400 mt-1">
+                {activity.timeAgo}
+              </p>
             </div>
           </div>
         ))}

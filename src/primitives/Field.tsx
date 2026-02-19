@@ -1,5 +1,5 @@
-import { getChildId, twMerge } from "@/utils";
-import type { ReactElement } from "react";
+import { getChildId, twMerge } from '@/utils';
+import type { ReactElement } from 'react';
 
 interface FieldProps {
   className?: string;
@@ -21,16 +21,11 @@ const Field = ({
   const fieldId = getChildId(children) ?? id;
 
   return (
-    <div
-      className={twMerge(
-        "relative flex flex-col gap-1.5",
-        formClassName,
-      )}
-    >
+    <div className={twMerge('relative flex flex-col gap-1.5', formClassName)}>
       <label
         className={twMerge(
-          "block text-sm font-semibold text-gray-700 dark:text-gray-300",
-          className,
+          'block text-sm font-semibold text-gray-700 dark:text-gray-300',
+          className
         )}
         htmlFor={fieldId}
       >

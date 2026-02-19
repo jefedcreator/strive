@@ -7,8 +7,8 @@ import z from 'zod';
 import {
   createSearchParamsCache,
   parseAsBoolean,
-  parseAsString
-} from 'nuqs/server'
+  parseAsString,
+} from 'nuqs/server';
 import { HttpException } from './exceptions';
 
 const cn = (...inputs: ClassValue[]) => {
@@ -120,16 +120,13 @@ const mongoIdValidator = z
   .string()
   .regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ID format');
 
-
-
 const parseParams = {
   isActive: parseAsBoolean,
   isPublic: parseAsBoolean,
   query: parseAsString,
-}
+};
 
-const loadParams = createSearchParamsCache(parseParams)
-
+const loadParams = createSearchParamsCache(parseParams);
 
 export {
   cn,
@@ -148,5 +145,7 @@ export {
   parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword, parseParams, loadParams
+  verifyPassword,
+  parseParams,
+  loadParams,
 };

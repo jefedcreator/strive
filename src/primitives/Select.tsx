@@ -1,13 +1,13 @@
-import type { Option } from "@/types";
-import Image from "next/image";
-import { type Dispatch, forwardRef, type SetStateAction } from "react";
-import type { Noop } from "react-hook-form";
+import type { Option } from '@/types';
+import Image from 'next/image';
+import { type Dispatch, forwardRef, type SetStateAction } from 'react';
+import type { Noop } from 'react-hook-form';
 import {
   type GroupBase,
   type SelectInstance,
   type SingleValue,
-} from "react-select";
-import { default as ReactSelect } from "react-select";
+} from 'react-select';
+import { default as ReactSelect } from 'react-select';
 
 interface SelectProps {
   isSearchable?: boolean;
@@ -42,7 +42,7 @@ const Select = forwardRef<SelectRef, SelectProps>(
       setPage,
       page,
     },
-    ref,
+    ref
   ) => {
     return (
       <div className="w-full">
@@ -122,72 +122,72 @@ const Select = forwardRef<SelectRef, SelectProps>(
               }}
               styles={{
                 control: (base, state) => ({
-                  border: "1px solid",
-                  borderRadius: "0",
-                  padding: "0.75rem 0.75rem",
-                  fontSize: "0.875rem",
+                  border: '1px solid',
+                  borderRadius: '0',
+                  padding: '0.75rem 0.75rem',
+                  fontSize: '0.875rem',
                   fontWeight: 600,
-                  height: "3rem",
-                  color: "#525C76",
-                  caretColor: "transparent",
-                  borderColor: "#e2e4e8",
-                  boxShadow: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  background: "linear-gradient(to bottom, #fff, #eeeff2)",
-                  width: "100%",
+                  height: '3rem',
+                  color: '#525C76',
+                  caretColor: 'transparent',
+                  borderColor: '#e2e4e8',
+                  boxShadow: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'linear-gradient(to bottom, #fff, #eeeff2)',
+                  width: '100%',
                 }),
                 valueContainer: (base) => ({
                   ...base,
-                  color: "#525C76",
+                  color: '#525C76',
                   paddingLeft: 0,
                 }),
                 indicatorsContainer: (base, props) => ({
                   ...base,
-                  "& > div": {
+                  '& > div': {
                     paddingLeft: 0,
                   },
                 }),
                 menu: (base) => ({
                   ...base,
-                  border: "none",
-                  boxShadow: "none",
-                  width: "100%",
-                  minWidth: "unset",
+                  border: 'none',
+                  boxShadow: 'none',
+                  width: '100%',
+                  minWidth: 'unset',
                 }),
                 menuList: (base) => ({
                   ...base,
-                  visibility: "visible",
-                  display: "flex",
-                  flexDirection: "column",
-                  background: "#fff",
-                  fontSize: "14px",
-                  border: "1px solid #F3F4F6",
+                  visibility: 'visible',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  background: '#fff',
+                  fontSize: '14px',
+                  border: '1px solid #F3F4F6',
                   maxHeight: `${maxHeightMenuList}`,
-                  gap: "8px",
-                  borderRadius: "0.5rem",
-                  boxShadow: "0px 4px 8px 0px rgba(9, 23, 74, 0.12);",
-                  overflowY: "auto",
-                  marginBottom: "30px",
+                  gap: '8px',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0px 4px 8px 0px rgba(9, 23, 74, 0.12);',
+                  overflowY: 'auto',
+                  marginBottom: '30px',
                 }),
                 option: (base, state) => ({
                   ...base,
-                  fontSize: "0.875rem",
-                  backgroundColor: state.isFocused ? "#9C2D7A" : "",
+                  fontSize: '0.875rem',
+                  backgroundColor: state.isFocused ? '#9C2D7A' : '',
                   fontWeight: 600,
-                  color: state.isFocused ? "#fff" : "#424A59",
-                  ":active": {
-                    backgroundColor: "#9C2D7A",
-                    cursor: "pointer",
+                  color: state.isFocused ? '#fff' : '#424A59',
+                  ':active': {
+                    backgroundColor: '#9C2D7A',
+                    cursor: 'pointer',
                   },
                 }),
                 dropdownIndicator: (base) => ({
                   ...base,
-                  color: "#525C76",
+                  color: '#525C76',
                 }),
                 singleValue: (base) => ({
                   ...base,
-                  color: "#525C76",
+                  color: '#525C76',
                 }),
               }}
               value={value}
@@ -221,9 +221,9 @@ const Select = forwardRef<SelectRef, SelectProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 
-Select.displayName = "Select";
+Select.displayName = 'Select';
 
 export { Select };

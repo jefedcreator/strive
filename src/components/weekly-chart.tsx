@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
+import { useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -9,9 +9,9 @@ import {
   Title,
   Tooltip,
   Legend,
-} from "chart.js";
-import { Bar } from "react-chartjs-2";
-import { useTheme } from "next-themes";
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { useTheme } from 'next-themes';
 
 ChartJS.register(
   CategoryScale,
@@ -26,7 +26,11 @@ export function WeeklyChart() {
   const { theme } = useTheme();
 
   const chartData = useMemo(() => {
-    const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const isDark =
+      theme === 'dark' ||
+      (theme === 'system' &&
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
     const barColor = isDark ? '#FFFFFF' : '#111111';
 
     return {
@@ -44,7 +48,11 @@ export function WeeklyChart() {
   }, [theme]);
 
   const chartOptions = useMemo(() => {
-    const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const isDark =
+      theme === 'dark' ||
+      (theme === 'system' &&
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
     const gridColor = isDark ? '#333333' : '#f3f4f6';
     const textColor = isDark ? '#9ca3af' : '#6b7280';
 
@@ -77,8 +85,8 @@ export function WeeklyChart() {
             drawBorder: false,
           },
           ticks: {
-              color: textColor,
-          }
+            color: textColor,
+          },
         },
       },
     };

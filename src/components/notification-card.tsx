@@ -6,7 +6,10 @@ interface NotificationCardProps {
   notification: NotificationWithRelations;
 }
 
-const typeConfig: Record<NotificationType, { icon: string; iconBg: string; iconText: string; label: string }> = {
+const typeConfig: Record<
+  NotificationType,
+  { icon: string; iconBg: string; iconText: string; label: string }
+> = {
   info: {
     icon: 'info',
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
@@ -45,7 +48,9 @@ function formatTimeAgo(date: Date | string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export const NotificationCard: React.FC<NotificationCardProps> = ({ notification }) => {
+export const NotificationCard: React.FC<NotificationCardProps> = ({
+  notification,
+}) => {
   const config = typeConfig[notification.type];
 
   return (
@@ -56,8 +61,12 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
     >
       {/* Icon */}
       <div className="flex-shrink-0">
-        <div className={`h-12 w-12 rounded-full ${config.iconBg} flex items-center justify-center ${config.iconText}`}>
-          <span className="material-symbols-outlined text-xl">{config.icon}</span>
+        <div
+          className={`h-12 w-12 rounded-full ${config.iconBg} flex items-center justify-center ${config.iconText}`}
+        >
+          <span className="material-symbols-outlined text-xl">
+            {config.icon}
+          </span>
         </div>
       </div>
 
@@ -67,7 +76,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
           <div className="pr-2">
             {/* Type badge + unread indicator */}
             <div className="flex items-center gap-2 mb-1">
-              <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${config.iconBg} ${config.iconText}`}>
+              <span
+                className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${config.iconBg} ${config.iconText}`}
+              >
                 {config.label}
               </span>
               {!notification.isRead && (
@@ -83,13 +94,17 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
             {/* Related entity */}
             {notification.club && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-xs">groups</span>
+                <span className="material-symbols-outlined text-xs">
+                  groups
+                </span>
                 {notification.club.name}
               </p>
             )}
             {notification.leaderboard && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-xs">emoji_events</span>
+                <span className="material-symbols-outlined text-xs">
+                  emoji_events
+                </span>
                 {notification.leaderboard.name}
               </p>
             )}
@@ -102,16 +117,18 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ notification
         </div>
 
         {/* Actions for club notifications */}
-        {notification.type === 'club' && notification.club && !notification.isRead && (
-          <div className="mt-3 flex gap-3">
-            <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors shadow-sm">
-              View Club
-            </button>
-            <button className="bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 px-4 py-2 rounded-lg text-xs font-medium transition-colors">
-              Dismiss
-            </button>
-          </div>
-        )}
+        {notification.type === 'club' &&
+          notification.club &&
+          !notification.isRead && (
+            <div className="mt-3 flex gap-3">
+              <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors shadow-sm">
+                View Club
+              </button>
+              <button className="bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 px-4 py-2 rounded-lg text-xs font-medium transition-colors">
+                Dismiss
+              </button>
+            </div>
+          )}
 
         {/* Actions for leaderboard notifications */}
         {notification.type === 'leaderboard' && notification.leaderboard && (

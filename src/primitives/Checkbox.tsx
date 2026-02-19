@@ -1,6 +1,6 @@
-import { twMerge } from "@/utils";
-import * as Checkbox from "@radix-ui/react-checkbox";
-import { SquareCheck } from "lucide-react";
+import { twMerge } from '@/utils';
+import * as Checkbox from '@radix-ui/react-checkbox';
+import { SquareCheck } from 'lucide-react';
 
 const CheckBox = ({
   id,
@@ -27,9 +27,9 @@ const CheckBox = ({
     <div className="flex items-center gap-2">
       <Checkbox.Root
         className={twMerge(
-          "border-bca-primary focus:shadow-bca-primary flex appearance-none items-center justify-center rounded border bg-white outline-none",
+          'border-bca-primary focus:shadow-bca-primary flex appearance-none items-center justify-center rounded border bg-white outline-none',
           `h-${height ?? 4} w-${width ?? 4}`,
-          checkboxClassName,
+          checkboxClassName
         )}
         defaultChecked={false}
         id={id}
@@ -39,7 +39,7 @@ const CheckBox = ({
         <Checkbox.Indicator
           className={twMerge(
             `bg-bca-primary h-4 w-4 rounded text-white`,
-            indicatorClassName,
+            indicatorClassName
           )}
         >
           <SquareCheck className="h-full w-full" />
@@ -47,8 +47,8 @@ const CheckBox = ({
       </Checkbox.Root>
       <label
         className={twMerge(
-          "text-bca-grey-3 font-outfit text-sm font-semibold",
-          labelClassName,
+          'text-bca-grey-3 font-outfit text-sm font-semibold',
+          labelClassName
         )}
         htmlFor={id}
       >

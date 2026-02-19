@@ -4,8 +4,6 @@ import { getLeaderboards } from '@/server';
 import type { PageProps } from '@/types';
 import { loadParams } from '@/utils';
 
-
-
 export default async function LeaderboardsPage({ searchParams }: PageProps) {
   const { isActive, isPublic, query } = loadParams.parse(await searchParams);
 
@@ -18,7 +16,10 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
   return (
     <div className="relative">
       <Background />
-      <LeaderboardsPageClient currentFilters={{ isActive, isPublic, query }} initialData={initialData} />
+      <LeaderboardsPageClient
+        currentFilters={{ isActive, isPublic, query }}
+        initialData={initialData}
+      />
     </div>
   );
 }

@@ -9,7 +9,11 @@ interface FadeInProps {
   delay?: number;
 }
 
-export const FadeIn: React.FC<FadeInProps> = ({ children, className, delay = 0 }) => {
+export const FadeIn: React.FC<FadeInProps> = ({
+  children,
+  className,
+  delay = 0,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -51,10 +55,10 @@ export const FadeInStagger: React.FC<FadeInStaggerProps> = ({
   );
 };
 
-export const FadeInItem: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className,
-}) => {
+export const FadeInItem: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className }) => {
   return (
     <motion.div
       variants={{

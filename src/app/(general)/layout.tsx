@@ -2,7 +2,6 @@ import { Provider } from '@/provider';
 import '@/styles/globals.css';
 import type { Metadata } from 'next';
 
-
 export const metadata: Metadata = {
   title: 'Strive - Sync Your Fitness Journey',
   description:
@@ -16,9 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden"
-      >
+      <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden">
         <div className="absolute inset-0 z-0 opacity-5 pointer-events-none select-none">
           <svg
             className="absolute top-10 left-10 w-64 h-64 text-gray-900 dark:text-gray-100 bg-pattern-item"

@@ -1,8 +1,6 @@
 'use client';
 
-import {
-  type LeaderboardValidatorSchema,
-} from '@/backend/validators/leaderboard.validator';
+import { type LeaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Calendar } from '@/primitives/Calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/primitives/Popover';
@@ -46,9 +44,7 @@ interface LeaderboardModalProps {
 const Icon: React.FC<{ name: string; className?: string }> = ({
   name,
   className = '',
-}) => (
-  <span className={`material-symbols-outlined ${className}`}>{name}</span>
-);
+}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
 
 export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   isOpen,
@@ -78,24 +74,29 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   };
 
   // console.log('field.value',field.value);
-  
 
   return (
-    <Modal open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        setThumbnailPreview(null);
-        onClose();
-      }
-    }}>
+    <Modal
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          setThumbnailPreview(null);
+          onClose();
+        }
+      }}
+    >
       <Modal.Portal className="bg-[#F9FAFC] opacity-70">
         <Modal.Content className="fixed top-1/2 left-1/2 w-full max-w-2xl bg-card-light dark:bg-card-dark rounded-2xl shadow-2xl z-[101] border border-gray-100 dark:border-gray-800 focus:outline-none overflow-hidden max-h-[90vh] flex flex-col">
           <div className="flex items-start justify-between border-b border-gray-100 dark:border-gray-800 p-6">
             <div>
               <Modal.Title className="text-xl font-bold text-gray-900 dark:text-white">
-                {type === 'create' ? 'Create New Leaderboard' : 'Edit Leaderboard'}
+                {type === 'create'
+                  ? 'Create New Leaderboard'
+                  : 'Edit Leaderboard'}
               </Modal.Title>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Fill in the details to {type === 'create' ? 'launch' : 'update'} your leaderboard.
+                Fill in the details to {type === 'create' ? 'launch' : 'update'}{' '}
+                your leaderboard.
               </p>
             </div>
             <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
@@ -183,7 +184,11 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             </div>
 
             {/* Description */}
-            <Field id="description" label="Description" error={errors.description?.message}>
+            <Field
+              id="description"
+              label="Description"
+              error={errors.description?.message}
+            >
               <Textarea
                 {...register('description')}
                 id="description"
@@ -192,7 +197,11 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             </Field>
 
             {/* Expiration Date */}
-            <Field id="expiryDate" label="Expiration Date" error={errors.expiryDate?.message}>
+            <Field
+              id="expiryDate"
+              label="Expiration Date"
+              error={errors.expiryDate?.message}
+            >
               {/* <div className="relative">
                 <Input
                   {...register('expiryDate')}
@@ -204,37 +213,42 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   <Icon name="calendar_today" className="text-sm" />
                 </div>
               </div> */}
-                <Controller
-                  name="expiryDate"
-                  control={control}
-                  render={({ field }) => (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className={`h-11 w-full flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/5 px-4 py-2 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none ${
-                            field.value
-                              ? 'text-gray-900 dark:text-white'
-                              : 'text-gray-400 dark:text-gray-500'
-                          }`}
-                        >
-                          {field.value
-                            ? format(new Date(field.value), 'PPP')
-                            : 'Pick an expiration date'}
-                          <Icon name="calendar_today" className="text-sm text-gray-400" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date ?? undefined)}
-                          className="rounded-lg"
+              <Controller
+                name="expiryDate"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className={`h-11 w-full flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/5 px-4 py-2 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none ${
+                          field.value
+                            ? 'text-gray-900 dark:text-white'
+                            : 'text-gray-400 dark:text-gray-500'
+                        }`}
+                      >
+                        {field.value
+                          ? format(new Date(field.value), 'PPP')
+                          : 'Pick an expiration date'}
+                        <Icon
+                          name="calendar_today"
+                          className="text-sm text-gray-400"
                         />
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date) => field.onChange(date ?? undefined)}
+                        className="rounded-lg"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
             </Field>
 
             {/* Visibility Switch */}
@@ -276,10 +290,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
+            <Button onClick={handleSubmit(onSubmit)} disabled={isPending}>
               {isPending && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}

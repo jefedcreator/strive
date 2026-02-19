@@ -36,7 +36,8 @@ const leaderboard = [
     distance: '65.0 km',
     avgPace: '5\'22" /km',
     initials: 'MK',
-    color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+    color:
+      'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
   },
   {
     rank: 5,
@@ -44,7 +45,8 @@ const leaderboard = [
     distance: '61.8 km',
     avgPace: '5\'15" /km',
     initials: 'AL',
-    color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+    color:
+      'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
   },
 ];
 
@@ -55,7 +57,8 @@ const activities = [
     description: 'Alex just finished a 10k run',
     time: '2 mins ago',
     initials: 'TR',
-    color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+    color:
+      'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
   },
   {
     id: '2',
@@ -63,7 +66,8 @@ const activities = [
     description: 'New challenge posted: "Winter Warrior"',
     time: '1 hour ago',
     initials: 'NRC',
-    color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+    color:
+      'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
   },
   {
     id: '3',
@@ -75,9 +79,13 @@ const activities = [
   },
 ];
 
-const Icon = ({ name, className = '' }: { name: string; className?: string }) => (
-  <span className={`material-symbols-outlined ${className}`}>{name}</span>
-);
+const Icon = ({
+  name,
+  className = '',
+}: {
+  name: string;
+  className?: string;
+}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
 
 function formatDuration(minutes: number): string {
   const mins = Math.floor(minutes);
@@ -93,7 +101,11 @@ function formatRunDate(dateString: string): string {
   yesterday.setDate(yesterday.getDate() - 1);
   const isYesterday = date.toDateString() === yesterday.toDateString();
 
-  const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  const timeStr = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
 
   if (isToday) return `Today at ${timeStr}`;
   if (isYesterday) return `Yesterday at ${timeStr}`;
@@ -135,13 +147,21 @@ function LastRunCard({ run }: { run: RunData }) {
             <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
               Duration
             </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatDuration(run.duration)}</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+              {formatDuration(run.duration)}
+            </p>
           </div>
           <div className="space-y-1">
             <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
               Avg Pace
             </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">{run.pace}<span className="text-lg font-medium text-gray-400 dark:text-gray-500"> /km</span></p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+              {run.pace}
+              <span className="text-lg font-medium text-gray-400 dark:text-gray-500">
+                {' '}
+                /km
+              </span>
+            </p>
           </div>
         </div>
       </div>
@@ -168,12 +188,18 @@ function NoRunsCard() {
     <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden p-8">
       <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
         <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-          <Icon name="directions_run" className="text-3xl text-gray-400 dark:text-gray-500" />
+          <Icon
+            name="directions_run"
+            className="text-3xl text-gray-400 dark:text-gray-500"
+          />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">No Recent Runs</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+            No Recent Runs
+          </h2>
           <p className="text-gray-400 dark:text-gray-500 text-sm font-medium">
-            Connect your Strava or Nike Run Club account to see your activity here.
+            Connect your Strava or Nike Run Club account to see your activity
+            here.
           </p>
         </div>
       </div>
@@ -233,64 +259,64 @@ export default async function HomePage() {
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-widest">
-                      <th className="px-8 py-4">Rank</th>
-                      <th className="px-8 py-4">Athlete</th>
-                      <th className="px-8 py-4">Distance</th>
-                      <th className="px-8 py-4 text-right">Avg Pace</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                    {leaderboard.map((row) => (
-                      <tr
-                        key={row.rank}
-                        className={`group transition-colors ${row.athlete === 'You' ? 'bg-gray-50/50 dark:bg-white/5' : 'hover:bg-gray-50/30 dark:hover:bg-white/5'}`}
-                      >
-                        <td className="px-8 py-5">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-widest">
+                    <th className="px-8 py-4">Rank</th>
+                    <th className="px-8 py-4">Athlete</th>
+                    <th className="px-8 py-4">Distance</th>
+                    <th className="px-8 py-4 text-right">Avg Pace</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+                  {leaderboard.map((row) => (
+                    <tr
+                      key={row.rank}
+                      className={`group transition-colors ${row.athlete === 'You' ? 'bg-gray-50/50 dark:bg-white/5' : 'hover:bg-gray-50/30 dark:hover:bg-white/5'}`}
+                    >
+                      <td className="px-8 py-5">
+                        <div
+                          className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
+                            row.rank === 1
+                              ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                              : row.rank === 2
+                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                                : row.rank === 3
+                                  ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300'
+                                  : 'text-gray-400 dark:text-gray-500'
+                          }`}
+                        >
+                          {row.rank}
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-3">
                           <div
-                            className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
-                              row.rank === 1
-                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-                                : row.rank === 2
-                                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
-                                  : row.rank === 3
-                                    ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300'
-                                    : 'text-gray-400 dark:text-gray-500'
-                            }`}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold ${row.color}`}
                           >
-                            {row.rank}
+                            {row.initials}
                           </div>
-                        </td>
-                        <td className="px-8 py-5">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold ${row.color}`}
-                            >
-                              {row.initials}
-                            </div>
-                            <span
-                              className={`text-sm font-bold ${row.athlete === 'You' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}
-                            >
-                              {row.athlete}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-8 py-5">
-                          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                            {row.distance}
+                          <span
+                            className={`text-sm font-bold ${row.athlete === 'You' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                          >
+                            {row.athlete}
                           </span>
-                        </td>
-                        <td className="px-8 py-5 text-right">
-                          <span className="text-sm font-medium text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                            {row.avgPace}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                          {row.distance}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <span className="text-sm font-medium text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                          {row.avgPace}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -300,7 +326,9 @@ export default async function HomePage() {
           {/* Club Activity */}
           <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft p-8">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Club Activity</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                Club Activity
+              </h2>
               <button className="text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                 View All
               </button>
@@ -363,7 +391,9 @@ export default async function HomePage() {
               <Icon name="award" className="text-[160px]" />
             </div>
             <div className="relative z-10 space-y-4">
-              <h2 className="text-xl font-bold text-white dark:text-gray-900">Pro Insights</h2>
+              <h2 className="text-xl font-bold text-white dark:text-gray-900">
+                Pro Insights
+              </h2>
               <p className="text-gray-400 dark:text-gray-600 text-sm font-medium leading-relaxed">
                 Unlock advanced analytics and training plans with Strive Pro.
               </p>

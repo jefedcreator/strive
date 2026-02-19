@@ -1,6 +1,6 @@
-"use client";
-import type { ISubMenu } from "@/types";
-import { twMerge } from "@/utils";
+'use client';
+import type { ISubMenu } from '@/types';
+import { twMerge } from '@/utils';
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -11,7 +11,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   DropdownMenuContent,
-} from "@radix-ui/react-dropdown-menu";
+} from '@radix-ui/react-dropdown-menu';
 
 interface DialogProps {
   container?: HTMLElement;

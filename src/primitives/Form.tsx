@@ -4,7 +4,7 @@ type FormProps = {
 
 const Form = ({ children, ...props }: FormProps) => {
   return (
-    <form autoComplete="off" {...props} noValidate >
+    <form autoComplete="off" {...props} noValidate>
       {children}
     </form>
   );

@@ -6,7 +6,7 @@ import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from 'next-themes';
-import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 interface QueryProviderProps {
   children: ReactNode;
@@ -36,9 +36,7 @@ export const Provider = ({ children }: QueryProviderProps) => {
           enableSystem
           disableTransitionOnChange
         >
-           <NuqsAdapter>
-          {children}
-           </NuqsAdapter>
+          <NuqsAdapter>{children}</NuqsAdapter>
         </ThemeProvider>
       </SessionProvider>
     </QueryClientProvider>

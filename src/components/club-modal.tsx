@@ -45,9 +45,7 @@ interface ClubModalProps {
 const Icon: React.FC<{ name: string; className?: string }> = ({
   name,
   className = '',
-}) => (
-  <span className={`material-symbols-outlined ${className}`}>{name}</span>
-);
+}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
 
 export const ClubModal: React.FC<ClubModalProps> = ({
   isOpen,
@@ -81,12 +79,15 @@ export const ClubModal: React.FC<ClubModalProps> = ({
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        setThumbnailPreview(existingImageUrl ?? null);
-        onClose();
-      }
-    }}>
+    <Modal
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          setThumbnailPreview(existingImageUrl ?? null);
+          onClose();
+        }
+      }}
+    >
       <Modal.Portal className="bg-[#F9FAFC] opacity-70">
         <Modal.Content className="fixed top-1/2 left-1/2 w-full max-w-2xl bg-card-light dark:bg-card-dark rounded-2xl shadow-2xl z-[101] border border-gray-100 dark:border-gray-800 focus:outline-none overflow-hidden max-h-[90vh] flex flex-col">
           <div className="flex items-start justify-between border-b border-gray-100 dark:border-gray-800 p-6">
@@ -230,10 +231,7 @@ export const ClubModal: React.FC<ClubModalProps> = ({
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSubmit(onSubmit)}
-              disabled={isPending}
-            >
+            <Button onClick={handleSubmit(onSubmit)} disabled={isPending}>
               {isPending && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}

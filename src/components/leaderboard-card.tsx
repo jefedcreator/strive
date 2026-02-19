@@ -20,25 +20,36 @@ export interface LeaderboardCardProps {
   data: LeaderboardListItem;
 }
 
-export const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
+export const Icon: React.FC<{ name: string; className?: string }> = ({
+  name,
+  className = '',
+}) => {
+  return (
+    <span className={`material-symbols-outlined ${className}`}>{name}</span>
+  );
 };
 
 export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const { data: session } = useSession();
-    const router = useRouter();
+  const router = useRouter();
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId ? data.createdById === currentUserId : false;
-  const isCompleted = data.expiryDate ? new Date(data.expiryDate) < new Date() : false;
+  const isCompleted = data.expiryDate
+    ? new Date(data.expiryDate) < new Date()
+    : false;
   const participantsCount = data._count?.entries ?? 0;
   const queryClient = useQueryClient();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(`/api/leaderboards/${data.id}/join`, {}, {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      });
+      const res = await axios.post(
+        `/api/leaderboards/${data.id}/join`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${session?.user.token}` },
+        }
+      );
       return res.data;
     },
     onSuccess: async () => {
@@ -56,11 +67,15 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
     },
   });
 
-    const inviteMutation = useMutation({
+  const inviteMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(`/api/leaderboards/${data.id}/invite`, {}, {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      });
+      const res = await axios.post(
+        `/api/leaderboards/${data.id}/invite`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${session?.user.token}` },
+        }
+      );
       return res.data;
     },
     onSuccess: async () => {
@@ -69,7 +84,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
           ? 'Successfully invited to the leaderboard!'
           : 'Join request sent. Waiting for owner approval.'
       );
-      handleInvite()
+      handleInvite();
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
     },
     onError: (error: any) => {
@@ -90,7 +105,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       toast.success('Leaderboard deleted successfully!');
       // await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
       setIsDeleteModalOpen(false);
-            router.refresh();
+      router.refresh();
     },
     onError: (error: any) => {
       toast.error(
@@ -102,11 +117,14 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const handleInvite = () => {
     // Copy invite link to clipboard
     const inviteUrl = `${window.location.origin}/leaderboards/${data.id}?action=join`;
-    navigator.clipboard.writeText(inviteUrl).then(() => {
-      toast.success('Invite link copied to clipboard!');
-    }).catch(() => {
-      toast.error('Failed to copy invite link');
-    });
+    navigator.clipboard
+      .writeText(inviteUrl)
+      .then(() => {
+        toast.success('Invite link copied to clipboard!');
+      })
+      .catch(() => {
+        toast.error('Failed to copy invite link');
+      });
   };
 
   return (
@@ -121,7 +139,6 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
             <Icon name="emoji_events" />
           </div>
           <div>
-            
             <span
               className={`text-[10px] font-bold ${data.isPublic ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'} px-2 py-0.5 rounded-full uppercase tracking-wide`}
             >
@@ -195,7 +212,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
         <div className="flex items-center gap-2">
           <Icon name="people" className="text-base text-gray-400" />
           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            {participantsCount} {participantsCount === 1 ? 'participant' : 'participants'}
+            {participantsCount}{' '}
+            {participantsCount === 1 ? 'participant' : 'participants'}
           </span>
         </div>
 
@@ -216,12 +234,17 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
                 <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
                   <Icon name="warning" className="text-xl" />
                 </div>
-                <Modal.Title className="text-lg font-bold">Delete Leaderboard</Modal.Title>
+                <Modal.Title className="text-lg font-bold">
+                  Delete Leaderboard
+                </Modal.Title>
               </div>
-              
+
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Are you sure you want to delete <span className="font-bold text-gray-900 dark:text-white">"{data.name}"</span>? 
-                This action cannot be undone and all data will be lost.
+                Are you sure you want to delete{' '}
+                <span className="font-bold text-gray-900 dark:text-white">
+                  "{data.name}"
+                </span>
+                ? This action cannot be undone and all data will be lost.
               </p>
 
               <div className="flex gap-3 justify-end mt-2">

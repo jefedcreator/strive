@@ -1,8 +1,6 @@
 'use client';
 
-import {
-  clubValidatorSchema,
-} from '@/backend/validators/club.validator';
+import { clubValidatorSchema } from '@/backend/validators/club.validator';
 import { ClubCard } from '@/components/club-card';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
@@ -22,37 +20,43 @@ import { toast } from 'sonner';
 
 interface ClubsPageClientProps {
   initialData: PaginatedApiResponse<ClubListItem[]>;
-    currentFilters: {
+  currentFilters: {
     isActive: boolean | null;
     isPublic: boolean | null;
     query: string | null;
   };
 }
 
-export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,currentFilters }) => {
+export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
+  initialData,
+  currentFilters,
+}) => {
   const { data: session } = useSession();
-    const router = useRouter();
+  const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [{ isActive, isPublic, query }, setStates] = useQueryStates(parseParams, { 
-    shallow: false,
-    throttleMs: 1000, 
-  });
+  const [{ isActive, isPublic, query }, setStates] = useQueryStates(
+    parseParams,
+    {
+      shallow: false,
+      throttleMs: 1000,
+    }
+  );
 
-    const tab = React.useMemo(() => {
-      if (isActive === true) return 'active';
-      if (isActive === false) return 'inactive';
-      if (isPublic === true) return 'public';
-      if (isPublic === false) return 'private';
-      return 'all';
-    }, [isActive, isPublic]);
+  const tab = React.useMemo(() => {
+    if (isActive === true) return 'active';
+    if (isActive === false) return 'inactive';
+    if (isPublic === true) return 'public';
+    if (isPublic === false) return 'private';
+    return 'all';
+  }, [isActive, isPublic]);
 
-      const isLoading = 
-    (isActive !== currentFilters.isActive) || 
-    (isPublic !== currentFilters.isPublic) ||
-    (query !== currentFilters.query);
+  const isLoading =
+    isActive !== currentFilters.isActive ||
+    isPublic !== currentFilters.isPublic ||
+    query !== currentFilters.query;
 
   const {
     register,
@@ -108,7 +112,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
     },
     onSuccess: async () => {
       toast.success('Club created successfully!');
-            router.refresh();
+      router.refresh();
       setIsModalOpen(false);
       reset();
       setThumbnail(null);
@@ -154,7 +158,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
             </p>
           </div>
 
-          <Button 
+          <Button
             onClick={() => setIsModalOpen(true)}
             className="w-full sm:w-auto"
           >
@@ -165,7 +169,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
       </div>
 
       {/* Filter Bar */}
- <div className="relative mb-6">
+      <div className="relative mb-6">
         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
           <span className="material-symbols-outlined text-xl">search</span>
         </span>
@@ -179,14 +183,17 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
       </div>
 
       {/* Grid Content */}
-      <Tabs 
-        value={tab} 
-        className="flex flex-col" 
+      <Tabs
+        value={tab}
+        className="flex flex-col"
         onValueChange={(value) => {
           if (value === 'active') setStates({ isActive: true, isPublic: null });
-          else if (value === 'inactive') setStates({ isActive: false, isPublic: null });
-          else if (value === 'public') setStates({ isPublic: true, isActive: null });
-          else if (value === 'private') setStates({ isPublic: false, isActive: null });
+          else if (value === 'inactive')
+            setStates({ isActive: false, isPublic: null });
+          else if (value === 'public')
+            setStates({ isPublic: true, isActive: null });
+          else if (value === 'private')
+            setStates({ isPublic: false, isActive: null });
           else setStates({ isActive: null, isPublic: null });
         }}
       >
@@ -200,22 +207,28 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
 
         <TabsContent value={tab} className="mt-6 outline-none">
           {isLoading ? (
-             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
-               {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 h-[220px] animate-pulse">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700" />
-                      <div className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 w-20 h-6" />
-                    </div>
-                    <div className="space-y-3">
-                      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 h-[220px] animate-pulse"
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700" />
+                    <div className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 w-20 h-6" />
                   </div>
-               ))}
+                  <div className="space-y-3">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
             </div>
-          ) : (filteredClubs.length > 0) ? (
-            <FadeInStagger key={`${tab}-${filteredClubs.length}`} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
+          ) : filteredClubs.length > 0 ? (
+            <FadeInStagger
+              key={`${tab}-${filteredClubs.length}`}
+              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0"
+            >
               {filteredClubs.map((club) => (
                 <FadeInItem key={club.id}>
                   <ClubCard club={club} />
@@ -231,7 +244,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
                 No clubs found
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-                 Try adjusting your filters or search term.
+                Try adjusting your filters or search term.
               </p>
             </div>
           )}

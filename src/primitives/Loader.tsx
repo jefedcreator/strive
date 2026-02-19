@@ -11,7 +11,10 @@ const sizeMap = {
   lg: 'w-12 h-12 border-4',
 };
 
-export const Loader: React.FC<LoaderProps> = ({ size = 'md', className = '' }) => {
+export const Loader: React.FC<LoaderProps> = ({
+  size = 'md',
+  className = '',
+}) => {
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <div

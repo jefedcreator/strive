@@ -20,13 +20,14 @@ interface ClubCardProps {
   club: ClubListItem;
 }
 
-const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
-  <span className={`material-symbols-outlined ${className}`}>{name}</span>
-);
+const Icon: React.FC<{ name: string; className?: string }> = ({
+  name,
+  className = '',
+}) => <span className={`material-symbols-outlined ${className}`}>{name}</span>;
 
 export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   const { data: session } = useSession();
-    const router = useRouter();
+  const router = useRouter();
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId ? club.createdById === currentUserId : false;
   const isInactive = !club.isActive;
@@ -36,9 +37,13 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(`/api/clubs/${club.id}/join`, {}, {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      });
+      const res = await axios.post(
+        `/api/clubs/${club.id}/join`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${session?.user.token}` },
+        }
+      );
       return res.data;
     },
     onSuccess: async () => {
@@ -50,17 +55,19 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to join club'
-      );
+      toast.error(error.response?.data?.message ?? 'Failed to join club');
     },
   });
 
-      const inviteMutation = useMutation({
+  const inviteMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(`/api/clubs/${club.id}/invite`, {}, {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      });
+      const res = await axios.post(
+        `/api/clubs/${club.id}/invite`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${session?.user.token}` },
+        }
+      );
       return res.data;
     },
     onSuccess: async () => {
@@ -69,17 +76,15 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           ? 'Successfully invited to the club!'
           : 'Join request sent. Waiting for owner approval.'
       );
-      handleInvite()
+      handleInvite();
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to invite to club'
-      );
+      toast.error(error.response?.data?.message ?? 'Failed to invite to club');
     },
   });
 
-    const deleteMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async () => {
       const res = await axios.delete(`/api/clubs/${club.id}`, {
         headers: { Authorization: `Bearer ${session?.user.token}` },
@@ -92,19 +97,20 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
       setIsDeleteModalOpen(false);
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to delete club'
-      );
+      toast.error(error.response?.data?.message ?? 'Failed to delete club');
     },
   });
 
   const handleInvite = () => {
     const inviteUrl = `${window.location.origin}/clubs/${club.id}?action=join`;
-    navigator.clipboard.writeText(inviteUrl).then(() => {
-      toast.success('Invite link copied to clipboard!');
-    }).catch(() => {
-      toast.error('Failed to copy invite link');
-    });
+    navigator.clipboard
+      .writeText(inviteUrl)
+      .then(() => {
+        toast.success('Invite link copied to clipboard!');
+      })
+      .catch(() => {
+        toast.error('Failed to copy invite link');
+      });
   };
 
   return (
@@ -156,22 +162,22 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
             {isCreator && (
               <DropdownMenuItem
                 onClick={() => inviteMutation.mutate()}
-                  disabled={inviteMutation.isPending || isInactive}
+                disabled={inviteMutation.isPending || isInactive}
                 className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
               >
                 <Icon name="person_add" className="text-base" />
                 Invite
               </DropdownMenuItem>
             )}
-                {isCreator && (
-                          <DropdownMenuItem
-                            onClick={() => setIsDeleteModalOpen(true)}
-                            className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
-                          >
-                            <Icon name="delete" className="text-base" />
-                            Delete
-                          </DropdownMenuItem>
-                        )}
+            {isCreator && (
+              <DropdownMenuItem
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
+              >
+                <Icon name="delete" className="text-base" />
+                Delete
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -206,11 +212,9 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           href={`/clubs/${club.id}`}
           className="text-sm font-semibold text-gray-900 dark:text-white flex items-center hover:underline"
         >
-          View Details{' '}
-          <Icon name="arrow_forward" className="text-sm ml-1" />
+          View Details <Icon name="arrow_forward" className="text-sm ml-1" />
         </a>
       </div>
-
 
       <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <Modal.Portal>
@@ -220,12 +224,17 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
                 <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
                   <Icon name="warning" className="text-xl" />
                 </div>
-                <Modal.Title className="text-lg font-bold">Delete Club</Modal.Title>
+                <Modal.Title className="text-lg font-bold">
+                  Delete Club
+                </Modal.Title>
               </div>
-              
+
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Are you sure you want to delete <span className="font-bold text-gray-900 dark:text-white">"{club.name}"</span>? 
-                This action cannot be undone and all data will be lost.
+                Are you sure you want to delete{' '}
+                <span className="font-bold text-gray-900 dark:text-white">
+                  "{club.name}"
+                </span>
+                ? This action cannot be undone and all data will be lost.
               </p>
 
               <div className="flex gap-3 justify-end mt-2">

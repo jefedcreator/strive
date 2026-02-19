@@ -13,7 +13,6 @@ export const metadata: Metadata = {
   icons: [{ rel: 'icon', url: '/favicon.ico' }],
 };
 
-
 export default function RootLayout({
   children,
 }: {
@@ -27,9 +26,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body
-        className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden"
-      >
+      <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden">
         <NextTopLoader showSpinner={false} color="#ff014e" />
         <Provider>
           <TooltipProvider delayDuration={0}>
