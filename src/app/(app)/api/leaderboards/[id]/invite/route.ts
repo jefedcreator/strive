@@ -110,6 +110,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           data: {
             userId: userToInviteId,
             leaderboardId,
+            invitedBy: currentUser.id,
             isRequest: true,
           },
         }),

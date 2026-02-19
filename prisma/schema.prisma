@@ -162,28 +162,35 @@ model UserLeaderboard {
 }
 
 model User {
-    id                  String               @id @default(auto()) @map("_id") @db.ObjectId
-    email               String
-    avatar              String?
-    type                UserType
-    fullname            String
-    username            String?
-    createdAt           DateTime             @default(now())
-    updatedAt           DateTime             @updatedAt
-    lastLoginAt         DateTime?
-    access_token        String?
+    id           String    @id @default(auto()) @map("_id") @db.ObjectId
+    email        String
+    avatar       String?
+    type         UserType
+    fullname     String
+    username     String?
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime  @updatedAt
+    lastLoginAt  DateTime?
+    access_token String?
+
     accounts            Account[]
     sessions            Session[]
-    createdLeaderboards Leaderboard[]        @relation("LeaderboardCreator")
-    createdClubs        Club[]               @relation("ClubCreator")
+    createdLeaderboards Leaderboard[]     @relation("LeaderboardCreator")
+    createdClubs        Club[]            @relation("ClubCreator")
     clubs               UserClub[]
     leaderboards        UserLeaderboard[]
-    clubInvites         ClubInvites[]
-    leaderboardInvites  LeaderboardInvites[]
     notifications       Notification[]
 
-    // @@index([email])
-    // @@index([username])
+    // --- FIXED RELATIONS BELOW ---
+
+    // Invites this user has RECEIVED
+    clubInvitesReceived        ClubInvites[]        @relation("ClubInviteReceiver")
+    leaderboardInvitesReceived LeaderboardInvites[] @relation("LeaderboardInviteReceiver")
+
+    // Invites this user has SENT
+    clubInvitesSent        ClubInvites[]        @relation("ClubInviter")
+    leaderboardInvitesSent LeaderboardInvites[] @relation("LeaderboardInviter")
+
     @@index([createdAt])
     @@index([lastLoginAt])
     @@map("users")
@@ -191,26 +198,30 @@ model User {
 
 model ClubInvites {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    userId    String   @db.ObjectId
     clubId    String   @db.ObjectId
     joinedAt  DateTime @default(now())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     isRequest Boolean  @default(false)
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-    club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+    club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+    userId    String   @db.ObjectId
+    user      User     @relation("ClubInviteReceiver", fields: [userId], references: [id], onDelete: Cascade)
+    invitedBy String?  @db.ObjectId
+    inviter   User?    @relation("ClubInviter", fields: [invitedBy], references: [id], onDelete: Cascade)
 }
 
 model LeaderboardInvites {
     id            String      @id @default(auto()) @map("_id") @db.ObjectId
-    userId        String      @db.ObjectId
     leaderboardId String      @db.ObjectId
     joinedAt      DateTime    @default(now())
     createdAt     DateTime    @default(now())
     updatedAt     DateTime    @updatedAt
     isRequest     Boolean     @default(false)
-    user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
     leaderboard   Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
+    userId        String      @db.ObjectId
+    user          User        @relation("LeaderboardInviteReceiver", fields: [userId], references: [id], onDelete: Cascade)
+    invitedBy     String?     @db.ObjectId
+    inviter       User?       @relation("LeaderboardInviter", fields: [invitedBy], references: [id], onDelete: Cascade)
 }
 
 model Notification {

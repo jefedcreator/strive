@@ -93,6 +93,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           data: {
             userId: userToInviteId,
             clubId,
+            invitedBy: currentUser.id,
             isRequest: true,
           },
         }),
