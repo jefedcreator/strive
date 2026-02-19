@@ -1,6 +1,6 @@
 'use client';
 
-import ToggleTheme from '@/components/toggle-theme';
+
 import { useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -55,10 +55,14 @@ function LoginPageContent() {
   };
 
   const handleNRCLogin = () => {
-    toast.promise(loginMutation.mutateAsync({ type: 'nrc' }), {
+    const clubId = searchParams.get('clubId') ?? undefined;
+    const inviteId = searchParams.get('inviteId') ?? undefined;
+    toast.promise(loginMutation.mutateAsync({ type: 'nrc', clubId, inviteId }), {
       loading: 'Opening Nike login...',
       success: () => {
-        router.push('/home');
+        if (!clubId) {
+          router.push('/home');
+        }
         return 'Welcome to Strive!';
       },
       error: (err) => err.message,
@@ -106,8 +110,6 @@ function LoginPageContent() {
         </svg>
         <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-primary rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
       </div>
-      {/* Theme Toggle Button */}
-      <ToggleTheme />
       {/* Screens */}
       <main className="relative z-10 min-h-screen flex flex-col items-center py-12 px-4">
         <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">

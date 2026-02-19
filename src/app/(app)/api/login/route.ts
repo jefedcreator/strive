@@ -1,5 +1,6 @@
 import { bodyValidatorMiddleware, withMiddleware } from '@/backend/middleware';
 import { authService } from '@/backend/services/auth';
+import { db } from '@/server/db';
 import { puppeteerService } from '@/backend/services/puppeteer';
 import { stravaService } from '@/backend/services/strava';
 import {
@@ -43,7 +44,6 @@ export const POST = withMiddleware<LoginValidatorSchema>(
       // 2. NRC HANDLER (One-Step Flow)
       // ---------------------------------------------------------
       else if (payload?.type === 'nrc') {
-        // NRC is automated/synchronous, so we just do it all at once
         const { email, token, username } =
           await puppeteerService.captureNikeAuth();
 
@@ -59,6 +59,54 @@ export const POST = withMiddleware<LoginValidatorSchema>(
           token,
           fullname: username,
         });
+
+        const { clubId, inviteId } = payload;
+        if (clubId && inviteId && user) {
+          const existingMember = await db.userClub.findUnique({
+            where: {
+              userId_clubId: {
+                userId: user.id,
+                clubId,
+              },
+            },
+          });
+
+          if (!existingMember) {
+            const club = await db.club.findUnique({
+              where: {
+                id: clubId,
+              },
+              select: {
+                createdById: true,
+                name: true,
+              },
+            });
+            await db.$transaction([
+              db.userClub.create({
+                data: {
+                  userId: user.id,
+                  clubId,
+                  role: 'MEMBER',
+                  isActive: true,
+                },
+              }),
+              db.notification.create({
+                data: {
+                  userId: club?.createdById ?? '',
+                  message: `${user.fullname} joined your club ${club?.name}`,
+                  type: 'info',
+                },
+              }),
+              db.club.update({
+                where: { id: clubId },
+                data: { memberCount: { increment: 1 } },
+              }),
+              db.clubInvites.delete({
+                where: { id: inviteId },
+              }),
+            ]);
+          }
+        }
       } else {
         throw new Error('Invalid login type provided.');
       }
@@ -89,17 +137,21 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         token: auth_token,
       });
 
-      return NextResponse.json(
-        {
-          status: 201,
-          data: {
-            ...user,
-            token: auth_token,
-            expiresAt,
-          },
+      let responsePayload: any = {
+        status: 201,
+        data: {
+          ...user,
+          token: auth_token,
+          expiresAt,
         },
-        { status: 201 }
-      );
+      };
+
+      if (payload?.type === 'nrc' && payload?.clubId) {
+        responsePayload.action = 'redirect';
+        responsePayload.url = `/clubs/${payload.clubId}`;
+      }
+
+      return NextResponse.json(responsePayload, { status: 201 });
     } catch (error: any) {
       if (error.statusCode) throw error;
       throw new InternalServerErrorException(
