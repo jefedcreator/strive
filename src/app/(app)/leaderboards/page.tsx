@@ -7,17 +7,18 @@ import { loadParams } from '@/utils';
 
 
 export default async function LeaderboardsPage({ searchParams }: PageProps) {
-  const { isActive, isPublic } = loadParams.parse(await searchParams);
+  const { isActive, isPublic, query } = loadParams.parse(await searchParams);
 
   const initialData = await getLeaderboards({
     isActive: isActive ?? undefined,
     isPublic: isPublic ?? undefined,
+    query: query ?? undefined,
   });
 
   return (
     <div className="relative">
       <Background />
-      <LeaderboardsPageClient currentFilters={{ isActive, isPublic }} initialData={initialData} />
+      <LeaderboardsPageClient currentFilters={{ isActive, isPublic, query }} initialData={initialData} />
     </div>
   );
 }

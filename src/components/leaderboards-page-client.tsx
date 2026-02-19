@@ -80,15 +80,18 @@ interface LeaderboardsPageClientProps {
   currentFilters: {
     isActive: boolean | null;
     isPublic: boolean | null;
+    query: string | null;
   };
 }
 
 export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ initialData, currentFilters }) => {
   const { data: session } = useSession();
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [{ isActive, isPublic }, setStates] = useQueryStates(parseParams, { shallow: false });
+  const [{ isActive, isPublic, query }, setStates] = useQueryStates(parseParams, { 
+    shallow: false,
+    throttleMs: 1000, 
+  });
 
   const tab = React.useMemo(() => {
     if (isActive === true) return 'active';
@@ -103,22 +106,17 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
   // do not match the server-side props (currentFilters) yet.
   const isLoading = 
     (isActive !== currentFilters.isActive) || 
-    (isPublic !== currentFilters.isPublic);
+    (isPublic !== currentFilters.isPublic) ||
+    (query !== currentFilters.query);
 
   // We rely on server-side data (initialData) passed via props.
   // When tabs change, the URL updates (nuqs), triggering a server re-render.
   // The isLoading state handles the visual transition until new props arrive.
+  // We rely on server-side data (initialData) passed via props.
+  // When tabs change or search query updates, the URL updates (nuqs), triggering a server re-render.
+  // The isLoading state handles the visual transition until new props arrive.
   const leaderboards = initialData.data;
 
-  const filteredLeaderboards = React.useMemo(() => {
-    return leaderboards.filter(
-      (board) =>
-        board.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (board.description && board.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  }, [leaderboards, searchTerm]);
-
-  // Fetch clubs for the modal dropdown
   const { data: clubs = [] } = useQuery<
     ApiResponse<ClubListItem[]>,
     Error,
@@ -208,8 +206,8 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
         </span>
         <input
           type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={query ?? ''}
+          onChange={(e) => setStates({ query: e.target.value || null })}
           className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card-dark text-sm focus:ring-2 focus:ring-primary dark:focus:ring-white focus:border-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 shadow-sm transition-shadow"
           placeholder="Search your leaderboards..."
         />
@@ -256,9 +254,9 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({ 
                   </div>
                ))}
             </div>
-          ) : (!isLoading && filteredLeaderboards.length > 0) ? (
-            <FadeInStagger key={`${tab}-${filteredLeaderboards.length}`} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 container-query">
-              {filteredLeaderboards.map((board) => (
+          ) : (!isLoading && leaderboards.length > 0) ? (
+            <FadeInStagger key={`${tab}-${leaderboards.length}`} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 container-query">
+              {leaderboards.map((board) => (
                 <FadeInItem key={board.id}>
                   <LeaderboardCard data={board} />
                 </FadeInItem>

@@ -6,7 +6,8 @@ import { generateUsername } from 'unique-username-generator';
 import z from 'zod';
 import {
   createSearchParamsCache,
-  parseAsBoolean
+  parseAsBoolean,
+  parseAsString
 } from 'nuqs/server'
 import { HttpException } from './exceptions';
 
@@ -124,6 +125,7 @@ const mongoIdValidator = z
 const parseParams = {
   isActive: parseAsBoolean,
   isPublic: parseAsBoolean,
+  query: parseAsString,
 }
 
 const loadParams = createSearchParamsCache(parseParams)
