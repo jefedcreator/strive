@@ -25,6 +25,7 @@ interface ClubsPageClientProps {
     currentFilters: {
     isActive: boolean | null;
     isPublic: boolean | null;
+    query: string | null;
   };
 }
 
@@ -35,7 +36,10 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [{ isActive, isPublic }, setStates] = useQueryStates(parseParams, { shallow: false });
+  const [{ isActive, isPublic, query }, setStates] = useQueryStates(parseParams, { 
+    shallow: false,
+    throttleMs: 1000, 
+  });
 
     const tab = React.useMemo(() => {
       if (isActive === true) return 'active';
@@ -47,7 +51,8 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
 
       const isLoading = 
     (isActive !== currentFilters.isActive) || 
-    (isPublic !== currentFilters.isPublic);
+    (isPublic !== currentFilters.isPublic) ||
+    (query !== currentFilters.query);
 
   const {
     register,
@@ -160,14 +165,14 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({ initialData,cu
       </div>
 
       {/* Filter Bar */}
-      <div className="relative mb-6">
+ <div className="relative mb-6">
         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
           <span className="material-symbols-outlined text-xl">search</span>
         </span>
         <input
           type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={query ?? ''}
+          onChange={(e) => setStates({ query: e.target.value || null })}
           className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card-dark text-sm focus:ring-2 focus:ring-primary dark:focus:ring-white focus:border-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 shadow-sm transition-shadow"
           placeholder="Search your clubs..."
         />
