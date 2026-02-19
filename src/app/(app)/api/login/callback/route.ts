@@ -23,8 +23,6 @@ type StravaCallbackQuerySchema = z.infer<typeof stravaCallbackQuerySchema>;
 export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
   async (request) => {
     try {
-      console.log('request', request);
-
       const { code, state } = request.query!;
       let clubId: string | undefined;
       let inviteId: string | undefined;

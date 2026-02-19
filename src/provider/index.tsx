@@ -1,13 +1,12 @@
 'use client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
-import type { ReactNode } from 'react';
 import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from 'next-themes';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
-import ToggleTheme from '@/components/toggle-theme';
+import type { ReactNode } from 'react';
 
 interface QueryProviderProps {
   children: ReactNode;
