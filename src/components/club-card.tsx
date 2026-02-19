@@ -118,8 +118,6 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
     },
   });
 
-
-
   return (
     <div
       className={`bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-soft border border-gray-200 dark:border-gray-800 hover:shadow-md transition-all group ${isInactive ? 'opacity-75 hover:opacity-100' : ''}`}

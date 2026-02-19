@@ -9,8 +9,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -29,6 +29,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const currentUserId = session?.user?.id;
 
   const isCreator = currentUserId
@@ -52,6 +53,52 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
   });
 
   const club = response.data!;
+
+  const joinViaInviteMutation = useMutation({
+    mutationFn: async (inviteId: string) => {
+      const res = await axios.post(
+        `/api/clubs/${club.id}/invites/${inviteId}/join`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${session?.user.token}` },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('Successfully joined the club via invite!');
+      await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
+      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      // Remove query params
+      router.replace(`/clubs/${club.id}`);
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to join club via invite'
+      );
+      // Remove query params
+      router.replace(`/clubs/${club.id}`);
+    },
+  });
+
+  useEffect(() => {
+    const action = searchParams.get('action');
+    const inviteId = searchParams.get('inviteId');
+
+    if (
+      action === 'join' &&
+      inviteId &&
+      session?.user &&
+      !joinViaInviteMutation.isPending
+    ) {
+      if (club.members.some((m) => m.userId === session.user.id)) {
+        toast.info('You are already a member of this club.');
+        router.replace(`/clubs/${club.id}`);
+        return;
+      }
+      joinViaInviteMutation.mutate(inviteId);
+    }
+  }, [searchParams, session]);
 
   const {
     register,

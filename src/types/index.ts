@@ -116,6 +116,30 @@ export interface RunData {
   name: string; // activity name
 }
 
+export interface InviteDetail {
+  id: string;
+  clubId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string | null;
+  joinedAt: Date;
+  isRequest: boolean;
+  invitedBy: string | null;
+  club: {
+    id: string;
+    name: string;
+    image: string | null;
+    description: string | null;
+    memberCount: number;
+  };
+  inviter: {
+    id: string;
+    fullname: string | null;
+    username: string | null;
+    avatar: string | null;
+  } | null;
+}
+
 interface ISubMenu {
   name: string;
   isActive: boolean;

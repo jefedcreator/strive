@@ -5,6 +5,7 @@ import type {
   ApiResponse,
   ClubDetail,
   ClubListItem,
+  InviteDetail,
   LeaderboardDetail,
   LeaderboardListItem,
   NotificationWithRelations,
@@ -195,7 +196,31 @@ async function getRuns(): Promise<ApiResponse<RunData[]>> {
   }
 }
 
+async function getInvite(
+  id: string,
+  invitesId: string
+): Promise<ApiResponse<InviteDetail | null>> {
+  try {
+    const url = `${baseUrl}/api/clubs/${id}/invites/${invitesId}`;
+    const res = await fetcher(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch leaderboard: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<ApiResponse<InviteDetail>>;
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    return {
+      status: 500,
+      message: 'Failed to fetch leaderboard',
+      data: null,
+    };
+  }
+}
+
 export {
+  getInvite,
   getClubs,
   getClub,
   getLeaderboards,

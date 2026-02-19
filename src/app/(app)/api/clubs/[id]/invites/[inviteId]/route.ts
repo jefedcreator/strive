@@ -4,7 +4,7 @@ import {
 } from '@/backend/middleware';
 import { paramValidator } from '@/backend/validators/index.validator';
 import { db } from '@/server/db';
-import { type ApiResponse } from '@/types';
+import { type ApiResponse, type InviteDetail } from '@/types';
 import { mongoIdValidator } from '@/utils';
 import {
   ForbiddenException,
@@ -61,11 +61,11 @@ export const GET = withMiddleware<unknown>(
       }
 
       // If invite is specific to a user, ensure current user matches
-      if (invite.userId && invite.userId !== request.user!.id) {
+      if (invite.userId && invite.userId !== request.user?.id) {
         throw new ForbiddenException('This invite was sent to another user');
       }
 
-      const response: ApiResponse<typeof invite> = {
+      const response: ApiResponse<InviteDetail> = {
         status: 200,
         message: 'Invite retrieved successfully',
         data: invite,

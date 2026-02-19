@@ -5,7 +5,10 @@ export default NextAuth({
   ...authConfig,
   callbacks: {
     ...authConfig.callbacks,
-    authorized({ auth }) {
+    authorized({ auth, request }) {
+      if (request.nextUrl.pathname.includes('/invites/')) {
+        return true;
+      }
       return !!auth?.user;
     },
   },
