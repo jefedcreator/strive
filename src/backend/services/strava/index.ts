@@ -1,4 +1,5 @@
 import { type RunData } from '@/types';
+import { signOut } from '@/server/auth';
 
 export interface StravaAuthResult {
   auth: {
@@ -118,6 +119,11 @@ export class StravaService {
         },
       }
     );
+
+    if (response.status === 401) {
+      await signOut();
+      throw new Error('Strava access token expired or revoked. User has been logged out.');
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

@@ -9,6 +9,7 @@ import type {
     LeaderboardListItem,
     NotificationWithRelations,
     PaginatedApiResponse,
+    RunData,
 } from '@/types';
 import { uncachedAuth } from './auth';
 
@@ -170,5 +171,25 @@ async function getNotifications(
     }
 }
 
-export { getClubs, getClub, getLeaderboards, getLeaderboard, getNotifications };
+async function getRuns(): Promise<ApiResponse<RunData[]>> {
+    try {
+        const url = `${baseUrl}/api/runs`;
+        const res = await fetcher(url);
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch runs: ${res.statusText}`);
+        }
+
+        return res.json() as Promise<ApiResponse<RunData[]>>;
+    } catch (error) {
+        console.error('Error fetching runs:', error);
+        return {
+            status: 500,
+            message: 'Failed to fetch runs',
+            data: [],
+        };
+    }
+}
+
+export { getClubs, getClub, getLeaderboards, getLeaderboard, getNotifications, getRuns };
 

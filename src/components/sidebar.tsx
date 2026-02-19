@@ -24,12 +24,6 @@ const platformNavigation: NavItemProps[] = [
   { name: 'Notifications', href: '/notifications', icon: 'notifications' },
 ];
 
-const managementNavigation: NavItemProps[] = [
-  { name: 'Projects', href: '/projects', icon: 'folder_open' },
-  { name: 'Invoices', href: '/invoices', icon: 'receipt_long' },
-  { name: 'Chat', href: '/chat', icon: 'chat_bubble_outline', badge: '2' },
-];
-
 const bottomNavigation: NavItemProps[] = [
   { name: 'Settings', href: '/settings', icon: 'settings' },
   { name: 'Help Center', href: '/help', icon: 'help_outline' },
@@ -38,7 +32,6 @@ const bottomNavigation: NavItemProps[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const NavItem = ({ item }: { item: NavItemProps }) => {
@@ -142,15 +135,6 @@ export function Sidebar() {
             {platformNavigation.map((item) => (
               <NavItem key={item.name} item={item} />
             ))}
-
-            {!isCollapsed && (
-              <p className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-8 mb-3">
-                Management
-              </p>
-            )}
-            {managementNavigation.map((item) => (
-              <NavItem key={item.name} item={item} />
-            ))}
           </div>
 
           {/* Bottom Actions */}
@@ -213,13 +197,6 @@ export function Sidebar() {
                   Platform
                 </p>
                 {platformNavigation.map((item) => (
-                  <NavItem key={item.name} item={item} />
-                ))}
-
-                <p className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-8 mb-3">
-                  Management
-                </p>
-                {managementNavigation.map((item) => (
                   <NavItem key={item.name} item={item} />
                 ))}
               </div>

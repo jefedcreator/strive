@@ -5,10 +5,12 @@ import {
 } from '@/backend/validators/leaderboard.validator';
 import { Form, Field, Input, Textarea, Button } from '@/primitives';
 import { Calendar } from '@/primitives/Calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/primitives/Popover';
 import { Modal } from '@/primitives/Modal';
 import { type ClubListItem } from '@/types';
 import * as Switch from '@radix-ui/react-switch';
 import React, { useState } from 'react';
+import { format } from 'date-fns';
 import {
   Controller,
   type Control,
@@ -74,6 +76,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
       reader.readAsDataURL(file);
     }
   };
+
+  // console.log('field.value',field.value);
+  
 
   return (
     <Modal open={isOpen} onOpenChange={(open) => {
@@ -203,12 +208,31 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   name="expiryDate"
                   control={control}
                   render={({ field }) => (
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date ?? undefined)}
-                      className="rounded-lg border"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className={`h-11 w-full flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/5 px-4 py-2 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none ${
+                            field.value
+                              ? 'text-gray-900 dark:text-white'
+                              : 'text-gray-400 dark:text-gray-500'
+                          }`}
+                        >
+                          {field.value
+                            ? format(new Date(field.value), 'PPP')
+                            : 'Pick an expiration date'}
+                          <Icon name="calendar_today" className="text-sm text-gray-400" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) => field.onChange(date ?? undefined)}
+                          className="rounded-lg"
+                        />
+                      </PopoverContent>
+                    </Popover>
                   )}
                 />
             </Field>
