@@ -19,6 +19,7 @@ export function TopNav() {
   const pathSegments = pathname.split('/').filter(Boolean);
   const { data: session } = useSession();
   const user = session?.user;
+console.log('user',user);
 
   return (
     <header className="h-[70px] flex items-center justify-between px-6 lg:px-8 bg-background-light dark:bg-background-dark sticky top-0 z-30 transition-colors duration-300">

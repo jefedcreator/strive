@@ -1,5 +1,17 @@
+'use client';
+
 import React from 'react';
 import { type LeaderboardListItem } from '@/types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/primitives/dropdown-menu';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface LeaderboardCardProps {
   data: LeaderboardListItem;
@@ -10,8 +22,45 @@ export const Icon: React.FC<{ name: string; className?: string }> = ({ name, cla
 };
 
 export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
+  const isCreator = currentUserId ? data.createdById === currentUserId : false;
   const isCompleted = data.expiryDate ? new Date(data.expiryDate) < new Date() : false;
   const participantsCount = data._count?.entries ?? 0;
+  const queryClient = useQueryClient();
+console.log('leaderboard data',data);
+
+  const joinMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.post(`/api/leaderboards/${data.id}/join`, {}, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success(
+        data.isPublic
+          ? 'Successfully joined the leaderboard!'
+          : 'Join request sent. Waiting for owner approval.'
+      );
+      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to join leaderboard'
+      );
+    },
+  });
+
+  const handleInvite = () => {
+    // Copy invite link to clipboard
+    const inviteUrl = `${window.location.origin}/leaderboards/${data.id}?action=join`;
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      toast.success('Invite link copied to clipboard!');
+    }).catch(() => {
+      toast.error('Failed to copy invite link');
+    });
+  };
 
   return (
     <div
@@ -36,11 +85,36 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
             </h3>
           </div>
         </div>
-        <div className="relative">
-          <button className="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-            <Icon name="more_vert" className="text-lg" />
-          </button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 outline-none">
+              <Icon name="more_vert" className="text-lg" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+            align="end"
+          >
+            <DropdownMenuItem
+              onClick={() => joinMutation.mutate()}
+              disabled={joinMutation.isPending || isCompleted}
+              className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+            >
+              <Icon name="login" className="text-base" />
+              {joinMutation.isPending ? 'Joining...' : 'Join'}
+            </DropdownMenuItem>
+            {isCreator && (
+              <DropdownMenuItem
+                onClick={handleInvite}
+                disabled={isCompleted}
+                className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+              >
+                <Icon name="person_add" className="text-base" />
+                Invite
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 min-h-[40px]">

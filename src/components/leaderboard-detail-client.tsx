@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { leaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import axios from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
 import { type ApiResponse, type LeaderboardDetail, type ClubListItem } from '@/types';
@@ -24,6 +25,9 @@ interface LeaderboardDetailClientProps {
 export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = ({ initialData }) => {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const currentUserId = session?.user?.id;
+  const isCreator = currentUserId ? initialData.data?.createdById === currentUserId : false;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
 
@@ -41,6 +45,8 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
   });
 
   const leaderboard = response.data!;
+  console.log('leaderboard',leaderboard);
+  
   const entries = leaderboard.entries ?? [];
   const isCompleted = leaderboard.expiryDate
     ? new Date(leaderboard.expiryDate) < new Date()
@@ -97,6 +103,26 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
     onError: (error: any) => {
       toast.error(
         error.response?.data?.message ?? 'Failed to update leaderboard'
+      );
+    },
+  });
+
+  const exitMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.delete(`/api/leaderboards/${leaderboard.id}/exit`, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('You have left the leaderboard.');
+      await queryClient.invalidateQueries({ queryKey: ['leaderboard', leaderboard.id] });
+      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      router.push('/leaderboards');
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to leave leaderboard'
       );
     },
   });
@@ -180,13 +206,25 @@ export const LeaderboardDetailClient: React.FC<LeaderboardDetailClientProps> = (
             </div>
           </div>
 
-          <button
-            onClick={() => setIsEditModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shrink-0"
-          >
-            <Icon name="edit" className="text-base" />
-            Edit
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* {!isCreator && ( */}
+              <button
+                onClick={() => exitMutation.mutate()}
+                disabled={exitMutation.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 dark:border-red-800/50 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+              >
+                <Icon name="logout" className="text-base" />
+                {exitMutation.isPending ? 'Leaving...' : 'Leave'}
+              </button>
+             {/* )} */}
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+            >
+              <Icon name="edit" className="text-base" />
+              Edit
+            </button>
+          </div>
         </div>
       </div>
       </FadeInItem>
