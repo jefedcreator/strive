@@ -61,28 +61,45 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
 
   const inviteMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(
-        `/api/clubs/${club.id}/invite`,
+      const promise = axios.post(
+        `/api/clubs/${club.id}/invites`,
         {},
         {
           headers: { Authorization: `Bearer ${session?.user.token}` },
         }
       );
+
+      toast.promise(promise, {
+        loading: 'Generating invite...',
+        success: (data) => {
+          handleInvite(data.data.data.id);
+          return club.isPublic
+            ? 'Successfully invited to the club!'
+            : 'Join request sent. Waiting for owner approval.';
+        },
+        error: (error: any) =>
+          error.response?.data?.message ?? 'Failed to invite to club',
+      });
+
+      const res = await promise;
       return res.data;
     },
     onSuccess: async () => {
-      toast.success(
-        club.isPublic
-          ? 'Successfully invited to the club!'
-          : 'Join request sent. Waiting for owner approval.'
-      );
-      handleInvite();
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message ?? 'Failed to invite to club');
-    },
   });
+
+  const handleInvite = (inviteId: string) => {
+    const inviteUrl = `${window.location.origin}/clubs/${club.id}/invites/${inviteId}`;
+    navigator.clipboard
+      .writeText(inviteUrl)
+      .then(() => {
+        toast.success('Invite link copied to clipboard!');
+      })
+      .catch(() => {
+        toast.error('Failed to copy invite link');
+      });
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -101,17 +118,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
     },
   });
 
-  const handleInvite = () => {
-    const inviteUrl = `${window.location.origin}/clubs/${club.id}?action=join`;
-    navigator.clipboard
-      .writeText(inviteUrl)
-      .then(() => {
-        toast.success('Invite link copied to clipboard!');
-      })
-      .catch(() => {
-        toast.error('Failed to copy invite link');
-      });
-  };
+
 
   return (
     <div

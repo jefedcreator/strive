@@ -66,7 +66,7 @@ export const clubQueryValidatorSchema = baseQueryValidatorSchema
 
 export const clubInviteValidatorSchema = z
   .object({
-    userId: mongoIdValidator,
+    userId: mongoIdValidator.optional(),
   })
   .strict();
 

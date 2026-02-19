@@ -53,64 +53,82 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
         throw new ForbiddenException('Only club members can invite users');
       }
 
-      const userToInvite = await db.user.findUnique({
-        where: { id: userToInviteId },
-      });
+      if (userToInviteId) {
+        const userToInvite = await db.user.findUnique({
+          where: { id: userToInviteId },
+        });
 
-      if (!userToInvite) {
-        throw new NotFoundException('User to invite not found');
-      }
+        if (!userToInvite) {
+          throw new NotFoundException('User to invite not found');
+        }
 
-      const existingMembership = await db.userClub.findUnique({
-        where: {
-          userId_clubId: {
+        const existingMembership = await db.userClub.findUnique({
+          where: {
+            userId_clubId: {
+              userId: userToInviteId,
+              clubId,
+            },
+          },
+        });
+
+        if (existingMembership) {
+          throw new ConflictException('User is already a member of this club');
+        }
+
+        const existingInvite = await db.clubInvites.findFirst({
+          where: {
             userId: userToInviteId,
             clubId,
           },
-        },
-      });
+        });
 
-      if (existingMembership) {
-        throw new ConflictException('User is already a member of this club');
+        if (existingInvite) {
+          throw new ConflictException(
+            'An invite or join request already exists for this user'
+          );
+        }
+
+        // Create invite and notification in a transaction
+        const invite = await db.$transaction([
+          db.clubInvites.create({
+            data: {
+              userId: userToInviteId,
+              clubId,
+              invitedBy: currentUser.id,
+              isRequest: true,
+            },
+          }),
+          db.notification.create({
+            data: {
+              userId: userToInviteId,
+              message: `Request sent to ${userToInvite.fullname} to join your club ${club.name}`,
+              type: 'club',
+              clubId: clubId,
+            },
+          }),
+        ]);
+
+        const response: ApiResponse<{ id: string }> = {
+          status: 201,
+          message: 'User invited successfully',
+          data: { id: invite[0].id },
+        };
+
+        return NextResponse.json(response, { status: 201 });
       }
 
-      const existingInvite = await db.clubInvites.findFirst({
-        where: {
-          userId: userToInviteId,
+      const invite = await db.clubInvites.create({
+        data: {
           clubId,
+          invitedBy: currentUser.id,
+          isRequest: true,
         },
       });
 
-      if (existingInvite) {
-        throw new ConflictException(
-          'An invite or join request already exists for this user'
-        );
-      }
-
-      // Create invite and notification in a transaction
-      await db.$transaction([
-        db.clubInvites.create({
-          data: {
-            userId: userToInviteId,
-            clubId,
-            invitedBy: currentUser.id,
-            isRequest: true,
-          },
-        }),
-        db.notification.create({
-          data: {
-            userId: userToInviteId,
-            message: `Request sent to ${userToInvite.fullname} to join your club ${club.name}`,
-            type: 'club',
-            clubId: clubId,
-          },
-        }),
-      ]);
-
-      const response: ApiResponse<null> = {
+      const response: ApiResponse<{ id: string }> = {
         status: 201,
-        message: 'User invited successfully',
-        data: null,
+        message: 'Invite link generated successfully',
+        data: { id: invite.id },
       };
 
       return NextResponse.json(response, { status: 201 });
