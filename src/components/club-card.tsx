@@ -1,74 +1,182 @@
+'use client';
+
 import React from 'react';
-import Link from 'next/link';
 import { type ClubListItem } from '@/types';
-import { StatusBadge, PrivacyBadge } from '@/primitives/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/primitives/dropdown-menu';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface ClubCardProps {
   club: ClubListItem;
 }
 
+const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
+  <span className={`material-symbols-outlined ${className}`}>{name}</span>
+);
+
 export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
+  const isCreator = currentUserId ? club.createdById === currentUserId : false;
   const isInactive = !club.isActive;
+  const memberCount = club.members ?? 0;
+  const queryClient = useQueryClient();
+
+  const joinMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.post(`/api/clubs/${club.id}/join`, {}, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success(
+        club.isPublic
+          ? 'Successfully joined the club!'
+          : 'Join request sent. Waiting for owner approval.'
+      );
+      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to join club'
+      );
+    },
+  });
+
+      const inviteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.post(`/api/clubs/${club.id}/invite`, {}, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success(
+        club.isPublic
+          ? 'Successfully invited to the club!'
+          : 'Join request sent. Waiting for owner approval.'
+      );
+      handleInvite()
+      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to invite to club'
+      );
+    },
+  });
+
+  const handleInvite = () => {
+    const inviteUrl = `${window.location.origin}/clubs/${club.id}?action=join`;
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      toast.success('Invite link copied to clipboard!');
+    }).catch(() => {
+      toast.error('Failed to copy invite link');
+    });
+  };
 
   return (
     <div
-      className={`bg-card-light dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-soft transition-all hover:shadow-md ${isInactive ? 'opacity-75' : ''}`}
+      className={`bg-card-light dark:bg-card-dark rounded-2xl p-5 shadow-soft border border-gray-200 dark:border-gray-800 hover:shadow-md transition-all group ${isInactive ? 'opacity-75 hover:opacity-100' : ''}`}
     >
-      <div className="flex items-start gap-4">
-        {club.image ? (
-          <img
-            alt={club.name}
-            className={`w-16 h-16 rounded-lg object-cover bg-gray-100 dark:bg-gray-800 flex-shrink-0 ${isInactive ? 'grayscale' : ''}`}
-            src={club.image}
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined text-gray-400">groups</span>
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center space-x-3">
+          {club.image ? (
+            <img
+              alt={club.name}
+              className={`h-12 w-12 rounded-xl object-cover bg-gray-100 dark:bg-gray-800 ${isInactive ? 'grayscale' : ''}`}
+              src={club.image}
+            />
+          ) : (
+            <div className="h-12 w-12 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white">
+              <Icon name="groups" />
+            </div>
+          )}
+          <div>
+            <span
+              className={`text-[10px] font-bold ${club.isPublic ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'} px-2 py-0.5 rounded-full uppercase tracking-wide`}
+            >
+              {club.isPublic ? 'Public' : 'Private'}
+            </span>
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white mt-0.5 truncate max-w-[180px]">
               {club.name}
             </h3>
-            <div className="flex gap-1">
-              <StatusBadge status={club.isActive} />
-            </div>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {club.slug}
-          </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-            {club.description}
-          </p>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 outline-none">
+              <Icon name="more_vert" className="text-lg" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+            align="end"
+          >
+            <DropdownMenuItem
+              onClick={() => joinMutation.mutate()}
+              disabled={joinMutation.isPending || isInactive}
+              className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+            >
+              <Icon name="login" className="text-base" />
+              {joinMutation.isPending ? 'Joining...' : 'Join'}
+            </DropdownMenuItem>
+            {isCreator && (
+              <DropdownMenuItem
+                onClick={() => inviteMutation.mutate()}
+                  disabled={inviteMutation.isPending || isInactive}
+                className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+              >
+                <Icon name="person_add" className="text-base" />
+                Invite
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 min-h-[40px]">
+        {club.description || 'No description provided.'}
+      </p>
+
+      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-5 space-x-4">
+        <div className="flex items-center">
+          <Icon name="groups" className="text-base mr-1" />
+          {club.slug}
+        </div>
+        <div className="flex items-center">
+          <Icon
+            name={isInactive ? 'cancel' : 'check_circle'}
+            className="text-base mr-1"
+          />
+          {isInactive ? 'Inactive' : 'Active'}
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-3">
+      <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <PrivacyBadge privacy={club.isPublic} />
-          <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">group</span>{' '}
-            {club.members.toLocaleString()}
+          <Icon name="people" className="text-base text-gray-400" />
+          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            {memberCount} {memberCount === 1 ? 'member' : 'members'}
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button className="text-sm text-red-600 dark:text-red-400 font-medium hover:text-red-700 transition-colors">
-            {isInactive ? 'Delete' : 'Leave'}
-          </button>
-          <Link
-            href={`/clubs/${club.id}`}
-            className="text-sm font-medium text-primary dark:text-white flex items-center hover:underline group"
-          >
-            View Details
-            <span className="material-symbols-outlined text-sm ml-0.5 transform group-hover:translate-x-0.5 transition-transform">
-              arrow_forward
-            </span>
-          </Link>
-        </div>
+        <a
+          href={`/clubs/${club.id}`}
+          className="text-sm font-semibold text-gray-900 dark:text-white flex items-center hover:underline"
+        >
+          View Details{' '}
+          <Icon name="arrow_forward" className="text-sm ml-1" />
+        </a>
       </div>
     </div>
   );
 };
-

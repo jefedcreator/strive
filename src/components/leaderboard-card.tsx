@@ -52,6 +52,30 @@ console.log('leaderboard data',data);
     },
   });
 
+
+    const inviteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.post(`/api/leaderboards/${data.id}/invite`, {}, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success(
+        data.isPublic
+          ? 'Successfully invited to the leaderboard!'
+          : 'Join request sent. Waiting for owner approval.'
+      );
+      handleInvite()
+      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to invite to leaderboard'
+      );
+    },
+  });
+
   const handleInvite = () => {
     // Copy invite link to clipboard
     const inviteUrl = `${window.location.origin}/leaderboards/${data.id}?action=join`;
@@ -105,8 +129,8 @@ console.log('leaderboard data',data);
             </DropdownMenuItem>
             {isCreator && (
               <DropdownMenuItem
-                onClick={handleInvite}
-                disabled={isCompleted}
+                onClick={() => inviteMutation.mutate()}
+                disabled={inviteMutation.isPending || isCompleted}
                 className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
               >
                 <Icon name="person_add" className="text-base" />

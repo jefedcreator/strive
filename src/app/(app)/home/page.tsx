@@ -189,7 +189,7 @@ export default async function HomePage() {
   }
 
   const { user } = session;
-  const username = (user as User).fullname ?? user.name ?? 'Runner';
+  const username = user.fullname ?? user.name ?? 'Runner';
 
   const runsResponse = await getRuns();
   const runs = runsResponse.data ?? [];
