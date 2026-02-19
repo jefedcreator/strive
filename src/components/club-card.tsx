@@ -12,6 +12,8 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Modal } from '@/primitives/Modal';
+import { Button } from '@/primitives/Button';
 
 interface ClubCardProps {
   club: ClubListItem;
@@ -28,6 +30,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   const isInactive = !club.isActive;
   const memberCount = club.members ?? 0;
   const queryClient = useQueryClient();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
 
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -70,6 +73,25 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
     onError: (error: any) => {
       toast.error(
         error.response?.data?.message ?? 'Failed to invite to club'
+      );
+    },
+  });
+
+    const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.delete(`/api/clubs/${club.id}`, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      toast.success('Club deleted successfully!');
+      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      setIsDeleteModalOpen(false);
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to delete club'
       );
     },
   });
@@ -177,6 +199,44 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           <Icon name="arrow_forward" className="text-sm ml-1" />
         </a>
       </div>
+
+
+      <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <Modal.Portal>
+          <Modal.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-[400px] bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-xl z-[100]">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                  <Icon name="warning" className="text-xl" />
+                </div>
+                <Modal.Title className="text-lg font-bold">Delete Club</Modal.Title>
+              </div>
+              
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Are you sure you want to delete <span className="font-bold text-gray-900 dark:text-white">"{club.name}"</span>? 
+                This action cannot be undone and all data will be lost.
+              </p>
+
+              <div className="flex gap-3 justify-end mt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  disabled={deleteMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => deleteMutation.mutate()}
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                </Button>
+              </div>
+            </div>
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal>
     </div>
   );
 };
