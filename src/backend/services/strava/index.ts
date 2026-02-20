@@ -50,7 +50,7 @@ export class StravaService {
   }): string {
     const params = new URLSearchParams({
       client_id: this.CLIENT_ID!,
-      redirect_uri: ` ${process.env.NODE_ENV == "production" ? "https://strive-beige.vercel.app" : "http://localhost:3000"}/api/login/callback`,
+      redirect_uri: `${process.env.NODE_ENV == "production" ? "https://strive-beige.vercel.app" : "http://localhost:3000"}/api/login/callback`,
       response_type: 'code',
       approval_prompt: 'auto',
       scope: 'read,activity:read_all',
