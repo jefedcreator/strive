@@ -9,8 +9,8 @@ export async function GET(request: Request) {
     const name = searchParams.get('name');
 
     const text = name
-      ? name.length > 18
-        ? name.substring(0, 18) + '...'
+      ? name.length > 40
+        ? name.substring(0, 40) + '...'
         : name
       : 'Leaderboard';
 
@@ -25,29 +25,30 @@ export async function GET(request: Request) {
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: '#000000',
-            // background: 'linear-gradient(to bottom right, #1e293b, #0f172a)',
             color: 'rgba(255, 255, 255, 0.9)',
           }}
         >
           <div
             style={{
-              fontSize: 160,
+              fontSize: 200,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: 20,
+              marginBottom: 40,
             }}
           >
             🏆
           </div>
           <div
             style={{
-              fontSize: 36,
+              fontSize: 72,
               fontWeight: 'bold',
               fontFamily: 'system-ui, -apple-system, sans-serif',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              textAlign: 'center',
+              padding: '0 80px',
             }}
           >
             {text}
@@ -55,8 +56,11 @@ export async function GET(request: Request) {
         </div>
       ),
       {
-        width: 400,
-        height: 400,
+        width: 1200,
+        height: 630,
+        headers: {
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
       }
     );
   } catch (e: any) {
