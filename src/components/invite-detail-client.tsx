@@ -57,7 +57,6 @@ const InviteDetailClient = ({
 
   const isClub = type === 'club';
 
-  // Extract entity based on type
   const entityName = isClub
     ? (invite as ClubInviteDetail).club.name
     : (invite as LeaderboardInviteDetail).leaderboard.name;
@@ -74,7 +73,7 @@ const InviteDetailClient = ({
 
   const entityImage = isClub
     ? ((invite as ClubInviteDetail).club.image ?? null)
-    : `/api/leaderboards/og?name=${encodeURIComponent(entityName)}`;
+    : `/api/og?name=${encodeURIComponent(entityName)}`;
 
   const inviterName = inviter?.fullname ?? inviter?.username ?? 'A member';
 

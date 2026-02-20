@@ -8,6 +8,7 @@ interface PageProps {
   params: Promise<{ id: string; inviteId: string }>;
 }
 
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
@@ -26,30 +27,27 @@ export async function generateMetadata({
     invite.leaderboard.description ?? `Join ${leaderboardName} on Strive!`;
   const baseUrl =
     process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://strive.vercel.app';
-  const rawImage = `/api/og/leaderboard?name=${encodeURIComponent(leaderboardName)}`;
-  const image = `${baseUrl}${rawImage}`;
+  // const baseUrl =
+  //   process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://2551-105-113-112-54.ngrok-free.app';
+  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(leaderboardName)}`;
 
   return {
+    metadataBase: new URL(baseUrl),
     title: `Join ${leaderboardName} | Invited by ${inviterName}`,
     description,
     openGraph: {
       title: `You're invited to join ${leaderboardName}`,
       description,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: leaderboardName,
-        },
-      ],
+      images: [imageUrl],
       type: 'website',
+      siteName: 'Strive',
+      url: `${baseUrl}/leaderboards/${id}/invite/${inviteId}`, // Add page URL
     },
     twitter: {
       card: 'summary_large_image',
       title: `Join ${leaderboardName} on Strive`,
       description,
-      images: [image],
+      images: [imageUrl],
     },
   };
 }

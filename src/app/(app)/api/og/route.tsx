@@ -14,6 +14,8 @@ export async function GET(request: Request) {
         : name
       : 'Leaderboard';
 
+    console.log('text', text);
+
     return new ImageResponse(
       (
         <div
