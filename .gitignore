@@ -44,7 +44,7 @@ yarn-error.log*
 
 # idea files
 .idea
-.gemini
+.gemini/
 
 .vscode
 .agent

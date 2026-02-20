@@ -19,7 +19,7 @@ interface NotificationsPageClientProps {
 }
 
 const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
-  initialData,
+  initialData: notificationsResponse,
 }) => {
   const { data: session } = useSession();
   const [filters, setFilters] = useState<FilterOption[]>([
@@ -29,21 +29,21 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
     { id: 'leaderboard', label: 'Leaderboard Activity', checked: false },
   ]);
 
-  const { data: notificationsResponse } = useQuery<
-    PaginatedApiResponse<NotificationWithRelations[]>
-  >({
-    queryKey: ['notifications'],
-    queryFn: async () => {
-      const { data } = await axios.get<
-        PaginatedApiResponse<NotificationWithRelations[]>
-      >('/api/notifications', {
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      });
-      return data;
-    },
-    initialData,
-    staleTime: Infinity,
-  });
+  // const { data: notificationsResponse } = useQuery<
+  //   PaginatedApiResponse<NotificationWithRelations[]>
+  // >({
+  //   queryKey: ['notifications'],
+  //   queryFn: async () => {
+  //     const { data } = await axios.get<
+  //       PaginatedApiResponse<NotificationWithRelations[]>
+  //     >('/api/notifications', {
+  //       headers: { Authorization: `Bearer ${session?.user.token}` },
+  //     });
+  //     return data;
+  //   },
+  //   initialData,
+  //   staleTime: Infinity,
+  // });
 
   const notifications = notificationsResponse.data;
 
