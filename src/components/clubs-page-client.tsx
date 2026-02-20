@@ -180,7 +180,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
       {/* Grid Content */}
       <Tabs
         value={tab}
-        className="flex flex-col"
+        className="flex flex-col min-w-0 w-full"
         onValueChange={(value) => {
           if (value === 'active')
             void setStates({ isActive: true, isPublic: null });

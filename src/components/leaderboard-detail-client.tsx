@@ -6,6 +6,7 @@ import {
   LeaderboardModal,
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
+import { ActivityList } from '@/components/activity-list';
 import {
   type ApiError,
   type ApiResponse,
@@ -21,7 +22,6 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import Image from 'next/image';
 
 import {
   ArrowLeft,
@@ -30,7 +30,6 @@ import {
   Calendar,
   LogOut,
   Edit2,
-  ListOrdered,
 } from 'lucide-react';
 
 interface LeaderboardDetailClientProps {
@@ -259,119 +258,14 @@ export const LeaderboardDetailClient: React.FC<
         </div>
       </FadeInItem>
 
-      {/* Entries Table */}
+      {/* Rankings */}
       <FadeInItem>
-        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-            <h2 className="font-bold text-gray-900 dark:text-white">
-              Rankings
-            </h2>
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
-              {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
-            </span>
-          </div>
-
-          {entries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-                <ListOrdered className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-1">
-                No entries yet
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-                This leaderboard doesn&apos;t have any participants yet. Share
-                it to get started!
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-[10px] font-bold tracking-wider">
-                  <tr>
-                    <th className="px-6 py-3 w-16">Rank</th>
-                    <th className="px-6 py-3">Athlete</th>
-                    <th className="px-6 py-3 text-right">Score</th>
-                    <th className="px-6 py-3 text-right">Last Activity</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {entries.map((entry, index) => {
-                    const rank = index + 1;
-                    return (
-                      <tr
-                        key={entry.id}
-                        className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                      >
-                        <td className="px-6 py-4">
-                          <div
-                            className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
-                              rank === 1
-                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-                                : rank === 2
-                                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-                                  : rank === 3
-                                    ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300'
-                                    : 'text-gray-400 dark:text-gray-500'
-                            }`}
-                          >
-                            {rank}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden shrink-0 relative">
-                              {entry.user.avatar ? (
-                                <Image
-                                  src={entry.user.avatar}
-                                  alt={
-                                    entry.user.fullname ??
-                                    entry.user.username ??
-                                    'User avatar'
-                                  }
-                                  width={32}
-                                  height={32}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center font-bold text-xs text-gray-400 dark:text-gray-500">
-                                  {entry.user.fullname?.[0]?.toUpperCase() ??
-                                    '?'}
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-900 dark:text-white">
-                                {entry.user.fullname ??
-                                  entry.user.username ??
-                                  'Unknown'}
-                              </span>
-                              {entry.user.username && entry.user.fullname && (
-                                <p className="text-xs text-gray-400 dark:text-gray-500">
-                                  @{entry.user.username}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <span className="font-bold text-gray-900 dark:text-white tabular-nums">
-                            {entry.score.toLocaleString()}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right text-gray-500 dark:text-gray-400 text-xs">
-                          {entry.lastScoreDate
-                            ? new Date(entry.lastScoreDate).toLocaleDateString()
-                            : '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <ActivityList
+          title="Rankings"
+          type="ranking"
+          entries={entries}
+          viewAllLink={undefined}
+        />
       </FadeInItem>
 
       <LeaderboardModal

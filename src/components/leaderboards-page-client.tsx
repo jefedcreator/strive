@@ -7,7 +7,9 @@ import {
   LeaderboardModal,
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
+import { ActivityList, type Activity } from '@/components/activity-list';
 import { Button } from '@/primitives/Button';
+import { Badge } from '@/primitives/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
   type ApiError,
@@ -18,7 +20,6 @@ import {
 } from '@/types';
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type User } from '@prisma/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios, { type AxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
@@ -28,82 +29,6 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Plus, Search, SearchX } from 'lucide-react';
-import Image from 'next/image';
-
-const ActivityTable: React.FC<{ activities: Activity[] }> = ({
-  activities,
-}) => (
-  <div className="mt-12 bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-soft">
-    <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-      <h3 className="font-bold text-gray-900 dark:text-white">
-        Recent Activity
-      </h3>
-      <Button variant="ghost" size="sm">
-        View All
-      </Button>
-    </div>
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 uppercase text-[10px] font-bold tracking-wider">
-          <tr>
-            <th className="px-6 py-3">User</th>
-            <th className="px-6 py-3">Leaderboard</th>
-            <th className="px-6 py-3">Action</th>
-            <th className="px-6 py-3 text-right">Time</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-          {activities.map((activity) => (
-            <tr
-              key={activity.id}
-              className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-            >
-              <td className="px-6 py-4 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden relative">
-                  {activity.user.avatar ? (
-                    <Image
-                      src={activity.user.avatar}
-                      alt={activity.user.fullname ?? 'User avatar'}
-                      width={32}
-                      height={32}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center font-bold text-xs text-gray-400">
-                      {activity.user.fullname?.[0]}
-                    </div>
-                  )}
-                </div>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {activity.user.fullname}
-                </span>
-              </td>
-              <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                {activity.leaderboardTitle}
-              </td>
-              <td className="px-6 py-4">
-                <span className="px-2 py-1 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase">
-                  {activity.action}
-                </span>
-              </td>
-              <td className="px-6 py-4 text-right text-gray-500 dark:text-gray-400 text-xs">
-                {activity.time}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
-
-interface Activity {
-  id: string;
-  user: Partial<User>;
-  leaderboardTitle: string;
-  action: string;
-  time: string;
-}
 
 interface LeaderboardsPageClientProps {
   initialData: PaginatedApiResponse<LeaderboardListItem[]>;
@@ -214,20 +139,30 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-8 gap-4 mt-16 lg:mt-0">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1 md:mb-2">
-            My Leaderboards
-          </h1>
-          <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">
-            Manage your competitions and track your progress across different
-            clubs.
-          </p>
-        </div>
-        <div>
+      {/* Page Header Area */}
+      <div className="mb-6 md:mb-10 mt-16 lg:mt-0">
+        <nav className="flex text-sm text-gray-500 dark:text-gray-400 mb-2 md:hidden">
+          <span>Home</span>
+          <span className="mx-2">/</span>
+          <span className="text-primary dark:text-white font-medium">
+            Leaderboards
+          </span>
+        </nav>
+
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              My Leaderboards
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base mt-1">
+              Manage your competitions and track your progress across different
+              clubs.
+            </p>
+          </div>
+
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="w-full md:w-auto overflow-hidden relative group"
+            className="w-full sm:w-auto overflow-hidden relative group"
           >
             <Plus className="w-5 h-5 mr-1 group-hover:scale-110 transition-transform" />
             Create Leaderboard
@@ -251,7 +186,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
 
       <Tabs
         value={tab}
-        className="flex flex-col"
+        className="flex flex-col w-full min-w-0"
         onValueChange={(value) => {
           if (value === 'active')
             void setStates({ isActive: true, isPublic: null });
@@ -270,17 +205,11 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
           <TabsTrigger value="inactive">Inactive</TabsTrigger>
           <TabsTrigger value="public">Public</TabsTrigger>
           <TabsTrigger value="private">Private</TabsTrigger>
-          {/* <TabsTrigger value="invitations">
-            Invitations
-            <span className="ml-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-0.5 px-2 rounded-full text-[10px] font-bold">
-              2
-            </span>
-          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 outline-none">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
@@ -300,29 +229,13 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
           ) : !isLoading && leaderboards.length > 0 ? (
             <FadeInStagger
               key={`${tab}-${leaderboards.length}`}
-              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 container-query"
+              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0"
             >
               {leaderboards.map((board) => (
                 <FadeInItem key={board.id}>
                   <LeaderboardCard data={board} />
                 </FadeInItem>
               ))}
-              <FadeInItem>
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-gray-50 dark:bg-white/5 rounded-2xl p-5 border-2 border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-gray-800/50 hover:border-primary dark:hover:border-gray-600 transition-all group min-h-[220px] w-full h-full"
-                >
-                  <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-white mb-3 transition-colors">
-                    <Plus className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900 dark:text-white mb-1">
-                    Create New Leaderboard
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
-                    Start a new competition with friends or your club.
-                  </p>
-                </button>
-              </FadeInItem>
             </FadeInStagger>
           ) : !isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -338,7 +251,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         </TabsContent>
       </Tabs>
 
-      <ActivityTable activities={recentActivities} />
+      <ActivityList activities={recentActivities} className="mt-12" />
 
       <LeaderboardModal
         isOpen={isModalOpen}
