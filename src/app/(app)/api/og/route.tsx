@@ -7,14 +7,15 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const name = searchParams.get('name');
+    const type = searchParams.get('type');
 
     const text = name
       ? name.length > 40
         ? name.substring(0, 40) + '...'
         : name
-      : 'Leaderboard';
-
-    console.log('text', text);
+      : type === 'club'
+        ? 'Club'
+        : 'Leaderboard';
 
     return new ImageResponse(
       (
