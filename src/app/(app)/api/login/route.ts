@@ -45,8 +45,16 @@ export const POST = withMiddleware<LoginValidatorSchema>(
       // 2. NRC HANDLER (One-Step Flow)
       // ---------------------------------------------------------
       else if (payload?.type === 'nrc') {
+        if (!payload.email || !payload.password) {
+          throw new Error('Email and password are required for NRC login.');
+        }
+
         const { email, token, username } =
-          await puppeteerService.captureNikeAuth();
+          await puppeteerService.captureNikeAuth({
+            email: payload.email,
+            password: payload.password,
+            headless: 'new',
+          });
 
         if (!email || !token || !username) {
           throw new Error(

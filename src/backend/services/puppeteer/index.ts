@@ -14,9 +14,11 @@ export interface NikeAuthResult {
 }
 
 export interface CaptureOptions {
-  headless?: boolean;
+  headless?: boolean | 'new';
   userDataDir?: string;
   timeout?: number;
+  email?: string;
+  password?: string;
 }
 
 export class PuppeteerService {
@@ -40,7 +42,7 @@ export class PuppeteerService {
    * and monitoring network requests while the user logs in.
    */
   async captureNikeAuth(options: CaptureOptions = {}): Promise<NikeAuthResult> {
-    const { headless = false, userDataDir, timeout = 0 } = options;
+    const { headless = 'new', userDataDir, timeout = 0, email, password } = options;
 
     const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
 
@@ -115,39 +117,59 @@ export class PuppeteerService {
       console.log('🌐 Navigating to Login...');
       await page.goto(this.URLS.LOGIN, { waitUntil: 'domcontentloaded' });
 
-      // --- 3. INJECT LISTENERS ---
+      // --- 3. INJECT LISTENERS OR AUTOMATE LOGIN ---
       console.log('👀 Waiting for login form...');
       await page.waitForSelector(this.SELECTORS.EMAIL_INPUT, {
         visible: true,
         timeout: 60000,
       });
 
-      await page.evaluate((selectors) => {
-        const emailInput = document.querySelector(selectors.EMAIL_INPUT)!;
-        const submitBtn = document.querySelector(selectors.NEXT_BUTTON);
-        const form = document.querySelector(selectors.LOGIN_FORM);
+      if (email && password) {
+        console.log('🤖 Automating Login entry...');
+        await page.type(this.SELECTORS.EMAIL_INPUT, email, { delay: 50 });
+        await page.waitForSelector(this.SELECTORS.NEXT_BUTTON, { visible: true });
+        await page.click(this.SELECTORS.NEXT_BUTTON);
 
-        const capture = () => {
-          if (emailInput && (emailInput as HTMLInputElement).value) {
-            (window as any).sendEmailToNode(
-              (emailInput as HTMLInputElement).value.trim()
-            );
+        // Wait for password field
+        const PWD_SELECTOR = 'input[type="password"]';
+        await page.waitForSelector(PWD_SELECTOR, { visible: true, timeout: 15000 });
+        await page.type(PWD_SELECTOR, password, { delay: 50 });
+
+        // Click sign in. The submit button is likely the same NEXT_BUTTON selector, but let's just click any button[type="submit"]
+        await Promise.all([
+          page.waitForNavigation({ waitUntil: 'networkidle2', timeout }),
+          page.click('button[type="submit"]')
+        ]);
+
+        emailValue = email;
+      } else {
+        await page.evaluate((selectors) => {
+          const emailInput = document.querySelector(selectors.EMAIL_INPUT)!;
+          const submitBtn = document.querySelector(selectors.NEXT_BUTTON);
+          const form = document.querySelector(selectors.LOGIN_FORM);
+
+          const capture = () => {
+            if (emailInput && (emailInput as HTMLInputElement).value) {
+              (window as any).sendEmailToNode(
+                (emailInput as HTMLInputElement).value.trim()
+              );
+            }
+          };
+
+          if (form) form.addEventListener('submit', capture);
+          if (submitBtn) {
+            submitBtn.addEventListener('click', capture);
+            submitBtn.addEventListener('mousedown', capture);
           }
-        };
+        }, this.SELECTORS);
 
-        if (form) form.addEventListener('submit', capture);
-        if (submitBtn) {
-          submitBtn.addEventListener('click', capture);
-          submitBtn.addEventListener('mousedown', capture);
-        }
-      }, this.SELECTORS);
+        console.log(
+          '✅ Listeners attached. Please enter email and click Continue.'
+        );
 
-      console.log(
-        '✅ Listeners attached. Please enter email and click Continue.'
-      );
-
-      // --- 4. WAIT FOR NAVIGATION ---
-      await page.waitForNavigation({ waitUntil: 'networkidle2', timeout });
+        // --- 4. WAIT FOR NAVIGATION ---
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout });
+      }
 
       // --- 5. FINAL CHECK ---
       emailValue ??= await page.evaluate(
