@@ -71,11 +71,10 @@ export type LeaderboardListItem = Leaderboard & {
   };
 };
 
-/** Composite type for Notification with User and optional Club relations */
 export type NotificationWithRelations = Notification & {
-  user?: User;
-  club?: Club;
-  leaderboard?: Leaderboard;
+  user?: User | null;
+  club?: Club | null;
+  leaderboard?: Leaderboard | null;
 };
 
 /** User fields included in leaderboard entries */

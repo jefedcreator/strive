@@ -57,6 +57,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 }) => {
   const config = typeConfig[notification.type];
   const queryClient = useQueryClient();
+  console.log('notification', notification.type);
 
   const acceptClubMutation = useMutation({
     mutationFn: async (clubId: string) => {

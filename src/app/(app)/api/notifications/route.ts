@@ -58,6 +58,10 @@ export const GET = withMiddleware<unknown, NotificationQueryValidatorSchema>(
         const data = await db.notification.findMany({
           where,
           orderBy,
+          include: {
+            club: true,
+            leaderboard: true,
+          },
         });
 
         const count = data.length;
@@ -82,6 +86,10 @@ export const GET = withMiddleware<unknown, NotificationQueryValidatorSchema>(
           take: size,
           skip,
           orderBy,
+          include: {
+            club: true,
+            leaderboard: true,
+          },
         }),
       ]);
 
