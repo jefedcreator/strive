@@ -1,4 +1,3 @@
-
 import type { Prisma, User, UserType } from '@prisma/client';
 import prisma from 'prisma';
 import { generateUsername } from 'unique-username-generator';

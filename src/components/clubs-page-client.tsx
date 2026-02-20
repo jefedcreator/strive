@@ -6,7 +6,11 @@ import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
 import { Button } from '@/primitives/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
-import { type ApiError, type ClubListItem, type PaginatedApiResponse } from '@/types';
+import {
+  type ApiError,
+  type ClubListItem,
+  type PaginatedApiResponse,
+} from '@/types';
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -188,7 +192,8 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
         value={tab}
         className="flex flex-col"
         onValueChange={(value) => {
-          if (value === 'active') void setStates({ isActive: true, isPublic: null });
+          if (value === 'active')
+            void setStates({ isActive: true, isPublic: null });
           else if (value === 'inactive')
             void setStates({ isActive: false, isPublic: null });
           else if (value === 'public')

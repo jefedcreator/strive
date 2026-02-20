@@ -7,9 +7,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const name = searchParams.get('name');
-    
-    const text = name 
-      ? (name.length > 18 ? name.substring(0, 18) + '...' : name)
+
+    const text = name
+      ? name.length > 18
+        ? name.substring(0, 18) + '...'
+        : name
       : 'Leaderboard';
 
     return new ImageResponse(

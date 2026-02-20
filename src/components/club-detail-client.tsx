@@ -15,7 +15,16 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
-import { ArrowLeft, Users, Trophy, Calendar, LogOut, Edit2, ArrowRight, User } from 'lucide-react';
+import {
+  ArrowLeft,
+  Users,
+  Trophy,
+  Calendar,
+  LogOut,
+  Edit2,
+  ArrowRight,
+  User,
+} from 'lucide-react';
 
 interface ClubDetailClientProps {
   initialData: ApiResponse<ClubDetail | null>;

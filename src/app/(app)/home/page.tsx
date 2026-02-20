@@ -4,7 +4,15 @@ import Background from '@/components/background';
 
 import { getRuns } from '@/server';
 import { type RunData } from '@/types';
-import { Clock, CheckCircle2, ArrowRight, Activity, PlusCircle, Share2, Award } from 'lucide-react';
+import {
+  Clock,
+  CheckCircle2,
+  ArrowRight,
+  Activity,
+  PlusCircle,
+  Share2,
+  Award,
+} from 'lucide-react';
 
 const leaderboard = [
   {

@@ -62,7 +62,7 @@ export default async function InviteDetailPage({ params }: PageProps) {
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
       <Background />
       <div className="z-10 w-full max-w-2xl">
-        <InviteDetailClient initialData={initialData} type='club'/>
+        <InviteDetailClient initialData={initialData} type="club" />
       </div>
     </div>
   );

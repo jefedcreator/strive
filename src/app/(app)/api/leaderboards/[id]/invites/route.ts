@@ -4,9 +4,7 @@ import {
   pathParamValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
-import {
-  clubInviteValidatorSchema
-} from '@/backend/validators/club.validator';
+import { clubInviteValidatorSchema } from '@/backend/validators/club.validator';
 import { paramValidator } from '@/backend/validators/index.validator';
 import type { LeaderboardInviteValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import { db } from '@/server/db';
@@ -48,7 +46,9 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
       });
 
       if (!requesterMembership || !requesterMembership.isActive) {
-        throw new ForbiddenException('Only leaderboard members can invite users');
+        throw new ForbiddenException(
+          'Only leaderboard members can invite users'
+        );
       }
 
       if (userToInviteId) {
@@ -70,13 +70,15 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
         });
 
         if (existingMembership) {
-          throw new ConflictException('User is already a member of this leaderboard');
+          throw new ConflictException(
+            'User is already a member of this leaderboard'
+          );
         }
 
         const existingInvite = await db.leaderboardInvites.findFirst({
           where: {
             userId: userToInviteId,
-            leaderboardId
+            leaderboardId,
           },
         });
 

@@ -36,9 +36,7 @@ export const Provider = ({ children }: QueryProviderProps) => {
           enableSystem
           disableTransitionOnChange
         >
-          <NuqsAdapter>
-            {children}
-          </NuqsAdapter>
+          <NuqsAdapter>{children}</NuqsAdapter>
         </ThemeProvider>
       </SessionProvider>
     </QueryClientProvider>

@@ -21,7 +21,18 @@ export interface LeaderboardCardProps {
   data: LeaderboardListItem;
 }
 
-import { Trophy, MoreVertical, LogIn, UserPlus, Trash2, Users, Calendar, Clock, ArrowRight, AlertTriangle } from 'lucide-react';
+import {
+  Trophy,
+  MoreVertical,
+  LogIn,
+  UserPlus,
+  Trash2,
+  Users,
+  Calendar,
+  Clock,
+  ArrowRight,
+  AlertTriangle,
+} from 'lucide-react';
 
 export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const { data: session } = useSession();
@@ -55,7 +66,9 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message ?? 'Failed to join leaderboard');
+      toast.error(
+        error.response?.data?.message ?? 'Failed to join leaderboard'
+      );
     },
   });
 
@@ -78,7 +91,9 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
             : 'Join request sent. Waiting for owner approval.';
         },
         error: (error: AxiosError<ApiError>) => {
-          return error.response?.data?.message ?? 'Failed to invite to leaderboard';
+          return (
+            error.response?.data?.message ?? 'Failed to invite to leaderboard'
+          );
         },
       });
 
@@ -104,7 +119,9 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       router.refresh();
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message ?? 'Failed to delete leaderboard');
+      toast.error(
+        error.response?.data?.message ?? 'Failed to delete leaderboard'
+      );
     },
   });
 
@@ -122,8 +139,14 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
 
   return (
     <motion.div
-      whileHover={{ y: -4, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
-      whileTap={{ scale: 0.98, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+      whileHover={{
+        y: -4,
+        transition: { type: 'spring', stiffness: 400, damping: 25 },
+      }}
+      whileTap={{
+        scale: 0.98,
+        transition: { type: 'spring', stiffness: 400, damping: 25 },
+      }}
       className={`relative bg-[#FAFAFA] dark:bg-[#0A0A0A] rounded-[24px] p-6 shadow-sm border border-black/5 dark:border-white/[0.08] hover:shadow-xl hover:shadow-primary/10 transition-shadow duration-300 group overflow-hidden ${!data.isActive || isCompleted ? 'opacity-75 hover:opacity-100' : ''}`}
     >
       {/* Subtle Inner Glow on Hover */}
@@ -198,7 +221,11 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
           {data.club?.name ?? 'General'}
         </div>
         <div className="flex items-center">
-          {isCompleted ? <Calendar className="w-4 h-4 mr-1" /> : <Clock className="w-4 h-4 mr-1" />}
+          {isCompleted ? (
+            <Calendar className="w-4 h-4 mr-1" />
+          ) : (
+            <Clock className="w-4 h-4 mr-1" />
+          )}
           {isCompleted ? 'Ended' : 'Active'}
         </div>
       </div>
@@ -216,7 +243,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
           href={`/leaderboards/${data.id}`}
           className="group/link text-[13px] font-bold text-gray-900 dark:text-white flex items-center bg-gray-100 dark:bg-white/5 hover:bg-primary hover:text-white dark:hover:bg-primary px-3 py-1.5 rounded-full transition-all duration-300"
         >
-          {isCompleted ? 'Results' : 'Board'} <ArrowRight className="w-3.5 h-3.5 ml-1 text-gray-400 group-hover/link:text-white group-hover/link:translate-x-1 transition-all" />
+          {isCompleted ? 'Results' : 'Board'}{' '}
+          <ArrowRight className="w-3.5 h-3.5 ml-1 text-gray-400 group-hover/link:text-white group-hover/link:translate-x-1 transition-all" />
         </a>
       </div>
 

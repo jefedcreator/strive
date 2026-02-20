@@ -28,10 +28,8 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
       let leaderboardId: string | undefined;
       let inviteId: string | undefined;
 
-
       console.log('leaderboardId', leaderboardId);
       console.log('inviteId', inviteId);
-
 
       if (state) {
         try {
@@ -151,7 +149,9 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
       if (clubId) {
         return NextResponse.redirect(new URL(`/clubs/${clubId}`, request.url));
       } else if (leaderboardId) {
-        return NextResponse.redirect(new URL(`/leaderboards/${leaderboardId}`, request.url));
+        return NextResponse.redirect(
+          new URL(`/leaderboards/${leaderboardId}`, request.url)
+        );
       }
 
       return NextResponse.redirect(new URL('/home', request.url));

@@ -43,7 +43,11 @@ export class StravaService {
   /**
    * Step 1: Generate the URL to redirect the user to Strava's consent screen.
    */
-  getAuthorizationUrl(state?: { clubId?: string; inviteId?: string; leaderboardId?: string }): string {
+  getAuthorizationUrl(state?: {
+    clubId?: string;
+    inviteId?: string;
+    leaderboardId?: string;
+  }): string {
     const params = new URLSearchParams({
       client_id: this.CLIENT_ID!,
       redirect_uri: 'http://localhost:3000/api/login/callback',

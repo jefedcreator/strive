@@ -1,6 +1,10 @@
 'use client';
 
-import { type ApiResponse, type ClubInviteDetail, type LeaderboardInviteDetail } from '@/types';
+import {
+  type ApiResponse,
+  type ClubInviteDetail,
+  type LeaderboardInviteDetail,
+} from '@/types';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, ShieldCheck, ArrowRight, X } from 'lucide-react';
@@ -17,7 +21,7 @@ const InviteDetailClient = ({
   initialData: ApiResponse<ClubInviteDetail | LeaderboardInviteDetail | null>;
   type: 'club' | 'leaderboard';
 }) => {
-  const router = useRouter(); 
+  const router = useRouter();
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
 
@@ -52,23 +56,35 @@ const InviteDetailClient = ({
   }
 
   const isClub = type === 'club';
-  
+
   // Extract entity based on type
-  const entityName = isClub ? (invite as ClubInviteDetail).club.name : (invite as LeaderboardInviteDetail).leaderboard.name;
-  const entityDescription = isClub ? (invite as ClubInviteDetail).club.description : (invite as LeaderboardInviteDetail).leaderboard.description;
-  const entityId = isClub ? (invite as ClubInviteDetail).club.id : (invite as LeaderboardInviteDetail).leaderboard.id;
-  const entityMemberCount = isClub ? (invite as ClubInviteDetail).club.memberCount : (invite as LeaderboardInviteDetail).leaderboard._count.entries;
+  const entityName = isClub
+    ? (invite as ClubInviteDetail).club.name
+    : (invite as LeaderboardInviteDetail).leaderboard.name;
+  const entityDescription = isClub
+    ? (invite as ClubInviteDetail).club.description
+    : (invite as LeaderboardInviteDetail).leaderboard.description;
+  const entityId = isClub
+    ? (invite as ClubInviteDetail).club.id
+    : (invite as LeaderboardInviteDetail).leaderboard.id;
+  const entityMemberCount = isClub
+    ? (invite as ClubInviteDetail).club.memberCount
+    : (invite as LeaderboardInviteDetail).leaderboard._count.entries;
   const inviter = invite.inviter;
 
-  const entityImage = isClub 
-    ? ((invite as ClubInviteDetail).club.image ?? null) 
+  const entityImage = isClub
+    ? ((invite as ClubInviteDetail).club.image ?? null)
     : `/api/leaderboards/og?name=${encodeURIComponent(entityName)}`;
 
   const inviterName = inviter?.fullname ?? inviter?.username ?? 'A member';
 
   const handleAccept = async () => {
     setIsAccepting(true);
-    router.push(type === 'club' ? `/?clubId=${entityId}&inviteId=${invite.id}` : `/?leaderboardId=${entityId}&inviteId=${invite.id}`);
+    router.push(
+      type === 'club'
+        ? `/?clubId=${entityId}&inviteId=${invite.id}`
+        : `/?leaderboardId=${entityId}&inviteId=${invite.id}`
+    );
   };
 
   const handleDecline = async () => {
@@ -188,7 +204,9 @@ const InviteDetailClient = ({
                 className="flex items-center relative z-10"
               >
                 <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3" />
-                {isAccepting ? `Joining ${type === 'club' ? 'Club' : 'Team'}...` : 'Accept Invitation'}
+                {isAccepting
+                  ? `Joining ${type === 'club' ? 'Club' : 'Team'}...`
+                  : 'Accept Invitation'}
               </motion.div>
             ) : (
               <span className="flex items-center relative z-10">

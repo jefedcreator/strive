@@ -52,7 +52,9 @@ export const POST = withMiddleware<unknown>(
       });
 
       if (existingMembership) {
-        throw new ConflictException('You are already a member of this leaderboard');
+        throw new ConflictException(
+          'You are already a member of this leaderboard'
+        );
       }
 
       const invite = await db.leaderboardInvites.findUnique({
@@ -64,7 +66,9 @@ export const POST = withMiddleware<unknown>(
       }
 
       if (invite.leaderboardId !== leaderboardId) {
-        throw new ForbiddenException('Invite does not belong to this leaderboard');
+        throw new ForbiddenException(
+          'Invite does not belong to this leaderboard'
+        );
       }
 
       // If invite is specific to a user, ensure current user matches

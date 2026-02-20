@@ -9,7 +9,18 @@ import {
   TooltipProvider,
   TooltipContent,
 } from '@/primitives/tooltip';
-import { LayoutDashboard, Users, Trophy, Bell, Settings, HelpCircle, Menu, ChevronRight, ChevronLeft, X } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Users,
+  Trophy,
+  Bell,
+  Settings,
+  HelpCircle,
+  Menu,
+  ChevronRight,
+  ChevronLeft,
+  X,
+} from 'lucide-react';
 
 interface NavItemProps {
   name: string;
@@ -50,7 +61,9 @@ export function Sidebar() {
               isCollapsed && 'justify-center px-2'
             )}
           >
-            <item.icon className={cn('w-5 h-5 shrink-0', !isCollapsed && 'mr-3')} />
+            <item.icon
+              className={cn('w-5 h-5 shrink-0', !isCollapsed && 'mr-3')}
+            />
             {!isCollapsed && (
               <span className="text-sm font-medium">{item.name}</span>
             )}
@@ -113,7 +126,11 @@ export function Sidebar() {
               )}
               onClick={() => setIsCollapsed(!isCollapsed)}
             >
-              {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+              {isCollapsed ? (
+                <ChevronRight className="w-5 h-5" />
+              ) : (
+                <ChevronLeft className="w-5 h-5" />
+              )}
             </button>
           </div>
 

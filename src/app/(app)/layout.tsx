@@ -20,8 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-      </head>
+      <head></head>
       <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden">
         <NextTopLoader showSpinner={false} color="#ff014e" />
         <Provider>

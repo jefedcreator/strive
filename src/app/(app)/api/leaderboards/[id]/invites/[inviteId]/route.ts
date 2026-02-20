@@ -40,8 +40,8 @@ export const GET = withMiddleware<unknown>(
               _count: {
                 select: {
                   entries: true,
-                }
-              }
+                },
+              },
             },
           },
           inviter: {
@@ -60,7 +60,9 @@ export const GET = withMiddleware<unknown>(
       }
 
       if (invite.leaderboardId !== leaderboardId) {
-        throw new ForbiddenException('Invite does not belong to this leaderboard');
+        throw new ForbiddenException(
+          'Invite does not belong to this leaderboard'
+        );
       }
 
       // If invite is specific to a user, ensure current user matches

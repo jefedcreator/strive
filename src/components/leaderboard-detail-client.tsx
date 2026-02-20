@@ -23,7 +23,15 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
-import { ArrowLeft, Trophy, Users, Calendar, LogOut, Edit2, ListOrdered } from 'lucide-react';
+import {
+  ArrowLeft,
+  Trophy,
+  Users,
+  Calendar,
+  LogOut,
+  Edit2,
+  ListOrdered,
+} from 'lucide-react';
 
 interface LeaderboardDetailClientProps {
   initialData: ApiResponse<LeaderboardDetail | null>;
@@ -114,7 +122,9 @@ export const LeaderboardDetailClient: React.FC<
       // setThumbnail(null);
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message ?? 'Failed to update leaderboard');
+      toast.error(
+        error.response?.data?.message ?? 'Failed to update leaderboard'
+      );
     },
   });
 
@@ -137,7 +147,9 @@ export const LeaderboardDetailClient: React.FC<
       router.push('/leaderboards');
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message ?? 'Failed to leave leaderboard');
+      toast.error(
+        error.response?.data?.message ?? 'Failed to leave leaderboard'
+      );
     },
   });
 
@@ -312,7 +324,11 @@ export const LeaderboardDetailClient: React.FC<
                               {entry.user.avatar ? (
                                 <Image
                                   src={entry.user.avatar}
-                                  alt={entry.user.fullname ?? entry.user.username ?? 'User avatar'}
+                                  alt={
+                                    entry.user.fullname ??
+                                    entry.user.username ??
+                                    'User avatar'
+                                  }
                                   width={32}
                                   height={32}
                                   className="w-full h-full object-cover"

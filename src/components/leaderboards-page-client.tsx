@@ -200,7 +200,9 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
       reset();
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message ?? 'Failed to create leaderboard');
+      toast.error(
+        error.response?.data?.message ?? 'Failed to create leaderboard'
+      );
     },
   });
 
@@ -251,7 +253,8 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         value={tab}
         className="flex flex-col"
         onValueChange={(value) => {
-          if (value === 'active') void setStates({ isActive: true, isPublic: null });
+          if (value === 'active')
+            void setStates({ isActive: true, isPublic: null });
           else if (value === 'inactive')
             void setStates({ isActive: false, isPublic: null });
           else if (value === 'public')

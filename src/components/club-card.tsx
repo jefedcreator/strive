@@ -22,7 +22,17 @@ interface ClubCardProps {
   club: ClubListItem;
 }
 
-import { Users, MoreVertical, LogIn, UserPlus, Trash2, ArrowRight, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import {
+  Users,
+  MoreVertical,
+  LogIn,
+  UserPlus,
+  Trash2,
+  ArrowRight,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
 
 export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   const { data: session } = useSession();
@@ -120,8 +130,14 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
 
   return (
     <motion.div
-      whileHover={{ y: -4, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
-      whileTap={{ scale: 0.98, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+      whileHover={{
+        y: -4,
+        transition: { type: 'spring', stiffness: 400, damping: 25 },
+      }}
+      whileTap={{
+        scale: 0.98,
+        transition: { type: 'spring', stiffness: 400, damping: 25 },
+      }}
       className={`relative bg-[#FAFAFA] dark:bg-[#0A0A0A] rounded-[24px] p-6 shadow-sm border border-black/5 dark:border-white/[0.08] hover:shadow-xl hover:shadow-primary/10 transition-shadow duration-300 group overflow-hidden ${isInactive ? 'opacity-75 hover:opacity-100' : ''}`}
     >
       {/* Subtle Inner Glow on Hover */}
@@ -206,7 +222,11 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           {club.slug}
         </div>
         <div className="flex items-center">
-          {isInactive ? <XCircle className="w-4 h-4 mr-1" /> : <CheckCircle className="w-4 h-4 mr-1" />}
+          {isInactive ? (
+            <XCircle className="w-4 h-4 mr-1" />
+          ) : (
+            <CheckCircle className="w-4 h-4 mr-1" />
+          )}
           {isInactive ? 'Inactive' : 'Active'}
         </div>
       </div>
@@ -223,7 +243,8 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           href={`/clubs/${club.id}`}
           className="group/link text-[13px] font-bold text-gray-900 dark:text-white flex items-center bg-gray-100 dark:bg-white/5 hover:bg-primary hover:text-white dark:hover:bg-primary px-3 py-1.5 rounded-full transition-all duration-300"
         >
-          Details <ArrowRight className="w-3.5 h-3.5 ml-1 text-gray-400 group-hover/link:text-white group-hover/link:translate-x-1 transition-all" />
+          Details{' '}
+          <ArrowRight className="w-3.5 h-3.5 ml-1 text-gray-400 group-hover/link:text-white group-hover/link:translate-x-1 transition-all" />
         </a>
       </div>
 
