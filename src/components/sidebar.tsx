@@ -33,7 +33,7 @@ interface NavItemProps {
 }
 
 const platformNavigation: NavItemProps[] = [
-  { name: 'Dashboard', href: '/home', icon: LayoutDashboard },
+  { name: 'Home', href: '/home', icon: LayoutDashboard },
   { name: 'Clubs', href: '/clubs', icon: Users },
   { name: 'Leaderboards', href: '/leaderboards', icon: Trophy },
   { name: 'Notifications', href: '/notifications', icon: Bell },
@@ -249,7 +249,7 @@ export function Sidebar() {
                     />
                   ) : (
                     (
-                      user?.username?.[0] ??
+                      user?.fullname?.[0] ??
                       user?.name?.[0] ??
                       'U'
                     ).toUpperCase()
@@ -257,7 +257,7 @@ export function Sidebar() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                    {user?.name ?? user?.username ?? 'Guest'}
+                    {user?.fullname ?? user?.username ?? 'Guest'}
                   </p>
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
                     {user ? 'Pro Member' : 'Not logged in'}

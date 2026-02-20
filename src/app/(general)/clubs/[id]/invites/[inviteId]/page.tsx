@@ -23,7 +23,9 @@ export async function generateMetadata({
   const clubName = invite.club.name;
   const inviterName = invite.inviter?.fullname ?? 'Someone';
   const description = invite.club.description ?? `Join ${clubName} on Strive!`;
-  const image = invite.club.image ?? '/favicon.ico';
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://strive.vercel.app';
+  const rawImage = invite.club.image ?? '/favicon.ico';
+  const image = rawImage.startsWith('http') ? rawImage : `${baseUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
 
   return {
     title: `Join ${clubName} | Invited by ${inviterName}`,

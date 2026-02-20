@@ -27,7 +27,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head></head>
       <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden">
         <NextTopLoader showSpinner={false} color="#ff014e" />
         <Provider>
@@ -36,7 +35,7 @@ export default function RootLayout({
               <Sidebar />
               <div className="flex-1">
                 <TopNav />
-                <div className="container mx-auto max-w-7xl p-6">
+                <div className="container mx-auto max-w-7xl px-4 py-6 md:p-6">
                   <main className="w-full">{children}</main>
                 </div>
               </div>
