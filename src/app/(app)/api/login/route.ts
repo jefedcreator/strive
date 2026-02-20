@@ -161,6 +161,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         userId: user.id,
         redirect: false,
         token: auth_token,
+        image: user.avatar,
       });
 
       const responsePayload: any = {

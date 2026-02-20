@@ -143,6 +143,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
       await signIn('credentials', {
         userId: user.id,
         token: auth_token,
+        image: user.avatar,
         redirect: false,
       });
 

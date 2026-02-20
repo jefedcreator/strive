@@ -24,6 +24,7 @@ declare module 'next-auth' {
     username?: string | null;
     fullname?: string | null;
     token?: string | null;
+    avatar?: string | null;
   }
 }
 
@@ -40,6 +41,7 @@ export const authConfig = {
       credentials: {
         userId: { label: 'User ID', type: 'text' },
         token: { label: 'Token', type: 'text' },
+        image: { label: 'Image', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.userId) return null;
@@ -56,6 +58,7 @@ export const authConfig = {
           username: user.username,
           fullname: user.fullname,
           avatar: user.avatar,
+          image: (credentials.image as string) ?? user.avatar ?? null,
           token: (credentials.token as string) ?? null,
         };
       },
@@ -81,6 +84,11 @@ export const authConfig = {
         token.username = user.username;
         token.fullname = user.fullname;
         token.accessToken = user.token;
+        if (user.image) {
+          token.picture = user.image;
+        } else if (user.avatar) {
+          token.picture = user.avatar;
+        }
       }
       return token;
     },
