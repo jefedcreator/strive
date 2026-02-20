@@ -16,7 +16,7 @@ export default async function LeaderboardDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full min-w-0 flex flex-col">
       <Background />
       <LeaderboardDetailClient initialData={initialData} />
     </div>

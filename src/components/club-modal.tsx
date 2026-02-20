@@ -189,7 +189,7 @@ export const ClubModal: React.FC<ClubModalProps> = ({
             </Field>
 
             {/* Visibility Switch */}
-            <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-white/5 p-4 flex items-center justify-between">
+            <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-white/5 p-4 flex md:flex-row flex-column items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                   Visibility

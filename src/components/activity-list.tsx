@@ -67,7 +67,6 @@ export function ActivityList({
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
           <Badge
-            variant="outline"
             className="text-[10px] uppercase tracking-wider px-1.5 py-0 rounded-md border-primary/20 bg-primary/5 text-primary"
           >
             {activity.action}

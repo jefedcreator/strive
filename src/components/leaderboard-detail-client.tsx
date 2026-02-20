@@ -6,7 +6,7 @@ import {
   LeaderboardModal,
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
-import { ActivityList } from '@/components/activity-list';
+import { Leaderboard } from '@/primitives/leaderboard';
 import {
   type ApiError,
   type ApiResponse,
@@ -157,7 +157,7 @@ export const LeaderboardDetailClient: React.FC<
   };
 
   return (
-    <FadeInStagger className="flex flex-col h-full px-4 md:px-0 mt-20 lg:mt-0 pb-10">
+    <FadeInStagger className="flex flex-col w-full min-w-0 h-full px-4 md:px-0 mt-20 lg:mt-0 pb-10">
       {/* Back link */}
       <FadeInItem>
         <Link
@@ -259,13 +259,16 @@ export const LeaderboardDetailClient: React.FC<
       </FadeInItem>
 
       {/* Rankings */}
-      <FadeInItem>
-        <ActivityList
-          title="Rankings"
-          type="ranking"
-          entries={entries}
-          viewAllLink={undefined}
-        />
+      <FadeInItem className="w-full min-w-0 flex flex-col">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-xl text-gray-900 dark:text-white">
+            Leaderboard Rankings
+          </h2>
+          <span className="text-xs font-bold tracking-widest uppercase text-gray-400 dark:text-gray-500">
+            {entries.length} {entries.length === 1 ? 'Athlete' : 'Athletes'}
+          </span>
+        </div>
+        <Leaderboard entries={entries} currentUserId={session?.user.id} />
       </FadeInItem>
 
       <LeaderboardModal

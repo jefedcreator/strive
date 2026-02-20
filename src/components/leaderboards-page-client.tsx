@@ -1,15 +1,14 @@
 'use client';
 
 import { leaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
+import { ActivityList, type Activity } from '@/components/activity-list';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
 import { LeaderboardCard } from '@/components/leaderboard-card';
 import {
   LeaderboardModal,
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
-import { ActivityList, type Activity } from '@/components/activity-list';
 import { Button } from '@/primitives/Button';
-import { Badge } from '@/primitives/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
   type ApiError,
@@ -22,13 +21,13 @@ import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios, { type AxiosError } from 'axios';
+import { Plus, Search, SearchX } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useQueryStates } from 'nuqs';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Plus, Search, SearchX } from 'lucide-react';
 
 interface LeaderboardsPageClientProps {
   initialData: PaginatedApiResponse<LeaderboardListItem[]>;

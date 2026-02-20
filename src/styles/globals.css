@@ -55,3 +55,11 @@
 .dark ::-webkit-scrollbar-thumb {
   background: #334155;
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 10px;
+}
