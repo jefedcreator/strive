@@ -2,7 +2,7 @@ import React from 'react';
 
 const Background = () => {
   return (
-    <div className="absolute inset-0 min-h-screen z-0 opacity-5 pointer-events-none select-none">
+    <div className="absolute inset-0 min-h-[100dvh] z-0 opacity-5 pointer-events-none select-none overflow-hidden">
       <svg
         className="absolute top-10 left-10 w-64 h-64 text-gray-900 dark:text-gray-100 bg-pattern-item"
         fill="none"

@@ -99,11 +99,11 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="mb-6 md:mb-8 mt-16 lg:mt-0">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
           My Notifications
         </h2>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">
+        <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-500 dark:text-gray-400">
           Stay updated with your latest activities, club invites, and records.
         </p>
       </div>

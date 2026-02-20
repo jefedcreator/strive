@@ -38,8 +38,6 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
 }) => {
   const { data: session } = useSession();
   const router = useRouter();
-
-  const [searchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [{ isActive, isPublic, query }, setStates] = useQueryStates(
@@ -133,18 +131,10 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
 
   const clubs = initialData.data;
 
-  const filteredClubs = useMemo(() => {
-    return clubs.filter(
-      (club) =>
-        club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        club.slug.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [clubs, searchTerm]);
-
   return (
     <div className="flex flex-col h-full">
       {/* Page Header Area */}
-      <div className="mb-6 md:mb-10">
+      <div className="mb-6 md:mb-10 mt-16 lg:mt-0">
         <nav className="flex text-sm text-gray-500 dark:text-gray-400 mb-2 md:hidden">
           <span>Home</span>
           <span className="mx-2">/</span>
@@ -230,12 +220,12 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
                 </div>
               ))}
             </div>
-          ) : filteredClubs.length > 0 ? (
+          ) : clubs.length > 0 ? (
             <FadeInStagger
-              key={`${tab}-${filteredClubs.length}`}
+              key={`${tab}-${clubs.length}`}
               className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0"
             >
-              {filteredClubs.map((club) => (
+              {clubs.map((club) => (
                 <FadeInItem key={club.id}>
                   <ClubCard club={club} />
                 </FadeInItem>

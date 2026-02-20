@@ -1,11 +1,18 @@
 import { Provider } from '@/provider';
 import '@/styles/globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
   title: 'Strive - Sync Your Fitness Journey',
   description:
     'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

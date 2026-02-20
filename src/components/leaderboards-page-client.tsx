@@ -214,12 +214,12 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-8 gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-8 gap-4 mt-16 lg:mt-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1 md:mb-2">
             My Leaderboards
           </h1>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">
             Manage your competitions and track your progress across different
             clubs.
           </p>
@@ -227,7 +227,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         <div>
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="w-full sm:w-auto overflow-hidden relative group"
+            className="w-full md:w-auto overflow-hidden relative group"
           >
             <Plus className="w-5 h-5 mr-1 group-hover:scale-110 transition-transform" />
             Create Leaderboard
@@ -307,7 +307,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
                   <LeaderboardCard data={board} />
                 </FadeInItem>
               ))}
-
               <FadeInItem>
                 <button
                   onClick={() => setIsModalOpen(true)}

@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { toast } from 'sonner';
+import { SiNike,SiStrava } from 'react-icons/si'
+
 
 function LoginPageContent() {
   const router = useRouter();
@@ -137,13 +139,7 @@ function LoginPageContent() {
                 className="w-full group relative flex justify-center items-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-[#FC4C02] hover:bg-[#e34402] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FC4C02] transition-all duration-200 shadow-lg"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-4">
-                  <svg
-                    className="h-5 w-5 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.477 0 4.5 13.828h4.172"></path>
-                  </svg>
+                  <SiStrava className="h-5 w-5 text-white" />
                 </span>
                 Sign in with Strava
               </button>
@@ -167,16 +163,10 @@ function LoginPageContent() {
                 className="w-full group relative flex justify-center items-center py-4 px-4 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-xl text-white bg-black hover:bg-gray-900 dark:bg-black dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 shadow-lg"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-4">
-                  <svg
-                    className="h-4 w-10 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M21 8.25c-5.75 0-9.25 3.5-12 8.75 5-6 10-6.75 12-6.5-5.5-2.5-14.5 0-21 13.5 1.75-8.5 10.5-15.75 21-15.75Z"></path>
-                  </svg>
+                  <SiNike className="h-6 w-10 text-white" />
                 </span>
                 Sign in with NRC
-              </button>
+              </button> 
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-900/40 px-8 py-5 border-t border-gray-100 dark:border-gray-800 text-center">

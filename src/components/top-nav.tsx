@@ -24,7 +24,7 @@ export function TopNav() {
   console.log('user', user);
 
   return (
-    <header className="h-[70px] flex items-center justify-between px-6 lg:px-8 bg-background-light dark:bg-background-dark sticky top-0 z-30 transition-colors duration-300">
+    <header className="hidden lg:flex h-[70px] items-center justify-between px-6 lg:px-8 bg-background-light dark:bg-background-dark sticky top-0 z-30 transition-colors duration-300">
       {/* --- Breadcrumbs --- */}
       <nav className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
         <Link

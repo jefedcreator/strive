@@ -158,7 +158,7 @@ export const LeaderboardDetailClient: React.FC<
   };
 
   return (
-    <FadeInStagger className="flex flex-col h-full">
+    <FadeInStagger className="flex flex-col h-full px-4 md:px-0 mt-20 lg:mt-0 pb-10">
       {/* Back link */}
       <FadeInItem>
         <Link
