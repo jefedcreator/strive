@@ -192,18 +192,18 @@ export function Sidebar() {
             className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
               isMobileOpen ? 'opacity-100' : 'opacity-0'
             }`}
-             onClick={() => setIsMobileOpen(false)}
+            onClick={() => setIsMobileOpen(false)}
           />
 
-           {/* Drawer Content */}
-           <div
+          {/* Drawer Content */}
+          <div
             className={`absolute inset-y-0 left-0 w-72 bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
               isMobileOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
-             <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
-               <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white">
-                 STRIVE
+            <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
+              <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white">
+                STRIVE
               </span>
               <button
                 onClick={() => setIsMobileOpen(false)}
@@ -211,35 +211,35 @@ export function Sidebar() {
                 aria-label="Close menu"
               >
                 <X className="w-6 h-6 text-gray-500" />
-               </button>
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-               <p className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+              <p className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">
                 Platform
               </p>
-               {platformNavigation.map((item) => (
-                 <NavItem key={item.name} item={item} />
-               ))}
-             </div>
+              {platformNavigation.map((item) => (
+                <NavItem key={item.name} item={item} />
+              ))}
+            </div>
 
-             <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4 shrink-0">
-               <div className="flex items-center justify-between px-3">
-                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4 shrink-0">
+              <div className="flex items-center justify-between px-3">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   Dark Mode
                 </span>
                 <ToggleTheme />
-               </div>
+              </div>
               <div className="space-y-1">
-                 {bottomNavigation.map((item) => (
+                {bottomNavigation.map((item) => (
                   <NavItem key={item.name} item={item} />
                 ))}
               </div>
 
               {/* User Profile Snippet (Mobile) */}
               <div className="mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20">
-                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden shadow-sm">
-                   {user?.image ? (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden shadow-sm">
+                  {user?.image ? (
                     <Image
                       src={user.image}
                       alt={user.name ?? 'User'}
@@ -248,20 +248,24 @@ export function Sidebar() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    (user?.username?.[0] ?? user?.name?.[0] ?? 'U').toUpperCase()
+                    (
+                      user?.username?.[0] ??
+                      user?.name?.[0] ??
+                      'U'
+                    ).toUpperCase()
                   )}
-                 </div>
-                 <div className="min-w-0">
+                </div>
+                <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                     {user?.name ?? user?.username ?? 'Guest'}
                   </p>
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
                     {user ? 'Pro Member' : 'Not logged in'}
                   </p>
-                 </div>
+                </div>
               </div>
             </div>
-           </div>
+          </div>
         </div>
       </>
     </TooltipProvider>

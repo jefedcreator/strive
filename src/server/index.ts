@@ -15,10 +15,13 @@ import type {
 } from '@/types';
 import { uncachedAuth } from './auth';
 
-const baseUrl = process.env.NODE_ENV == "production" ? "https://strive-beige.vercel.app" : "http://localhost:3000";
+const baseUrl =
+  process.env.NODE_ENV == 'production'
+    ? 'https://strive-beige.vercel.app'
+    : 'http://localhost:3000';
 
 const fetcher = async (url: string): Promise<Response> => {
-  const session = await uncachedAuth(); 
+  const session = await uncachedAuth();
   return await fetch(url, {
     headers: { Authorization: `Bearer ${session?.user.token}` },
     cache: 'no-store',

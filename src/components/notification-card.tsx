@@ -1,7 +1,10 @@
 import React from 'react';
-import { type NotificationWithRelations } from '@/types';
+import { type ApiError, type NotificationWithRelations } from '@/types';
 import { type NotificationType } from '@prisma/client';
-import { Info, Users, Trophy, ArrowRight } from 'lucide-react';
+import { Info, Users, Trophy, ArrowRight, Loader2 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axios, { AxiosError } from 'axios';
+import { toast } from 'sonner';
 
 interface NotificationCardProps {
   notification: NotificationWithRelations;
@@ -53,6 +56,62 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   notification,
 }) => {
   const config = typeConfig[notification.type];
+  const queryClient = useQueryClient();
+
+  const acceptClubMutation = useMutation({
+    mutationFn: async (clubId: string) => {
+      await axios.post(`/api/clubs/${clubId}/accept`, {
+        userId: notification.userId,
+      });
+    },
+    onSuccess: () => {
+      toast.success('Accepted club invite');
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: ['clubs'] });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to accept club invite'
+      );
+    },
+  });
+
+  const acceptLeaderboardMutation = useMutation({
+    mutationFn: async (leaderboardId: string) => {
+      await axios.post(`/api/leaderboards/${leaderboardId}/accept`, {
+        userId: notification.userId,
+      });
+    },
+    onSuccess: () => {
+      toast.success('Accepted leaderboard invite');
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      void queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to accept leaderboard invite'
+      );
+    },
+  });
+
+  const dismissMutation = useMutation({
+    mutationFn: async () => {
+      await axios.patch(`/api/notifications/${notification.id}`, {
+        isRead: true,
+      });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+    onError: () => {
+      toast.error('Failed to dismiss notification');
+    },
+  });
+
+  const isPending =
+    acceptClubMutation.isPending ||
+    acceptLeaderboardMutation.isPending ||
+    dismissMutation.isPending;
 
   return (
     <div
@@ -60,7 +119,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         notification.isRead ? 'opacity-70 hover:opacity-100' : ''
       }`}
     >
-      {/* Icon */}
       <div className="flex-shrink-0">
         <div
           className={`h-12 w-12 rounded-full ${config.iconBg} flex items-center justify-center ${config.iconText}`}
@@ -116,27 +174,90 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           notification.club &&
           !notification.isRead && (
             <div className="mt-3 flex gap-3">
-              <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors shadow-sm">
-                View Club
+              <button
+                onClick={() => acceptClubMutation.mutate(notification.club!.id)}
+                disabled={isPending}
+                className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors shadow-sm flex items-center justify-center min-w-[80px] disabled:opacity-50"
+              >
+                {acceptClubMutation.isPending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  'Accept'
+                )}
               </button>
-              <button className="bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 px-4 py-2 rounded-lg text-xs font-medium transition-colors">
-                Dismiss
+              <button
+                onClick={() => dismissMutation.mutate()}
+                disabled={isPending}
+                className="bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 px-4 py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center min-w-[80px]"
+              >
+                {dismissMutation.isPending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  'Decline'
+                )}
               </button>
             </div>
           )}
 
         {/* Actions for leaderboard notifications */}
-        {notification.type === 'leaderboard' && notification.leaderboard && (
-          <div className="mt-3">
-            <a
-              href={`/leaderboards/${notification.leaderboard.id}`}
-              className="text-xs text-gray-900 dark:text-white font-medium hover:underline flex items-center group"
-            >
-              View Leaderboard
-              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-          </div>
-        )}
+        {notification.type === 'leaderboard' &&
+          notification.leaderboard &&
+          !notification.isRead && (
+            <div className="mt-3 flex gap-3">
+              <button
+                onClick={() =>
+                  acceptLeaderboardMutation.mutate(notification.leaderboard!.id)
+                }
+                disabled={isPending}
+                className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors shadow-sm flex items-center justify-center min-w-[80px] disabled:opacity-50"
+              >
+                {acceptLeaderboardMutation.isPending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  'Accept'
+                )}
+              </button>
+              <button
+                onClick={() => dismissMutation.mutate()}
+                disabled={isPending}
+                className="bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 px-4 py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 flex items-center justify-center min-w-[80px]"
+              >
+                {dismissMutation.isPending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  'Decline'
+                )}
+              </button>
+            </div>
+          )}
+
+        {/* Fallback View Link for Read or other types */}
+        {notification.isRead &&
+          notification.type === 'leaderboard' &&
+          notification.leaderboard && (
+            <div className="mt-3">
+              <a
+                href={`/leaderboards/${notification.leaderboard.id}`}
+                className="text-xs text-gray-900 dark:text-white font-medium hover:underline flex items-center group"
+              >
+                View Leaderboard
+                <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
+              </a>
+            </div>
+          )}
+        {notification.isRead &&
+          notification.type === 'club' &&
+          notification.club && (
+            <div className="mt-3">
+              <a
+                href={`/clubs/${notification.club.id}`}
+                className="text-xs text-gray-900 dark:text-white font-medium hover:underline flex items-center group"
+              >
+                View Club
+                <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
+              </a>
+            </div>
+          )}
       </div>
     </div>
   );

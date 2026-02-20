@@ -173,13 +173,12 @@ export const LeaderboardDetailClient: React.FC<
       <FadeInItem>
         <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 md:gap-4">
-            
             {/* Identity & Metadata Stack */}
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
               <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white shrink-0">
                 <Trophy className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              
+
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 flex-wrap mb-1.5">
                   <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
@@ -204,11 +203,11 @@ export const LeaderboardDetailClient: React.FC<
                     {isCompleted ? 'Ended' : 'Active'}
                   </span>
                 </div>
-                
+
                 <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl leading-relaxed mb-4">
                   {leaderboard.description ?? 'No description provided.'}
                 </p>
-                
+
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                   {leaderboard.club && (
                     <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
@@ -248,7 +247,7 @@ export const LeaderboardDetailClient: React.FC<
                 <LogOut className="w-4 h-4" />
                 {exitMutation.isPending ? 'Leaving...' : 'Leave'}
               </button>
-              
+
               {isCreator && (
                 <button
                   onClick={() => setIsEditModalOpen(true)}

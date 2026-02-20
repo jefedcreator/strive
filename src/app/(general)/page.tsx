@@ -6,8 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { toast } from 'sonner';
-import { SiNike,SiStrava } from 'react-icons/si'
-
+import { SiNike, SiStrava } from 'react-icons/si';
 
 function LoginPageContent() {
   const router = useRouter();
@@ -166,7 +165,7 @@ function LoginPageContent() {
                   <SiNike className="h-6 w-10 text-white" />
                 </span>
                 Sign in with NRC
-              </button> 
+              </button>
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-900/40 px-8 py-5 border-t border-gray-100 dark:border-gray-800 text-center">

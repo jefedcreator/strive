@@ -66,14 +66,15 @@ export function ActivityList({
           </span>
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <Badge
-            className="text-[10px] uppercase tracking-wider px-1.5 py-0 rounded-md border-primary/20 bg-primary/5 text-primary"
-          >
+          <Badge className="text-[10px] uppercase tracking-wider px-1.5 py-0 rounded-md border-primary/20 bg-primary/5 text-primary">
             {activity.action}
           </Badge>
           {activity.leaderboardTitle && (
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              in <span className="text-gray-700 dark:text-gray-200 font-medium">{activity.leaderboardTitle}</span>
+              in{' '}
+              <span className="text-gray-700 dark:text-gray-200 font-medium">
+                {activity.leaderboardTitle}
+              </span>
             </p>
           )}
         </div>
@@ -89,17 +90,25 @@ export function ActivityList({
       <div
         key={entry.id}
         className={cn(
-          "group flex items-center space-x-4 p-3 rounded-xl transition-all duration-200 border-b border-border-light/50 dark:border-border-dark/50 last:border-0",
-          isTopThree ? "bg-white dark:bg-white/5 shadow-sm" : "hover:bg-gray-50 dark:hover:bg-white/5"
+          'group flex items-center space-x-4 p-3 rounded-xl transition-all duration-200 border-b border-border-light/50 dark:border-border-dark/50 last:border-0',
+          isTopThree
+            ? 'bg-white dark:bg-white/5 shadow-sm'
+            : 'hover:bg-gray-50 dark:hover:bg-white/5'
         )}
       >
         <div className="flex-shrink-0 w-8 flex justify-center">
-          <span className={cn(
-            "font-bold text-sm",
-            rank === 1 ? "text-yellow-500 text-lg" : 
-            rank === 2 ? "text-gray-400 text-base" : 
-            rank === 3 ? "text-amber-600 text-base" : "text-gray-400"
-          )}>
+          <span
+            className={cn(
+              'font-bold text-sm',
+              rank === 1
+                ? 'text-yellow-500 text-lg'
+                : rank === 2
+                  ? 'text-gray-400 text-base'
+                  : rank === 3
+                    ? 'text-amber-600 text-base'
+                    : 'text-gray-400'
+            )}
+          >
             {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
           </span>
         </div>
@@ -148,10 +157,12 @@ export function ActivityList({
   const hasData = data && data.length > 0;
 
   return (
-    <div className={cn(
-      "bg-card-light dark:bg-card-dark rounded-2xl border border-border-light dark:border-border-dark shadow-soft overflow-hidden flex flex-col",
-      className
-    )}>
+    <div
+      className={cn(
+        'bg-card-light dark:bg-card-dark rounded-2xl border border-border-light dark:border-border-dark shadow-soft overflow-hidden flex flex-col',
+        className
+      )}
+    >
       <div className="px-6 py-5 border-b border-border-light dark:border-border-dark flex justify-between items-center shrink-0">
         <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
           {title}
@@ -174,7 +185,9 @@ export function ActivityList({
       <div className="p-2 overflow-y-auto max-h-[500px] scrollbar-hide">
         {!hasData ? (
           <div className="py-12 flex flex-col items-center justify-center text-center opacity-50">
-            <p className="text-sm text-gray-500 dark:text-gray-400">No data available</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No data available
+            </p>
           </div>
         ) : (
           <FadeInStagger className="space-y-1">

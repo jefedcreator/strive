@@ -1,33 +1,46 @@
 'use client';
 
+import { FadeInItem, FadeInStagger } from '@/components/fade-in';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
   type FilterOption,
   type NotificationWithRelations,
   type PaginatedApiResponse,
 } from '@/types';
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { parseParams } from '@/utils';
+import { Search, SearchX } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import FilterPanel from './filterpanel';
+import { useQueryStates } from 'nuqs';
+import { useMemo, useState } from 'react';
 import { NotificationCard } from './notification-card';
-import { FadeInStagger, FadeInItem } from '@/components/fade-in';
-import { Bell } from 'lucide-react';
 
 interface NotificationsPageClientProps {
   initialData: PaginatedApiResponse<NotificationWithRelations[]>;
+  currentFilters: {
+    type: string | null;
+    query: string | null;
+  };
 }
 
 const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
   initialData: notificationsResponse,
+  currentFilters,
 }) => {
   const { data: session } = useSession();
-  const [filters, setFilters] = useState<FilterOption[]>([
-    { id: 'all', label: 'All Notifications', checked: true },
-    { id: 'info', label: 'General Info', checked: false },
-    { id: 'club', label: 'Club Activity', checked: false },
-    { id: 'leaderboard', label: 'Leaderboard Activity', checked: false },
-  ]);
+  const [{ type, query }, setStates] = useQueryStates(parseParams, {
+    shallow: false,
+    throttleMs: 1000,
+  });
+
+  const tab = useMemo(() => {
+    if (type === 'info') return 'info';
+    if (type === 'club') return 'club';
+    if (type === 'leaderboard') return 'leaderboard';
+    return 'all';
+  }, [type]);
+
+  const isLoading =
+    type !== currentFilters.type || query !== currentFilters.query;
 
   // const { data: notificationsResponse } = useQuery<
   //   PaginatedApiResponse<NotificationWithRelations[]>
@@ -47,55 +60,17 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
 
   const notifications = notificationsResponse.data;
 
-  const handleFilterChange = (id: string) => {
-    if (id === 'all') {
-      setFilters((prev) =>
-        prev.map((f) => ({
-          ...f,
-          checked: f.id === 'all',
-        }))
-      );
-    } else {
-      setFilters((prev) => {
-        const newFilters = prev.map((f) => {
-          if (f.id === id) return { ...f, checked: !f.checked };
-          if (f.id === 'all') return { ...f, checked: false };
-          return f;
-        });
+  // const todayNotifications = useMemo(() => {
+  //   const today = new Date();
+  //   today.setHours(0, 0, 0, 0);
+  //   return filteredNotifications.filter((n) => new Date(n.createdAt) >= today);
+  // }, [filteredNotifications]);
 
-        const anyChecked = newFilters.some((f) => f.id !== 'all' && f.checked);
-        if (!anyChecked) {
-          return newFilters.map((f) =>
-            f.id === 'all' ? { ...f, checked: true } : f
-          );
-        }
-        return newFilters;
-      });
-    }
-  };
-
-  // Filtering logic based on NotificationType enum values
-  const activeFilterIds = filters
-    .filter((f) => f.checked && f.id !== 'all')
-    .map((f) => f.id);
-  const isAllFilter = filters.find((f) => f.id === 'all')?.checked;
-
-  const filteredNotifications = useMemo(() => {
-    if (isAllFilter) return notifications;
-    return notifications.filter((n) => activeFilterIds.includes(n.type));
-  }, [notifications, isAllFilter, activeFilterIds]);
-
-  const todayNotifications = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return filteredNotifications.filter((n) => new Date(n.createdAt) >= today);
-  }, [filteredNotifications]);
-
-  const olderNotifications = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return filteredNotifications.filter((n) => new Date(n.createdAt) < today);
-  }, [filteredNotifications]);
+  // const olderNotifications = useMemo(() => {
+  //   const today = new Date();
+  //   today.setHours(0, 0, 0, 0);
+  //   return filteredNotifications.filter((n) => new Date(n.createdAt) < today);
+  // }, [filteredNotifications]);
 
   return (
     <div className="flex flex-col h-full">
@@ -108,74 +83,82 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Notification Feed */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Today Section */}
-          {todayNotifications.length > 0 && (
-            <>
-              <FadeInItem className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800 mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Today
-                </h3>
-                <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
-                  Mark all as read
-                </button>
-              </FadeInItem>
-              <FadeInStagger className="space-y-4">
-                {todayNotifications.map((notification) => (
-                  <FadeInItem key={notification.id}>
-                    <NotificationCard notification={notification} />
-                  </FadeInItem>
-                ))}
-              </FadeInStagger>
-            </>
-          )}
-
-          {/* Earlier Section */}
-          {olderNotifications.length > 0 && (
-            <>
-              <FadeInItem className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800 mt-8 mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Earlier
-                </h3>
-              </FadeInItem>
-              <FadeInStagger className="space-y-4">
-                {olderNotifications.map((notification) => (
-                  <FadeInItem key={notification.id}>
-                    <NotificationCard notification={notification} />
-                  </FadeInItem>
-                ))}
-              </FadeInStagger>
-            </>
-          )}
-
-          {todayNotifications.length === 0 &&
-            olderNotifications.length === 0 && (
-              <FadeInItem className="text-center py-12 bg-white dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800">
-                <Bell className="w-10 h-10 mb-2 text-gray-300 dark:text-gray-600" />
-                <p className="text-gray-500 dark:text-gray-400">
-                  No notifications found for the selected filters.
-                </p>
-              </FadeInItem>
-            )}
-        </div>
-
-        {/* Right Sidebar / Filter Panel */}
-        <div className="hidden lg:block">
-          <div className="sticky top-4">
-            <FilterPanel
-              filters={filters}
-              onFilterChange={handleFilterChange}
-            />
-          </div>
-        </div>
-
-        {/* Mobile Filter */}
-        <div className="block lg:hidden mt-8">
-          <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
-        </div>
+      <div className="relative mb-6">
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+          <Search className="w-5 h-5 text-gray-400" />
+        </span>
+        <input
+          type="text"
+          value={query ?? ''}
+          onChange={(e) => setStates({ query: e.target.value || null })}
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card-dark text-sm focus:ring-2 focus:ring-primary dark:focus:ring-white focus:border-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 shadow-sm transition-shadow"
+          placeholder="Search your notifications..."
+        />
       </div>
+
+      <Tabs
+        value={tab}
+        className="flex flex-col w-full min-w-0"
+        onValueChange={(value) => {
+          if (value === 'info') void setStates({ type: 'info' });
+          else if (value === 'club') void setStates({ type: 'club' });
+          else if (value === 'leaderboard')
+            void setStates({ type: 'leaderboard' });
+          else void setStates({ type: null });
+        }}
+      >
+        <TabsList className="mb-8">
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="info">Info</TabsTrigger>
+          <TabsTrigger value="club">Club</TabsTrigger>
+          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={tab} className="mt-6 outline-none">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Notification Feed */}
+            <div className="lg:col-span-2 space-y-4">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 h-[220px] animate-pulse"
+                    >
+                      <div className="flex justify-between items-start mb-6">
+                        <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700" />
+                        <div className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 w-20 h-6" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : !isLoading && notifications.length > 0 ? (
+                <FadeInStagger className="space-y-4">
+                  {notifications.map((notification) => (
+                    <FadeInItem key={notification.id}>
+                      <NotificationCard notification={notification} />
+                    </FadeInItem>
+                  ))}
+                </FadeInStagger>
+              ) : !isLoading ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <SearchX className="w-10 h-10 mb-2 opacity-50 text-gray-400 dark:text-gray-500" />
+                  <h3 className="font-bold text-gray-900 dark:text-white mb-1">
+                    No notifications found
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+                    Try adjusting your filters or search term.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

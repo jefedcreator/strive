@@ -208,7 +208,6 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
       <FadeInItem>
         <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 md:gap-4">
-            
             {/* Identity & Metadata Stack */}
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
               {club.image ? (
@@ -224,7 +223,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                   <Users className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
                 </div>
               )}
-              
+
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 flex-wrap mb-1.5">
                   <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
@@ -249,15 +248,15 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                     {club.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
-                
+
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-2 font-medium">
                   /{club.slug}
                 </p>
-                
+
                 <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl leading-relaxed mb-4">
                   {club.description ?? 'No description provided.'}
                 </p>
-                
+
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
                     <Users className="w-3.5 h-3.5" />
@@ -295,7 +294,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                 <LogOut className="w-4 h-4" />
                 {exitMutation.isPending ? 'Leaving...' : 'Leave'}
               </button>
-              
+
               {isCreator && (
                 <button
                   onClick={() => setIsEditModalOpen(true)}

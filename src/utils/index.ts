@@ -8,8 +8,10 @@ import {
   createSearchParamsCache,
   parseAsBoolean,
   parseAsString,
+  parseAsStringEnum,
 } from 'nuqs/server';
 import { HttpException } from './exceptions';
+import { NotificationType } from '@prisma/client';
 
 const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -124,6 +126,7 @@ const parseParams = {
   isActive: parseAsBoolean,
   isPublic: parseAsBoolean,
   query: parseAsString,
+  type: parseAsStringEnum<NotificationType>(Object.values(NotificationType)),
 };
 
 const loadParams = createSearchParamsCache(parseParams);
