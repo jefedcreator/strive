@@ -248,16 +248,16 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             </Field>
 
             {/* Visibility Switch */}
-            <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-white/5 p-4 flex md:flex-row flex-column items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+            <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-white/5 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">
                   Visibility
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400 relative">
                   Public leaderboards are visible to everyone.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                   Private
                 </span>
@@ -268,13 +268,13 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                     <Switch.Root
                       checked={field.value}
                       onCheckedChange={field.onChange}
-                      className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full relative data-[state=checked]:bg-primary outline-none cursor-pointer transition-colors"
+                      className="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full relative data-[state=checked]:bg-primary outline-none cursor-pointer transition-colors shadow-sm"
                     >
-                      <Switch.Thumb className="block w-4 h-4 bg-white rounded-full transition-transform duration-100 translate-x-1 will-change-transform data-[state=checked]:translate-x-6" />
+                      <Switch.Thumb className="block w-4 h-4 bg-white rounded-full transition-transform duration-100 translate-x-1 shadow-sm will-change-transform data-[state=checked]:translate-x-6" />
                     </Switch.Root>
                   )}
                 />
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
                   Public
                 </span>
               </div>

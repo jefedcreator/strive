@@ -1,5 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/primitives/avatar';
 import { Badge } from '@/primitives/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/primitives/table';
 import { type UserLeaderboard } from '@prisma/client';
 import React from 'react';
 
@@ -32,38 +40,38 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   return (
     <div className="grid grid-cols-1 w-full">
       <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
-        <div className="overflow-x-auto w-full custom-scrollbar">
-          <table className="w-full text-left min-w-[700px] border-collapse">
-            <thead className="bg-gray-50/80 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800">
-            <tr>
-              <th className="w-24 px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400">
+        <div className="overflow-x-auto w-full">
+          <Table className="w-full text-left min-w-[700px] border-collapse">
+            <TableHeader className="bg-gray-50/80 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800">
+            <TableRow>
+              <TableHead className="w-24 px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400">
                 Rank
-              </th>
-              <th className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400">
+              </TableHead>
+              <TableHead className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400">
                 Athlete
-              </th>
-              <th className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400 text-right">
+              </TableHead>
+              <TableHead className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400 text-right">
                 Score
-              </th>
-              <th className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400 text-right">
+              </TableHead>
+              <TableHead className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400 text-right">
                 Last Updated
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-gray-50 dark:divide-gray-800/50">
             {sortedEntries.map((entry, index) => {
               const rank = index + 1;
               const isCurrentUser = entry.userId === currentUserId;
 
               return (
-                <tr
+                <TableRow
                   key={entry.id}
                   className={`group transition-colors border-0 hover:bg-gray-50/50 dark:hover:bg-white/5 ${
                     isCurrentUser ? 'bg-gray-50/80 dark:bg-white/10' : ''
                   }`}
                 >
                   {/* Rank Pillar */}
-                  <td className="px-8 py-5">
+                  <TableCell className="px-8 py-5">
                     <div
                       className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold shadow-sm ${
                         rank === 1
@@ -77,10 +85,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     >
                       {rank}
                     </div>
-                  </td>
+                  </TableCell>
 
                   {/* Athlete Identity */}
-                  <td className="px-8 py-5">
+                  <TableCell className="px-8 py-5">
                     <div className="flex items-center gap-4 min-w-[200px]">
                       <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
                         {entry.user.avatar && (
@@ -120,17 +128,17 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                         )}
                       </div>
                     </div>
-                  </td>
+                  </TableCell>
 
                   {/* Metric/Score */}
-                  <td className="px-8 py-5 text-right">
+                  <TableCell className="px-8 py-5 text-right">
                     <Badge className="bg-primary/5 text-primary hover:bg-primary/10 dark:bg-primary/10 dark:text-white dark:hover:bg-primary/20 px-3 py-1.5 text-[13px] font-black tracking-tight tabular-nums border border-primary/10 dark:border-primary/20 rounded-xl shadow-sm whitespace-nowrap">
                       {entry.score.toLocaleString()}
                     </Badge>
-                  </td>
+                  </TableCell>
 
                   {/* Timestamp */}
-                  <td className="px-8 py-5 text-right whitespace-nowrap">
+                  <TableCell className="px-8 py-5 text-right whitespace-nowrap">
                     <span className="text-xs font-medium text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
                       {entry.lastScoreDate
                         ? new Date(entry.lastScoreDate).toLocaleDateString(
@@ -143,12 +151,12 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                           )
                         : '—'}
                     </span>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {sortedEntries.length === 0 && (

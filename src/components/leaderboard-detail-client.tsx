@@ -172,18 +172,21 @@ export const LeaderboardDetailClient: React.FC<
       {/* Header */}
       <FadeInItem>
         <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="h-14 w-14 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white shrink-0">
-                <Trophy className="w-6 h-6" />
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 md:gap-4">
+            
+            {/* Identity & Metadata Stack */}
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
+              <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white shrink-0">
+                <Trophy className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                     {leaderboard.name}
                   </h1>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
+                    className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
                       leaderboard.isPublic
                         ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                         : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'
@@ -192,7 +195,7 @@ export const LeaderboardDetailClient: React.FC<
                     {leaderboard.isPublic ? 'Public' : 'Private'}
                   </span>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
+                    className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
                       isCompleted
                         ? 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
                         : 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
@@ -201,18 +204,20 @@ export const LeaderboardDetailClient: React.FC<
                     {isCompleted ? 'Ended' : 'Active'}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl">
+                
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl leading-relaxed mb-4">
                   {leaderboard.description ?? 'No description provided.'}
                 </p>
-                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+                
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                   {leaderboard.club && (
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
+                      <Users className="w-3.5 h-3.5" />
                       <span>{leaderboard.club.name}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
+                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
+                    <Users className="w-3.5 h-3.5" />
                     <span>
                       {leaderboard._count.entries}{' '}
                       {leaderboard._count.entries === 1
@@ -221,8 +226,8 @@ export const LeaderboardDetailClient: React.FC<
                     </span>
                   </div>
                   {leaderboard.expiryDate && (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
+                    <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
+                      <Calendar className="w-3.5 h-3.5" />
                       <span>
                         {isCompleted ? 'Ended' : 'Expires'}{' '}
                         {new Date(leaderboard.expiryDate).toLocaleDateString()}
@@ -233,21 +238,21 @@ export const LeaderboardDetailClient: React.FC<
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              {/* {!isCreator && ( */}
+            {/* Actions Stack */}
+            <div className="flex flex-row sm:flex-col items-stretch sm:items-end gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0 pt-4 md:pt-0 border-t border-gray-100 dark:border-gray-800 md:border-t-0 p-1 md:p-0">
               <button
                 onClick={() => exitMutation.mutate()}
                 disabled={exitMutation.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 dark:border-red-800/50 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-red-200 dark:border-red-800/50 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors shadow-sm"
               >
                 <LogOut className="w-4 h-4" />
                 {exitMutation.isPending ? 'Leaving...' : 'Leave'}
               </button>
-              {/* )} */}
+              
               {isCreator && (
                 <button
                   onClick={() => setIsEditModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm"
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit

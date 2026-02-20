@@ -250,7 +250,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         </TabsContent>
       </Tabs>
 
-      <ActivityList activities={recentActivities} className="mt-12" />
+      {/* <ActivityList activities={recentActivities} className="mt-12" /> */}
 
       <LeaderboardModal
         isOpen={isModalOpen}
