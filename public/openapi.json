@@ -3,12 +3,16 @@
   "info": {
     "title": "Strive Documentation",
     "version": "1.0.0",
-    "description": "This is the OpenAPI specification for your project."
+    "description": "Strive API Documentation"
   },
   "servers": [
     {
       "url": "http://localhost:3000/api",
       "description": "Local development server"
+    },
+    {
+      "url": "https://strive-beige.vercel.app/api",
+      "description": "Production server"
     }
   ],
   "components": {
@@ -42,16 +46,29 @@
           "userId"
         ]
       },
+      "inviteParamValidator": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/mongoIdValidator"
+          },
+          "inviteId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "inviteId"
+        ]
+      },
       "ClubInviteValidatorSchema": {
         "type": "object",
         "properties": {
           "userId": {
-            "$ref": "#/components/schemas/mongoIdValidator"
+            "type": "object"
           }
-        },
-        "required": [
-          "userId"
-        ]
+        }
       },
       "UpdateClubValidatorSchema": {
         "type": "object",
@@ -67,6 +84,8 @@
             "nullable": true
           },
           "image": {
+            "type": "string",
+            "format": "binary",
             "nullable": true
           },
           "slug": {
@@ -77,11 +96,27 @@
             "nullable": true
           },
           "isPublic": {
-            "type": "string",
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": true,
             "nullable": true
           },
           "isActive": {
-            "type": "string",
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": true,
             "nullable": true
           }
         }
@@ -99,6 +134,8 @@
             "nullable": true
           },
           "image": {
+            "type": "string",
+            "format": "binary",
             "nullable": true
           },
           "slug": {
@@ -108,17 +145,33 @@
             "pattern": "^[a-z0-9-]+$"
           },
           "isPublic": {
-            "type": "string",
-            "nullable": true
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": true
           },
           "isActive": {
-            "type": "string",
-            "nullable": true
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": true
           }
         },
         "required": [
           "name",
-          "slug"
+          "slug",
+          "isPublic",
+          "isActive"
         ]
       },
       "ClubQueryValidatorSchema": {
@@ -379,6 +432,10 @@
         "properties": {
           "code": {
             "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -396,6 +453,26 @@
             ]
           },
           "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "string",
+            "nullable": true
+          },
+          "leaderboardId": {
+            "type": "string",
+            "nullable": true
+          },
+          "inviteId": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
             "type": "string",
             "nullable": true
           }
@@ -528,6 +605,8 @@
             "nullable": true
           },
           "image": {
+            "type": "string",
+            "format": "binary",
             "nullable": true
           },
           "slug": {
@@ -537,29 +616,42 @@
             "pattern": "^[a-z0-9-]+$"
           },
           "isPublic": {
-            "type": "string",
-            "nullable": true
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": true
           },
           "isActive": {
-            "type": "string",
-            "nullable": true
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": true
           }
         },
         "required": [
           "name",
-          "slug"
+          "slug",
+          "isPublic",
+          "isActive"
         ]
       },
       "clubInviteValidatorSchema": {
         "type": "object",
         "properties": {
           "userId": {
-            "$ref": "#/components/schemas/mongoIdValidator"
+            "type": "object"
           }
-        },
-        "required": [
-          "userId"
-        ]
+        }
       },
       "acceptInviteValidatorSchema": {
         "type": "object",
@@ -586,6 +678,8 @@
             "nullable": true
           },
           "image": {
+            "type": "string",
+            "format": "binary",
             "nullable": true
           },
           "slug": {
@@ -596,11 +690,27 @@
             "nullable": true
           },
           "isPublic": {
-            "type": "string",
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": true,
             "nullable": true
           },
           "isActive": {
-            "type": "string",
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": true,
             "nullable": true
           }
         }
@@ -912,6 +1022,10 @@
         "properties": {
           "code": {
             "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -929,6 +1043,26 @@
             ]
           },
           "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "string",
+            "nullable": true
+          },
+          "leaderboardId": {
+            "type": "string",
+            "nullable": true
+          },
+          "inviteId": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
             "type": "string",
             "nullable": true
           }
@@ -1395,9 +1529,44 @@
         }
       }
     },
-    "/clubs/{id}/invite": {
+    "/clubs/{id}/exit": {
+      "delete": {
+        "operationId": "delete-clubs-{id}-exit",
+        "summary": "",
+        "description": "Exit (leave) a club. The creator cannot leave their own club.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clubs/{id}/invites": {
       "post": {
-        "operationId": "post-clubs-{id}-invite",
+        "operationId": "post-clubs-{id}-invites",
         "summary": "",
         "description": "Invite a user to a club. Only the owner can do this.",
         "tags": [
@@ -1449,6 +1618,83 @@
             "in": "path",
             "name": "id",
             "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clubs/{id}/invites/{inviteId}": {
+      "get": {
+        "operationId": "get-clubs-{id}-invites-{inviteId}",
+        "summary": "",
+        "description": "Get an invite by ID.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          },
+          {
+            "in": "path",
+            "name": "inviteId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clubs/{id}/invites/{inviteId}/join": {
+      "post": {
+        "operationId": "post-clubs-{id}-invites-{inviteId}-join",
+        "summary": "",
+        "description": "Join a club using an invite ID. Works for both user-specific and open invites.",
+        "tags": [
+          "Clubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          },
+          {
+            "in": "path",
+            "name": "inviteId",
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "example": "123"
           }
@@ -1790,11 +2036,46 @@
         }
       }
     },
-    "/leaderboards/{id}/invite": {
-      "post": {
-        "operationId": "post-leaderboards-{id}-invite",
+    "/leaderboards/{id}/exit": {
+      "delete": {
+        "operationId": "delete-leaderboards-{id}-exit",
         "summary": "",
-        "description": "Invite a user to a leaderboard. Only members can do this.",
+        "description": "Exit (leave) a leaderboard. The creator cannot leave their own leaderboard.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/leaderboards/{id}/invites": {
+      "post": {
+        "operationId": "post-leaderboards-{id}-invites",
+        "summary": "",
+        "description": "Invite a user to a leaderboard. Only the owner can do this.",
         "tags": [
           "Leaderboards"
         ],
@@ -1863,6 +2144,83 @@
         }
       }
     },
+    "/leaderboards/{id}/invites/{inviteId}": {
+      "get": {
+        "operationId": "get-leaderboards-{id}-invites-{inviteId}",
+        "summary": "",
+        "description": "Get an invite by ID.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          },
+          {
+            "in": "path",
+            "name": "inviteId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/leaderboards/{id}/invites/{inviteId}/join": {
+      "post": {
+        "operationId": "post-leaderboards-{id}-invites-{inviteId}-join",
+        "summary": "",
+        "description": "Join a club using an invite ID. Works for both user-specific and open invites.",
+        "tags": [
+          "Leaderboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {},
+            "required": true,
+            "example": "123"
+          },
+          {
+            "in": "path",
+            "name": "inviteId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "123"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "operationId": "post-login",
@@ -1904,6 +2262,14 @@
           {
             "in": "query",
             "name": "code",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "state",
             "schema": {
               "type": "string"
             },
@@ -2008,6 +2374,25 @@
             "BearerAuth": []
           }
         ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/og": {
+      "get": {
+        "operationId": "get-og",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Og"
+        ],
+        "parameters": [],
         "responses": {
           "400": {
             "$ref": "#/components/responses/400"
