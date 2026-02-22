@@ -3,11 +3,12 @@
 import { Button } from '@/primitives/Button';
 import { Input } from '@/primitives/Input';
 import { Modal } from '@/primitives/Modal';
+import { useSocket } from '@/provider/socket-provider';
 import type { ApiError } from '@/types';
 import { useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { SiNike, SiStrava } from 'react-icons/si';
 import { toast } from 'sonner';
 
@@ -15,14 +16,60 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
+  const { socket } = useSocket();
 
   const [isNRCModalOpen, setIsNRCModalOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  
+  // NRC Flow States
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
-  // Mutation Logic
-  const loginMutation = useMutation({
+  // --- Real-Time NRC Webhook Listener ---
+  useEffect(() => {
+    if (!socket || !activeSessionId) return;
+
+    const handleNrcStep = (data: { step: string; sessionId: string; message?: string }) => {
+      if (data.sessionId !== activeSessionId) return;
+
+      if (data.step === 'ready') {
+        setIsInitializing(false);
+        setIsNRCModalOpen(true);
+      } else if (data.step === 'success') {
+        setIsSubmitting(false);
+        setIsNRCModalOpen(false);
+        handleLoginSuccess(null);
+      } else if (data.step === 'error') {
+        setIsSubmitting(false);
+        setIsInitializing(false);
+        toast.error(data.message ?? 'An error occurred during authentication.');
+        setActiveSessionId(null);
+      }
+    };
+
+    socket.on('nrc-login-step', handleNrcStep);
+    return () => {
+      socket.off('nrc-login-step', handleNrcStep);
+    };
+  }, [socket, activeSessionId]);
+
+  const handleLoginSuccess = (payloadUrl: string | null) => {
+    toast.success(`Welcome back!`);
+    if (payloadUrl) {
+      window.location.href = payloadUrl;
+    } else {
+      const clubId = searchParams.get('clubId');
+      const leaderboardId = searchParams.get('leaderboardId');
+      if (clubId) router.push(`/clubs/${clubId}`);
+      else if (leaderboardId) router.push(`/leaderboards/${leaderboardId}`);
+      else router.push('/home');
+    }
+  };
+
+  // Strava Mutation Logic
+  const stravaMutation = useMutation({
     mutationFn: async (payload: any) => {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -36,52 +83,68 @@ function LoginPageContent() {
       if (result.action === 'redirect' && result.url) {
         window.location.href = result.url;
       } else {
-        toast.success(`Welcome back!`);
-        router.push('/home');
+        handleLoginSuccess(null);
       }
     },
     onError: (error: ApiError) => toast.error(error.message),
   });
 
+  // NRC Submissions (Step 1 and Step 2)
   const handleStravaLogin = () => {
     const clubId = searchParams.get('clubId') ?? undefined;
     const leaderboardId = searchParams.get('leaderboardId') ?? undefined;
     const inviteId = searchParams.get('inviteId') ?? undefined;
-    loginMutation.mutate({ type: 'strava', clubId, leaderboardId, inviteId });
+    stravaMutation.mutate({ type: 'strava', clubId, leaderboardId, inviteId });
   };
 
-  const handleNRCLogin = async (e: React.FormEvent) => {
+  const initNRCLogin = async () => {
+    setIsInitializing(true);
+    try {
+      const response = await fetch('/api/login/nrc/init', { method: 'POST' });
+      if (!response.ok) throw new Error('Failed to connect to Nike servers.');
+      
+      const { sessionId } = await response.json();
+      setActiveSessionId(sessionId);
+      toast.info('Connecting to Nike servers...');
+    } catch (err: any) {
+      toast.error(err.message);
+      setIsInitializing(false);
+    }
+  };
+
+  const submitNRCCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!email || !password || !activeSessionId) {
       toast.error('Email and password are required.');
       return;
     }
 
-    const clubId = searchParams.get('clubId') ?? undefined;
-    const leaderboardId = searchParams.get('leaderboardId') ?? undefined;
-    const inviteId = searchParams.get('inviteId') ?? undefined;
-    
-    setIsLoggingIn(true);
+    setIsSubmitting(true);
+    const payload = {
+      type: 'nrc',
+      sessionId: activeSessionId,
+      email,
+      password,
+      clubId: searchParams.get('clubId') ?? undefined,
+      leaderboardId: searchParams.get('leaderboardId') ?? undefined,
+      inviteId: searchParams.get('inviteId') ?? undefined,
+    };
 
     try {
-      await loginMutation.mutateAsync({
-        type: 'nrc',
-        email,
-        password,
-        clubId,
-        leaderboardId,
-        inviteId,
+      const response = await fetch('/api/login/nrc/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-      setIsNRCModalOpen(false);
-      toast.success('Welcome to Strive!');
-      if (!clubId && !leaderboardId) {
-        router.push('/home');
+      
+      if (!response.ok) {
+         const errorInfo = await response.json();
+         throw new Error(errorInfo.message ?? 'Invalid credentials.');
       }
-    } catch (err: unknown) {
-      const error = err as ApiError;
-      toast.error(error.message ?? 'Failed to connect NRC');
-    } finally {
-      setIsLoggingIn(false);
+      // Success will be handled by the websocket!
+    } catch (err: any) {
+      toast.error(err.message);
+      setIsSubmitting(false);
     }
   };
 
@@ -177,13 +240,18 @@ function LoginPageContent() {
               </div>
               {/* Nike Login */}
               <button
-                onClick={() => setIsNRCModalOpen(true)}
-                className="w-full group relative flex justify-center items-center py-4 px-4 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-xl text-white bg-black hover:bg-gray-900 dark:bg-black dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 shadow-lg"
+                onClick={initNRCLogin}
+                disabled={isInitializing}
+                className="w-full group relative flex justify-center items-center py-4 px-4 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-xl text-white bg-black hover:bg-gray-900 dark:bg-black dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 shadow-lg disabled:opacity-50"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-4">
-                  <SiNike className="h-6 w-10 text-white" />
+                  {isInitializing ? (
+                    <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  ) : (
+                    <SiNike className="h-6 w-10 text-white" />
+                  )}
                 </span>
-                Sign in with NRC
+                {isInitializing ? 'Connecting...' : 'Sign in with NRC'}
               </button>
             </div>
 
@@ -211,13 +279,13 @@ function LoginPageContent() {
       </main>
 
       {/* NRC Login Modal */}
-      <Modal open={isNRCModalOpen} onOpenChange={setIsNRCModalOpen}>
+      <Modal open={isNRCModalOpen} onOpenChange={isSubmitting ? undefined : setIsNRCModalOpen}>
         <Modal.Portal>
           <Modal.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-card-light dark:bg-card-dark rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Sign in with Nike</h2>
               <Modal.Close asChild>
-                <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 disabled:opacity-50" disabled={isSubmitting}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -225,7 +293,7 @@ function LoginPageContent() {
                 </button>
               </Modal.Close>
             </div>
-            <form onSubmit={handleNRCLogin} className="space-y-4">
+            <form onSubmit={submitNRCCredentials} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Email
@@ -234,6 +302,7 @@ function LoginPageContent() {
                   id="email"
                   type="email"
                   value={email}
+                  disabled={isSubmitting}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your Nike email"
                   required
@@ -247,6 +316,7 @@ function LoginPageContent() {
                   id="password"
                   type="password"
                   value={password}
+                  disabled={isSubmitting}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your Nike password"
                   required
@@ -255,16 +325,16 @@ function LoginPageContent() {
               <div className="pt-2">
                 <Button
                   type="submit"
-                  disabled={isLoggingIn}
+                  disabled={isSubmitting}
                   className="w-full flex justify-center py-3 bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 rounded-lg hover:shadow-md transition-shadow disabled:opacity-50"
                 >
-                  {isLoggingIn ? (
+                  {isSubmitting ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 rounded-full border-2 border-white dark:border-black border-t-transparent animate-spin" />
-                      <span>Connecting...</span>
+                      <span>Authenticating...</span>
                     </div>
                   ) : (
-                    'Login to NRC'
+                    'Login'
                   )}
                 </Button>
               </div>

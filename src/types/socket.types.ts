@@ -4,6 +4,7 @@ export interface ServerToClientEvents {
     'club-invite': (data: { clubId: string; inviteId: string; inviterName: string }) => void;
     'leaderboard-invite': (data: { leaderboardId: string; inviteId: string; inviterName: string }) => void;
     'run-synced': (data: { runId: string; success: boolean }) => void;
+    'nrc-login-step': (data: { step: 'ready' | 'processing' | 'success' | 'error'; sessionId: string; message?: string }) => void;
 }
 
 export interface ClientToServerEvents {
