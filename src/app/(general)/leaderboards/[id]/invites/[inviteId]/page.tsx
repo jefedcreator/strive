@@ -26,7 +26,7 @@ export async function generateMetadata({
   const description =
     invite.leaderboard.description ?? `Join ${leaderboardName} on Strive!`;
   const baseUrl =
-    process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://strive.vercel.app';
+    process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://strive-beige.vercel.app';
   // const baseUrl =
   //   process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://2551-105-113-112-54.ngrok-free.app';
   const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(leaderboardName)}&type=leaderboard`;
