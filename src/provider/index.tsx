@@ -26,6 +26,8 @@ function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
 
+import { SocketProvider } from './socket-provider';
+
 export const Provider = ({ children }: QueryProviderProps) => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -36,7 +38,9 @@ export const Provider = ({ children }: QueryProviderProps) => {
           enableSystem
           disableTransitionOnChange
         >
-          <NuqsAdapter>{children}</NuqsAdapter>
+          <NuqsAdapter>
+            <SocketProvider>{children}</SocketProvider>
+          </NuqsAdapter>
         </ThemeProvider>
       </SessionProvider>
     </QueryClientProvider>
