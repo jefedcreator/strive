@@ -1,3 +1,4 @@
+// src/services/webhook.ts
 import { Server as SocketIOServer } from 'socket.io';
 import Pusher from 'pusher';
 import type { Server as NetServer } from 'http';
@@ -9,18 +10,44 @@ import type {
 } from '@/types/socket.types';
 import { env } from '@/env';
 
+type QueuedEvent = {
+    room: string | null; // null = global broadcast
+    event: string;
+    args: unknown[];
+};
+
+// ─── Why globalThis instead of a static class property ───────────────────────
+//
+// Next.js re-evaluates modules on hot reload and across API route boundaries.
+// A module-level `static instance` produces MULTIPLE singletons in the same
+// process — one where initialize() is called (the custom server), and a
+// different one where emit() fires (API routes / Puppeteer service).
+//
+// Pinning to `globalThis` survives module re-evaluation: every import in every
+// module boundary always gets the exact same WebhookService object.
+//
+declare global {
+    // eslint-disable-next-line no-var
+    var __webhookService: WebhookService | undefined;
+}
+
 class WebhookService {
-    private static instance: WebhookService;
     private io: SocketIOServer<
         ClientToServerEvents,
         ServerToClientEvents,
         InterServerEvents,
         SocketData
     > | null = null;
+
     private pusher: Pusher | null = null;
 
-    private constructor() {
-        // Singleton pattern
+    /**
+     * Events emitted before any transport was ready.
+     * Replayed automatically once a transport comes online.
+     */
+    private queue: QueuedEvent[] = [];
+
+    constructor() {
         if (
             env.PUSHER_APP_ID &&
             env.PUSHER_KEY &&
@@ -34,16 +61,64 @@ class WebhookService {
                 cluster: env.PUSHER_CLUSTER,
                 useTLS: true,
             });
-            console.log('[WebhookService] Pusher initialized for Serverless environment');
+            console.log('[WebhookService] Pusher initialized');
+            // Pusher is ready synchronously — drain the queue immediately.
+            this.flushQueue();
         }
     }
 
-    public static getInstance(): WebhookService {
-        if (!WebhookService.instance) {
-            WebhookService.instance = new WebhookService();
-        }
-        return WebhookService.instance;
+    // ─── Transport availability ───────────────────────────────────────────────
+
+    private get hasTransport(): boolean {
+        return this.io !== null || this.pusher !== null;
     }
+
+    // ─── Queue helpers ────────────────────────────────────────────────────────
+
+    private enqueue(room: string | null, event: string, args: unknown[]) {
+        this.queue.push({ room, event, args });
+        console.warn(
+            `[WebhookService] No transport ready yet. Queued "${event}" (queue length: ${this.queue.length})`
+        );
+    }
+
+    private flushQueue() {
+        if (this.queue.length === 0) return;
+
+        console.log(`[WebhookService] Flushing ${this.queue.length} queued event(s)...`);
+        for (const { room, event, args } of this.queue) {
+            if (room === null) {
+                this.dispatchGlobal(event, args);
+            } else {
+                this.dispatchToRoom(room, event, args);
+            }
+        }
+        this.queue = [];
+    }
+
+    // ─── Raw dispatch (no queuing) ────────────────────────────────────────────
+
+    private dispatchGlobal(event: string, args: unknown[]) {
+        if (this.io) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (this.io.emit as any)(event, ...args);
+        }
+        if (this.pusher) {
+            void this.pusher.trigger('global', event, args);
+        }
+    }
+
+    private dispatchToRoom(room: string, event: string, args: unknown[]) {
+        if (this.io) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (this.io.to(room).emit as any)(event, ...args);
+        }
+        if (this.pusher) {
+            void this.pusher.trigger(room, event, args);
+        }
+    }
+
+    // ─── Public API ───────────────────────────────────────────────────────────
 
     public initialize(httpServer: NetServer) {
         if (this.io) {
@@ -61,7 +136,7 @@ class WebhookService {
             path: '/api/socket/io',
             addTrailingSlash: false,
             cors: {
-                origin: '*', // Adjust this for production security
+                origin: '*',
                 methods: ['GET', 'POST'],
             },
         });
@@ -84,32 +159,28 @@ class WebhookService {
             });
         });
 
+        // Socket.IO is now live — drain any events queued before it was ready.
+        this.flushQueue();
+
         return this.io;
     }
 
     public getIO() {
         if (!this.io) {
-            throw new Error('Socket.IO is not initialized yet. Call initialize() first.');
+            throw new Error('Socket.IO not initialized. Call initialize(httpServer) first.');
         }
         return this.io;
     }
 
-    // Helper method to emit events to specific rooms or globally
     public emit<Ev extends keyof ServerToClientEvents>(
         event: Ev,
         ...args: Parameters<ServerToClientEvents[Ev]>
     ) {
-        if (this.io) {
-            this.io.emit(event, ...args);
+        if (!this.hasTransport) {
+            this.enqueue(null, event as string, args);
+            return;
         }
-
-        if (this.pusher) {
-            void this.pusher.trigger('global', event as string, args);
-        }
-
-        if (!this.io && !this.pusher) {
-            console.warn(`[WebhookService] No transport initialized. Missed event. Event: ${String(event)}`);
-        }
+        this.dispatchGlobal(event as string, args);
     }
 
     public emitTo<Ev extends keyof ServerToClientEvents>(
@@ -117,18 +188,18 @@ class WebhookService {
         event: Ev,
         ...args: Parameters<ServerToClientEvents[Ev]>
     ) {
-        if (this.io) {
-            this.io.to(room).emit(event, ...args);
+        if (!this.hasTransport) {
+            this.enqueue(room, event as string, args);
+            return;
         }
-
-        if (this.pusher) {
-            void this.pusher.trigger(room, event as string, args);
-        }
-
-        if (!this.io && !this.pusher) {
-            console.warn(`[WebhookService] No transport initialized. Missed event. Event: ${String(event)}`);
-        }
+        this.dispatchToRoom(room, event as string, args);
     }
 }
 
-export const webhookService = WebhookService.getInstance();
+// ─── Export a true process-level singleton ────────────────────────────────────
+//
+// `??=` constructs exactly once per Node.js process, regardless of how many
+// times Next.js re-evaluates this module.
+//
+export const webhookService =
+    (globalThis.__webhookService ??= new WebhookService());

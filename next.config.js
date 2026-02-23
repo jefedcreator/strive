@@ -8,6 +8,14 @@ import "./src/env.js";
 const config = {
   images: {
     remotePatterns: [new URL("https://lh3.googleusercontent.com/**"),new URL("https://res.cloudinary.com/**")],
+    localPatterns: [
+      {
+        pathname: '/api/og/**',
+      },
+      {
+        pathname: '/api/og',
+      }
+    ],
   },
   serverExternalPackages: ["puppeteer-extra", "puppeteer-extra-plugin-stealth", "puppeteer"],
 };

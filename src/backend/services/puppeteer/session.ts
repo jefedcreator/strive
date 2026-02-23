@@ -87,7 +87,7 @@ export class PuppeteerSessionManager {
      */
     public async initSession(options: CaptureOptions = {}): Promise<string> {
         const sessionId = uuidv4();
-        const { headless = 'new', userDataDir, timeout = 0 } = options;
+        const { headless = false, userDataDir, timeout = 0 } = options;
         const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
 
         console.log(`[PuppeteerSessionManager] Starting new session: ${sessionId}`);
@@ -127,6 +127,9 @@ export class PuppeteerSessionManager {
                 reject: rejectPromise,
             });
 
+            console.log(sessionId, page, timeout);
+
+
             // Start the background navigation to Nike Login
             this.startNavigationFlow(sessionId, page, timeout).catch(err => {
                 console.error(`[PuppeteerSessionManager] Background flow error for ${sessionId}:`, err);
@@ -164,6 +167,7 @@ export class PuppeteerSessionManager {
         // Broadcast webhook that the session is ready for credentials!
         console.log(`[${sessionId}] ✅ Form ready. Emitting webhook for credentials prompt.`);
         webhookService.emit('nrc-login-step', { step: 'ready', sessionId });
+        console.log('webhook emmitted??');
     }
 
     /**

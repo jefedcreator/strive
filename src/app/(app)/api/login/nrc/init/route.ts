@@ -4,8 +4,8 @@ import { puppeteerSessionManager } from '@/backend/services/puppeteer/session';
 export const POST = async () => {
     try {
         const sessionId = await puppeteerSessionManager.initSession({
-            headless: 'new', // Using new headless mode for stability
-            timeout: 60000,
+            // headless: 'new',
+            timeout: 600000,
         });
 
         return NextResponse.json({

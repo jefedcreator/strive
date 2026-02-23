@@ -1,5 +1,6 @@
 'use client';
 
+import { useNRCLogin } from '@/hooks/useNRCLogin';
 import { Button } from '@/primitives/Button';
 import { Input } from '@/primitives/Input';
 import { Modal } from '@/primitives/Modal';
@@ -13,6 +14,9 @@ import { SiNike, SiStrava } from 'react-icons/si';
 import { toast } from 'sonner';
 
 function LoginPageContent() {
+  const { step, error, result, initLogin, submitCredentials, reset } = useNRCLogin();
+      const isInitializing = step === 'initializing' || step === 'navigating';
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
@@ -23,37 +27,37 @@ function LoginPageContent() {
   const [password, setPassword] = useState('');
   
   // NRC Flow States
-  const [isInitializing, setIsInitializing] = useState(false);
+  // const [isInitializing, setIsInitializing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   // --- Real-Time NRC Webhook Listener ---
-  useEffect(() => {
-    if (!socket || !activeSessionId) return;
+  // useEffect(() => {
+  //   if (!socket || !activeSessionId) return;
 
-    const handleNrcStep = (data: { step: string; sessionId: string; message?: string }) => {
-      if (data.sessionId !== activeSessionId) return;
+  //   const handleNrcStep = (data: { step: string; sessionId: string; message?: string }) => {
+  //     if (data.sessionId !== activeSessionId) return;
 
-      if (data.step === 'ready') {
-        setIsInitializing(false);
-        setIsNRCModalOpen(true);
-      } else if (data.step === 'success') {
-        setIsSubmitting(false);
-        setIsNRCModalOpen(false);
-        handleLoginSuccess(null);
-      } else if (data.step === 'error') {
-        setIsSubmitting(false);
-        setIsInitializing(false);
-        toast.error(data.message ?? 'An error occurred during authentication.');
-        setActiveSessionId(null);
-      }
-    };
+  //     if (data.step === 'ready') {
+  //       setIsInitializing(false);
+  //       setIsNRCModalOpen(true);
+  //     } else if (data.step === 'success') {
+  //       setIsSubmitting(false);
+  //       setIsNRCModalOpen(false);
+  //       handleLoginSuccess(null);
+  //     } else if (data.step === 'error') {
+  //       setIsSubmitting(false);
+  //       setIsInitializing(false);
+  //       toast.error(data.message ?? 'An error occurred during authentication.');
+  //       setActiveSessionId(null);
+  //     }
+  //   };
 
-    socket.on('nrc-login-step', handleNrcStep);
-    return () => {
-      socket.off('nrc-login-step', handleNrcStep);
-    };
-  }, [socket, activeSessionId]);
+  //   socket.on('nrc-login-step', handleNrcStep);
+  //   return () => {
+  //     socket.off('nrc-login-step', handleNrcStep);
+  //   };
+  // }, [socket, activeSessionId]);
 
   const handleLoginSuccess = (payloadUrl: string | null) => {
     toast.success(`Welcome back!`);
@@ -97,20 +101,20 @@ function LoginPageContent() {
     stravaMutation.mutate({ type: 'strava', clubId, leaderboardId, inviteId });
   };
 
-  const initNRCLogin = async () => {
-    setIsInitializing(true);
-    try {
-      const response = await fetch('/api/login/nrc/init', { method: 'POST' });
-      if (!response.ok) throw new Error('Failed to connect to Nike servers.');
+  // const initNRCLogin = async () => {
+  //   setIsInitializing(true);
+  //   try {
+  //     const response = await fetch('/api/login/nrc/init', { method: 'POST' });
+  //     if (!response.ok) throw new Error('Failed to connect to Nike servers.');
       
-      const { sessionId } = await response.json();
-      setActiveSessionId(sessionId);
-      toast.info('Connecting to Nike servers...');
-    } catch (err: any) {
-      toast.error(err.message);
-      setIsInitializing(false);
-    }
-  };
+  //     const { sessionId } = await response.json();
+  //     setActiveSessionId(sessionId);
+  //     toast.info('Connecting to Nike servers...');
+  //   } catch (err: any) {
+  //     toast.error(err.message);
+  //     setIsInitializing(false);
+  //   }
+  // };
 
   const submitNRCCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,7 +244,7 @@ function LoginPageContent() {
               </div>
               {/* Nike Login */}
               <button
-                onClick={initNRCLogin}
+                onClick={initLogin}
                 disabled={isInitializing}
                 className="w-full group relative flex justify-center items-center py-4 px-4 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-xl text-white bg-black hover:bg-gray-900 dark:bg-black dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 shadow-lg disabled:opacity-50"
               >
@@ -308,7 +312,7 @@ function LoginPageContent() {
                   required
                 />
               </div>
-              <div>
+              {/* <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Password
                 </label>
@@ -321,7 +325,7 @@ function LoginPageContent() {
                   placeholder="Enter your Nike password"
                   required
                 />
-              </div>
+              </div> */}
               <div className="pt-2">
                 <Button
                   type="submit"
