@@ -39,11 +39,22 @@ interface ActiveSession {
     reject: (reason?: any) => void;
 }
 
+// ─── Anchor to globalThis ─────────────────────────────────────────────────────
+//
+// Next.js re-evaluates modules across API route boundaries within the same
+// process. A module-level `new PuppeteerSessionManager()` at the bottom of
+// this file produces a FRESH instance (with an empty `sessions` Map) every
+// time a different API route imports it — so `initSession()` stores the
+// session on instance A, but `submitEmail()` runs on instance B and can't
+// find it, causing "Session not found or expired".
+//
+// Pinning to `globalThis` guarantees every import across every module
+// boundary returns the exact same object for the lifetime of the process.
+//
 declare global {
     // eslint-disable-next-line no-var
     var __puppeteerSessionManager: PuppeteerSessionManager | undefined;
 }
-
 
 export class PuppeteerSessionManager {
     private readonly DEFAULT_CHROME_PATH =
@@ -60,11 +71,11 @@ export class PuppeteerSessionManager {
         LOGIN_FORM: "form[method='post']",
         USERNAME: 'h1[data-testid="subheader-username"]',
         CODE_INPUT: 'input[name="verificationCode"]',
-        CODE_SUBMIT: 'button[aria-label="Sign In"][type="submit"]',   // submit button on the code screen
+        CODE_SUBMIT: 'button[aria-label="Sign In"][type="submit"]',
     };
 
     private sessions = new Map<string, ActiveSession>();
-    private readonly SESSION_TIMEOUT_MS = 5 * 600 * 1000;
+    private readonly SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 
     constructor() {
         setInterval(() => this.cleanupStaleSessions(), 60 * 1000);
@@ -172,6 +183,120 @@ export class PuppeteerSessionManager {
         sseService.emit(sessionId, 'nrc-login-step', { step: 'ready', sessionId });
     }
 
+    // ─── Network capture setup ────────────────────────────────────────────────
+
+    /**
+     * Sets up request interception and the Node↔Browser email bridge.
+     * Called ONCE in submitEmail — the listener stays alive for the entire page.
+     *
+     * Token capture works via a mutable __resolveToken reference on the session:
+     *   - The request listener calls __resolveToken(token) whenever it sees an
+     *     auth header, regardless of when that happens.
+     *   - makeTokenPromise() (called right before page.goto(PROFILE)) creates a
+     *     fresh Promise and sets __resolveToken to its resolve function, so the
+     *     timeout starts at exactly the right moment.
+     */
+    private async setupNetworkCapture(
+        sessionId: string,
+        page: Page,
+        emailFallback: string,
+    ): Promise<void> {
+        const session = this.sessions.get(sessionId)!;
+
+        // ── 1. Node↔Browser email bridge (same pattern as captureNikeAuth) ──
+        await page.exposeFunction('sendEmailToNode', (email: string) => {
+            if (email && !(session as any).__capturedEmail) {
+                console.log(`[${sessionId}] ⚡ bridge: Email captured via DOM listener: ${email}`);
+                (session as any).__capturedEmail = email;
+            }
+        });
+
+        // ── 2. Request interception ───────────────────────────────────────────
+        await page.setRequestInterception(true);
+
+        page.on('request', (request) => {
+            const url = request.url();
+            const headers = request.headers();
+            const postData = request.postData();
+
+            // ── Token capture ─────────────────────────────────────────────────
+            if (
+                (url.includes('api.nike.com') || url.includes('unite.nike.com')) &&
+                headers.authorization
+            ) {
+                const token = headers.authorization;
+                (session as any).__capturedToken = token;
+
+                // Call the current promise resolver if makeTokenPromise() has armed one.
+                // __resolveToken is replaced each time makeTokenPromise() is called,
+                // so this always notifies the most recently created promise.
+                const resolver = (session as any).__resolveToken as ((t: string) => void) | undefined;
+                if (resolver) {
+                    console.log(`[${sessionId}] 🔑 network: Bearer token captured — resolving promise`);
+                    (session as any).__resolveToken = undefined; // prevent double-resolve
+                    resolver(token);
+                }
+            }
+
+            // ── Email capture (network payload backup) ────────────────────────
+            if (
+                postData &&
+                (url.includes('login') || url.includes('check') || url.includes('unite'))
+            ) {
+                try {
+                    const json = JSON.parse(postData);
+                    const possibleEmail =
+                        json.username ?? json.emailAddress ?? json.credential;
+                    if (possibleEmail && !(session as any).__capturedEmail) {
+                        console.log(`[${sessionId}] 📡 network: Email captured from payload: ${possibleEmail}`);
+                        (session as any).__capturedEmail = possibleEmail;
+                    }
+                } catch { /* non-JSON body — ignore */ }
+            }
+
+            void request.continue();
+        });
+
+        // Seed email from what the user typed — network/bridge may refine it later
+        if (!(session as any).__capturedEmail) {
+            (session as any).__capturedEmail = emailFallback;
+        }
+    }
+
+    /**
+     * Creates a fresh token Promise and arms the active request listener to
+     * resolve it the instant a Nike auth header appears on the wire.
+     *
+     * MUST be called immediately before page.goto(PROFILE) — this is when
+     * Nike fires authenticated API requests that carry the bearer token.
+     * Calling it earlier would start the timeout clock too soon.
+     */
+    private makeTokenPromise(sessionId: string): Promise<string | null> {
+        const session = this.sessions.get(sessionId)!;
+
+        // If the token somehow arrived before the profile navigation, resolve immediately.
+        const alreadyCaptured = (session as any).__capturedToken as string | undefined;
+        if (alreadyCaptured) {
+            console.log(`[${sessionId}] 🔑 Token already captured before profile nav — resolving immediately.`);
+            return Promise.resolve(alreadyCaptured);
+        }
+
+        return new Promise<string | null>((resolve) => {
+            // Arm the listener — it will call this resolve when it next sees a token.
+            (session as any).__resolveToken = resolve;
+
+            // 15 s timeout: profile page auth requests fire well within this window.
+            // If exceeded, resolve with whatever we have (null if nothing was captured).
+            setTimeout(() => {
+                if ((session as any).__resolveToken === resolve) {
+                    console.warn(`[${sessionId}] ⚠️  Token not captured within 15 s of profile nav.`);
+                    (session as any).__resolveToken = undefined;
+                    resolve((session as any).__capturedToken ?? null);
+                }
+            }, 15_000);
+        });
+    }
+
     // ─── Phase 2: Submit email → trigger code modal ───────────────────────────
 
     /**
@@ -186,37 +311,29 @@ export class PuppeteerSessionManager {
         }
 
         const { page, reject } = session;
-
         console.log(`[${sessionId}] 📧 Submitting email: ${emailStr}`);
 
         try {
-            // ── Setup network listener to capture the bearer token early ──────
-            await page.setRequestInterception(true);
-            page.on('request', (request) => {
-                const headers = request.headers();
-                const url = request.url();
-                const postData = request.postData();
+            // ── Wire up network capture + email bridge ────────────────────────
+            // No tokenPromise here — makeTokenPromise() is called in submitCode
+            // right before page.goto(PROFILE), which is when the token actually appears.
+            await this.setupNetworkCapture(sessionId, page, emailStr);
 
-                if (
-                    (url.includes('api.nike.com') || url.includes('unite.nike.com')) &&
-                    headers.authorization
-                ) {
-                    // Store on session for use in submitCode()
-                    (session as any).__capturedToken = headers.authorization;
-                }
+            // ── Attach DOM-side email listener (same as captureNikeAuth) ──────
+            await page.evaluate((selectors) => {
+                const emailInput = document.querySelector(selectors.EMAIL_INPUT);
+                const submitBtn = document.querySelector(selectors.NEXT_BUTTON);
+                const form = document.querySelector(selectors.LOGIN_FORM);
 
-                if (postData && (url.includes('login') || url.includes('check') || url.includes('unite'))) {
-                    try {
-                        const json = JSON.parse(postData);
-                        const possibleEmail = json.username ?? json.emailAddress ?? json.credential;
-                        if (possibleEmail && !(session as any).__capturedEmail) {
-                            (session as any).__capturedEmail = possibleEmail;
-                        }
-                    } catch { /* non-JSON body — ignore */ }
-                }
+                const capture = () => {
+                    const val = (emailInput as HTMLInputElement | null)?.value?.trim();
+                    if (val) (window as any).sendEmailToNode(val);
+                };
 
-                void request.continue();
-            });
+                form?.addEventListener('submit', capture);
+                submitBtn?.addEventListener('click', capture);
+                submitBtn?.addEventListener('mousedown', capture);
+            }, this.SELECTORS);
 
             // ── Type email ────────────────────────────────────────────────────
             console.log(`[${sessionId}] ⌨️  Typing email into #username...`);
@@ -228,18 +345,15 @@ export class PuppeteerSessionManager {
             await page.waitForSelector(this.SELECTORS.NEXT_BUTTON, { visible: true });
 
             await Promise.all([
-                // Nike either navigates or does a SPA transition — handle both
+                // Nike either does a full navigation or a SPA transition — handle both
                 page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30_000 })
                     .catch(() => {
-                        // SPA transition: navigation may not fire — that's fine
                         console.log(`[${sessionId}] ℹ️  No full navigation after Continue (SPA flow).`);
                     }),
                 page.click(this.SELECTORS.NEXT_BUTTON),
             ]);
 
             // ── Wait for the next meaningful screen ───────────────────────────
-            // Nike shows either a password field or an OTP/code field next.
-            // We wait for whichever appears first.
             console.log(`[${sessionId}] 👀 Waiting for code or password screen...`);
             await page.waitForSelector(
                 `${this.SELECTORS.CODE_INPUT}, input[type="password"]`,
@@ -249,18 +363,11 @@ export class PuppeteerSessionManager {
             console.log(`[${sessionId}] ✅ Next screen loaded. Prompting client for code.`);
 
             // ── Notify client → open code modal ──────────────────────────────
-            sseService.emit(sessionId, 'login-code', {
-                step: 'awaiting-code',
-                sessionId,
-            });
+            sseService.emit(sessionId, 'login-code', { step: 'awaiting-code', sessionId });
 
         } catch (err: any) {
             console.error(`[${sessionId}] ❌ Error submitting email:`, err.message);
-            sseService.emit(sessionId, 'nrc-login-step', {
-                step: 'error',
-                sessionId,
-                message: err.message,
-            });
+            sseService.emit(sessionId, 'nrc-login-step', { step: 'error', sessionId, message: err.message });
             reject(err);
             throw err;
         }
@@ -271,6 +378,15 @@ export class PuppeteerSessionManager {
     /**
      * Receives the OTP / verification code from the client, submits it,
      * navigates to the profile page, and resolves with the final NikeAuthResult.
+     *
+     * Token capture strategy (mirrors captureNikeAuth):
+     *   - The request listener set up in setupNetworkCapture() stays active for
+     *     the lifetime of the page, so it continues intercepting Nike API calls
+     *     that fire during and after code submission.
+     *   - Rather than reading __capturedToken at an arbitrary point in time,
+     *     we await __tokenPromise which resolves the instant the first auth
+     *     header appears on the wire (with a 30 s safety timeout).
+     *   - localStorage is checked as a final fallback, consistent with captureNikeAuth.
      */
     public async submitCode(sessionId: string, code: string): Promise<NikeAuthResult> {
         const session = this.sessions.get(sessionId);
@@ -279,7 +395,6 @@ export class PuppeteerSessionManager {
         }
 
         const { page, resolve, reject } = session;
-
         console.log(`[${sessionId}] 🔑 Submitting verification code...`);
 
         try {
@@ -290,15 +405,20 @@ export class PuppeteerSessionManager {
             await page.focus(this.SELECTORS.CODE_INPUT);
             await page.type(this.SELECTORS.CODE_INPUT, code, { delay: 80 });
 
-            // ── Submit ────────────────────────────────────────────────────────
+            // ── Submit code ───────────────────────────────────────────────────
             console.log(`[${sessionId}] 🖱️  Clicking Submit...`);
             await Promise.all([
                 page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30_000 }),
                 page.click(this.SELECTORS.CODE_SUBMIT),
             ]);
 
-            // ── Navigate to profile ───────────────────────────────────────────
-            console.log(`[${sessionId}] 🏃 Navigating to profile...`);
+            // ── Arm token capture THEN navigate to profile ────────────────────
+            // Nike's authenticated API requests (which carry the bearer token)
+            // fire during the profile page load — not during code submission.
+            // makeTokenPromise() arms the listener and starts its timeout here,
+            // right before the navigation that will actually produce the token.
+            console.log(`[${sessionId}] 🏃 Arming token capture and navigating to profile...`);
+            const tokenPromise = this.makeTokenPromise(sessionId);
             await page.goto(this.URLS.PROFILE, { waitUntil: 'networkidle2', timeout: 30_000 });
 
             // ── Extract username ──────────────────────────────────────────────
@@ -309,8 +429,32 @@ export class PuppeteerSessionManager {
                 (el) => (el as HTMLElement).innerText,
             );
 
-            const capturedToken: string | null = (session as any).__capturedToken ?? null;
-            const emailValue: string = (session as any).__capturedEmail ?? '';
+            // ── Resolve token (await the Promise, not a property read) ────────
+            // By this point the profile page has fully loaded, so the Nike session
+            // API calls have almost certainly fired. tokenPromise resolves immediately
+            // if the token was already captured, or waits up to 30 s if not.
+            const capturedToken = await tokenPromise;
+
+            // ── Final email fallback (mirrors captureNikeAuth step 5) ─────────
+            let emailValue: string = (session as any).__capturedEmail ?? '';
+            if (!emailValue) {
+                emailValue = await page.evaluate(
+                    () =>
+                        localStorage.getItem('userEmail') ??
+                        localStorage.getItem('nike.email') ??
+                        '',
+                );
+            }
+
+            // ── Log summary (mirrors captureNikeAuth) ─────────────────────────
+            console.log('\n' + '='.repeat(60));
+            console.log(`[${sessionId}] 🎉 EXTRACTION COMPLETE`);
+            console.log('='.repeat(60));
+            console.log(`📧 Email:    ${emailValue || '❌ Failed to capture'}`);
+            console.log(`👤 Username: ${username}`);
+            console.log(`🔑 Token:    ${capturedToken ? 'Captured ✅' : '❌ Failed to capture'}`);
+            if (capturedToken) console.log(capturedToken);
+            console.log('='.repeat(60) + '\n');
 
             const result: NikeAuthResult = {
                 email: emailValue,
@@ -318,25 +462,18 @@ export class PuppeteerSessionManager {
                 username: username,
             };
 
-            console.log(`[${sessionId}] 🎉 Flow complete. Username: ${username}`);
             sseService.emit(sessionId, 'nrc-login-step', { step: 'success', sessionId });
-
             resolve(result);
             return result;
 
         } catch (err: any) {
             console.error(`[${sessionId}] ❌ Error submitting code:`, err.message);
-            sseService.emit(sessionId, 'nrc-login-step', {
-                step: 'error',
-                sessionId,
-                message: err.message,
-            });
+            sseService.emit(sessionId, 'nrc-login-step', { step: 'error', sessionId, message: err.message });
             reject(err);
             throw err;
         }
     }
 }
-
 
 export const puppeteerSessionManager =
     (globalThis.__puppeteerSessionManager ??= new PuppeteerSessionManager());

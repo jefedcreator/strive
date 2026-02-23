@@ -19,6 +19,7 @@
 
 import type { NikeAuthResult } from '@/backend/services/puppeteer';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import useSessionStorage from './useSessionStorage';
 
 export type NRCLoginStep =
     | 'idle'
@@ -45,7 +46,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
     const sessionIdRef = useRef<string | null>(null);
     const eventSourceRef = useRef<EventSource | null>(null);
 
-    const [step, setStep] = useState<NRCLoginStep>('idle');
+    const [step, setStep] = useSessionStorage<NRCLoginStep>('nrc_login_step', 'idle');
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<NikeAuthResult | null>(null);
 
@@ -98,6 +99,11 @@ export function useNRCLogin(): UseNRCLoginReturn {
                 // Email was accepted — show the OTP / code modal
                 setStep('code-modal');
             }
+        });
+
+        // ── Code modal trigger ────────────────────────────────────────────────
+        es.addEventListener('success', (e: MessageEvent<string>) => {
+            es.close();
         });
 
         es.onerror = () => {
@@ -177,13 +183,24 @@ export function useNRCLogin(): UseNRCLoginReturn {
             return;
         }
 
+        const params = new URLSearchParams(window.location.search);
+        const clubId = params.get('clubId');
+        const leaderboardId = params.get('leaderboardId');
+        const inviteId = params.get('inviteId');
+
         setStep('processing');
 
         try {
             const res = await fetch('/api/login/nrc/stream/code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId: sessionIdRef.current, code }),
+                body: JSON.stringify({
+                    sessionId: sessionIdRef.current,
+                    code,
+                    clubId,
+                    leaderboardId,
+                    inviteId
+                }),
             });
 
             if (!res.ok) {

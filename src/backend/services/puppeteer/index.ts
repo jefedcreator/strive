@@ -35,6 +35,8 @@ export class PuppeteerService {
     NEXT_BUTTON: "button[aria-label='continue'][type='submit']",
     LOGIN_FORM: "form[method='post']",
     USERNAME: 'h1[data-testid="subheader-username"]',
+    CODE_INPUT: 'input[name="verificationCode"]',
+    CODE_SUBMIT: 'button[aria-label="Sign In"][type="submit"]',
   };
 
   /**
