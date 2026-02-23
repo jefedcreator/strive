@@ -23,21 +23,20 @@ export const POST = withMiddleware<LoginValidatorSchema>(
             let user;
 
             if (payload?.type !== 'nrc') {
-                // Should realistically be caught by the client, but defensive coding:
                 throw new Error('This endpoint strictly processes interactive NRC authentications.');
             }
 
-            const { sessionId, email, password } = payload;
+            const { sessionId, email } = payload;
 
-            if (!sessionId || !email || !password) {
-                throw new Error('Session ID, email, and password are required to resume an NRC login.');
+            if (!sessionId || !email) {
+                throw new Error('Session ID and email are required to resume an NRC login.');
             }
 
             // ---------------------------------------------------------
             // 1. RESUME NRC FLOW
             // ---------------------------------------------------------
             const { email: finalEmail, token, username } =
-                await puppeteerSessionManager.submitCredentials(sessionId, email, password);
+                await puppeteerSessionManager.submitCredentials(sessionId, email);
 
             if (!finalEmail || !token || !username) {
                 throw new Error(

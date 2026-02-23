@@ -1,24 +1,33 @@
 // src/hooks/useNRCLogin.ts
 //
-// Flow:
-//   1. User clicks "Sign in with NRC"
-//   2. POST /api/nrc/init  → gets sessionId, browser navigates to nike.com/login
-//   3. Server emits 'nrc-login-step' { step: 'ready', sessionId } via socket
-//   4. Hook opens email modal
-//   5. User types email (+ password) and submits
-//   6. POST /api/nrc/credentials → Puppeteer fills the form and completes login
-//   7. Server emits 'nrc-login-step' { step: 'success' | 'error' }
+// Full flow:
+//   idle
+//     → [click button]
+//   initializing  (POST /api/nrc/init)
+//     → [sessionId received, EventSource opens]
+//   navigating    (waiting for SSE 'ready')
+//     → [SSE: nrc-login-step { step: 'ready' }]
+//   email-modal   (user types email, clicks submit)
+//     → [POST /api/nrc/email]
+//   awaiting-code (waiting for SSE 'login-code')
+//     → [SSE: login-code { step: 'awaiting-code' }]
+//   code-modal    (user types OTP, clicks submit)
+//     → [POST /api/nrc/code]
+//   processing    (Puppeteer submitting code)
+//     → [SSE: nrc-login-step { step: 'success' }]
+//   success | error
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSocket } from '@/provider/socket-provider';
 import type { NikeAuthResult } from '@/backend/services/puppeteer';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type NRCLoginStep =
     | 'idle'
-    | 'initializing'   // waiting for /api/nrc/init to respond
-    | 'navigating'     // browser is loading nike.com/login
-    | 'email-modal'    // nike form is ready; show email/password modal to user
-    | 'processing'     // credentials submitted; puppeteer is logging in
+    | 'initializing'   // POST /api/nrc/init in-flight
+    | 'navigating'     // browser loading nike.com/login
+    | 'email-modal'    // ready: show email input modal
+    | 'awaiting-code'  // email submitted, waiting for SSE login-code event
+    | 'code-modal'     // show OTP / verification code modal
+    | 'processing'     // code submitted, Puppeteer finishing login
     | 'success'
     | 'error';
 
@@ -26,35 +35,40 @@ interface UseNRCLoginReturn {
     step: NRCLoginStep;
     error: string | null;
     result: NikeAuthResult | null;
-    /** Call this when the user clicks the "Sign in with NRC" button */
     initLogin: () => Promise<void>;
-    /** Call this when the user submits the email+password modal */
-    submitCredentials: (email: string, password: string) => Promise<void>;
+    submitEmail: (email: string) => Promise<void>;
+    submitCode: (code: string) => Promise<void>;
     reset: () => void;
 }
 
 export function useNRCLogin(): UseNRCLoginReturn {
-    const socket = useSocket();                 // your existing socket instance
     const sessionIdRef = useRef<string | null>(null);
+    const eventSourceRef = useRef<EventSource | null>(null);
 
     const [step, setStep] = useState<NRCLoginStep>('idle');
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<NikeAuthResult | null>(null);
 
-    // ─── Listen for server-side webhook events ────────────────────────────────
-    useEffect(() => {
-        if (!socket) return;
+    // ─── SSE stream ───────────────────────────────────────────────────────────
 
-        const handleLoginStep = (data: { step: string; sessionId: string; message?: string }) => {
-            console.log('handleLoginStep', data);
-            console.log('sessionIdRef', sessionIdRef);
+    const openStream = useCallback((sessionId: string) => {
+        eventSourceRef.current?.close();
 
-            // Only handle events for the session we started
+        const es = new EventSource(`/api/login/nrc/stream/${sessionId}`);
+        eventSourceRef.current = es;
+
+        // ── Puppeteer milestone events ────────────────────────────────────────
+        es.addEventListener('nrc-login-step', (e: MessageEvent<string>) => {
+            const data = JSON.parse(e.data) as {
+                step: string;
+                sessionId: string;
+                message?: string;
+            };
             if (data.sessionId !== sessionIdRef.current) return;
 
             switch (data.step) {
                 case 'ready':
-                    // Nike form is loaded → show the email/password modal
+                    // Nike email form is loaded → show email modal
                     setStep('email-modal');
                     break;
                 case 'processing':
@@ -62,42 +76,101 @@ export function useNRCLogin(): UseNRCLoginReturn {
                     break;
                 case 'success':
                     setStep('success');
+                    es.close();
                     break;
                 case 'error':
                     setError(data.message ?? 'An unknown error occurred.');
                     setStep('error');
+                    es.close();
                     break;
             }
+        });
+
+        // ── Code modal trigger ────────────────────────────────────────────────
+        es.addEventListener('login-code', (e: MessageEvent<string>) => {
+            const data = JSON.parse(e.data) as {
+                step: string;
+                sessionId: string;
+            };
+            if (data.sessionId !== sessionIdRef.current) return;
+
+            if (data.step === 'awaiting-code') {
+                // Email was accepted — show the OTP / code modal
+                setStep('code-modal');
+            }
+        });
+
+        es.onerror = () => {
+            setStep((current) => {
+                if (current === 'success' || current === 'error') return current;
+                setError('Connection to server lost. Please try again.');
+                return 'error';
+            });
+            es.close();
         };
+    }, []);
 
-        socket.socket?.on('nrc-login-step', handleLoginStep);
-        return () => { socket.socket?.off('nrc-login-step', handleLoginStep); };
-    }, [socket]);
+    // ─── Cleanup on unmount ───────────────────────────────────────────────────
 
-    // ─── Step 1: Init session ─────────────────────────────────────────────────
+    useEffect(() => () => { eventSourceRef.current?.close(); }, []);
+
+    // ─── Step 1: Init ─────────────────────────────────────────────────────────
+
     const initLogin = useCallback(async () => {
+        eventSourceRef.current?.close();
         setStep('initializing');
         setError(null);
         setResult(null);
         sessionIdRef.current = null;
 
         try {
-            const res = await fetch('/api/login/nrc/init', { method: 'POST' });
+            const res = await fetch('/api/login/nrc/stream/init', { method: 'POST' });
             if (!res.ok) throw new Error('Failed to start Nike session.');
 
             const { sessionId } = await res.json() as { sessionId: string };
             sessionIdRef.current = sessionId;
 
-            // Now we wait for the 'ready' socket event before doing anything else
+            openStream(sessionId);     // open before navigation completes
             setStep('navigating');
+        } catch (err: any) {
+            setError(err.message);
+            setStep('error');
+        }
+    }, [openStream]);
+
+    // ─── Step 2: Submit email ─────────────────────────────────────────────────
+
+    const submitEmail = useCallback(async (email: string) => {
+        if (!sessionIdRef.current) {
+            setError('No active session. Please try again.');
+            setStep('error');
+            return;
+        }
+
+        // Transition to a waiting state while Puppeteer types + clicks Continue
+        setStep('awaiting-code');
+
+        try {
+            const res = await fetch('/api/login/nrc/stream/email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId: sessionIdRef.current, email }),
+            });
+
+            if (!res.ok) {
+                const { error: msg } = await res.json() as { error: string };
+                throw new Error(msg ?? 'Failed to submit email.');
+            }
+            // The 'login-code' SSE event will drive the step → 'code-modal'
         } catch (err: any) {
             setError(err.message);
             setStep('error');
         }
     }, []);
 
-    // ─── Step 2: Submit credentials ───────────────────────────────────────────
-    const submitCredentials = useCallback(async (email: string) => {
+    // ─── Step 3: Submit OTP code ──────────────────────────────────────────────
+
+    const submitCode = useCallback(async (code: string) => {
         if (!sessionIdRef.current) {
             setError('No active session. Please try again.');
             setStep('error');
@@ -107,38 +180,37 @@ export function useNRCLogin(): UseNRCLoginReturn {
         setStep('processing');
 
         try {
-            const res = await fetch('/api/nrc/credentials', {
+            const res = await fetch('/api/login/nrc/stream/code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sessionId: sessionIdRef.current,
-                    email,
-                    // password,
-                }),
+                body: JSON.stringify({ sessionId: sessionIdRef.current, code }),
             });
 
             if (!res.ok) {
                 const { error: msg } = await res.json() as { error: string };
-                throw new Error(msg ?? 'Credential submission failed.');
+                throw new Error(msg ?? 'Failed to submit code.');
             }
 
             const authResult = await res.json() as NikeAuthResult;
             setResult(authResult);
-            // 'success' step is also set by the socket event, but set it here
-            // as a fallback in case socket delivery is delayed.
-            setStep('success');
+            // SSE 'success' event also sets step — this is a fallback
+            setStep((current) => (current === 'success' ? current : 'success'));
         } catch (err: any) {
             setError(err.message);
             setStep('error');
         }
     }, []);
 
+    // ─── Reset ────────────────────────────────────────────────────────────────
+
     const reset = useCallback(() => {
+        eventSourceRef.current?.close();
+        eventSourceRef.current = null;
         sessionIdRef.current = null;
         setStep('idle');
         setError(null);
         setResult(null);
     }, []);
 
-    return { step, error, result, initLogin, submitCredentials, reset };
+    return { step, error, result, initLogin, submitEmail, submitCode, reset };
 }

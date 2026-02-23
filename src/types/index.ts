@@ -25,7 +25,7 @@ export interface ApiError {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-    PaginationMeta {}
+  PaginationMeta { }
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -182,11 +182,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-    | {
-        1: string;
-        2?: string | undefined;
-      }
-    | undefined;
+  | {
+    1: string;
+    2?: string | undefined;
+  }
+  | undefined;
 };
 
 enum DateRangeFilters {
@@ -225,12 +225,18 @@ interface PageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export type {
-  ISubMenu,
-  Option,
-  LeaderboardEntry,
-  Activity,
-  FilterOption,
-  PageProps,
-};
+type NRCLoginStep =
+  | 'idle'
+  | 'initializing'  // POST /api/nrc/init in-flight
+  | 'navigating'    // waiting for 'ready' SSE event
+  | 'email-modal'   // Nike form is ready; show modal
+  | 'processing'    // credentials submitted
+  | 'success'
+  | 'error';
+
 export { DateRangeFilters };
+export type {
+  Activity,
+  FilterOption, ISubMenu, LeaderboardEntry, NRCLoginStep, Option, PageProps
+};
+

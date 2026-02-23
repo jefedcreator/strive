@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function POST() {
     try {
         const sessionId = await puppeteerSessionManager.initSession({
-            headless: 'new',
+            // headless: 'new',
         });
 
         return NextResponse.json({ sessionId });
