@@ -34,6 +34,7 @@ export type NRCLoginStep =
 
 interface UseNRCLoginReturn {
     step: NRCLoginStep;
+    sessionStep: NRCLoginStep;
     error: string | null;
     result: NikeAuthResult | null;
     initLogin: () => Promise<void>;
@@ -46,7 +47,8 @@ export function useNRCLogin(): UseNRCLoginReturn {
     const sessionIdRef = useRef<string | null>(null);
     const eventSourceRef = useRef<EventSource | null>(null);
 
-    const [step, setStep] = useSessionStorage<NRCLoginStep>('nrc_login_step', 'idle');
+    const [sessionStep, setSessionStep] = useSessionStorage<NRCLoginStep>('nrc_login_step', 'idle');
+    const [step, setStep] = useState<NRCLoginStep>('idle');
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<NikeAuthResult | null>(null);
 
@@ -70,18 +72,21 @@ export function useNRCLogin(): UseNRCLoginReturn {
             switch (data.step) {
                 case 'ready':
                     // Nike email form is loaded → show email modal
-                    setStep('email-modal');
+                    setStep('idle');
+                    setSessionStep('email-modal');
                     break;
                 case 'processing':
                     setStep('processing');
                     break;
                 case 'success':
                     setStep('success');
+                    setSessionStep('idle');
                     es.close();
                     break;
                 case 'error':
                     setError(data.message ?? 'An unknown error occurred.');
                     setStep('error');
+                    setSessionStep('idle');
                     es.close();
                     break;
             }
@@ -97,7 +102,8 @@ export function useNRCLogin(): UseNRCLoginReturn {
 
             if (data.step === 'awaiting-code') {
                 // Email was accepted — show the OTP / code modal
-                setStep('code-modal');
+                setStep('idle');
+                setSessionStep('code-modal');
             }
         });
 
@@ -110,6 +116,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
             setStep((current) => {
                 if (current === 'success' || current === 'error') return current;
                 setError('Connection to server lost. Please try again.');
+                setSessionStep('idle');
                 return 'error';
             });
             es.close();
@@ -208,10 +215,18 @@ export function useNRCLogin(): UseNRCLoginReturn {
                 throw new Error(msg ?? 'Failed to submit code.');
             }
 
-            const authResult = await res.json() as NikeAuthResult;
-            setResult(authResult);
-            // SSE 'success' event also sets step — this is a fallback
-            setStep((current) => (current === 'success' ? current : 'success'));
+            const data = await res.json() as any;
+
+            if (data.action === 'redirect' && data.url) {
+                console.log(`[useNRCLogin] 🚀 Server signaled redirect to: ${data.url}`);
+                setSessionStep('idle');
+                window.location.href = data.url;
+                return;
+            }
+
+            setResult(data as NikeAuthResult);
+            setStep('success');
+            setSessionStep('idle');
         } catch (err: any) {
             setError(err.message);
             setStep('error');
@@ -225,9 +240,10 @@ export function useNRCLogin(): UseNRCLoginReturn {
         eventSourceRef.current = null;
         sessionIdRef.current = null;
         setStep('idle');
+        setSessionStep('idle');
         setError(null);
         setResult(null);
     }, []);
 
-    return { step, error, result, initLogin, submitEmail, submitCode, reset };
+    return { step, error, result, initLogin, submitEmail, submitCode, reset, sessionStep };
 }

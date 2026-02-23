@@ -263,39 +263,6 @@ export class PuppeteerSessionManager {
         }
     }
 
-    /**
-     * Creates a fresh token Promise and arms the active request listener to
-     * resolve it the instant a Nike auth header appears on the wire.
-     *
-     * MUST be called immediately before page.goto(PROFILE) — this is when
-     * Nike fires authenticated API requests that carry the bearer token.
-     * Calling it earlier would start the timeout clock too soon.
-     */
-    private makeTokenPromise(sessionId: string): Promise<string | null> {
-        const session = this.sessions.get(sessionId)!;
-
-        // If the token somehow arrived before the profile navigation, resolve immediately.
-        const alreadyCaptured = (session as any).__capturedToken as string | undefined;
-        if (alreadyCaptured) {
-            console.log(`[${sessionId}] 🔑 Token already captured before profile nav — resolving immediately.`);
-            return Promise.resolve(alreadyCaptured);
-        }
-
-        return new Promise<string | null>((resolve) => {
-            // Arm the listener — it will call this resolve when it next sees a token.
-            (session as any).__resolveToken = resolve;
-
-            // 15 s timeout: profile page auth requests fire well within this window.
-            // If exceeded, resolve with whatever we have (null if nothing was captured).
-            setTimeout(() => {
-                if ((session as any).__resolveToken === resolve) {
-                    console.warn(`[${sessionId}] ⚠️  Token not captured within 15 s of profile nav.`);
-                    (session as any).__resolveToken = undefined;
-                    resolve((session as any).__capturedToken ?? null);
-                }
-            }, 15_000);
-        });
-    }
 
     // ─── Phase 2: Submit email → trigger code modal ───────────────────────────
 
@@ -346,7 +313,7 @@ export class PuppeteerSessionManager {
 
             await Promise.all([
                 // Nike either does a full navigation or a SPA transition — handle both
-                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30_000 })
+                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 100_000 })
                     .catch(() => {
                         console.log(`[${sessionId}] ℹ️  No full navigation after Continue (SPA flow).`);
                     }),
@@ -408,32 +375,41 @@ export class PuppeteerSessionManager {
             // ── Submit code ───────────────────────────────────────────────────
             console.log(`[${sessionId}] 🖱️  Clicking Submit...`);
             await Promise.all([
-                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30_000 }),
+                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 100_000 }),
                 page.click(this.SELECTORS.CODE_SUBMIT),
             ]);
 
-            // ── Arm token capture THEN navigate to profile ────────────────────
+            // ── Navigate to profile and capture token ─────────────────────────
             // Nike's authenticated API requests (which carry the bearer token)
-            // fire during the profile page load — not during code submission.
-            // makeTokenPromise() arms the listener and starts its timeout here,
-            // right before the navigation that will actually produce the token.
-            console.log(`[${sessionId}] 🏃 Arming token capture and navigating to profile...`);
-            const tokenPromise = this.makeTokenPromise(sessionId);
-            await page.goto(this.URLS.PROFILE, { waitUntil: 'networkidle2', timeout: 30_000 });
+            // fire *after* the profile page starts loading.
+            console.log(`[${sessionId}] 🏃 Navigating to profile and capturing token...`);
+
+            // We use page.waitForRequest to catch the first Nike API call that has an Authorization header.
+            // This is more robust than a fixed timeout and matches the "intercept after navigating" requirement.
+            const [capturedToken] = await Promise.all([
+                page.waitForRequest(
+                    (request) => {
+                        const url = request.url();
+                        const hasAuth = !!request.headers().authorization;
+                        const isNikeApi = url.includes('api.nike.com') || url.includes('unite.nike.com');
+                        return isNikeApi && hasAuth;
+                    },
+                    { timeout: 200_000 }
+                ).then(req => req.headers().authorization)
+                    .catch((err) => {
+                        console.warn(`[${sessionId}] ⚠️  Token capture timed out or failed: ${err.message}`);
+                        return (session as any).__capturedToken ?? null;
+                    }),
+                page.goto(this.URLS.PROFILE, { waitUntil: 'networkidle2', timeout: 200_000 }),
+            ]);
 
             // ── Extract username ──────────────────────────────────────────────
             console.log(`[${sessionId}] 👀 Waiting for username...`);
-            await page.waitForSelector(this.SELECTORS.USERNAME, { visible: true, timeout: 15_000 });
+            await page.waitForSelector(this.SELECTORS.USERNAME, { visible: true, timeout: 200_000 });
             const username = await page.$eval(
                 this.SELECTORS.USERNAME,
                 (el) => (el as HTMLElement).innerText,
             );
-
-            // ── Resolve token (await the Promise, not a property read) ────────
-            // By this point the profile page has fully loaded, so the Nike session
-            // API calls have almost certainly fired. tokenPromise resolves immediately
-            // if the token was already captured, or waits up to 30 s if not.
-            const capturedToken = await tokenPromise;
 
             // ── Final email fallback (mirrors captureNikeAuth step 5) ─────────
             let emailValue: string = (session as any).__capturedEmail ?? '';

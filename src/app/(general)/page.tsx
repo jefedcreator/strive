@@ -1,22 +1,22 @@
 'use client';
 
-import { useNRCLogin } from '@/hooks/useNRCLogin';
-import { Button } from '@/primitives/Button';
-import { Input } from '@/primitives/Input';
-import { Modal } from '@/primitives/Modal';
 import { NRCLoginModal } from '@/components/nrc-login-modal';
+import { useNRCLogin } from '@/hooks/useNRCLogin';
 import { useSocket } from '@/provider/socket-provider';
 import type { ApiError } from '@/types';
 import { useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { SiNike, SiStrava } from 'react-icons/si';
 import { toast } from 'sonner';
 
 function LoginPageContent() {
-  const { step, error, result, initLogin, reset, submitEmail, submitCode } = useNRCLogin();
-      const isInitializing = step === 'initializing' || step=="awaiting-code"|| step === 'navigating';
+  const { step, error, result, initLogin, reset, submitEmail, submitCode, sessionStep } = useNRCLogin();
+  
+  // Derive loading states from the current step
+  const isInitializing = step === 'initializing' || step === 'navigating';
+  const isSubmitting = step === 'initializing' || step === 'navigating' || step === 'awaiting-code' || step === 'processing';
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,7 +26,6 @@ function LoginPageContent() {
   const [isNRCModalOpen, setIsNRCModalOpen] = useState(false);
   
   // NRC Flow States
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- Real-Time NRC Webhook Listener ---
   // useEffect(() => {
@@ -246,7 +245,7 @@ function LoginPageContent() {
       </main>
 
       <NRCLoginModal
-        step={step}
+        sessionStep={sessionStep}
         isSubmitting={isSubmitting}
         submitEmail={submitEmail}
         submitCode={submitCode}

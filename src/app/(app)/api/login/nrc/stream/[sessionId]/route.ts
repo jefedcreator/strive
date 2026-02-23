@@ -7,11 +7,11 @@
 import { sseService } from '@/backend/services/events';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic'; // Never cache this route
+export const dynamic = 'force-dynamic';
 
 export async function GET(
     _req: NextRequest,
-    { params }: { params: { sessionId: string } },
+    { params }: { params: Promise<{ sessionId: string }> },
 ) {
     const { sessionId } = await params;
 
@@ -26,7 +26,6 @@ export async function GET(
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache, no-transform',
             'Connection': 'keep-alive',
-            // Disable buffering in nginx / Vercel proxies
             'X-Accel-Buffering': 'no',
         },
     });

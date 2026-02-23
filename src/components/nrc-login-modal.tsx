@@ -8,7 +8,7 @@ import { SiNike } from 'react-icons/si';
 import type { NRCLoginStep } from '@/hooks/useNRCLogin';
 
 interface NRCLoginModalProps {
-  step: NRCLoginStep;
+  sessionStep: NRCLoginStep;
   isSubmitting: boolean;
   submitEmail: (email: string) => Promise<void>;
   submitCode: (code: string) => Promise<void>;
@@ -16,16 +16,17 @@ interface NRCLoginModalProps {
 }
 
 export function NRCLoginModal({
-  step,
   isSubmitting,
   submitEmail,
   submitCode,
   onOpenChange,
+  sessionStep
 }: NRCLoginModalProps) {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+console.log('sessionStep',sessionStep);
 
-  const isOpen = step === 'email-modal' || step === 'code-modal';
+  const isOpen = sessionStep === 'email-modal' || sessionStep === 'code-modal';
 
   if (!isOpen) return null;
 
@@ -38,7 +39,7 @@ export function NRCLoginModal({
           className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-50 w-[95%] max-w-md bg-card-light dark:bg-card-dark rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden"
         >
           <div className="relative p-8 md:p-10">
-            {step === 'email-modal' ? (
+            {sessionStep === 'email-modal' ? (
               <>
                 <div className="flex flex-col items-center text-center mb-8">
                   <div className="w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center mb-6 shadow-lg transform hover:scale-110 transition-transform cursor-default">

@@ -6,6 +6,7 @@ import { InternalServerErrorException } from '@/utils/exceptions';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server';
+import { redirect, RedirectType } from 'next/navigation'
 
 export async function POST(req: NextRequest) {
     try {
@@ -110,21 +111,30 @@ export async function POST(req: NextRequest) {
             userId: user.id,
             redirect: false,
             token: auth_token,
-            image: user.avatar,
+            // image: user.avatar,
         });
 
-        const responsePayload = {
-            status: 201,
-            data: {
-                ...user,
-                token: auth_token,
-                expiresAt,
-            },
-            action: (clubId || leaderboardId) ? 'redirect' : undefined,
-            url: clubId ? `/clubs/${clubId}` : leaderboardId ? `/leaderboards/${leaderboardId}` : undefined,
-        };
+        const redirectPath = clubId
+            ? `/clubs/${clubId}`
+            : leaderboardId
+                ? `/leaderboards/${leaderboardId}`
+                : '/home';
 
-        return NextResponse.json(responsePayload, { status: 201 });
+        const redirectUrl = new URL(redirectPath, req.url);
+        // redirectUrl.searchParams.set('success', 'true');
+        // redirect(redirectUrl.toString(), RedirectType.replace)
+        return NextResponse.redirect(redirectUrl);
+
+        // return NextResponse.json({
+        //     status: 201,
+        //     action: 'redirect',
+        //     url: redirectUrl.toString(),
+        //     data: {
+        //         ...user,
+        //         token: auth_token,
+        //         expiresAt,
+        //     }
+        // });
     } catch (err: any) {
         console.error('[/api/nrc/code]', err.message);
         if (err.statusCode) throw err;
