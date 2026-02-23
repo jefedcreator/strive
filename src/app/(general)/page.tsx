@@ -4,6 +4,7 @@ import { useNRCLogin } from '@/hooks/useNRCLogin';
 import { Button } from '@/primitives/Button';
 import { Input } from '@/primitives/Input';
 import { Modal } from '@/primitives/Modal';
+import { NRCLoginModal } from '@/components/nrc-login-modal';
 import { useSocket } from '@/provider/socket-provider';
 import type { ApiError } from '@/types';
 import { useMutation } from '@tanstack/react-query';
@@ -23,14 +24,9 @@ function LoginPageContent() {
   const { socket } = useSocket();
 
   const [isNRCModalOpen, setIsNRCModalOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [password, setPassword] = useState('');
   
   // NRC Flow States
-  // const [isInitializing, setIsInitializing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   // --- Real-Time NRC Webhook Listener ---
   // useEffect(() => {
@@ -117,41 +113,7 @@ function LoginPageContent() {
   //   }
   // };
 
-  const submitNRCCredentials = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password || !activeSessionId) {
-      toast.error('Email and password are required.');
-      return;
-    }
 
-    setIsSubmitting(true);
-    const payload = {
-      type: 'nrc',
-      sessionId: activeSessionId,
-      email,
-      password,
-      clubId: searchParams.get('clubId') ?? undefined,
-      leaderboardId: searchParams.get('leaderboardId') ?? undefined,
-      inviteId: searchParams.get('inviteId') ?? undefined,
-    };
-
-    try {
-      const response = await fetch('/api/login/nrc/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      
-      if (!response.ok) {
-         const errorInfo = await response.json();
-         throw new Error(errorInfo.message ?? 'Invalid credentials.');
-      }
-      // Success will be handled by the websocket!
-    } catch (err: any) {
-      toast.error(err.message);
-      setIsSubmitting(false);
-    }
-  };
 
   if (status === 'loading') {
     return (
@@ -283,112 +245,13 @@ function LoginPageContent() {
         </div>
       </main>
 
-      {/* NRC Login Modal */}
-      <Modal open={step === 'email-modal'} onOpenChange={isSubmitting ? undefined : setIsNRCModalOpen}>
-        <Modal.Portal>
-          <Modal.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-card-light dark:bg-card-dark rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Sign in with Nike</h2>
-              <Modal.Close asChild>
-                <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 disabled:opacity-50" disabled={isSubmitting}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
-              </Modal.Close>
-            </div>
-            <form onSubmit={() => submitEmail(email)} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  disabled={isSubmitting}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your Nike email"
-                  required
-                />
-              </div>
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex justify-center py-3 bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 rounded-lg hover:shadow-md transition-shadow disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 rounded-full border-2 border-white dark:border-black border-t-transparent animate-spin" />
-                      <span>Authenticating...</span>
-                    </div>
-                  ) : (
-                    'Login'
-                  )}
-                </Button>
-              </div>
-              <p className="text-xs text-center text-gray-500 mt-4">
-                Your credentials are used locally by headless authentication exactly once to generate a session token. They are not stored.
-              </p>
-            </form>
-          </Modal.Content>
-        </Modal.Portal>
-      </Modal>
-      <Modal open={step === "code-modal"} onOpenChange={isSubmitting ? undefined : setIsNRCModalOpen}>
-        <Modal.Portal>
-          <Modal.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-card-light dark:bg-card-dark rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Enter the 8-digit code sent to your email.</h2>
-              <p>{email}</p>
-              <Modal.Close asChild>
-                <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 disabled:opacity-50" disabled={isSubmitting}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
-              </Modal.Close>
-            </div>
-            <form onSubmit={() => submitCode(code)} className="space-y-4">
-              <div>
-                <label htmlFor="code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Code
-                </label>
-                <Input
-                  id="code"
-                  type="text"
-                  value={code}
-                  disabled={isSubmitting}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="8 digit code *"
-                  required
-                />
-              </div>
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex justify-center py-3 bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 rounded-lg hover:shadow-md transition-shadow disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 rounded-full border-2 border-white dark:border-black border-t-transparent animate-spin" />
-                      <span>Authenticating...</span>
-                    </div>
-                  ) : (
-                    'Login'
-                  )}
-                </Button>
-              </div>
-              <p className="text-xs text-center text-gray-500 mt-4">
-                Your credentials are used locally by headless authentication exactly once to generate a session token. They are not stored.
-              </p>
-            </form>
-          </Modal.Content>
-        </Modal.Portal>
-      </Modal>
+      <NRCLoginModal
+        step={step}
+        isSubmitting={isSubmitting}
+        submitEmail={submitEmail}
+        submitCode={submitCode}
+        onOpenChange={setIsNRCModalOpen}
+      />
     </div>
   );
 }

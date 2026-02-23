@@ -1,0 +1,177 @@
+'use client';
+
+import { Button } from '@/primitives/Button';
+import { Input } from '@/primitives/Input';
+import { Modal } from '@/primitives/Modal';
+import { useState } from 'react';
+import { SiNike } from 'react-icons/si';
+import type { NRCLoginStep } from '@/hooks/useNRCLogin';
+
+interface NRCLoginModalProps {
+  step: NRCLoginStep;
+  isSubmitting: boolean;
+  submitEmail: (email: string) => Promise<void>;
+  submitCode: (code: string) => Promise<void>;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function NRCLoginModal({
+  step,
+  isSubmitting,
+  submitEmail,
+  submitCode,
+  onOpenChange,
+}: NRCLoginModalProps) {
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+
+  const isOpen = step === 'email-modal' || step === 'code-modal';
+
+  if (!isOpen) return null;
+
+  return (
+    <Modal open={isOpen} onOpenChange={isSubmitting ? undefined : onOpenChange}>
+      <Modal.Portal>
+        <Modal.Content
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-50 w-[95%] max-w-md bg-card-light dark:bg-card-dark rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden"
+        >
+          <div className="relative p-8 md:p-10">
+            {step === 'email-modal' ? (
+              <>
+                <div className="flex flex-col items-center text-center mb-8">
+                  <div className="w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center mb-6 shadow-lg transform hover:scale-110 transition-transform cursor-default">
+                    <SiNike className="h-10 w-16 text-white dark:text-black" />
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+                    Nike Connection
+                  </h2>
+                  <p className="mt-2 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">
+                    Enter your NRC account email to continue.
+                  </p>
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    submitEmail(email);
+                  }}
+                  className="space-y-6"
+                >
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
+                      Nike Email Address
+                    </label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      disabled={isSubmitting}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-base md:text-lg"
+                      required
+                    />
+                  </div>
+
+                  <div className="pt-4">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting || !email}
+                      className="w-full h-14 text-lg font-black bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 rounded-2xl shadow-xl transform active:scale-[0.98] transition-all disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center justify-center space-x-3">
+                          <div className="w-5 h-5 rounded-full border-3 border-white dark:border-black border-t-transparent animate-spin" />
+                          <span>Initializing...</span>
+                        </div>
+                      ) : (
+                        'Continue'
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-center space-x-2 text-[10px] md:text-xs text-center text-gray-400 dark:text-gray-500 pt-4">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>Secure, ephemeral connection. No passwords stored.</span>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col items-center text-center mb-8">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                    <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+                    Verification Required
+                  </h2>
+                  <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Enter the 8-digit code sent to:
+                    </p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white mt-1 uppercase tracking-tight">
+                      {email}
+                    </p>
+                  </div>
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    submitCode(code);
+                  }}
+                  className="space-y-6"
+                >
+                  <div className="space-y-2">
+                    <label htmlFor="code" className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
+                      8-Digit Security Code
+                    </label>
+                    <Input
+                      id="code"
+                      type="text"
+                      value={code}
+                      disabled={isSubmitting}
+                      onChange={(e) => setCode(e.target.value)}
+                      placeholder="00000000"
+                      className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-primary text-center text-2xl font-mono tracking-[0.5em] focus:tracking-[0.5em] placeholder:tracking-normal placeholder:font-sans transition-all"
+                      required
+                      maxLength={8}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="pt-4">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting || code.length < 6}
+                      className="w-full h-14 text-lg font-black bg-[#FC4C02] hover:bg-[#e34402] text-white rounded-2xl shadow-xl transform active:scale-[0.98] transition-all disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center justify-center space-x-3">
+                          <div className="w-5 h-5 rounded-full border-3 border-white border-t-transparent animate-spin" />
+                          <span>Verifying...</span>
+                        </div>
+                      ) : (
+                        'Verify & Connect'
+                      )}
+                    </Button>
+                  </div>
+
+                  <p className="text-[10px] md:text-xs text-center text-gray-400 dark:text-gray-500 pt-4 leading-relaxed">
+                    Haven&#39;t received a code? Check your spam folder or wait a few minutes before trying again.
+                  </p>
+                </form>
+              </>
+            )}
+          </div>
+        </Modal.Content>
+      </Modal.Portal>
+    </Modal>
+  );
+}
