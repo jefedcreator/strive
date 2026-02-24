@@ -1,4 +1,5 @@
 'use client';
+import { MetaThemeColorMeta } from '@/components/meta-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
 import {
@@ -39,7 +40,9 @@ export const Provider = ({ children }: QueryProviderProps) => {
           enableSystem
           disableTransitionOnChange
         >
+          <MetaThemeColorMeta />
           <NuqsAdapter>
+    
             {/* <SocketProvider> */}
             {children}
             {/* </SocketProvider> */}

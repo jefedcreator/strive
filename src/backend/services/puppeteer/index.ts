@@ -52,7 +52,10 @@ export class PuppeteerService {
       password,
     } = options;
 
-    const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
+    const chromePath =
+      process.env.CHROME_PATH ??
+      process.env.PUPPETEER_EXECUTABLE_PATH ??
+      this.DEFAULT_CHROME_PATH;
 
     const browser = (await puppeteer.launch({
       headless,
@@ -64,6 +67,14 @@ export class PuppeteerService {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-blink-features=AutomationControlled',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--window-size=1920,1080',
+        '--no-zygote',
+        '--single-process',
+        '--disable-accelerated-2d-canvas',
+        '--ignore-certificate-errors',
+        '--disable-web-security',
       ],
       ignoreDefaultArgs: ['--enable-automation'],
     })) as Browser;
