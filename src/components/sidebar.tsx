@@ -22,8 +22,16 @@ import {
   X,
 } from 'lucide-react';
 import ToggleTheme from './toggle-theme';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/primitives/dropdown-menu';
 
 interface NavItemProps {
   name: string;
@@ -256,12 +264,54 @@ export function Sidebar() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                    {user?.fullname ?? user?.username ?? 'Guest'}
-                  </p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
-                    {user ? 'Pro Member' : 'Not logged in'}
-                  </p>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
+                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                          {`${user?.fullname?.split(' ')?.[0] ?? 'John'}. ${user?.fullname?.split(' ')?.[1]?.[0] ?? 'Doe'}`}
+                        </p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
+                          {user ? 'Pro Member' : 'Not logged in'}
+                        </p>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-56 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+                      align="end"
+                      forceMount
+                    >
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">
+                            {user?.name ?? user?.username}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-none">
+                            {user?.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+                      <DropdownMenuItem
+                        asChild
+                        className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer"
+                      >
+                        <Link href="/settings">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        asChild
+                        className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer"
+                      >
+                        <Link href="/settings">Settings</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+                      <DropdownMenuItem
+                        onClick={() => signOut({ callbackUrl: '/' })}
+                        className="text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer"
+                      >
+                        Log out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>

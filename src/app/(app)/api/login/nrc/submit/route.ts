@@ -3,8 +3,8 @@ import { authService } from '@/backend/services/auth';
 import { db } from '@/server/db';
 import { puppeteerSessionManager } from '@/backend/services/puppeteer/session';
 import {
-    loginValidatorSchema,
-    type LoginValidatorSchema,
+  loginValidatorSchema,
+  type LoginValidatorSchema,
 } from '@/backend/validators/auth.validator';
 import { signIn } from '@/server/auth';
 import { InternalServerErrorException } from '@/utils/exceptions';

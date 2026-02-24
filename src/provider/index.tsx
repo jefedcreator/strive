@@ -40,8 +40,8 @@ export const Provider = ({ children }: QueryProviderProps) => {
         >
           <NuqsAdapter>
             {/* <SocketProvider> */}
-              {children}
-              {/* </SocketProvider> */}
+            {children}
+            {/* </SocketProvider> */}
           </NuqsAdapter>
         </ThemeProvider>
       </SessionProvider>

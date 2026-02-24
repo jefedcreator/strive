@@ -8,7 +8,6 @@ interface PageProps {
   params: Promise<{ id: string; inviteId: string }>;
 }
 
-
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {

@@ -44,7 +44,13 @@ export class PuppeteerService {
    * and monitoring network requests while the user logs in.
    */
   async captureNikeAuth(options: CaptureOptions = {}): Promise<NikeAuthResult> {
-    const { headless = 'new', userDataDir, timeout = 0, email, password } = options;
+    const {
+      headless = 'new',
+      userDataDir,
+      timeout = 0,
+      email,
+      password,
+    } = options;
 
     const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
 
@@ -129,18 +135,23 @@ export class PuppeteerService {
       if (email && password) {
         console.log('🤖 Automating Login entry...');
         await page.type(this.SELECTORS.EMAIL_INPUT, email, { delay: 50 });
-        await page.waitForSelector(this.SELECTORS.NEXT_BUTTON, { visible: true });
+        await page.waitForSelector(this.SELECTORS.NEXT_BUTTON, {
+          visible: true,
+        });
         await page.click(this.SELECTORS.NEXT_BUTTON);
 
         // Wait for password field
         const PWD_SELECTOR = 'input[type="password"]';
-        await page.waitForSelector(PWD_SELECTOR, { visible: true, timeout: 15000 });
+        await page.waitForSelector(PWD_SELECTOR, {
+          visible: true,
+          timeout: 15000,
+        });
         await page.type(PWD_SELECTOR, password, { delay: 50 });
 
         // Click sign in. The submit button is likely the same NEXT_BUTTON selector, but let's just click any button[type="submit"]
         await Promise.all([
           page.waitForNavigation({ waitUntil: 'networkidle2', timeout }),
-          page.click('button[type="submit"]')
+          page.click('button[type="submit"]'),
         ]);
 
         emailValue = email;

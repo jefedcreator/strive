@@ -3,9 +3,19 @@
 import { Button } from '@/primitives/Button';
 import { Input } from '@/primitives/Input';
 import { Modal } from '@/primitives/Modal';
-import { useState } from 'react';
+import React from 'react';
 import { SiNike } from 'react-icons/si';
 import type { NRCLoginStep } from '@/hooks/useNRCLogin';
+import { Field, Form } from '@/primitives';
+import { useForm } from 'react-hook-form';
+
+interface NRCEmailFormValues {
+  email: string;
+}
+
+interface NRCCodeFormValues {
+  code: string;
+}
 
 interface NRCLoginModalProps {
   sessionStep: NRCLoginStep;
@@ -30,46 +40,109 @@ export function NRCLoginModal({
   code,
   setCode,
   error,
-  reset
+  reset,
 }: NRCLoginModalProps) {
-  
-  const isEmailScreen = sessionStep === 'email-modal' || sessionStep === 'awaiting-code';
-  const isCodeScreen = sessionStep === 'code-modal' || sessionStep === 'processing' || sessionStep === 'success';
+  const emailForm = useForm<NRCEmailFormValues>({
+    mode: 'onChange',
+    defaultValues: { email },
+  });
+
+  const codeForm = useForm<NRCCodeFormValues>({
+    mode: 'onChange',
+    defaultValues: { code },
+  });
+
+  const emailRegister = emailForm.register('email', {
+    required: 'Email is required',
+    pattern: {
+      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+      message: 'Invalid email address',
+    },
+  });
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    void emailRegister.onChange(e);
+    setEmail(e.target.value);
+  };
+
+  const codeRegister = codeForm.register('code', {
+    required: 'Code is required',
+    pattern: {
+      value: /^\d{8}$/,
+      message: 'Code must be 8 digits',
+    },
+  });
+
+  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only accept numbers
+    const value = e.target.value.replace(/\D/g, '').slice(0, 8);
+    codeForm.setValue('code', value, { shouldValidate: true });
+    setCode(value);
+  };
+
+  const isEmailScreen =
+    sessionStep === 'email-modal' || sessionStep === 'awaiting-code';
+  const isCodeScreen =
+    sessionStep === 'code-modal' ||
+    sessionStep === 'processing' ||
+    sessionStep === 'success';
 
   const isOpen = isEmailScreen || isCodeScreen || sessionStep === 'error';
 
   if (!isOpen) return null;
 
   return (
-    <Modal open={isOpen} onOpenChange={(open) => !open && !isSubmitting && reset()}>
+    <Modal
+      open={isOpen}
+      onOpenChange={(open) => !open && !isSubmitting && reset()}
+    >
       <Modal.Portal>
         <Modal.Content
           onInteractOutside={(e) => !isSubmitting && reset()}
           onEscapeKeyDown={(e) => !isSubmitting && reset()}
           className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-50 w-[95%] max-w-md bg-card-light dark:bg-card-dark rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden outline-none"
         >
-          {/* Close Button */}
           {!isSubmitting && (
             <button
               onClick={reset}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 transition-colors z-[60]"
               aria-label="Close"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           )}
 
           <div className="relative p-8 md:p-10">
-            {error && (
+            {/* {error && (
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl flex items-start space-x-3 text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-top-2 duration-300">
-                <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-5 h-5 mt-0.5 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <p className="text-sm font-semibold leading-relaxed">{error}</p>
               </div>
-            )}
+            )} */}
             {isEmailScreen ? (
               <>
                 <div className="flex flex-col items-center text-center mb-8">
@@ -83,34 +156,32 @@ export function NRCLoginModal({
                     Enter your NRC account email to continue.
                   </p>
                 </div>
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    submitEmail(email);
-                  }}
+                <Form
+                  onSubmit={emailForm.handleSubmit((data) => submitEmail(data.email))}
                   className="space-y-6"
                 >
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-                      Nike Email Address
-                    </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      disabled={isSubmitting}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@example.com"
-                      className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-base md:text-lg"
-                      required
-                    />
+                    <Field 
+                      id="email" 
+                      label="Nike Email Address" 
+                      error={emailForm.formState.errors.email?.message}
+                    >
+                      <Input
+                        {...emailRegister}
+                        onChange={handleEmailChange}
+                        id="email"
+                        type="email"
+                        disabled={isSubmitting}
+                        placeholder="name@example.com"
+                        className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-base md:text-lg"
+                      />
+                    </Field>
                   </div>
 
                   <div className="pt-4">
                     <Button
                       type="submit"
-                      disabled={isSubmitting || !email}
+                      disabled={isSubmitting || !emailForm.formState.isValid}
                       className="w-full h-14 text-lg font-black bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 rounded-2xl shadow-xl transform active:scale-[0.98] transition-all disabled:opacity-50"
                     >
                       {isSubmitting ? (
@@ -125,19 +196,41 @@ export function NRCLoginModal({
                   </div>
 
                   <div className="flex items-center justify-center space-x-2 text-[10px] md:text-xs text-center text-gray-400 dark:text-gray-500 pt-4">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
                     </svg>
-                    <span>Secure, ephemeral connection. No passwords stored.</span>
+                    <span>
+                      Secure, ephemeral connection. No passwords stored.
+                    </span>
                   </div>
-                </form>
+                </Form>
               </>
             ) : (
               <>
                 <div className="flex flex-col items-center text-center mb-8">
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                    <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <svg
+                      className="h-8 w-8 text-primary"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
                     </svg>
                   </div>
                   <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
@@ -153,35 +246,35 @@ export function NRCLoginModal({
                   </div>
                 </div>
 
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    submitCode(code);
-                  }}
+                <Form
+                  onSubmit={codeForm.handleSubmit((data) => submitCode(data.code))}
                   className="space-y-6"
                 >
                   <div className="space-y-2">
-                    <label htmlFor="code" className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-                      8-Digit Security Code
-                    </label>
-                    <Input
+                    <Field
                       id="code"
-                      type="text"
-                      value={code}
-                      disabled={isSubmitting}
-                      onChange={(e) => setCode(e.target.value)}
-                      placeholder="00000000"
-                      className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-primary text-center text-2xl font-mono tracking-[0.5em] focus:tracking-[0.5em] placeholder:tracking-normal placeholder:font-sans transition-all"
-                      required
-                      maxLength={8}
-                      autoFocus
-                    />
+                      label="8-Digit Security Code"
+                      error={codeForm.formState.errors.code?.message}
+                    >
+                      <Input
+                        {...codeRegister}
+                        onChange={handleCodeChange}
+                        id="code"
+                        type="number"
+                        disabled={isSubmitting}
+                        placeholder="00000000"
+                        className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-primary text-center text-2xl font-mono tracking-[0.5em] focus:tracking-[0.5em] placeholder:tracking-normal placeholder:font-sans transition-all"
+                        required
+                        maxLength={8}
+                        autoFocus
+                      />
+                    </Field>
                   </div>
 
                   <div className="pt-4">
                     <Button
                       type="submit"
-                      disabled={isSubmitting || code.length < 6}
+                      disabled={isSubmitting || !codeForm.formState.isValid}
                       className="w-full h-14 text-lg font-black bg-[#FC4C02] hover:bg-[#e34402] text-white rounded-2xl shadow-xl transform active:scale-[0.98] transition-all disabled:opacity-50"
                     >
                       {isSubmitting ? (
@@ -196,9 +289,10 @@ export function NRCLoginModal({
                   </div>
 
                   <p className="text-[10px] md:text-xs text-center text-gray-400 dark:text-gray-500 pt-4 leading-relaxed">
-                    Haven&#39;t received a code? Check your spam folder or wait a few minutes before trying again.
+                    Haven&#39;t received a code? Check your spam folder or wait
+                    a few minutes before trying again.
                   </p>
-                </form>
+                </Form>
               </>
             )}
           </div>

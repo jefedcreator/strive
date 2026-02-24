@@ -12,18 +12,34 @@ import { SiNike, SiStrava } from 'react-icons/si';
 import { toast } from 'sonner';
 
 function LoginPageContent() {
-  const { step, error, result, initLogin, reset, submitEmail, submitCode, sessionStep, email, setEmail, code, setCode } = useNRCLogin();
-  
+  const {
+    step,
+    error,
+    result,
+    initLogin,
+    reset,
+    submitEmail,
+    submitCode,
+    sessionStep,
+    email,
+    setEmail,
+    code,
+    setCode,
+  } = useNRCLogin();
+
   // Derive loading states from the current step
   const isInitializing = step === 'initializing' || step === 'navigating';
-  const isSubmitting = step === 'initializing' || step === 'navigating' || step === 'awaiting-code' || step === 'processing';
+  const isSubmitting =
+    step === 'initializing' ||
+    step === 'navigating' ||
+    step === 'awaiting-code' ||
+    step === 'processing';
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
 
   console.log('isSubmitting', isSubmitting);
-
 
   // NRC Flow States
 
@@ -102,7 +118,7 @@ function LoginPageContent() {
   //   try {
   //     const response = await fetch('/api/login/nrc/init', { method: 'POST' });
   //     if (!response.ok) throw new Error('Failed to connect to Nike servers.');
-      
+
   //     const { sessionId } = await response.json();
   //     setActiveSessionId(sessionId);
   //     toast.info('Connecting to Nike servers...');
@@ -111,8 +127,6 @@ function LoginPageContent() {
   //     setIsInitializing(false);
   //   }
   // };
-
-
 
   if (status === 'loading') {
     return (
