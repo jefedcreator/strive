@@ -42,44 +42,6 @@ export function NRCLoginModal({
   error,
   reset,
 }: NRCLoginModalProps) {
-  const emailForm = useForm<NRCEmailFormValues>({
-    mode: 'onChange',
-    defaultValues: { email },
-  });
-
-  const codeForm = useForm<NRCCodeFormValues>({
-    mode: 'onChange',
-    defaultValues: { code },
-  });
-
-  const emailRegister = emailForm.register('email', {
-    required: 'Email is required',
-    pattern: {
-      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-      message: 'Invalid email address',
-    },
-  });
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    void emailRegister.onChange(e);
-    setEmail(e.target.value);
-  };
-
-  const codeRegister = codeForm.register('code', {
-    required: 'Code is required',
-    pattern: {
-      value: /^\d{8}$/,
-      message: 'Code must be 8 digits',
-    },
-  });
-
-  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only accept numbers
-    const value = e.target.value.replace(/\D/g, '').slice(0, 8);
-    codeForm.setValue('code', value, { shouldValidate: true });
-    setCode(value);
-  };
-
   const isEmailScreen =
     sessionStep === 'email-modal' || sessionStep === 'awaiting-code';
   const isCodeScreen =
@@ -88,8 +50,6 @@ export function NRCLoginModal({
     sessionStep === 'success';
 
   const isOpen = isEmailScreen || isCodeScreen || sessionStep === 'error';
-
-  if (!isOpen) return null;
 
   return (
     <Modal
@@ -144,160 +104,250 @@ export function NRCLoginModal({
               </div>
             )} */}
             {isEmailScreen ? (
-              <>
-                <div className="flex flex-col items-center text-center mb-8">
-                  <div className="w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center mb-6 shadow-lg transform hover:scale-110 transition-transform cursor-default">
-                    <SiNike className="h-10 w-16 text-white dark:text-black" />
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
-                    Nike Connection
-                  </h2>
-                  <p className="mt-2 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">
-                    Enter your NRC account email to continue.
-                  </p>
-                </div>
-                <Form
-                  onSubmit={emailForm.handleSubmit((data) => submitEmail(data.email))}
-                  className="space-y-6"
-                >
-                  <div className="space-y-2">
-                    <Field 
-                      id="email" 
-                      label="Nike Email Address" 
-                      error={emailForm.formState.errors.email?.message}
-                    >
-                      <Input
-                        {...emailRegister}
-                        onChange={handleEmailChange}
-                        id="email"
-                        type="email"
-                        disabled={isSubmitting}
-                        placeholder="name@example.com"
-                        className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-base md:text-lg"
-                      />
-                    </Field>
-                  </div>
-
-                  <div className="pt-4">
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting || !emailForm.formState.isValid}
-                      className="w-full h-14 text-lg font-black bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 rounded-2xl shadow-xl transform active:scale-[0.98] transition-all disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <div className="flex items-center justify-center space-x-3">
-                          <div className="w-5 h-5 rounded-full border-3 border-white dark:border-black border-t-transparent animate-spin" />
-                          <span>Initializing...</span>
-                        </div>
-                      ) : (
-                        'Continue'
-                      )}
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center justify-center space-x-2 text-[10px] md:text-xs text-center text-gray-400 dark:text-gray-500 pt-4">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      />
-                    </svg>
-                    <span>
-                      Secure, ephemeral connection. No passwords stored.
-                    </span>
-                  </div>
-                </Form>
-              </>
+              <EmailStep
+                email={email}
+                setEmail={setEmail}
+                submitEmail={submitEmail}
+                isSubmitting={isSubmitting}
+              />
             ) : (
-              <>
-                <div className="flex flex-col items-center text-center mb-8">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                    <svg
-                      className="h-8 w-8 text-primary"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      />
-                    </svg>
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
-                    Verification Required
-                  </h2>
-                  <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Enter the 8-digit code sent to:
-                    </p>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white mt-1 tracking-tight">
-                      {email.toLowerCase()}
-                    </p>
-                  </div>
-                </div>
-
-                <Form
-                  onSubmit={codeForm.handleSubmit((data) => submitCode(data.code))}
-                  className="space-y-6"
-                >
-                  <div className="space-y-2">
-                    <Field
-                      id="code"
-                      label="8-Digit Security Code"
-                      error={codeForm.formState.errors.code?.message}
-                    >
-                      <Input
-                        {...codeRegister}
-                        onChange={handleCodeChange}
-                        id="code"
-                        type="number"
-                        disabled={isSubmitting}
-                        placeholder="00000000"
-                        className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-primary text-center text-2xl font-mono tracking-[0.5em] focus:tracking-[0.5em] placeholder:tracking-normal placeholder:font-sans transition-all"
-                        required
-                        maxLength={8}
-                        autoFocus
-                      />
-                    </Field>
-                  </div>
-
-                  <div className="pt-4">
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting || !codeForm.formState.isValid}
-                      className="w-full h-14 text-lg font-black bg-[#FC4C02] hover:bg-[#e34402] text-white rounded-2xl shadow-xl transform active:scale-[0.98] transition-all disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <div className="flex items-center justify-center space-x-3">
-                          <div className="w-5 h-5 rounded-full border-3 border-white border-t-transparent animate-spin" />
-                          <span>Verifying...</span>
-                        </div>
-                      ) : (
-                        'Verify & Connect'
-                      )}
-                    </Button>
-                  </div>
-
-                  <p className="text-[10px] md:text-xs text-center text-gray-400 dark:text-gray-500 pt-4 leading-relaxed">
-                    Haven&#39;t received a code? Check your spam folder or wait
-                    a few minutes before trying again.
-                  </p>
-                </Form>
-              </>
+              <CodeStep
+                email={email}
+                code={code}
+                setCode={setCode}
+                submitCode={submitCode}
+                isSubmitting={isSubmitting}
+              />
             )}
           </div>
         </Modal.Content>
       </Modal.Portal>
     </Modal>
+  );
+}
+
+function EmailStep({
+  email,
+  setEmail,
+  submitEmail,
+  isSubmitting,
+}: {
+  email: string;
+  setEmail: (email: string) => void;
+  submitEmail: (email: string) => Promise<void>;
+  isSubmitting: boolean;
+}) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<NRCEmailFormValues>({
+    mode: 'onChange',
+    defaultValues: { email },
+  });
+
+  const emailRegister = register('email', {
+    required: 'Email is required',
+    pattern: {
+      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+      message: 'Invalid email address',
+    },
+  });
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    void emailRegister.onChange(e);
+    setEmail(e.target.value);
+  };
+
+  return (
+    <>
+      <div className="flex flex-col items-center text-center mb-8">
+        <div className="w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center mb-6 shadow-lg transform hover:scale-110 transition-transform cursor-default">
+          <SiNike className="h-10 w-16 text-white dark:text-black" />
+        </div>
+        <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+          Nike Connection
+        </h2>
+        <p className="mt-2 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">
+          Enter your NRC account email to continue.
+        </p>
+      </div>
+      <Form
+        onSubmit={handleSubmit((data) => submitEmail(data.email))}
+        className="space-y-6"
+      >
+        <div className="space-y-2">
+          <Field
+            id="email"
+            label="Nike Email Address"
+            error={errors.email?.message}
+          >
+            <Input
+              {...emailRegister}
+              onChange={handleEmailChange}
+              id="email"
+              type="email"
+              disabled={isSubmitting}
+              placeholder="name@example.com"
+              className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-base md:text-lg"
+            />
+          </Field>
+        </div>
+
+        <div className="pt-4">
+          <Button
+            type="submit"
+            disabled={isSubmitting || !isValid}
+            className="w-full h-14 text-lg font-black bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 rounded-2xl shadow-xl transform active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <div className="flex items-center justify-center space-x-3">
+                <div className="w-5 h-5 rounded-full border-3 border-white dark:border-black border-t-transparent animate-spin" />
+                <span>Initializing...</span>
+              </div>
+            ) : (
+              'Continue'
+            )}
+          </Button>
+        </div>
+
+        <div className="flex items-center justify-center space-x-2 text-[10px] md:text-xs text-center text-gray-400 dark:text-gray-500 pt-4">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
+          </svg>
+          <span>Secure, ephemeral connection. No passwords stored.</span>
+        </div>
+      </Form>
+    </>
+  );
+}
+
+function CodeStep({
+  email,
+  code,
+  setCode,
+  submitCode,
+  isSubmitting,
+}: {
+  email: string;
+  code: string;
+  setCode: (code: string) => void;
+  submitCode: (code: string) => Promise<void>;
+  isSubmitting: boolean;
+}) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    setValue,
+  } = useForm<NRCCodeFormValues>({
+    mode: 'onChange',
+    defaultValues: { code },
+  });
+
+  const codeRegister = register('code', {
+    required: 'Code is required',
+    pattern: {
+      value: /^\d{8}$/,
+      message: 'Code must be 8 digits',
+    },
+  });
+
+  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only accept numbers
+    const value = e.target.value.replace(/\D/g, '').slice(0, 8);
+    setValue('code', value, { shouldValidate: true });
+    setCode(value);
+  };
+
+  return (
+    <>
+      <div className="flex flex-col items-center text-center mb-8">
+        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 shadow-sm">
+          <svg
+            className="h-8 w-8 text-primary"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
+          </svg>
+        </div>
+        <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+          Verification Required
+        </h2>
+        <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Enter the 8-digit code sent to:
+          </p>
+          <p className="text-sm font-bold text-gray-900 dark:text-white mt-1 tracking-tight">
+            {email.toLowerCase()}
+          </p>
+        </div>
+      </div>
+
+      <Form
+        onSubmit={handleSubmit((data) => submitCode(data.code))}
+        className="space-y-6"
+      >
+        <div className="space-y-2">
+          <Field
+            id="code"
+            label="8-Digit Security Code"
+            error={errors.code?.message}
+          >
+            <Input
+              {...codeRegister}
+              onChange={handleCodeChange}
+              id="code"
+              type="number"
+              disabled={isSubmitting}
+              placeholder="00000000"
+              className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-primary text-center text-2xl font-mono tracking-[0.5em] focus:tracking-[0.5em] placeholder:tracking-normal placeholder:font-sans transition-all"
+              required
+              maxLength={8}
+              autoFocus
+            />
+          </Field>
+        </div>
+
+        <div className="pt-4">
+          <Button
+            type="submit"
+            disabled={isSubmitting || !isValid}
+            className="w-full h-14 text-lg font-black bg-[#FC4C02] hover:bg-[#e34402] text-white rounded-2xl shadow-xl transform active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <div className="flex items-center justify-center space-x-3">
+                <div className="w-5 h-5 rounded-full border-3 border-white border-t-transparent animate-spin" />
+                <span>Verifying...</span>
+              </div>
+            ) : (
+              'Verify & Connect'
+            )}
+          </Button>
+        </div>
+
+        <p className="text-[10px] md:text-xs text-center text-gray-400 dark:text-gray-500 pt-4 leading-relaxed">
+          Haven&#39;t received a code? Check your spam folder or wait a few
+          minutes before trying again.
+        </p>
+      </Form>
+    </>
   );
 }

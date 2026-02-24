@@ -22,287 +22,293 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import useSessionStorage from './useSessionStorage';
 
 export type NRCLoginStep =
-  | 'idle'
-  | 'initializing' // POST /api/nrc/init in-flight
-  | 'navigating' // browser loading nike.com/login
-  | 'email-modal' // ready: show email input modal
-  | 'awaiting-code' // email submitted, waiting for SSE login-code event
-  | 'code-modal' // show OTP / verification code modal
-  | 'processing' // code submitted, Puppeteer finishing login
-  | 'success'
-  | 'error';
+    | 'idle'
+    | 'initializing' // POST /api/nrc/init in-flight
+    | 'navigating' // browser loading nike.com/login
+    | 'email-modal' // ready: show email input modal
+    | 'awaiting-code' // email submitted, waiting for SSE login-code event
+    | 'code-modal' // show OTP / verification code modal
+    | 'processing' // code submitted, Puppeteer finishing login
+    | 'success'
+    | 'error';
 
 interface UseNRCLoginReturn {
-  step: NRCLoginStep;
-  sessionStep: NRCLoginStep;
-  error: string | null;
-  result: NikeAuthResult | null;
-  initLogin: () => Promise<void>;
-  submitEmail: (email: string) => Promise<void>;
-  submitCode: (code: string) => Promise<void>;
-  setEmail: (email: string) => void;
-  setCode: (code: string) => void;
-  email: string;
-  code: string;
-  reset: () => void;
+    step: NRCLoginStep;
+    sessionStep: NRCLoginStep;
+    error: string | null;
+    result: NikeAuthResult | null;
+    initLogin: () => Promise<void>;
+    submitEmail: (email: string) => Promise<void>;
+    submitCode: (code: string) => Promise<void>;
+    setEmail: (email: string) => void;
+    setCode: (code: string) => void;
+    email: string;
+    code: string;
+    reset: () => void;
 }
 
 export function useNRCLogin(): UseNRCLoginReturn {
-  const sessionIdRef = useRef<string | null>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
+    const sessionIdRef = useRef<string | null>(null);
+    const eventSourceRef = useRef<EventSource | null>(null);
 
-  const [sessionStep, setSessionStep] = useSessionStorage<NRCLoginStep>(
-    'nrc_login_step',
-    'idle'
-  );
-  const [email, setEmail] = useSessionStorage<string>('nrc_login_email', '');
-  const [code, setCode] = useSessionStorage<string>('nrc_login_code', '');
+    const [sessionStep, setSessionStep] = useSessionStorage<NRCLoginStep>(
+        'nrc_login_step',
+        'idle'
+    );
+    const [email, setEmail] = useSessionStorage<string>('nrc_login_email', '');
+    const [code, setCode] = useSessionStorage<string>('nrc_login_code', '');
 
-  const [step, setStep] = useState<NRCLoginStep>(sessionStep);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<NikeAuthResult | null>(null);
+    const [step, setStep] = useState<NRCLoginStep>(sessionStep);
+    const [error, setError] = useState<string | null>(null);
+    const [result, setResult] = useState<NikeAuthResult | null>(null);
 
-  const setCurrentStep = useCallback(
-    (next: NRCLoginStep) => {
-      setStep(next);
-      setSessionStep(next);
-    },
-    [setSessionStep]
-  );
+    const setCurrentStep = useCallback(
+        (next: NRCLoginStep) => {
+            setStep(next);
+            setSessionStep(next);
+        },
+        [setSessionStep]
+    );
 
-  const openStream = useCallback(
-    (sessionId: string) => {
-      eventSourceRef.current?.close();
+    const openStream = useCallback(
+        (sessionId: string) => {
+            eventSourceRef.current?.close();
 
-      const es = new EventSource(`/api/login/nrc/stream/${sessionId}`);
-      eventSourceRef.current = es;
+            const es = new EventSource(`/api/login/nrc/stream/${sessionId}`);
+            eventSourceRef.current = es;
 
-      // ── Puppeteer milestone events ────────────────────────────────────────
-      es.addEventListener('nrc-login-step', (e: MessageEvent<string>) => {
-        const data = JSON.parse(e.data) as {
-          step: string;
-          sessionId: string;
-          message?: string;
-        };
-        if (data.sessionId !== sessionIdRef.current) return;
+            // ── Puppeteer milestone events ────────────────────────────────────────
+            es.addEventListener('nrc-login-step', (e: MessageEvent<string>) => {
+                const data = JSON.parse(e.data) as {
+                    step: string;
+                    sessionId: string;
+                    message?: string;
+                };
+                if (data.sessionId !== sessionIdRef.current) return;
 
-        switch (data.step) {
-          case 'ready':
-            // Nike email form is loaded → show email modal
-            setCurrentStep('email-modal');
-            break;
-          case 'processing':
-            setCurrentStep('processing');
-            break;
-          case 'success':
-            setCurrentStep('success');
-            setEmail('');
-            setCode('');
-            es.close();
-            break;
-          case 'error':
-            setError(data.message ?? 'An unknown error occurred.');
+                switch (data.step) {
+                    case 'ready':
+                        // Nike email form is loaded → show email modal
+                        setEmail('');
+                        setCode('');
+                        setCurrentStep('email-modal');
+                        break;
+                    case 'processing':
+                        setCurrentStep('processing');
+                        break;
+                    case 'success':
+                        setCurrentStep('success');
+                        setEmail('');
+                        setCode('');
+                        es.close();
+                        break;
+                    case 'error':
+                        setError(data.message ?? 'An unknown error occurred.');
+                        // If error happens, we typically want to clear the code to allow retry
+                        setCode('');
+                        setCurrentStep('error');
+                        es.close();
+                        break;
+                }
+            });
+
+            // ── Code modal trigger ────────────────────────────────────────────────
+            es.addEventListener('login-code', (e: MessageEvent<string>) => {
+                const data = JSON.parse(e.data) as {
+                    step: string;
+                    sessionId: string;
+                };
+                if (data.sessionId !== sessionIdRef.current) return;
+
+                if (data.step === 'awaiting-code') {
+                    // Email was accepted — show the OTP / code modal
+                    setCurrentStep('code-modal');
+                }
+            });
+
+            // ── Code modal trigger ────────────────────────────────────────────────
+            es.addEventListener('success', (e: MessageEvent<string>) => {
+                es.close();
+            });
+
+            es.onerror = () => {
+                setStep((current) => {
+                    if (current === 'success' || current === 'error') return current;
+                    setError('Connection to server lost. Please try again.');
+                    return 'error';
+                });
+                es.close();
+            };
+        },
+        [setCurrentStep, setEmail, setCode, setSessionStep]
+    );
+
+    // ─── Reset on Refresh logic ──────────────────────────────────────────────
+
+    useEffect(() => {
+        // If the sessionStep is active but this is a fresh mount (e.g. page refresh),
+        // we might want to reset it.
+        // Note: sessionStorage persists on refresh, so we need a way to detect
+        // if this is a "first load" of the session.
+        // A simple way is to check if we have an active stream. If not, we reset.
+        if (sessionStep !== 'idle' && !sessionIdRef.current) {
+            setSessionStep('idle');
+            setStep('idle');
+        }
+    }, []);
+
+    // ─── Cleanup on unmount ───────────────────────────────────────────────────
+
+    useEffect(
+        () => () => {
+            eventSourceRef.current?.close();
+        },
+        []
+    );
+
+    // ─── Step 1: Init ─────────────────────────────────────────────────────────
+
+    const initLogin = useCallback(async () => {
+        eventSourceRef.current?.close();
+        setCurrentStep('initializing');
+        setError(null);
+        setResult(null);
+        sessionIdRef.current = null;
+
+        try {
+            const res = await fetch('/api/login/nrc/stream/init', { method: 'POST' });
+            if (!res.ok) throw new Error('Failed to start Nike session.');
+
+            const { sessionId } = (await res.json()) as { sessionId: string };
+            sessionIdRef.current = sessionId;
+
+            openStream(sessionId); // open before navigation completes
+            setCurrentStep('navigating');
+        } catch (err: any) {
+            setError(err.message);
             setCurrentStep('error');
-            es.close();
-            break;
         }
-      });
+    }, [openStream]);
 
-      // ── Code modal trigger ────────────────────────────────────────────────
-      es.addEventListener('login-code', (e: MessageEvent<string>) => {
-        const data = JSON.parse(e.data) as {
-          step: string;
-          sessionId: string;
-        };
-        if (data.sessionId !== sessionIdRef.current) return;
+    // ─── Step 2: Submit email ─────────────────────────────────────────────────
 
-        if (data.step === 'awaiting-code') {
-          // Email was accepted — show the OTP / code modal
-          setCurrentStep('code-modal');
-        }
-      });
+    const submitEmail = useCallback(
+        async (email: string) => {
+            if (!sessionIdRef.current) {
+                setError('No active session. Please try again.');
+                setCurrentStep('error');
+                return;
+            }
 
-      // ── Code modal trigger ────────────────────────────────────────────────
-      es.addEventListener('success', (e: MessageEvent<string>) => {
-        es.close();
-      });
+            // Transition to a waiting state while Puppeteer types + clicks Continue
+            setCurrentStep('awaiting-code');
 
-      es.onerror = () => {
-        setStep((current) => {
-          if (current === 'success' || current === 'error') return current;
-          setError('Connection to server lost. Please try again.');
-          return 'error';
-        });
-        es.close();
-      };
-    },
-    [setCurrentStep, setEmail, setCode, setSessionStep]
-  );
+            try {
+                const res = await fetch('/api/login/nrc/stream/email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionIdRef.current, email }),
+                });
 
-  // ─── Reset on Refresh logic ──────────────────────────────────────────────
+                if (!res.ok) {
+                    const { error: msg } = (await res.json()) as { error: string };
+                    throw new Error(msg ?? 'Failed to submit email.');
+                }
+                // The 'login-code' SSE event will drive the step → 'code-modal'
+            } catch (err: any) {
+                setError(err.message);
+                setCurrentStep('error');
+                setSessionStep('idle');
+            }
+        },
+        [setCurrentStep, setSessionStep]
+    );
 
-  useEffect(() => {
-    // If the sessionStep is active but this is a fresh mount (e.g. page refresh),
-    // we might want to reset it.
-    // Note: sessionStorage persists on refresh, so we need a way to detect
-    // if this is a "first load" of the session.
-    // A simple way is to check if we have an active stream. If not, we reset.
-    if (sessionStep !== 'idle' && !sessionIdRef.current) {
-      setSessionStep('idle');
-      setStep('idle');
-    }
-  }, []);
+    // ─── Step 3: Submit OTP code ──────────────────────────────────────────────
 
-  // ─── Cleanup on unmount ───────────────────────────────────────────────────
+    const submitCode = useCallback(
+        async (code: string) => {
+            if (!sessionIdRef.current) {
+                setError('No active session. Please try again.');
+                setCurrentStep('error');
+                return;
+            }
 
-  useEffect(
-    () => () => {
-      eventSourceRef.current?.close();
-    },
-    []
-  );
+            const params = new URLSearchParams(window.location.search);
+            const clubId = params.get('clubId');
+            const leaderboardId = params.get('leaderboardId');
+            const inviteId = params.get('inviteId');
 
-  // ─── Step 1: Init ─────────────────────────────────────────────────────────
+            setCurrentStep('processing');
 
-  const initLogin = useCallback(async () => {
-    eventSourceRef.current?.close();
-    setCurrentStep('initializing');
-    setError(null);
-    setResult(null);
-    sessionIdRef.current = null;
+            try {
+                const res = await fetch('/api/login/nrc/stream/code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionIdRef.current,
+                        code,
+                        clubId,
+                        leaderboardId,
+                        inviteId,
+                    }),
+                });
 
-    try {
-      const res = await fetch('/api/login/nrc/stream/init', { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to start Nike session.');
+                if (!res.ok) {
+                    const { error: msg } = (await res.json()) as { error: string };
+                    throw new Error(msg ?? 'Failed to submit code.');
+                }
 
-      const { sessionId } = (await res.json()) as { sessionId: string };
-      sessionIdRef.current = sessionId;
+                const data = (await res.json()) as any;
 
-      openStream(sessionId); // open before navigation completes
-      setCurrentStep('navigating');
-    } catch (err: any) {
-      setError(err.message);
-      setCurrentStep('error');
-    }
-  }, [openStream]);
+                if (data.action === 'redirect' && data.redirectUrl) {
+                    console.log(
+                        `[useNRCLogin] 🚀 Server signaled redirect to: ${data.redirectUrl}`
+                    );
+                    window.location.href = data.redirectUrl;
+                    return;
+                }
 
-  // ─── Step 2: Submit email ─────────────────────────────────────────────────
+                setResult(data as NikeAuthResult);
+                setCurrentStep('success');
+                setEmail('');
+                setCode('');
+            } catch (err: any) {
+                setError(err.message);
+                // User requested to delete only code if it breaks at the code phase
+                setCode('');
+                setCurrentStep('error');
+            }
+        },
+        [setEmail, setCode, setCurrentStep]
+    );
 
-  const submitEmail = useCallback(
-    async (email: string) => {
-      if (!sessionIdRef.current) {
-        setError('No active session. Please try again.');
-        setCurrentStep('error');
-        return;
-      }
+    // ─── Reset ────────────────────────────────────────────────────────────────
 
-      // Transition to a waiting state while Puppeteer types + clicks Continue
-      setCurrentStep('awaiting-code');
-
-      try {
-        const res = await fetch('/api/login/nrc/stream/email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: sessionIdRef.current, email }),
-        });
-
-        if (!res.ok) {
-          const { error: msg } = (await res.json()) as { error: string };
-          throw new Error(msg ?? 'Failed to submit email.');
-        }
-        // The 'login-code' SSE event will drive the step → 'code-modal'
-      } catch (err: any) {
-        setError(err.message);
-        setCurrentStep('error');
+    const reset = useCallback(() => {
+        eventSourceRef.current?.close();
+        eventSourceRef.current = null;
+        sessionIdRef.current = null;
+        setCurrentStep('idle');
         setSessionStep('idle');
-      }
-    },
-    [setCurrentStep, setSessionStep]
-  );
-
-  // ─── Step 3: Submit OTP code ──────────────────────────────────────────────
-
-  const submitCode = useCallback(
-    async (code: string) => {
-      if (!sessionIdRef.current) {
-        setError('No active session. Please try again.');
-        setCurrentStep('error');
-        return;
-      }
-
-      const params = new URLSearchParams(window.location.search);
-      const clubId = params.get('clubId');
-      const leaderboardId = params.get('leaderboardId');
-      const inviteId = params.get('inviteId');
-
-      setCurrentStep('processing');
-
-      try {
-        const res = await fetch('/api/login/nrc/stream/code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: sessionIdRef.current,
-            code,
-            clubId,
-            leaderboardId,
-            inviteId,
-          }),
-        });
-
-        if (!res.ok) {
-          const { error: msg } = (await res.json()) as { error: string };
-          throw new Error(msg ?? 'Failed to submit code.');
-        }
-
-        const data = (await res.json()) as any;
-
-        if (data.action === 'redirect' && data.redirectUrl) {
-          console.log(
-            `[useNRCLogin] 🚀 Server signaled redirect to: ${data.redirectUrl}`
-          );
-          window.location.href = data.redirectUrl;
-          return;
-        }
-
-        setResult(data as NikeAuthResult);
-        setCurrentStep('success');
         setEmail('');
         setCode('');
-      } catch (err: any) {
-        setError(err.message);
-        setCurrentStep('error');
-      }
-    },
-    [setEmail, setCode, setCurrentStep, setSessionStep]
-  );
+        setError(null);
+        setResult(null);
+    }, [setEmail, setCode, setCurrentStep, setSessionStep]);
 
-  // ─── Reset ────────────────────────────────────────────────────────────────
-
-  const reset = useCallback(() => {
-    eventSourceRef.current?.close();
-    eventSourceRef.current = null;
-    sessionIdRef.current = null;
-    setCurrentStep('idle');
-    setSessionStep('idle');
-    setEmail('');
-    setCode('');
-    setError(null);
-    setResult(null);
-  }, [setEmail, setCode, setCurrentStep, setSessionStep]);
-
-  return {
-    step,
-    error,
-    result,
-    initLogin,
-    submitEmail,
-    submitCode,
-    reset,
-    sessionStep,
-    email,
-    setEmail,
-    code,
-    setCode,
-  };
+    return {
+        step,
+        error,
+        result,
+        initLogin,
+        submitEmail,
+        submitCode,
+        reset,
+        sessionStep,
+        email,
+        setEmail,
+        code,
+        setCode,
+    };
 }
