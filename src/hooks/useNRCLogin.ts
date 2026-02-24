@@ -48,10 +48,17 @@ export function useNRCLogin(): UseNRCLoginReturn {
     const eventSourceRef = useRef<EventSource | null>(null);
 
     const [sessionStep, setSessionStep] = useSessionStorage<NRCLoginStep>('nrc_login_step', 'idle');
-    const [step, setStep] = useState<NRCLoginStep>('idle');
+    const [step, setStep] = useState<NRCLoginStep>(sessionStep);
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<NikeAuthResult | null>(null);
-
+    const setCurrentStep = useCallback((next: NRCLoginStep) => {
+        setStep(next);
+        if (next === 'email-modal' || next === 'code-modal') {
+            setSessionStep(next);
+        } else {
+            setSessionStep('idle'); 
+        }
+    }, [setSessionStep]);
     // ─── SSE stream ───────────────────────────────────────────────────────────
 
     const openStream = useCallback((sessionId: string) => {
@@ -72,21 +79,18 @@ export function useNRCLogin(): UseNRCLoginReturn {
             switch (data.step) {
                 case 'ready':
                     // Nike email form is loaded → show email modal
-                    setStep('idle');
-                    setSessionStep('email-modal');
+                    setCurrentStep('idle');
                     break;
                 case 'processing':
-                    setStep('processing');
+                    setCurrentStep('processing');
                     break;
                 case 'success':
-                    setStep('success');
-                    setSessionStep('idle');
+                    setCurrentStep('success');
                     es.close();
                     break;
                 case 'error':
                     setError(data.message ?? 'An unknown error occurred.');
-                    setStep('error');
-                    setSessionStep('idle');
+                    setCurrentStep('error');
                     es.close();
                     break;
             }
@@ -102,8 +106,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
 
             if (data.step === 'awaiting-code') {
                 // Email was accepted — show the OTP / code modal
-                setStep('idle');
-                setSessionStep('code-modal');
+                setCurrentStep('idle');
             }
         });
 
@@ -116,7 +119,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
             setStep((current) => {
                 if (current === 'success' || current === 'error') return current;
                 setError('Connection to server lost. Please try again.');
-                setSessionStep('idle');
+                setCurrentStep('idle');
                 return 'error';
             });
             es.close();
@@ -131,7 +134,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
 
     const initLogin = useCallback(async () => {
         eventSourceRef.current?.close();
-        setStep('initializing');
+        setCurrentStep('initializing');
         setError(null);
         setResult(null);
         sessionIdRef.current = null;
@@ -144,10 +147,10 @@ export function useNRCLogin(): UseNRCLoginReturn {
             sessionIdRef.current = sessionId;
 
             openStream(sessionId);     // open before navigation completes
-            setStep('navigating');
+            setCurrentStep('navigating');
         } catch (err: any) {
             setError(err.message);
-            setStep('error');
+            setCurrentStep('error');
         }
     }, [openStream]);
 
@@ -156,12 +159,12 @@ export function useNRCLogin(): UseNRCLoginReturn {
     const submitEmail = useCallback(async (email: string) => {
         if (!sessionIdRef.current) {
             setError('No active session. Please try again.');
-            setStep('error');
+            setCurrentStep('error');
             return;
         }
 
         // Transition to a waiting state while Puppeteer types + clicks Continue
-        setStep('awaiting-code');
+        setCurrentStep('awaiting-code');
 
         try {
             const res = await fetch('/api/login/nrc/stream/email', {
@@ -177,7 +180,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
             // The 'login-code' SSE event will drive the step → 'code-modal'
         } catch (err: any) {
             setError(err.message);
-            setStep('error');
+            setCurrentStep('error');
         }
     }, []);
 
@@ -186,7 +189,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
     const submitCode = useCallback(async (code: string) => {
         if (!sessionIdRef.current) {
             setError('No active session. Please try again.');
-            setStep('error');
+            setCurrentStep('error');
             return;
         }
 
@@ -195,7 +198,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
         const leaderboardId = params.get('leaderboardId');
         const inviteId = params.get('inviteId');
 
-        setStep('processing');
+        setCurrentStep('processing');
 
         try {
             const res = await fetch('/api/login/nrc/stream/code', {
@@ -225,11 +228,11 @@ export function useNRCLogin(): UseNRCLoginReturn {
             }
 
             setResult(data as NikeAuthResult);
-            setStep('success');
+            setCurrentStep('success');
             setSessionStep('idle');
         } catch (err: any) {
             setError(err.message);
-            setStep('error');
+            setCurrentStep('error');
         }
     }, []);
 
@@ -239,7 +242,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
         eventSourceRef.current?.close();
         eventSourceRef.current = null;
         sessionIdRef.current = null;
-        setStep('idle');
+        setCurrentStep('idle');
         setSessionStep('idle');
         setError(null);
         setResult(null);
