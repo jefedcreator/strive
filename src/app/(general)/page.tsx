@@ -12,7 +12,7 @@ import { SiNike, SiStrava } from 'react-icons/si';
 import { toast } from 'sonner';
 
 function LoginPageContent() {
-  const { step, error, result, initLogin, reset, submitEmail, submitCode, sessionStep } = useNRCLogin();
+  const { step, error, result, initLogin, reset, submitEmail, submitCode, sessionStep, email, setEmail, code, setCode } = useNRCLogin();
   
   // Derive loading states from the current step
   const isInitializing = step === 'initializing' || step === 'navigating';
@@ -21,10 +21,10 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
-  const { socket } = useSocket();
 
-  const [isNRCModalOpen, setIsNRCModalOpen] = useState(false);
-  
+  console.log('isSubmitting', isSubmitting);
+
+
   // NRC Flow States
 
   // --- Real-Time NRC Webhook Listener ---
@@ -245,11 +245,16 @@ function LoginPageContent() {
       </main>
 
       <NRCLoginModal
-        sessionStep={sessionStep}
+        sessionStep={step}
         isSubmitting={isSubmitting}
         submitEmail={submitEmail}
         submitCode={submitCode}
-        onOpenChange={setIsNRCModalOpen}
+        email={email}
+        setEmail={setEmail}
+        code={code}
+        setCode={setCode}
+        error={error}
+        reset={reset}
       />
     </div>
   );

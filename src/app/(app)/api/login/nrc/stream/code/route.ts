@@ -2,11 +2,11 @@ import { authService } from '@/backend/services/auth';
 import { puppeteerSessionManager } from '@/backend/services/puppeteer/session';
 import { signIn } from '@/server/auth';
 import { db } from '@/server/db';
-import { InternalServerErrorException } from '@/utils/exceptions';
+import type { NikeAuthResult } from '@/types';
+import { UserType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
-import { NextRequest, NextResponse } from 'next/server';
-import { redirect, RedirectType } from 'next/navigation'
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
     try {
@@ -26,18 +26,19 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { email, token, username } = await puppeteerSessionManager.submitCode(sessionId, code);
+        const { email, token, username, avatar } = await puppeteerSessionManager.submitCode(sessionId, code);
 
         if (!email || !token || !username) {
             throw new Error('Missing required user information from Nike authentication.');
         }
 
-        const user = await authService.findOrCreateUser({
-            type: 'NRC',
-            email,
-            token,
-            fullname: username,
-        });
+        const payload: NikeAuthResult = { email, token, fullname: username, avatar: null, type: UserType.NRC };
+
+        if (avatar?.startsWith("http")) {
+            payload.avatar = avatar;
+        }
+
+        const user = await authService.findOrCreateUser(payload);
 
         if (!user) {
             throw new Error('User authentication failed.');
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
             userId: user.id,
             redirect: false,
             token: auth_token,
-            // image: user.avatar,
+            image: user.avatar,
         });
 
         const redirectPath = clubId
@@ -120,21 +121,14 @@ export async function POST(req: NextRequest) {
                 ? `/leaderboards/${leaderboardId}`
                 : '/home';
 
-        const redirectUrl = new URL(redirectPath, req.url);
+        // const redirectUrl = new URL(redirectPath, req.url);
         // redirectUrl.searchParams.set('success', 'true');
         // redirect(redirectUrl.toString(), RedirectType.replace)
-        return NextResponse.redirect(redirectUrl);
-
-        // return NextResponse.json({
-        //     status: 201,
-        //     action: 'redirect',
-        //     url: redirectUrl.toString(),
-        //     data: {
-        //         ...user,
-        //         token: auth_token,
-        //         expiresAt,
-        //     }
-        // });
+        return NextResponse.json({
+            success: true,
+            action: "redirect",
+            redirectUrl: redirectPath
+        }, { status: 200 });
     } catch (err: any) {
         console.error('[/api/nrc/code]', err.message);
         if (err.statusCode) throw err;

@@ -111,17 +111,17 @@ export function TopNav() {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-xs font-bold text-white shadow-md border-2 border-background-light dark:border-background-dark">
-                  {user?.image ? (
+                  {user?.image?.startsWith('http') ? (
                     <Image
                       src={user.image}
                       alt={user.name ?? 'User'}
-                      width={36}
-                      height={36}
-                      className="w-full h-full rounded-full object-cover"
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     (
-                      user?.username?.[0] ??
+                      user?.fullname?.[0] ??
                       user?.name?.[0] ??
                       'U'
                     ).toUpperCase()

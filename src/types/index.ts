@@ -1,4 +1,5 @@
 import {
+  type UserType,
   type Club,
   type Leaderboard,
   type Notification,
@@ -234,9 +235,17 @@ type NRCLoginStep =
   | 'success'
   | 'error';
 
+interface NikeAuthResult {
+  type: UserType;
+  email: string;
+  token: string | null;
+  fullname: string | null;
+  avatar?: string | null;
+}
+
 export { DateRangeFilters };
 export type {
   Activity,
-  FilterOption, ISubMenu, LeaderboardEntry, NRCLoginStep, Option, PageProps
+  FilterOption, ISubMenu, NikeAuthResult, LeaderboardEntry, NRCLoginStep, Option, PageProps
 };
 

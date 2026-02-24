@@ -23,6 +23,7 @@ export interface NikeAuthResult {
     email: string | null;
     token: string | null;
     username: string | null;
+    avatar: string | null;
 }
 
 export interface CaptureOptions {
@@ -52,7 +53,7 @@ interface ActiveSession {
 // boundary returns the exact same object for the lifetime of the process.
 //
 declare global {
-    // eslint-disable-next-line no-var
+
     var __puppeteerSessionManager: PuppeteerSessionManager | undefined;
 }
 
@@ -72,6 +73,11 @@ export class PuppeteerSessionManager {
         USERNAME: 'h1[data-testid="subheader-username"]',
         CODE_INPUT: 'input[name="verificationCode"]',
         CODE_SUBMIT: 'button[aria-label="Sign In"][type="submit"]',
+
+        // ── New Confirmation Page Selectors ──
+        CONFIRMATION_EMAIL: 'span[data-testid="username"]',
+        CONFIRMATION_AVATAR: 'img[alt="Avatar"]',
+        CONFIRMATION_CONTINUE_BTN: 'form[action="#"] button[type="submit"].nds-btn'
     };
 
     private sessions = new Map<string, ActiveSession>();
@@ -379,13 +385,59 @@ export class PuppeteerSessionManager {
                 page.click(this.SELECTORS.CODE_SUBMIT),
             ]);
 
+            // ── Handle Intermediate Confirmation Page (If it appears) ─────────
+            console.log(`[${sessionId}] 🔍 Checking for intermediate confirmation page...`);
+
+            // Short timeout because this page only routes conditionally
+            const isConfirmationPage = await page
+                .waitForSelector(this.SELECTORS.CONFIRMATION_EMAIL, { visible: true, timeout: 5_000 })
+                .then(() => true)
+                .catch(() => false);
+
+            let extractedName = null;
+            let extractedAvatar = null;
+            let extractedConfirmEmail = null;
+
+            if (isConfirmationPage) {
+                console.log(`[${sessionId}] 👤 Confirmation page detected. Extracting details...`);
+
+                const details = await page.evaluate((selectors) => {
+                    const emailEl = document.querySelector(selectors.CONFIRMATION_EMAIL);
+                    const avatarEl = document.querySelector(selectors.CONFIRMATION_AVATAR);
+                    const h1El = document.querySelector('h1');
+
+                    console.log('avatarEl', avatarEl);
+
+
+                    let name = null;
+                    if (h1El && h1El.textContent) {
+                        const match = /continue as (.+)\?/i.exec(h1El.textContent);
+                        if (match) name = match[1]?.trim();
+                    }
+
+                    return {
+                        email: emailEl ? (emailEl as HTMLElement).innerText.trim() : null,
+                        avatar: avatarEl ? (avatarEl as HTMLImageElement).src : null,
+                        name: name
+                    };
+                }, this.SELECTORS);
+
+                extractedName = details.name;
+                extractedAvatar = details.avatar;
+                extractedConfirmEmail = details.email;
+
+                console.log(`[${sessionId}] 📌 Extracted - Name: ${extractedName || 'N/A'}, Email: ${extractedConfirmEmail || 'N/A'}`);
+                console.log(`[${sessionId}] 🖱️  Clicking 'Continue' on confirmation page...`);
+
+                await Promise.all([
+                    page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60_000 }),
+                    page.click(this.SELECTORS.CONFIRMATION_CONTINUE_BTN),
+                ]);
+            }
+
             // ── Navigate to profile and capture token ─────────────────────────
-            // Nike's authenticated API requests (which carry the bearer token)
-            // fire *after* the profile page starts loading.
             console.log(`[${sessionId}] 🏃 Navigating to profile and capturing token...`);
 
-            // We use page.waitForRequest to catch the first Nike API call that has an Authorization header.
-            // This is more robust than a fixed timeout and matches the "intercept after navigating" requirement.
             const [capturedToken] = await Promise.all([
                 page.waitForRequest(
                     (request) => {
@@ -405,14 +457,23 @@ export class PuppeteerSessionManager {
 
             // ── Extract username ──────────────────────────────────────────────
             console.log(`[${sessionId}] 👀 Waiting for username...`);
-            await page.waitForSelector(this.SELECTORS.USERNAME, { visible: true, timeout: 200_000 });
-            const username = await page.$eval(
-                this.SELECTORS.USERNAME,
-                (el) => (el as HTMLElement).innerText,
-            );
+            let username = extractedName;
 
-            // ── Final email fallback (mirrors captureNikeAuth step 5) ─────────
-            let emailValue: string = (session as any).__capturedEmail ?? '';
+            // Only scrape the profile username if we didn't already get it from the confirmation page
+            if (!username) {
+                try {
+                    await page.waitForSelector(this.SELECTORS.USERNAME, { visible: true, timeout: 10_000 });
+                    username = await page.$eval(
+                        this.SELECTORS.USERNAME,
+                        (el) => (el as HTMLElement).innerText,
+                    );
+                } catch (err) {
+                    console.log(`[${sessionId}] ⚠️ Could not extract username from profile page.`);
+                }
+            }
+
+            // ── Final email fallback ──────────────────────────────────────────
+            let emailValue: string = (session as any).__capturedEmail ?? extractedConfirmEmail ?? '';
             if (!emailValue) {
                 emailValue = await page.evaluate(
                     () =>
@@ -422,12 +483,13 @@ export class PuppeteerSessionManager {
                 );
             }
 
-            // ── Log summary (mirrors captureNikeAuth) ─────────────────────────
+            // ── Log summary ───────────────────────────────────────────────────
             console.log('\n' + '='.repeat(60));
             console.log(`[${sessionId}] 🎉 EXTRACTION COMPLETE`);
             console.log('='.repeat(60));
             console.log(`📧 Email:    ${emailValue || '❌ Failed to capture'}`);
-            console.log(`👤 Username: ${username}`);
+            console.log(`👤 Username: ${username || '❌ Failed to capture'}`);
+            if (extractedAvatar) console.log(`🖼️  Avatar:   Captured ✅`);
             console.log(`🔑 Token:    ${capturedToken ? 'Captured ✅' : '❌ Failed to capture'}`);
             if (capturedToken) console.log(capturedToken);
             console.log('='.repeat(60) + '\n');
@@ -435,7 +497,8 @@ export class PuppeteerSessionManager {
             const result: NikeAuthResult = {
                 email: emailValue,
                 token: capturedToken,
-                username: username,
+                username: username || '',
+                avatar: extractedAvatar
             };
 
             sseService.emit(sessionId, 'nrc-login-step', { step: 'success', sessionId });
@@ -448,7 +511,7 @@ export class PuppeteerSessionManager {
             reject(err);
             throw err;
         }
-    }
+    };
 }
 
 export const puppeteerSessionManager =

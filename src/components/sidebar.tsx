@@ -170,7 +170,7 @@ export function Sidebar() {
               {!isCollapsed && (
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                    Jace M.
+                    {`${user?.fullname?.split(' ')?.[0] ?? 'John'}. ${user?.fullname?.split(' ')?.[1]?.[0] ?? 'Doe'}`}
                   </p>
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
                     Pro Member
@@ -239,7 +239,7 @@ export function Sidebar() {
               {/* User Profile Snippet (Mobile) */}
               <div className="mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden shadow-sm">
-                  {user?.image ? (
+                  {user?.image?.startsWith('http') ? (
                     <Image
                       src={user.image}
                       alt={user.name ?? 'User'}

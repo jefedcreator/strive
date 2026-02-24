@@ -12,34 +12,65 @@ interface NRCLoginModalProps {
   isSubmitting: boolean;
   submitEmail: (email: string) => Promise<void>;
   submitCode: (code: string) => Promise<void>;
-  onOpenChange: (open: boolean) => void;
+  email: string;
+  setEmail: (email: string) => void;
+  code: string;
+  setCode: (code: string) => void;
+  error: string | null;
+  reset: () => void;
 }
 
 export function NRCLoginModal({
+  sessionStep,
   isSubmitting,
   submitEmail,
   submitCode,
-  onOpenChange,
-  sessionStep
+  email,
+  setEmail,
+  code,
+  setCode,
+  error,
+  reset
 }: NRCLoginModalProps) {
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-console.log('sessionStep',sessionStep);
+  
+  const isEmailScreen = sessionStep === 'email-modal' || sessionStep === 'awaiting-code';
+  const isCodeScreen = sessionStep === 'code-modal' || sessionStep === 'processing' || sessionStep === 'success';
 
-  const isOpen = sessionStep === 'email-modal' || sessionStep === 'code-modal';
+  const isOpen = isEmailScreen || isCodeScreen || sessionStep === 'error';
 
   if (!isOpen) return null;
 
   return (
-    <Modal open={isOpen} onOpenChange={isSubmitting ? undefined : onOpenChange}>
+    <Modal open={isOpen} onOpenChange={(open) => !open && !isSubmitting && reset()}>
       <Modal.Portal>
         <Modal.Content
-          onInteractOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
-          className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-50 w-[95%] max-w-md bg-card-light dark:bg-card-dark rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden"
+          onInteractOutside={(e) => !isSubmitting && reset()}
+          onEscapeKeyDown={(e) => !isSubmitting && reset()}
+          className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-50 w-[95%] max-w-md bg-card-light dark:bg-card-dark rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden outline-none"
         >
+          {/* Close Button */}
+          {!isSubmitting && (
+            <button
+              onClick={reset}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 transition-colors z-[60]"
+              aria-label="Close"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+
           <div className="relative p-8 md:p-10">
-            {sessionStep === 'email-modal' ? (
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl flex items-start space-x-3 text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-top-2 duration-300">
+                <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm font-semibold leading-relaxed">{error}</p>
+              </div>
+            )}
+            {isEmailScreen ? (
               <>
                 <div className="flex flex-col items-center text-center mb-8">
                   <div className="w-16 h-16 bg-black dark:bg-white rounded-full flex items-center justify-center mb-6 shadow-lg transform hover:scale-110 transition-transform cursor-default">
@@ -116,8 +147,8 @@ console.log('sessionStep',sessionStep);
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       Enter the 8-digit code sent to:
                     </p>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white mt-1 uppercase tracking-tight">
-                      {email}
+                    <p className="text-sm font-bold text-gray-900 dark:text-white mt-1 tracking-tight">
+                      {email.toLowerCase()}
                     </p>
                   </div>
                 </div>

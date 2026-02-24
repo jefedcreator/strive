@@ -1,3 +1,4 @@
+import type { NikeAuthResult } from '@/types';
 import type { Prisma, User, UserType } from '@prisma/client';
 import prisma from 'prisma';
 import { generateUsername } from 'unique-username-generator';
@@ -9,13 +10,7 @@ class AuthService {
     email = '',
     fullname,
     avatar,
-  }: {
-    type: UserType;
-    email: string;
-    token: string | null;
-    fullname: string | null;
-    avatar?: string | null;
-  }): Promise<User> {
+  }: NikeAuthResult): Promise<User> {
     const user = await prisma.user.findFirst({
       where: {
         email,

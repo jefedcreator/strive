@@ -40,6 +40,10 @@ interface UseNRCLoginReturn {
     initLogin: () => Promise<void>;
     submitEmail: (email: string) => Promise<void>;
     submitCode: (code: string) => Promise<void>;
+    setEmail: (email: string) => void;
+    setCode: (code: string) => void;
+    email: string;
+    code: string;
     reset: () => void;
 }
 
@@ -48,18 +52,17 @@ export function useNRCLogin(): UseNRCLoginReturn {
     const eventSourceRef = useRef<EventSource | null>(null);
 
     const [sessionStep, setSessionStep] = useSessionStorage<NRCLoginStep>('nrc_login_step', 'idle');
+    const [email, setEmail] = useSessionStorage<string>('nrc_login_email', '');
+    const [code, setCode] = useSessionStorage<string>('nrc_login_code', '');
+
     const [step, setStep] = useState<NRCLoginStep>(sessionStep);
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<NikeAuthResult | null>(null);
+
     const setCurrentStep = useCallback((next: NRCLoginStep) => {
         setStep(next);
-        if (next === 'email-modal' || next === 'code-modal') {
-            setSessionStep(next);
-        } else {
-            setSessionStep('idle'); 
-        }
+        setSessionStep(next);
     }, [setSessionStep]);
-    // ─── SSE stream ───────────────────────────────────────────────────────────
 
     const openStream = useCallback((sessionId: string) => {
         eventSourceRef.current?.close();
@@ -79,13 +82,15 @@ export function useNRCLogin(): UseNRCLoginReturn {
             switch (data.step) {
                 case 'ready':
                     // Nike email form is loaded → show email modal
-                    setCurrentStep('idle');
+                    setCurrentStep('email-modal');
                     break;
                 case 'processing':
                     setCurrentStep('processing');
                     break;
                 case 'success':
                     setCurrentStep('success');
+                    setEmail('');
+                    setCode('');
                     es.close();
                     break;
                 case 'error':
@@ -106,7 +111,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
 
             if (data.step === 'awaiting-code') {
                 // Email was accepted — show the OTP / code modal
-                setCurrentStep('idle');
+                setCurrentStep('code-modal');
             }
         });
 
@@ -119,11 +124,24 @@ export function useNRCLogin(): UseNRCLoginReturn {
             setStep((current) => {
                 if (current === 'success' || current === 'error') return current;
                 setError('Connection to server lost. Please try again.');
-                setCurrentStep('idle');
                 return 'error';
             });
             es.close();
         };
+    }, [setCurrentStep, setEmail, setCode, setSessionStep]);
+
+    // ─── Reset on Refresh logic ──────────────────────────────────────────────
+
+    useEffect(() => {
+        // If the sessionStep is active but this is a fresh mount (e.g. page refresh),
+        // we might want to reset it. 
+        // Note: sessionStorage persists on refresh, so we need a way to detect 
+        // if this is a "first load" of the session.
+        // A simple way is to check if we have an active stream. If not, we reset.
+        if (sessionStep !== 'idle' && !sessionIdRef.current) {
+            setSessionStep('idle');
+            setStep('idle');
+        }
     }, []);
 
     // ─── Cleanup on unmount ───────────────────────────────────────────────────
@@ -181,8 +199,9 @@ export function useNRCLogin(): UseNRCLoginReturn {
         } catch (err: any) {
             setError(err.message);
             setCurrentStep('error');
+            setSessionStep('idle');
         }
-    }, []);
+    }, [setCurrentStep, setSessionStep]);
 
     // ─── Step 3: Submit OTP code ──────────────────────────────────────────────
 
@@ -220,21 +239,21 @@ export function useNRCLogin(): UseNRCLoginReturn {
 
             const data = await res.json() as any;
 
-            if (data.action === 'redirect' && data.url) {
-                console.log(`[useNRCLogin] 🚀 Server signaled redirect to: ${data.url}`);
-                setSessionStep('idle');
-                window.location.href = data.url;
+            if (data.action === 'redirect' && data.redirectUrl) {
+                console.log(`[useNRCLogin] 🚀 Server signaled redirect to: ${data.redirectUrl}`);
+                window.location.href = data.redirectUrl;
                 return;
             }
 
             setResult(data as NikeAuthResult);
             setCurrentStep('success');
-            setSessionStep('idle');
+            setEmail('');
+            setCode('');
         } catch (err: any) {
             setError(err.message);
             setCurrentStep('error');
         }
-    }, []);
+    }, [setEmail, setCode, setCurrentStep, setSessionStep]);
 
     // ─── Reset ────────────────────────────────────────────────────────────────
 
@@ -244,9 +263,11 @@ export function useNRCLogin(): UseNRCLoginReturn {
         sessionIdRef.current = null;
         setCurrentStep('idle');
         setSessionStep('idle');
+        setEmail('');
+        setCode('');
         setError(null);
         setResult(null);
-    }, []);
+    }, [setEmail, setCode, setCurrentStep, setSessionStep]);
 
-    return { step, error, result, initLogin, submitEmail, submitCode, reset, sessionStep };
+    return { step, error, result, initLogin, submitEmail, submitCode, reset, sessionStep, email, setEmail, code, setCode };
 }

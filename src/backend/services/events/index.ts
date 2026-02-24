@@ -60,7 +60,12 @@ class SSEService {
      * Returns a ReadableStream that stays open until the session ends.
      */
     public register(sessionId: string): ReadableStream<Uint8Array> {
-        this.close(sessionId);
+        // Close previous controller if any, but don't clear the queue yet
+        const old = this.controllers.get(sessionId);
+        if (old) {
+            try { old.close(); } catch { /* ignore */ }
+            this.controllers.delete(sessionId);
+        }
 
         const stream = new ReadableStream<Uint8Array>({
             start: (controller) => {

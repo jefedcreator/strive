@@ -113,3 +113,4 @@ export function WeeklyChart() {
     </div>
   );
 }
+
