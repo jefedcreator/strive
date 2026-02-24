@@ -170,7 +170,7 @@ function LoginPageContent() {
         <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-primary rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
       </div>
       {/* Screens */}
-      <main className="relative z-10 min-h-screen flex flex-col items-center py-12 px-4">
+      <main className="relative z-10 min-h-screen flex flex-col items-center py-12 px-4 pt-[env(safe-area-inset-top,12px)]">
         <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="mb-12 text-center">
             <div className="flex items-center justify-center mb-4">

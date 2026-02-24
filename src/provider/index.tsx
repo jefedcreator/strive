@@ -26,9 +26,10 @@ function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
 
-import { SocketProvider } from './socket-provider';
 
 export const Provider = ({ children }: QueryProviderProps) => {
+  // useViewportHandler();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>

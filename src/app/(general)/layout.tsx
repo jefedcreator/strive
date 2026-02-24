@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: 'Strive - Sync Your Fitness Journey',
   description:
     'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+  },
+  colorScheme: 'light dark',
 };
 
 export const viewport: Viewport = {
@@ -13,6 +18,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F7F9FB' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B0F19' },
+  ],
 };
 
 export default function RootLayout({
@@ -21,7 +31,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="bg-background-light dark:bg-background-dark">
+      <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              html, body { background-color: #F7F9FB; }
+              @media (prefers-color-scheme: dark) {
+                html, body { background-color: #0B0F19; }
+              }
+            `,
+          }}
+        />
+      </head>
       <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden">
         <div className="absolute inset-0 z-0 opacity-5 pointer-events-none select-none">
           <svg

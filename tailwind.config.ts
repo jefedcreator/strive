@@ -88,6 +88,20 @@ const config: Config = {
                 fadeIn: "fadeIn 200ms ease",
                 fadeOut: "fadeOut 200ms ease",
             },
+            height: {
+                'dynamic': 'var(--dynamic-vh, 100vh)',
+            },
+            minHeight: {
+                'dynamic': 'var(--dynamic-vh, 100vh)',
+            },
+            padding: {
+                'safe-nav': 'calc(60px + var(--dynamic-safe-top, 0px))',
+            }, spacing: {
+                'safe-top': 'env(safe-area-inset-top)',
+                'safe-bottom': 'env(safe-area-inset-bottom)',
+                'safe-left': 'env(safe-area-inset-left)',
+                'safe-right': 'env(safe-area-inset-right)',
+            }
         },
     },
     plugins: [],

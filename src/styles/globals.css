@@ -63,3 +63,30 @@
   background: rgba(156, 163, 175, 0.3);
   border-radius: 10px;
 }
+
+@layer utilities {
+  .pt-safe-nav {
+    /* Spaces are safe to use here, ensuring cross-browser compatibility */
+    padding-top: calc(60px + env(safe-area-inset-top, 0px));
+  }
+}
+
+:root {
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+}
+
+@supports (padding: max(0px)) {
+  body {
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+.safe-area-top {
+  padding-top: max(60px, calc(60px + env(safe-area-inset-top)));
+}

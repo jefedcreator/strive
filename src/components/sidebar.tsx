@@ -32,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
+import { useTheme } from 'next-themes';
 
 interface NavItemProps {
   name: string;
@@ -54,6 +55,7 @@ const bottomNavigation: NavItemProps[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { theme } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { data: session } = useSession();
@@ -100,7 +102,7 @@ export function Sidebar() {
     <TooltipProvider>
       <>
         {/* --- Mobile Header (Visible only on lg and below) --- */}
-        <div className="lg:hidden flex items-center justify-between p-4 bg-card-light dark:bg-card-dark border-b border-gray-200 dark:border-gray-800 fixed w-full z-50 top-0 left-0">
+        <div className="lg:hidden flex items-center justify-between px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] bg-card-light dark:bg-card-dark border-b border-gray-200 dark:border-gray-800 fixed w-full z-50 top-0 left-0">
           <div className="font-black text-xl tracking-tighter text-gray-900 dark:text-white flex items-center gap-1">
             STRIVE{' '}
             <span className="w-2 h-2 rounded-full bg-primary inline-block"></span>
@@ -209,7 +211,7 @@ export function Sidebar() {
               isMobileOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
-            <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
+            <div className="h-auto flex items-center justify-between px-6 pb-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] border-b border-gray-100 dark:border-gray-800 shrink-0">
               <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white">
                 STRIVE
               </span>
@@ -234,7 +236,7 @@ export function Sidebar() {
             <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4 shrink-0">
               <div className="flex items-center justify-between px-3">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Dark Mode
+                  {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
                 </span>
                 <ToggleTheme />
               </div>
