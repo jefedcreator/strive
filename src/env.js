@@ -20,10 +20,6 @@ export const env = createEnv({
     CLOUDINARY_CLOUD_NAME: z.string(),
     CLOUDINARY_API_KEY: z.string(),
     CLOUDINARY_API_SECRET: z.string(),
-    PUSHER_APP_ID: z.string().optional(),
-    PUSHER_KEY: z.string().optional(),
-    PUSHER_SECRET: z.string().optional(),
-    PUSHER_CLUSTER: z.string().optional(),
   },
 
   /**
@@ -32,8 +28,6 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_PUSHER_KEY: z.string().optional(),
-    NEXT_PUBLIC_PUSHER_CLUSTER: z.string().optional(),
   },
 
   /**
@@ -49,12 +43,6 @@ export const env = createEnv({
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
-    PUSHER_APP_ID: process.env.PUSHER_APP_ID,
-    PUSHER_KEY: process.env.PUSHER_KEY,
-    PUSHER_SECRET: process.env.PUSHER_SECRET,
-    PUSHER_CLUSTER: process.env.PUSHER_CLUSTER,
-    NEXT_PUBLIC_PUSHER_KEY: process.env.NEXT_PUBLIC_PUSHER_KEY,
-    NEXT_PUBLIC_PUSHER_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

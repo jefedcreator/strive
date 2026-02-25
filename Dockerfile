@@ -6,15 +6,14 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile --ignore-scripts; \
-  elif [ -f package-lock.json ]; then npm ci --ignore-scripts; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile --ignore-scripts; \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
   else echo "Lockfile not found." && exit 1; \
   fi
 
 # Stage 2: Builder
 FROM node:20-slim AS builder
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -28,6 +27,18 @@ RUN npx prisma generate
 # Build the application
 RUN npm run build
 
+# Bundle the custom server.ts to server.js in the standalone directory
+# This allows running the app with node server.js without needing tsx in the final image
+RUN npx esbuild server.ts \
+    --bundle \
+    --platform=node \
+    --outfile=.next/standalone/server.js \
+    --external:next \
+    --external:socket.io \
+    --external:dotenv \
+    --minify \
+    --alias:@=./src
+
 # Stage 3: Runner
 FROM node:20-slim AS runner
 WORKDIR /app
@@ -37,12 +48,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Puppeteer environment variables
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chrome
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Install Puppeteer dependencies and Google Chrome
-# Based on user reference script for DigitalOcean/EC2
+# Install minimal Chromium dependencies
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
+    chromium \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
@@ -79,46 +89,31 @@ RUN apt-get update && apt-get install -y \
     wget \
     xdg-utils \
     openssl \
-    gnupg \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Google Chrome or Chromium based on architecture
-RUN arch=$(uname -m) && \
-    if [ "$arch" = "x86_64" ]; then \
-        wget --quiet --output-document=- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg && \
-        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list && \
-        apt-get update && \
-        apt-get install -y google-chrome-stable --no-install-recommends && \
-        ln -s /usr/bin/google-chrome /usr/bin/chrome; \
-    else \
-        apt-get update && \
-        apt-get install -y chromium --no-install-recommends && \
-        ln -s /usr/bin/chromium /usr/bin/chrome; \
-    fi && \
-    rm -rf /var/lib/apt/lists/*
 
 # Create a non-privileged user to run the app
 RUN groupadd -g 1001 nodejs && \
     useradd -u 1001 -g nodejs nextjs
 
-# Copy built assets and dependencies
+# Set up the production files from standalone output
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/server.ts ./server.ts
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/next.config.js ./next.config.js
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Set the ownership to the nextjs user
+# Note: Standalone output already includes node_modules
+# We just need to make sure the prisma schema is available for migrations
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package.json ./package.json
+
 RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
 
-# Start the application using tsx as defined in package.json
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+# Start the application
+# We use the bundled server.js which includes our custom Socket.IO logic
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+
+

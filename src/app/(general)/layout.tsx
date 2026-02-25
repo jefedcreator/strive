@@ -3,14 +3,44 @@ import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Strive - Sync Your Fitness Journey',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  title: {
+    template: '%s | Strive',
+    default: 'Strive - Sync Your Fitness Journey',
+  },
   description:
     'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  },
+  openGraph: {
+    title: 'Strive - Sync Your Fitness Journey',
+    description: 'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+    url: '/',
+    siteName: 'Strive',
+    images: [
+      {
+        url: '/banner.png',
+        width: 1200,
+        height: 630,
+        alt: 'Strive - Sync Your Fitness Journey',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Strive - Sync Your Fitness Journey',
+    description: 'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+    images: ['/banner.png'],
+  },
   appleWebApp: {
+    title: 'Strive',
     capable: true,
     statusBarStyle: 'black-translucent',
   },
-  colorScheme: 'light dark',
 };
 
 export const viewport: Viewport = {

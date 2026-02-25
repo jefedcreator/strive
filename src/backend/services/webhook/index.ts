@@ -1,6 +1,5 @@
 // src/services/webhook.ts
 import { Server as SocketIOServer } from 'socket.io';
-import Pusher from 'pusher';
 import type { Server as NetServer } from 'http';
 import type {
   ClientToServerEvents,
@@ -8,7 +7,6 @@ import type {
   InterServerEvents,
   SocketData,
 } from '@/types/socket.types';
-import { env } from '@/env';
 
 type QueuedEvent = {
   room: string | null; // null = global broadcast
@@ -26,10 +24,6 @@ type QueuedEvent = {
 // Pinning to `globalThis` survives module re-evaluation: every import in every
 // module boundary always gets the exact same WebhookService object.
 //
-declare global {
-  // eslint-disable-next-line no-var
-  var __webhookService: WebhookService | undefined;
-}
 
 class WebhookService {
   private io: SocketIOServer<
@@ -39,38 +33,18 @@ class WebhookService {
     SocketData
   > | null = null;
 
-  private pusher: Pusher | null = null;
-
   /**
    * Events emitted before any transport was ready.
    * Replayed automatically once a transport comes online.
    */
   private queue: QueuedEvent[] = [];
 
-  constructor() {
-    if (
-      env.PUSHER_APP_ID &&
-      env.PUSHER_KEY &&
-      env.PUSHER_SECRET &&
-      env.PUSHER_CLUSTER
-    ) {
-      this.pusher = new Pusher({
-        appId: env.PUSHER_APP_ID,
-        key: env.PUSHER_KEY,
-        secret: env.PUSHER_SECRET,
-        cluster: env.PUSHER_CLUSTER,
-        useTLS: true,
-      });
-      console.log('[WebhookService] Pusher initialized');
-      // Pusher is ready synchronously — drain the queue immediately.
-      this.flushQueue();
-    }
-  }
+  constructor() { }
 
   // ─── Transport availability ───────────────────────────────────────────────
 
   private get hasTransport(): boolean {
-    return this.io !== null || this.pusher !== null;
+    return this.io !== null;
   }
 
   // ─── Queue helpers ────────────────────────────────────────────────────────
@@ -105,18 +79,12 @@ class WebhookService {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this.io.emit as any)(event, ...args);
     }
-    if (this.pusher) {
-      void this.pusher.trigger('global', event, args);
-    }
   }
 
   private dispatchToRoom(room: string, event: string, args: unknown[]) {
     if (this.io) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this.io.to(room).emit as any)(event, ...args);
-    }
-    if (this.pusher) {
-      void this.pusher.trigger(room, event, args);
     }
   }
 
@@ -198,6 +166,11 @@ class WebhookService {
     }
     this.dispatchToRoom(room, event as string, args);
   }
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __webhookService: WebhookService | undefined;
 }
 
 // ─── Export a true process-level singleton ────────────────────────────────────
