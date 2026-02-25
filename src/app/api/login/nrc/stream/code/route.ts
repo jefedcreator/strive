@@ -2,7 +2,6 @@ import { authService } from '@/backend/services/auth';
 import { puppeteerSessionManager } from '@/backend/services/puppeteer/session';
 import { signIn } from '@/server/auth';
 import { db } from '@/server/db';
-import type { NikeAuthResult } from '@/types';
 import { UserType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
@@ -16,8 +15,9 @@ export async function POST(req: NextRequest) {
       clubId?: string;
       leaderboardId?: string;
       inviteId?: string;
+      callbackUrl?: string;
     };
-    const { sessionId, code, clubId, leaderboardId, inviteId } = body;
+    const { sessionId, code, clubId, leaderboardId, inviteId, callbackUrl } = body;
 
     if (!sessionId || !code) {
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, token, username, avatar } =
+    const { email, token, username } =
       await puppeteerSessionManager.submitCode(sessionId, code);
 
     if (!email || !token || !username) {
@@ -35,19 +35,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const payload: NikeAuthResult = {
+    const user = await authService.findOrCreateUser({
+      type: UserType.NRC,
       email,
       token,
       fullname: username,
-      avatar: null,
-      type: UserType.NRC,
-    };
-
-    if (avatar?.startsWith('http')) {
-      payload.avatar = avatar;
-    }
-
-    const user = await authService.findOrCreateUser(payload);
+    });
 
     if (!user) {
       throw new Error('User authentication failed.');
@@ -132,7 +125,9 @@ export async function POST(req: NextRequest) {
       ? `/clubs/${clubId}`
       : leaderboardId
         ? `/leaderboards/${leaderboardId}`
-        : '/home';
+        : callbackUrl
+          ? callbackUrl
+          : '/home';
 
     // const redirectUrl = new URL(redirectPath, req.url);
     // redirectUrl.searchParams.set('success', 'true');
