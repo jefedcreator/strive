@@ -12,15 +12,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { User as UserType } from '@prisma/client';
 import { useMutation } from '@tanstack/react-query';
 import { AlertTriangle, Camera, Loader2, Trash2, User } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import axios, { type AxiosError } from 'axios';
+import type { ApiError } from '@/types';
 
 export function SettingsClient({ user }: { user: UserType }) {
   const router = useRouter();
+  const { data: session, update } = useSession();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
@@ -41,7 +44,7 @@ export function SettingsClient({ user }: { user: UserType }) {
     reset,
   } = useForm<UpdateUserValidatorSchema>({
     resolver: zodResolver(updateUserValidatorSchema),
-    defaultValues: {
+    values: {
       username: user?.username ?? '',
     },
   });
@@ -52,48 +55,44 @@ export function SettingsClient({ user }: { user: UserType }) {
       if (data.username) formData.append('username', data.username);
       if (data.avatar) formData.append('avatar', data.avatar);
 
-      const res = await fetch('/api/users/me', {
-        method: 'PUT',
-        body: formData,
+      const res = await axios.put(`/api/users/me`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${session?.user.token}`,
+        },
       });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to update profile');
-      }
-
-      return res.json();
+      return res.data;
     },
-    onSuccess: () => {
+    onSuccess: async (data: UserType) => {
       toast.success('Profile updated successfully');
       router.refresh();
-      reset();
       setAvatarPreview(null);
+      await update({
+        image: data.avatar,
+        username: data.username,
+      });
+      reset();
     },
-    onError: (error: Error) => {
-      toast.error(error.message);
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message ?? 'Failed to update profile');
     },
   });
 
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch('/api/users/me', {
-        method: 'DELETE',
+      const res = await axios.delete(`/api/users/me`, {
+        headers: {
+          Authorization: `Bearer ${session?.user.token}`,
+        },
       });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to delete account');
-      }
-
-      return res.json();
+      return res.data;
     },
     onSuccess: () => {
       toast.success('Account deleted successfully');
-      signOut({ callbackUrl: '/' });
+      signOut({ callbackUrl: '/login' });
     },
-    onError: (error: Error) => {
-      toast.error(error.message);
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message ?? 'Failed to delete account');
     },
   });
 
@@ -131,7 +130,7 @@ export function SettingsClient({ user }: { user: UserType }) {
         </Button>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-[1fr_2fr]">
+      <div className="bg-card-light dark:bg-card-dark rounded-2xl w-full flex md:flex-row flex-col justify-between border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             Profile Photo
@@ -139,7 +138,7 @@ export function SettingsClient({ user }: { user: UserType }) {
           <div className="relative group w-32 h-32 mx-auto md:mx-0">
             <div className="w-full h-full rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               {(() => {
-                const avatarSrc = avatarPreview || user?.avatar;
+                const avatarSrc = avatarPreview ?? user?.avatar;
                 return avatarSrc ? (
                   <Image
                     src={avatarSrc}
@@ -168,45 +167,41 @@ export function SettingsClient({ user }: { user: UserType }) {
           </p>
         </div>
 
-        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
-          <Form
-            onSubmit={handleSubmit((data) =>
-              updateProfileMutation.mutate(data)
-            )}
-            className="space-y-6"
-          >
-            <div className="space-y-2">
-              <Field
+        <Form
+          onSubmit={handleSubmit((data) => updateProfileMutation.mutate(data))}
+          className="space-y-6 w-full md:w-2/3 flex flex-col justify-between"
+        >
+          <div className="space-y-2">
+            <Field
+              id="username"
+              label="Username"
+              error={errors.username?.message}
+            >
+              <Input
+                {...register('username')}
                 id="username"
-                label="Username"
-                error={errors.username?.message}
-              >
-                <Input
-                  {...register('username')}
-                  id="username"
-                  placeholder="Enter your username"
-                />
-              </Field>
-            </div>
+                placeholder="Enter your username"
+              />
+            </Field>
+          </div>
 
-            <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end">
-              <Button
-                type="submit"
-                disabled={!isDirty || updateProfileMutation.isPending}
-                className="min-w-[120px]"
-              >
-                {updateProfileMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Changes'
-                )}
-              </Button>
-            </div>
-          </Form>
-        </div>
+          <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+            <Button
+              type="submit"
+              disabled={!isDirty || updateProfileMutation.isPending}
+              className="min-w-[120px]"
+            >
+              {updateProfileMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </div>
+        </Form>
       </div>
 
       <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

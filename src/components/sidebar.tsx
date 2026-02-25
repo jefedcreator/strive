@@ -50,7 +50,7 @@ const platformNavigation: NavItemProps[] = [
 
 const bottomNavigation: NavItemProps[] = [
   { name: 'Settings', href: '/settings', icon: Settings },
-  { name: 'Help Center', href: '/help', icon: HelpCircle },
+  // { name: 'Help Center', href: '/help', icon: HelpCircle },
 ];
 
 export function Sidebar() {
@@ -232,11 +232,10 @@ export function Sidebar() {
                 <NavItem key={item.name} item={item} />
               ))}
             </div>
-
             <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4 shrink-0">
               <div className="flex items-center justify-between px-3">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                  <p>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
                 </span>
                 <ToggleTheme />
               </div>
@@ -245,7 +244,6 @@ export function Sidebar() {
                   <NavItem key={item.name} item={item} />
                 ))}
               </div>
-
               {/* User Profile Snippet (Mobile) */}
               <div className="mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden shadow-sm">

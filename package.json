@@ -18,7 +18,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
-    "start": "NODE_ENV=production tsx server.ts",
+    "start": "NODE_ENV=production next start",
     "docs:generate": "npx next-openapi-gen generate",
     "docs:init": "npx next-openapi-gen init --ui swagger",
     "typecheck": "tsc --noEmit",
