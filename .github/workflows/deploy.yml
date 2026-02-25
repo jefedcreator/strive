@@ -1,0 +1,60 @@
+name: Deploy Strive App to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create .env file for Docker build (if needed)
+        run: |
+          echo "SKIP_ENV_VALIDATION=1" > .env
+          # Add any build-time public envs here if necessary
+          # echo "NEXT_PUBLIC_...=${{ secrets.NEXT_PUBLIC_... }}" >> .env
+
+      - name: Build and Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+
+            echo "📁 Navigating to app directory..."
+            cd /root/strive # Update if your path is different
+
+            echo "📦 Pulling latest code..."
+            git pull origin main
+
+            echo "🧠 Creating/Updating .env file..."
+            cat > .env << EOL
+            DATABASE_URL="${{ secrets.DATABASE_URL }}"
+            AUTH_SECRET="${{ secrets.AUTH_SECRET }}"
+            CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}"
+            CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}"
+            CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}"
+            NEXT_PUBLIC_PUSHER_KEY="${{ secrets.NEXT_PUBLIC_PUSHER_KEY }}"
+            NEXT_PUBLIC_PUSHER_CLUSTER="${{ secrets.NEXT_PUBLIC_PUSHER_CLUSTER }}"
+            PUSHER_APP_ID="${{ secrets.PUSHER_APP_ID }}"
+            PUSHER_SECRET="${{ secrets.PUSHER_SECRET }}"
+            NODE_ENV=production
+            PORT=3000
+            SKIP_ENV_VALIDATION=1
+            EOL
+
+            echo "🛠️ Building and restarting containers..."
+            docker-compose down
+            docker-compose up --build -d
+
+            echo "🚀 Cleaning up old images..."
+            docker image prune -af
+
+            echo "✅ Deployment successful!"
