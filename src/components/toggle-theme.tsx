@@ -23,7 +23,7 @@ const ToggleTheme = ({ className }: { className?: string }) => {
   return (
     <button
       onClick={toggleTheme}
-      className={`${className} w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors group relative overflow-hidden`}
+      className={`${className} w-10 h-10 z-60 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors group relative overflow-hidden`}
       aria-label="Toggle theme"
     >
       <AnimatePresence mode="wait" initial={false}>
