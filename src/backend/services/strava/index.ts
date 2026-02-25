@@ -47,6 +47,7 @@ export class StravaService {
     clubId?: string;
     inviteId?: string;
     leaderboardId?: string;
+    callbackUrl?: string;
   }): string {
     const params = new URLSearchParams({
       client_id: this.CLIENT_ID!,

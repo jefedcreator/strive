@@ -77,8 +77,10 @@ function LoginPageContent() {
     } else {
       const clubId = searchParams.get('clubId');
       const leaderboardId = searchParams.get('leaderboardId');
+      const callbackUrl = searchParams.get('callbackUrl');
       if (clubId) router.push(`/clubs/${clubId}`);
       else if (leaderboardId) router.push(`/leaderboards/${leaderboardId}`);
+      else if (callbackUrl) router.push(callbackUrl);
       else router.push('/home');
     }
   };
@@ -109,7 +111,14 @@ function LoginPageContent() {
     const clubId = searchParams.get('clubId') ?? undefined;
     const leaderboardId = searchParams.get('leaderboardId') ?? undefined;
     const inviteId = searchParams.get('inviteId') ?? undefined;
-    stravaMutation.mutate({ type: 'strava', clubId, leaderboardId, inviteId });
+    const callbackUrl = searchParams.get('callbackUrl') ?? undefined;
+    stravaMutation.mutate({
+      type: 'strava',
+      clubId,
+      leaderboardId,
+      inviteId,
+      callbackUrl,
+    });
   };
 
   // const initNRCLogin = async () => {
@@ -190,20 +199,25 @@ function LoginPageContent() {
               Sync your fitness journey across platforms.
             </p>
           </div>
-
           <div className="w-full bg-card-light dark:bg-card-dark rounded-2xl shadow-card border border-gray-100 dark:border-gray-800 overflow-hidden transform hover:scale-[1.01] transition-transform">
             <div className="p-8 space-y-6">
               {/* Strava Login */}
               <button
                 onClick={handleStravaLogin}
+                disabled={stravaMutation.isPending}
                 className="w-full group relative flex justify-center items-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-[#FC4C02] hover:bg-[#e34402] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FC4C02] transition-all duration-200 shadow-lg"
               >
-                <span className="absolute left-0 inset-y-0 flex items-center pl-4">
-                  <SiStrava className="h-5 w-5 text-white" />
-                </span>
-                Sign in with Strava
+                {stravaMutation.isPending ? (
+                  <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                ) : (
+                  <>
+                    <span className="absolute left-0 inset-y-0 flex items-center pl-4">
+                      <SiStrava className="h-5 w-5 text-white" />
+                    </span>
+                    Sign in with Strava
+                  </>
+                )}
               </button>
-
               <div className="relative">
                 <div
                   aria-hidden="true"

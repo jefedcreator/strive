@@ -27,6 +27,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
       let clubId: string | undefined;
       let leaderboardId: string | undefined;
       let inviteId: string | undefined;
+      let callbackUrl: string | undefined;
 
       console.log('leaderboardId', leaderboardId);
       console.log('inviteId', inviteId);
@@ -37,6 +38,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
           clubId = parsedState.clubId;
           leaderboardId = parsedState.leaderboardId;
           inviteId = parsedState.inviteId;
+          callbackUrl = parsedState.callbackUrl;
         } catch (e) {
           console.error('Failed to parse state:', e);
         }
@@ -153,6 +155,8 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         return NextResponse.redirect(
           new URL(`/leaderboards/${leaderboardId}`, request.url)
         );
+      } else if (callbackUrl) {
+        return NextResponse.redirect(new URL(callbackUrl, request.url));
       }
 
       return NextResponse.redirect(new URL('/home', request.url));

@@ -32,6 +32,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
             clubId: payload.clubId,
             leaderboardId: payload.leaderboardId,
             inviteId: payload.inviteId,
+            callbackUrl: payload.callbackUrl,
           });
           return NextResponse.json({
             status: 200,
@@ -188,6 +189,9 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         } else if (payload?.leaderboardId) {
           responsePayload.action = 'redirect';
           responsePayload.url = `/leaderboards/${payload.leaderboardId}`;
+        } else if (payload?.callbackUrl) {
+          responsePayload.action = 'redirect';
+          responsePayload.url = payload.callbackUrl;
         }
       }
 

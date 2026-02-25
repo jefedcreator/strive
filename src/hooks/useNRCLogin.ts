@@ -238,6 +238,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
       const clubId = params.get('clubId');
       const leaderboardId = params.get('leaderboardId');
       const inviteId = params.get('inviteId');
+      const callbackUrl = params.get('callbackUrl');
 
       setCurrentStep('processing');
 
@@ -251,6 +252,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
             clubId,
             leaderboardId,
             inviteId,
+            callbackUrl,
           }),
         });
 

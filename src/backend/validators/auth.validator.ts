@@ -13,6 +13,7 @@ export const loginValidatorSchema = z
     sessionId: z.string().optional(),
     email: z.string().optional(),
     password: z.string().optional(),
+    callbackUrl: z.string().optional(),
   })
   .strict();
 
