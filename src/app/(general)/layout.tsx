@@ -3,7 +3,7 @@ import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://strive-beige.vercel.app'),
   title: {
     template: '%s | Strive',
     default: 'Strive - Sync Your Fitness Journey',
