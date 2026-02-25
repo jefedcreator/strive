@@ -41,7 +41,7 @@ export function SettingsClient({ user }: { user: UserType }) {
     reset,
   } = useForm<UpdateUserValidatorSchema>({
     resolver: zodResolver(updateUserValidatorSchema),
-    values: {
+    defaultValues: {
       username: user?.username ?? '',
     },
   });
