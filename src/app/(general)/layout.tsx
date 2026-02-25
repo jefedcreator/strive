@@ -3,7 +3,9 @@ import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://strive-beige.vercel.app'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'https://strive-beige.vercel.app'
+  ),
   title: {
     template: '%s | Strive',
     default: 'Strive - Sync Your Fitness Journey',
@@ -16,7 +18,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Strive - Sync Your Fitness Journey',
-    description: 'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+    description:
+      'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
     url: '/',
     siteName: 'Strive',
     images: [
@@ -33,7 +36,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Strive - Sync Your Fitness Journey',
-    description: 'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+    description:
+      'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
     images: ['/banner.png'],
   },
   appleWebApp: {
@@ -61,7 +65,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="bg-background-light dark:bg-background-dark">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className="bg-background-light dark:bg-background-dark"
+    >
       <head>
         <style
           dangerouslySetInnerHTML={{

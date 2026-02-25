@@ -8,7 +8,9 @@ import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://strive-beige.vercel.app'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'https://strive-beige.vercel.app'
+  ),
   title: {
     template: '%s | Strive',
     default: 'Strive Dashboard',
@@ -21,7 +23,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Strive Dashboard',
-    description: 'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+    description:
+      'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
     url: '/home',
     siteName: 'Strive',
     images: [
@@ -38,7 +41,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Strive Dashboard',
-    description: 'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+    description:
+      'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
     images: ['/banner.png'],
   },
   appleWebApp: {
@@ -85,7 +89,9 @@ export default function RootLayout({
           <TooltipProvider delayDuration={0}>
             <div className="flex min-h-[100dvh]">
               <Sidebar />
-<div className="flex-1 flex flex-col safe-area-top lg:pt-0">                <TopNav />
+              <div className="flex-1 flex flex-col safe-area-top lg:pt-0">
+                {' '}
+                <TopNav />
                 <div className="container mx-auto max-w-7xl px-4 py-6 md:p-6">
                   <main className="w-full">{children}</main>
                 </div>

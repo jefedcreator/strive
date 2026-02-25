@@ -9,15 +9,15 @@ export function MetaThemeColorMeta() {
   useEffect(() => {
     // These must be the exact hex codes from your Tailwind config
     // corresponding to bg-background-light and bg-background-dark
-    const lightColor = '#F7F9FB'; 
-    const darkColor = '#0B0F19';  
+    const lightColor = '#F7F9FB';
+    const darkColor = '#0B0F19';
 
     // Determine the active color based on the current theme
     const activeColor = resolvedTheme === 'dark' ? darkColor : lightColor;
-    
+
     // Check if the meta tag already exists
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    
+
     // If it exists, update it. If not, create and inject it.
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', activeColor);
@@ -30,5 +30,5 @@ export function MetaThemeColorMeta() {
   }, [resolvedTheme]);
 
   // This component manages the DOM head and renders no UI
-  return null; 
+  return null;
 }

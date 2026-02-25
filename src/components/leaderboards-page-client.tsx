@@ -1,7 +1,7 @@
 'use client';
 
 import { leaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
-import { ActivityList, type Activity } from '@/components/activity-list';
+import { type Activity } from '@/components/activity-list';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
 import { LeaderboardCard } from '@/components/leaderboard-card';
 import {

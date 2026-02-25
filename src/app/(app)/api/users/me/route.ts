@@ -15,14 +15,14 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@/utils/exceptions';
-import type { Prisma } from '@prisma/client';
+import type { Prisma, User } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 /**
  * @description Retrieves the authenticated user's profile, including clubs and leaderboards.
  * @auth bearer
  */
-export const GET = withMiddleware<unknown>(
+export const GET = withMiddleware<User>(
   async (request) => {
     try {
       const user = request.user!;
@@ -51,7 +51,7 @@ export const GET = withMiddleware<unknown>(
         throw new NotFoundException('User not found');
       }
 
-      const response: ApiResponse<typeof fullUser> = {
+      const response: ApiResponse<User> = {
         status: 200,
         message: 'User profile retrieved successfully',
         data: fullUser,

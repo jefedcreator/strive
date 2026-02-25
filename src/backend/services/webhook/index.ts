@@ -39,7 +39,7 @@ class WebhookService {
    */
   private queue: QueuedEvent[] = [];
 
-  constructor() { }
+  constructor() {}
 
   // ─── Transport availability ───────────────────────────────────────────────
 

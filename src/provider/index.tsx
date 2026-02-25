@@ -27,10 +27,9 @@ function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
 
-
 export const Provider = ({ children }: QueryProviderProps) => {
   // useViewportHandler();
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
@@ -42,7 +41,6 @@ export const Provider = ({ children }: QueryProviderProps) => {
         >
           <MetaThemeColorMeta />
           <NuqsAdapter>
-    
             {/* <SocketProvider> */}
             {children}
             {/* </SocketProvider> */}

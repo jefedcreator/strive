@@ -14,6 +14,7 @@ import type {
   RunData,
 } from '@/types';
 import { uncachedAuth } from './auth';
+import type { User } from '@prisma/client';
 
 const baseUrl =
   process.env.NODE_ENV == 'production'
@@ -180,6 +181,27 @@ async function getNotifications(
   }
 }
 
+async function getProfile(): Promise<ApiResponse<User | null>> {
+  try {
+    const url = `${baseUrl}/api/users/me`;
+
+    const res = await fetcher(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch profile: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<ApiResponse<User>>;
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    return {
+      status: 500,
+      message: 'Failed to fetch profile',
+      data: null,
+    };
+  }
+}
+
 async function getRuns(): Promise<ApiResponse<RunData[]>> {
   try {
     const url = `${baseUrl}/api/runs`;
@@ -255,4 +277,5 @@ export {
   getNotifications,
   getRuns,
   getLeaderboardInvite,
+  getProfile,
 };
