@@ -160,6 +160,7 @@ export const GET = withMiddleware<unknown>(
   async (request, { params }) => {
     try {
       const { id } = params;
+      const user = request.user!;
 
       const club = await db.club.findUnique({
         where: { id },
@@ -177,6 +178,11 @@ export const GET = withMiddleware<unknown>(
 
       if (!club) {
         throw new NotFoundException('Club not found');
+      }
+
+      const isMember = club.members.some((m) => m.userId === user.id);
+      if (!club.isPublic && !isMember) {
+        throw new ForbiddenException('You are not authorized to view this club');
       }
 
       const response: ApiResponse<typeof club> = {

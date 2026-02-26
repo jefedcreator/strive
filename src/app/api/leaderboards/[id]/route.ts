@@ -145,6 +145,7 @@ export const GET = withMiddleware<
   async (request, { params }) => {
     try {
       const { id } = params;
+      const user = request.user!;
       const query = request.query!;
 
       const sortBy = query.sortBy ?? 'score';
@@ -187,6 +188,11 @@ export const GET = withMiddleware<
 
       if (!leaderboard) {
         throw new NotFoundException('Leaderboard not found');
+      }
+
+      const isMember = leaderboard.entries.some((e) => e.userId === user.id);
+      if (!leaderboard.isPublic && !isMember) {
+        throw new ForbiddenException('You are not authorized to view this leaderboard');
       }
 
       const response: ApiResponse<typeof leaderboard> = {
