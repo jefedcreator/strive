@@ -149,17 +149,19 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         redirect: false,
       });
 
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
       if (clubId) {
-        return NextResponse.redirect(new URL(`/clubs/${clubId}`, request.url));
+        return NextResponse.redirect(new URL(`/clubs/${clubId}`, appUrl));
       } else if (leaderboardId) {
         return NextResponse.redirect(
-          new URL(`/leaderboards/${leaderboardId}`, request.url)
+          new URL(`/leaderboards/${leaderboardId}`, appUrl)
         );
       } else if (callbackUrl) {
-        return NextResponse.redirect(new URL(callbackUrl, request.url));
+        return NextResponse.redirect(new URL(callbackUrl, appUrl));
       }
 
-      return NextResponse.redirect(new URL('/home', request.url));
+      return NextResponse.redirect(new URL('/home', appUrl));
     } catch (error: any) {
       if (error.statusCode) throw error;
       throw new InternalServerErrorException(

@@ -28,18 +28,6 @@ RUN npx prisma generate
 # Build the application
 RUN npm run build
 
-# Bundle the custom server.ts to server.js in the standalone directory
-# This allows running the app with node server.js without needing tsx in the final image
-RUN npx esbuild server.ts \
-    --bundle \
-    --platform=node \
-    --outfile=.next/standalone/server.js \
-    --external:next \
-    --external:socket.io \
-    --external:dotenv \
-    --minify \
-    --alias:@=./src
-
 # Stage 3: Runner
 FROM node:20-slim AS runner
 WORKDIR /app
@@ -94,17 +82,17 @@ RUN apt-get update && apt-get install -y \
 
 # Create a non-privileged user to run the app
 RUN groupadd -g 1001 nodejs && \
-    useradd -u 1001 -g nodejs nextjs
+    useradd -m -u 1001 -g nodejs nextjs
 
 # Set up the production files from standalone output
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Note: Standalone output already includes node_modules
-# We just need to make sure the prisma schema is available for migrations
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
+
+# Copy prisma CLI so migrations can run
+COPY --from=builder /app/prisma ./prisma
+# Prisma installed globally in runner layer already handles npx invocations
 
 RUN chown -R nextjs:nodejs /app
 
@@ -113,8 +101,7 @@ USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 
-# Start the application
-# We use the bundled server.js which includes our custom Socket.IO logic
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+# Start the application using next start (via npm run start)
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npm run start"]
 
 

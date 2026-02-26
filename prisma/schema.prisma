@@ -218,8 +218,8 @@ model LeaderboardInvites {
     updatedAt     DateTime    @updatedAt
     isRequest     Boolean     @default(false)
     leaderboard   Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
-    userId        String?      @db.ObjectId
-    user          User?        @relation("LeaderboardInviteReceiver", fields: [userId], references: [id], onDelete: Cascade)
+    userId        String?     @db.ObjectId
+    user          User?       @relation("LeaderboardInviteReceiver", fields: [userId], references: [id], onDelete: Cascade)
     invitedBy     String?     @db.ObjectId
     inviter       User?       @relation("LeaderboardInviter", fields: [invitedBy], references: [id], onDelete: Cascade)
 }

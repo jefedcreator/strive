@@ -64,8 +64,8 @@ export function SettingsClient({ user }: { user: UserType }) {
       return res.data;
     },
     onSuccess: async (data: UserType) => {
-      toast.success('Profile updated successfully');
       router.refresh();
+      toast.success('Profile updated successfully');
       setAvatarPreview(null);
       await update({
         image: data.avatar,

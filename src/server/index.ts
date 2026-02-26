@@ -16,10 +16,10 @@ import type {
 import { uncachedAuth } from './auth';
 import type { User } from '@prisma/client';
 
-const baseUrl =
-  process.env.NODE_ENV == 'production'
-    ? 'https://strive-beige.vercel.app'
-    : 'http://localhost:3000';
+// Server-side fetches must use the internal Next.js port (3000), not the public Nginx URL.
+// NEXT_PUBLIC_APP_URL points to http://localhost (Nginx) which is unreachable from inside the container.
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+console.log('baseUrl', baseUrl);
 
 const fetcher = async (url: string): Promise<Response> => {
   const session = await uncachedAuth();

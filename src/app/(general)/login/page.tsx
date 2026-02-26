@@ -6,7 +6,7 @@ import type { ApiError } from '@/types';
 import { useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { SiNike, SiStrava } from 'react-icons/si';
 import { toast } from 'sonner';
 
@@ -37,8 +37,8 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
-
-  console.log('isSubmitting', isSubmitting);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [stravaStatus, setStravaStatus] = useState<string | null>(null);
 
   // NRC Flow States
 
@@ -98,16 +98,27 @@ function LoginPageContent() {
     },
     onSuccess: (result) => {
       if (result.action === 'redirect' && result.url) {
+        setStravaStatus('Redirecting to Strava...');
+        setIsRedirecting(true);
         window.location.href = result.url;
       } else {
         handleLoginSuccess(null);
+        setIsRedirecting(false);
+        setStravaStatus(null);
       }
     },
-    onError: (error: ApiError) => toast.error(error.message),
+    onError: (error: ApiError) => {
+      toast.error(error.message);
+      setIsRedirecting(false);
+      setStravaStatus(null);
+    },
   });
+
+  const isStravaLoading = stravaMutation.isPending || isRedirecting;
 
   // NRC Submissions (Step 1 and Step 2)
   const handleStravaLogin = () => {
+    setStravaStatus('Connecting...');
     const clubId = searchParams.get('clubId') ?? undefined;
     const leaderboardId = searchParams.get('leaderboardId') ?? undefined;
     const inviteId = searchParams.get('inviteId') ?? undefined;
@@ -204,11 +215,16 @@ function LoginPageContent() {
               {/* Strava Login */}
               <button
                 onClick={handleStravaLogin}
-                disabled={stravaMutation.isPending}
-                className="w-full group relative flex justify-center items-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-[#FC4C02] hover:bg-[#e34402] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FC4C02] transition-all duration-200 shadow-lg"
+                disabled={isStravaLoading}
+                className="w-full group relative flex flex-col justify-center items-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-[#FC4C02] hover:bg-[#e34402] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FC4C02] transition-all duration-200 shadow-lg disabled:opacity-80 disabled:cursor-not-allowed"
               >
-                {stravaMutation.isPending ? (
-                  <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                {isStravaLoading ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      <span>{stravaStatus ?? 'Loading...'}</span>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <span className="absolute left-0 inset-y-0 flex items-center pl-4">
