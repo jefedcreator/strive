@@ -49,6 +49,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [shareInviteUrl, setShareInviteUrl] = React.useState('');
+  const hasMenuItems = !isMember || (isMember && data.isPublic) || isCreator;
 
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -62,17 +63,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       return res.data;
     },
     onSuccess: async () => {
-      toast.success(
-        data.isPublic
-          ? 'Successfully joined the leaderboard!'
-          : 'Join request sent. Waiting for owner approval.'
-      );
+      router.refresh();
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to join leaderboard'
-      );
     },
   });
 
@@ -92,10 +84,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       const inviteUrl = `${window.location.origin}/leaderboards/${data.id}/invites/${inviteId}`;
       setShareInviteUrl(inviteUrl);
       setIsShareModalOpen(true);
+      router.refresh();
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message ?? 'Failed to generate invite');
     },
   });
 
@@ -107,14 +97,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       return res.data;
     },
     onSuccess: async () => {
-      toast.success('Leaderboard deleted successfully!');
       setIsDeleteModalOpen(false);
       router.refresh();
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to delete leaderboard'
-      );
     },
   });
 
@@ -189,6 +173,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
           </Link>
 
           {/* Overflow menu */}
+          {hasMenuItems && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/8 transition-colors outline-none">
@@ -201,7 +186,19 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
             >
               {!isMember && (
                 <DropdownMenuItem
-                  onClick={() => joinMutation.mutate()}
+                  onClick={() =>
+                    toast.promise(
+                      joinMutation.mutateAsync(),
+                      {
+                        loading: 'Joining leaderboard…',
+                        success: data.isPublic
+                          ? 'Successfully joined the leaderboard!'
+                          : 'Join request sent. Waiting for owner approval.',
+                        error: (err: AxiosError<ApiError>) =>
+                          err.response?.data?.message ?? 'Failed to join leaderboard',
+                      }
+                    )
+                  }
                   disabled={joinMutation.isPending || isCompleted}
                   className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
                 >
@@ -211,7 +208,17 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
               )}
               {isMember && data.isPublic && (
                 <DropdownMenuItem
-                  onClick={() => inviteMutation.mutate()}
+                  onClick={() =>
+                    toast.promise(
+                      inviteMutation.mutateAsync(),
+                      {
+                        loading: 'Generating invite link…',
+                        success: 'Invite link ready!',
+                        error: (err: AxiosError<ApiError>) =>
+                          err.response?.data?.message ?? 'Failed to generate invite',
+                      }
+                    )
+                  }
                   disabled={inviteMutation.isPending || isCompleted}
                   className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
                 >
@@ -230,6 +237,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
         </div>
       </motion.div>
 
@@ -273,7 +281,17 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => deleteMutation.mutate()}
+                  onClick={() =>
+                    toast.promise(
+                      deleteMutation.mutateAsync(),
+                      {
+                        loading: 'Deleting leaderboard…',
+                        success: 'Leaderboard deleted successfully!',
+                        error: (err: AxiosError<ApiError>) =>
+                          err.response?.data?.message ?? 'Failed to delete leaderboard',
+                      }
+                    )
+                  }
                   disabled={deleteMutation.isPending}
                 >
                   {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
