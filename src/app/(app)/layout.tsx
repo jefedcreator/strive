@@ -69,21 +69,23 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className="bg-background-light dark:bg-background-dark"
+      className="bg-background-light dark:bg-background-dark min-h-[100dvh]"
     >
       <head>
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              html, body { background-color: #F7F9FB; }
+              html { min-height: 100dvh; background-color: #F7F9FB; }
+              body { min-height: 100dvh; background-color: #F7F9FB; }
               @media (prefers-color-scheme: dark) {
                 html, body { background-color: #0B0F19; }
               }
+              html.dark, html.dark body { background-color: #0B0F19; }
             `,
           }}
         />
       </head>
-      <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-[100dvh] transition-colors duration-300 relative overflow-x-hidden">
+      <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-[100dvh] transition-colors duration-300 relative overflow-x-hidden antialiased">
         <NextTopLoader showSpinner={false} color="#ff014e" />
         <Provider>
           <TooltipProvider delayDuration={0}>

@@ -193,7 +193,7 @@ export function Sidebar() {
 
         {/* --- Mobile Drawer (Always mapped but translated off-screen to preserve transitions) --- */}
         <div
-          className={`fixed z-50 lg:hidden transition-all duration-300 ${
+          className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ${
             isMobileOpen ? 'visible' : 'invisible'
           }`}
         >
