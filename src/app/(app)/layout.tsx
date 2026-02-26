@@ -8,6 +8,9 @@ import { type Metadata, type Viewport } from 'next';
 import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from 'sonner';
 
+export const dynamic = 'force-dynamic';
+
+
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || 'https://strive-beige.vercel.app'
