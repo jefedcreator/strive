@@ -122,6 +122,7 @@ export async function POST(req: NextRequest) {
       redirect: false,
       token: auth_token,
       image: user.avatar,
+      type: user.type,
     });
 
     const redirectPath = clubId

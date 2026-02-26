@@ -3,6 +3,7 @@ import { type DefaultSession, type NextAuthConfig } from 'next-auth';
 import DiscordProvider from 'next-auth/providers/discord';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from '@/server/db';
+import type { UserType } from '@prisma/client';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -17,6 +18,7 @@ declare module 'next-auth' {
       username?: string | null;
       fullname?: string | null;
       token?: string | null;
+      type?: UserType | null;
     } & DefaultSession['user'];
   }
 
@@ -25,6 +27,7 @@ declare module 'next-auth' {
     fullname?: string | null;
     token?: string | null;
     avatar?: string | null;
+    type: UserType | null;
   }
 }
 
@@ -58,6 +61,7 @@ export const authConfig = {
           username: user.username,
           fullname: user.fullname,
           avatar: user.avatar,
+          type: user.type,
           image: (credentials.image as string) ?? user.avatar ?? null,
           token: (credentials.token as string) ?? null,
         };
@@ -77,6 +81,7 @@ export const authConfig = {
         username: token.username as string | null,
         fullname: token.fullname as string | null,
         token: token.accessToken as string | null,
+        type: token.type as UserType | null,
       },
     }),
     jwt: ({ token, user }) => {
@@ -84,6 +89,7 @@ export const authConfig = {
         token.username = user.username;
         token.fullname = user.fullname;
         token.accessToken = user.token;
+        token.type = user.type;
         if (user.image) {
           token.picture = user.image;
         } else if (user.avatar) {

@@ -89,8 +89,7 @@ export default function RootLayout({
           <TooltipProvider delayDuration={0}>
             <div className="flex min-h-[100dvh]">
               <Sidebar />
-              <div className="flex-1 flex flex-col safe-area-top lg:pt-0">
-                {' '}
+              <div className="flex-1 flex flex-col lg:pt-0">
                 <TopNav />
                 <div className="container mx-auto max-w-7xl px-4 py-6 md:p-6">
                   <main className="w-full">{children}</main>

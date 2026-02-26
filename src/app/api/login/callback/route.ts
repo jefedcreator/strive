@@ -54,6 +54,8 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         token: auth.accessToken,
       });
 
+      console.log('user', user);
+
       // Handle Club Join if invite info is present
       if (clubId && inviteId && user) {
         // Check if already a member
@@ -146,6 +148,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         userId: user.id,
         token: auth_token,
         image: user.avatar,
+        type: user.type,
         redirect: false,
       });
 

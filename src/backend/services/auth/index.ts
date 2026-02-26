@@ -10,10 +10,19 @@ class AuthService {
     email = '',
     fullname,
     avatar,
-  }: NikeAuthResult): Promise<User> {
+  }: NikeAuthResult): Promise<
+    Pick<User, 'id' | 'type' | 'fullname' | 'avatar' | 'email'>
+  > {
     const user = await prisma.user.findFirst({
       where: {
         email,
+      },
+      select: {
+        id: true,
+        type: true,
+        fullname: true,
+        avatar: true,
+        email: true,
       },
     });
 
@@ -25,6 +34,9 @@ class AuthService {
       avatar: avatar ?? user?.avatar,
     };
 
+    console.log('data', data);
+    console.log('userData', user);
+
     if (user?.type == type) {
       await prisma.user.update({
         where: {
@@ -34,8 +46,6 @@ class AuthService {
       });
       return user;
     }
-
-    console.log('userData', user);
 
     try {
       const data: Prisma.UserCreateInput = {

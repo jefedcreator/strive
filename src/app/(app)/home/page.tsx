@@ -13,6 +13,7 @@ import {
   Share2,
   Award,
 } from 'lucide-react';
+import type { UserType } from '@prisma/client';
 
 const leaderboard = [
   {
@@ -113,7 +114,7 @@ function formatRunDate(dateString: string): string {
   return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${timeStr}`;
 }
 
-function LastRunCard({ run }: { run: RunData }) {
+function LastRunCard({ run, type }: { run: RunData; type: UserType | null }) {
   return (
     <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden transition-transform duration-300 hover:scale-[1.005]">
       <div className="p-8 pb-4">
@@ -127,9 +128,11 @@ function LastRunCard({ run }: { run: RunData }) {
               <span>{formatRunDate(run.date)}</span>
             </div>
           </div>
-          <div className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-3 py-1 rounded text-[10px] font-black uppercase tracking-tighter">
-            {run.type}
-          </div>
+          {type && (
+            <div className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-3 py-1 rounded text-[10px] font-black uppercase tracking-tighter">
+              {type}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-8">
@@ -219,6 +222,9 @@ export default async function HomePage() {
   const runs = runsResponse.data ?? [];
   const lastRun = runs.length > 0 ? runs[0] : null;
 
+  console.log('user', user);
+  console.log('lastRun', lastRun);
+
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-10 relative">
       <Background />
@@ -238,7 +244,11 @@ export default async function HomePage() {
         {/* Left Column: Stats & Leaderboard */}
         <div className="lg:col-span-2 space-y-8">
           {/* Main Activity Card */}
-          {lastRun ? <LastRunCard run={lastRun} /> : <NoRunsCard />}
+          {lastRun ? (
+            <LastRunCard run={lastRun} type={user.type} />
+          ) : (
+            <NoRunsCard />
+          )}
 
           {/* Leaderboard Table */}
           <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden">
