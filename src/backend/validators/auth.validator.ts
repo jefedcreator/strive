@@ -17,7 +17,6 @@ export const loginValidatorSchema = z
   })
   .strict();
 
-
 export const updateUserValidatorSchema = z
   .object({
     username: z

@@ -91,7 +91,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       label: 'X',
       href: `https://twitter.com/intent/tweet?text=${shareText}`,
       icon: <XIcon />,
-      color: 'hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-white/20',
+      color:
+        'hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-white/20',
     },
     {
       label: 'Facebook',
@@ -158,9 +159,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                     ) : (
                       <div
                         className={`w-full h-full flex items-center justify-center
-                          ${variant === 'club'
-                            ? 'bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 dark:from-blue-900/50 dark:via-purple-900/30 dark:to-pink-900/20'
-                            : 'bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 dark:from-amber-900/40 dark:via-orange-900/20 dark:to-yellow-900/20'
+                          ${
+                            variant === 'club'
+                              ? 'bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 dark:from-blue-900/50 dark:via-purple-900/30 dark:to-pink-900/20'
+                              : 'bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 dark:from-amber-900/40 dark:via-orange-900/20 dark:to-yellow-900/20'
                           }`}
                       >
                         {variant === 'club' ? (
@@ -239,8 +241,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   <p className="text-[11px] text-gray-400 dark:text-gray-600 text-center leading-relaxed">
                     ⓘ{' '}
                     {isPublic
-                      ? 'Anyone with this link can join the ' + (variant === 'club' ? 'club' : 'leaderboard') + '.'
-                      : 'This is a private ' + (variant === 'club' ? 'club' : 'leaderboard') + '. Only invited users can join.'}
+                      ? 'Anyone with this link can join the ' +
+                        (variant === 'club' ? 'club' : 'leaderboard') +
+                        '.'
+                      : 'This is a private ' +
+                        (variant === 'club' ? 'club' : 'leaderboard') +
+                        '. Only invited users can join.'}
                   </p>
                 </div>
               </motion.div>

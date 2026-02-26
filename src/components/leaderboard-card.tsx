@@ -122,7 +122,10 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -2, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+        whileHover={{
+          y: -2,
+          transition: { type: 'spring', stiffness: 400, damping: 25 },
+        }}
         className={`group flex flex-col ${isInactive ? 'opacity-60' : ''}`}
       >
         {/* Cover image area */}
@@ -139,9 +142,10 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
             {/* Visibility badge */}
             <span
               className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm
-                ${data.isPublic
-                  ? 'bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/20'
-                  : 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/20'
+                ${
+                  data.isPublic
+                    ? 'bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/20'
+                    : 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/20'
                 }`}
             >
               {data.isPublic ? 'Public' : 'Private'}

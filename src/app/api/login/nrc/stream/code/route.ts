@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
       inviteId?: string;
       callbackUrl?: string;
     };
-    const { sessionId, code, clubId, leaderboardId, inviteId, callbackUrl } = body;
+    const { sessionId, code, clubId, leaderboardId, inviteId, callbackUrl } =
+      body;
 
     if (!sessionId || !code) {
       return NextResponse.json(
@@ -26,8 +27,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, token, username } =
-      await puppeteerSessionManager.submitCode(sessionId, code);
+    const { email, token, username } = await puppeteerSessionManager.submitCode(
+      sessionId,
+      code
+    );
 
     if (!email || !token || !username) {
       throw new Error(
