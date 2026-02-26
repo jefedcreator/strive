@@ -16,10 +16,9 @@ import type {
 import { uncachedAuth } from './auth';
 import type { User } from '@prisma/client';
 
-// Server-side fetches must use the internal Next.js port (3000), not the public Nginx URL.
-// NEXT_PUBLIC_APP_URL points to http://localhost (Nginx) which is unreachable from inside the container.
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-console.log('baseUrl', baseUrl);
+// Server-side fetches must use the internal Next.js port directly.
+// NEXT_PUBLIC_APP_URL=http://localhost points to Nginx (a separate container) which is NOT reachable via localhost:80 from here.
+const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:3000';
 
 const fetcher = async (url: string): Promise<Response> => {
   const session = await uncachedAuth();

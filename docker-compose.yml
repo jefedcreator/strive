@@ -17,7 +17,7 @@ services:
       - AUTH_TRUST_HOST=true
       - NEXT_PUBLIC_APP_URL=http://localhost
       - PORT=3000
-      - INTERNAL_API_URL=http://localhost
+      - INTERNAL_API_URL=http://localhost:3000
     expose:
       - "3000"
     networks:

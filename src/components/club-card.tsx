@@ -17,22 +17,21 @@ import { Button } from '@/primitives/Button';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-
-interface ClubCardProps {
-  club: ClubListItem;
-}
-
+import Link from 'next/link';
+import { ShareModal } from '@/components/share-modal';
 import {
-  Users,
-  MoreVertical,
+  MoreHorizontal,
   LogIn,
   UserPlus,
   Trash2,
-  ArrowRight,
   AlertTriangle,
   CheckCircle,
   XCircle,
 } from 'lucide-react';
+
+interface ClubCardProps {
+  club: ClubListItem;
+}
 
 export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   const { data: session } = useSession();
@@ -43,6 +42,8 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   const memberCount = club.members ?? 0;
   const queryClient = useQueryClient();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+  const [shareInviteUrl, setShareInviteUrl] = React.useState('');
 
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -70,46 +71,26 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
 
   const inviteMutation = useMutation({
     mutationFn: async () => {
-      const promise = axios.post(
+      const res = await axios.post(
         `/api/clubs/${club.id}/invites`,
         {},
         {
           headers: { Authorization: `Bearer ${session?.user.token}` },
         }
       );
-
-      toast.promise(promise, {
-        loading: 'Generating invite...',
-        success: (data) => {
-          handleInvite(String(data.data.data.id));
-          return club.isPublic
-            ? 'Successfully invited to the club!'
-            : 'Join request sent. Waiting for owner approval.';
-        },
-        error: (error: AxiosError<ApiError>) => {
-          return error.response?.data?.message ?? 'Failed to invite to club';
-        },
-      });
-
-      const res = await promise;
       return res.data;
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
+      const inviteId = String(data.data.id);
+      const inviteUrl = `${window.location.origin}/clubs/${club.id}/invites/${inviteId}`;
+      setShareInviteUrl(inviteUrl);
+      setIsShareModalOpen(true);
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
     },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message ?? 'Failed to generate invite');
+    },
   });
-
-  const handleInvite = (inviteId: string) => {
-    const inviteUrl = `${window.location.origin}/clubs/${club.id}/invites/${inviteId}`;
-    navigator.clipboard
-      .writeText(inviteUrl)
-      .then(() => {
-        toast.success('Invite link copied to clipboard!');
-      })
-      .catch(() => {
-        toast.error('Failed to copy invite link');
-      });
-  };
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -129,124 +110,121 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   });
 
   return (
-    <motion.div
-      whileHover={{
-        y: -4,
-        transition: { type: 'spring', stiffness: 400, damping: 25 },
-      }}
-      whileTap={{
-        scale: 0.98,
-        transition: { type: 'spring', stiffness: 400, damping: 25 },
-      }}
-      className={`relative bg-[#FAFAFA] dark:bg-[#0A0A0A] rounded-[24px] p-6 shadow-sm border border-black/5 dark:border-white/[0.08] hover:shadow-xl hover:shadow-primary/10 transition-shadow duration-300 group overflow-hidden ${isInactive ? 'opacity-75 hover:opacity-100' : ''}`}
-    >
-      {/* Subtle Inner Glow on Hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-      <div className="relative z-10 flex justify-between items-start mb-5">
-        <div className="flex items-center space-x-4">
-          <div className="h-14 w-14 rounded-2xl overflow-hidden shrink-0 border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex flex-col justify-center items-center">
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -2, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+        className={`group flex flex-col ${isInactive ? 'opacity-60' : ''}`}
+      >
+        {/* Cover image area */}
+        <Link href={`/clubs/${club.id}`} className="block relative">
+          <div className="relative w-full aspect-[4/3] rounded-[16px] overflow-hidden bg-gray-100 dark:bg-white/5 mb-3">
             {club.image ? (
               <Image
                 alt={club.name}
-                width={56}
-                height={56}
-                className={`h-full w-full object-cover group-hover:scale-110 transition-transform duration-500 ${isInactive ? 'grayscale' : ''}`}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className={`object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out ${isInactive ? 'grayscale' : ''}`}
                 src={club.image}
               />
             ) : (
-              <div className="h-full w-full bg-gradient-to-br from-primary/10 to-primary/5 dark:from-white/10 dark:to-white/5 flex items-center justify-center text-primary dark:text-white group-hover:scale-110 transition-transform duration-500">
-                <Users className="w-6 h-6" />
-              </div>
+              <Image
+                alt={club.name}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                src={`/api/og?name=${encodeURIComponent(club.name)}&type=club`}
+              />
             )}
-          </div>
-          <div className="flex flex-col justify-center">
+
+            {/* Visibility badge */}
             <span
-              className={`text-[10px] font-bold ${club.isPublic ? 'text-blue-600 dark:text-blue-400 bg-blue-500/10' : 'text-purple-600 dark:text-purple-400 bg-purple-500/10'} px-2.5 py-0.5 rounded-full uppercase tracking-wider w-fit`}
+              className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm
+                ${club.isPublic
+                  ? 'bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/20'
+                  : 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/20'
+                }`}
             >
               {club.isPublic ? 'Public' : 'Private'}
             </span>
-            <h3 className="font-extrabold tracking-tight text-lg text-gray-900 dark:text-white mt-1.5 truncate max-w-[170px] group-hover:text-primary transition-colors duration-300">
+          </div>
+        </Link>
+
+        {/* Footer row */}
+        <div className="flex items-start justify-between gap-2 px-0.5">
+          <Link href={`/clubs/${club.id}`} className="flex-1 min-w-0">
+            <h3 className="font-semibold text-[14px] leading-snug text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors duration-200">
               {club.name}
             </h3>
-          </div>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 outline-none backdrop-blur-sm">
-              <MoreVertical className="w-5 h-5" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
-            align="end"
-          >
-            <DropdownMenuItem
-              onClick={() => joinMutation.mutate()}
-              disabled={joinMutation.isPending || isInactive}
-              className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[12px] text-gray-400 dark:text-gray-500">
+                {memberCount} {memberCount === 1 ? 'member' : 'members'}
+              </span>
+              {isInactive ? (
+                <span className="flex items-center gap-0.5 text-[11px] text-red-400 dark:text-red-500">
+                  <XCircle className="w-3 h-3" /> Inactive
+                </span>
+              ) : (
+                <span className="flex items-center gap-0.5 text-[11px] text-green-500 dark:text-green-400">
+                  <CheckCircle className="w-3 h-3" /> Active
+                </span>
+              )}
+            </div>
+          </Link>
+
+          {/* Overflow menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/8 transition-colors outline-none">
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+              align="end"
             >
-              <LogIn className="w-4 h-4" />
-              {joinMutation.isPending ? 'Joining...' : 'Join'}
-            </DropdownMenuItem>
-            {isCreator && (
               <DropdownMenuItem
-                onClick={() => inviteMutation.mutate()}
-                disabled={inviteMutation.isPending || isInactive}
+                onClick={() => joinMutation.mutate()}
+                disabled={joinMutation.isPending || isInactive}
                 className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
               >
-                <UserPlus className="w-4 h-4" />
-                Invite
+                <LogIn className="w-4 h-4" />
+                {joinMutation.isPending ? 'Joining...' : 'Join'}
               </DropdownMenuItem>
-            )}
-            {isCreator && (
-              <DropdownMenuItem
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <p className="relative z-10 text-[13px] text-gray-500 dark:text-gray-400/90 mb-6 leading-relaxed line-clamp-2 min-h-[44px]">
-        {club.description ?? 'No description provided.'}
-      </p>
-
-      <div className="relative z-10 flex items-center text-xs font-semibold text-gray-500 dark:text-gray-400/80 mb-6 space-x-4">
-        <div className="flex items-center">
-          <Users className="w-4 h-4 mr-1" />
-          {club.slug}
+              {isCreator && (
+                <DropdownMenuItem
+                  onClick={() => inviteMutation.mutate()}
+                  disabled={inviteMutation.isPending || isInactive}
+                  className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Invite
+                </DropdownMenuItem>
+              )}
+              {isCreator && (
+                <DropdownMenuItem
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <div className="flex items-center">
-          {isInactive ? (
-            <XCircle className="w-4 h-4 mr-1" />
-          ) : (
-            <CheckCircle className="w-4 h-4 mr-1" />
-          )}
-          {isInactive ? 'Inactive' : 'Active'}
-        </div>
-      </div>
+      </motion.div>
 
-      <div className="relative z-10 pt-4 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-gray-400/70" />
-          <span className="text-[13px] font-semibold tracking-tight text-gray-500 dark:text-gray-400">
-            {memberCount} {memberCount === 1 ? 'member' : 'members'}
-          </span>
-        </div>
-
-        <a
-          href={`/clubs/${club.id}`}
-          className="group/link text-[13px] font-bold text-gray-900 dark:text-white flex items-center bg-gray-100 dark:bg-white/5 hover:bg-primary hover:text-white dark:hover:bg-primary px-3 py-1.5 rounded-full transition-all duration-300"
-        >
-          Details{' '}
-          <ArrowRight className="w-3.5 h-3.5 ml-1 text-gray-400 group-hover/link:text-white group-hover/link:translate-x-1 transition-all" />
-        </a>
-      </div>
+      <ShareModal
+        open={isShareModalOpen}
+        onOpenChange={setIsShareModalOpen}
+        name={club.name}
+        inviteUrl={shareInviteUrl}
+        image={club.image}
+        isPublic={club.isPublic}
+        variant="club"
+      />
 
       <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <Modal.Portal>
@@ -289,6 +267,6 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
           </Modal.Content>
         </Modal.Portal>
       </Modal>
-    </motion.div>
+    </>
   );
 };
