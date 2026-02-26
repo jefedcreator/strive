@@ -13,17 +13,24 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import Image from 'next/image';
 
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/primitives/dropdown-menu';
+import {
   ArrowLeft,
-  Users,
-  Trophy,
-  Calendar,
-  LogOut,
-  Edit2,
   ArrowRight,
+  Calendar,
+  Edit2,
+  LogOut,
+  MoreHorizontal,
+  Trophy,
   User,
+  Users,
 } from 'lucide-react';
 
 interface ClubDetailClientProps {
@@ -59,52 +66,6 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
   });
 
   const club = response.data!;
-
-  // const joinViaInviteMutation = useMutation({
-  //   mutationFn: async (inviteId: string) => {
-  //     const res = await axios.post(
-  //       `/api/clubs/${club.id}/invites/${inviteId}/join`,
-  //       {},
-  //       {
-  //         headers: { Authorization: `Bearer ${session?.user.token}` },
-  //       }
-  //     );
-  //     return res.data;
-  //   },
-  //   onSuccess: async () => {
-  //     toast.success('Successfully joined the club via invite!');
-  //     await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
-  //     await queryClient.invalidateQueries({ queryKey: ['clubs'] });
-  //     // Remove query params
-  //     router.replace(`/clubs/${club.id}`);
-  //   },
-  //   onError: (error: any) => {
-  //     toast.error(
-  //       error.response?.data?.message ?? 'Failed to join club via invite'
-  //     );
-  //     // Remove query params
-  //     router.replace(`/clubs/${club.id}`);
-  //   },
-  // });
-
-  // useEffect(() => {
-  //   const action = searchParams.get('action');
-  //   const inviteId = searchParams.get('inviteId');
-
-  //   if (
-  //     action === 'join' &&
-  //     inviteId &&
-  //     session?.user &&
-  //     !joinViaInviteMutation.isPending
-  //   ) {
-  //     if (club.members.some((m) => m.userId === session.user.id)) {
-  //       toast.info('You are already a member of this club.');
-  //       router.replace(`/clubs/${club.id}`);
-  //       return;
-  //     }
-  //     joinViaInviteMutation.mutate(inviteId);
-  //   }
-  // }, [searchParams, session]);
 
   const {
     register,
@@ -144,10 +105,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
       if (data.description) formData.append('description', data.description);
       formData.append('isPublic', String(data.isPublic));
       formData.append('isActive', String(data.isActive));
-
-      if (thumbnail) {
-        formData.append('image', thumbnail);
-      }
+      if (thumbnail) formData.append('image', thumbnail);
 
       const res = await axios.put(`/api/clubs/${club.id}`, formData, {
         headers: {
@@ -197,118 +155,142 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
       <FadeInItem>
         <Link
           href="/clubs"
-          className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
+          className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-5 w-fit"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Back to Clubs
+          Clubs
         </Link>
       </FadeInItem>
 
-      {/* Header */}
+      {/* Hero Banner */}
       <FadeInItem>
-        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 md:gap-4">
-            {/* Identity & Metadata Stack */}
-            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-              {club.image ? (
-                <Image
-                  src={club.image}
-                  alt={club.name}
-                  width={64}
-                  height={64}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover bg-gray-100 dark:bg-gray-800 shrink-0"
-                />
-              ) : (
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                  <Users className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
-                </div>
-              )}
+        <div className="relative w-full rounded-2xl overflow-hidden mb-3">
+          {/* Background: image or gradient */}
+          {/* {club.image ? (
+            <>
+              <Image
+                src={club.image}
+                alt={club.name}
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+            </>
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 via-teal-500/20 to-blue-500/10 dark:from-emerald-500/20 dark:via-teal-600/15 dark:to-blue-700/5" />
+              <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
+            </>
+          )} */}
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 via-teal-500/20 to-blue-500/10 dark:from-emerald-500/20 dark:via-teal-600/15 dark:to-blue-700/5" />
+            <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
+          </>
 
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                    {club.name}
-                  </h1>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
-                      club.isPublic
-                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                        : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'
-                    }`}
-                  >
-                    {club.isPublic ? 'Public' : 'Private'}
-                  </span>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
-                      club.isActive
-                        ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
-                        : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
-                    }`}
-                  >
-                    {club.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-2 font-medium">
-                  /{club.slug}
-                </p>
-
-                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl leading-relaxed mb-4">
-                  {club.description ?? 'No description provided.'}
-                </p>
-
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>
-                      {club._count.members}{' '}
-                      {club._count.members === 1 ? 'member' : 'members'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
-                    <Trophy className="w-3.5 h-3.5" />
-                    <span>
-                      {club._count.leaderboards}{' '}
-                      {club._count.leaderboards === 1
-                        ? 'leaderboard'
-                        : 'leaderboards'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>
-                      Created {new Date(club.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
+          {/* Banner content */}
+          <div className="relative flex flex-col items-center justify-center text-center px-16 py-12 md:py-16">
+            {!club.image && (
+              <div className="w-12 h-12 rounded-2xl bg-white/20 dark:bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 shadow-inner">
+                <Users className="w-6 h-6 text-white drop-shadow" />
               </div>
-            </div>
-
-            {/* Actions Stack */}
-            <div className="flex flex-row sm:flex-col items-stretch sm:items-end gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0 pt-4 md:pt-0 border-t border-gray-100 dark:border-gray-800 md:border-t-0 p-1 md:p-0">
-              <button
-                onClick={() => exitMutation.mutate()}
-                disabled={exitMutation.isPending}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-red-200 dark:border-red-800/50 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors shadow-sm"
+            )}
+            <h1
+              className={`text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm mb-3 ${
+                club.image ? 'text-white' : 'text-gray-900 dark:text-white'
+              }`}
+            >
+              {club.name}
+            </h1>
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              <span
+                className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide backdrop-blur-sm ${
+                  club.isPublic
+                    ? 'text-blue-700 dark:text-blue-300 bg-blue-100/70 dark:bg-blue-900/40'
+                    : 'text-purple-700 dark:text-purple-300 bg-purple-100/70 dark:bg-purple-900/40'
+                }`}
               >
-                <LogOut className="w-4 h-4" />
-                {exitMutation.isPending ? 'Leaving...' : 'Leave'}
-              </button>
-
-              {isCreator && (
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  Edit
-                </button>
-              )}
+                {club.isPublic ? 'Public' : 'Private'}
+              </span>
+              <span
+                className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide backdrop-blur-sm ${
+                  club.isActive
+                    ? 'text-green-700 dark:text-green-300 bg-green-100/70 dark:bg-green-900/40'
+                    : 'text-gray-600 dark:text-gray-400 bg-white/40 dark:bg-white/10'
+                }`}
+              >
+                {club.isActive ? 'Active' : 'Inactive'}
+              </span>
             </div>
+          </div>
+
+          {/* ··· Menu */}
+          <div className="absolute top-3 right-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/30 dark:bg-white/10 backdrop-blur-sm hover:bg-white/50 dark:hover:bg-white/20 transition-colors text-gray-700 dark:text-gray-200">
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+              >
+                {isCreator && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-gray-800"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Edit Club
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+                  </>
+                )}
+                <DropdownMenuItem
+                  onClick={() => exitMutation.mutate()}
+                  disabled={exitMutation.isPending}
+                  className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
+                >
+                  <LogOut className="w-4 h-4" />
+                  {exitMutation.isPending ? 'Leaving…' : 'Leave Club'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </FadeInItem>
 
+      {/* Metadata pill row */}
+      <FadeInItem>
+        <div className="flex flex-wrap items-center gap-2 mb-8 px-1">
+          {club.description && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mr-2 max-w-xl">
+              {club.description}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-2 ml-auto">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">
+              <Users className="w-3.5 h-3.5" />
+              {club._count.members}{' '}
+              {club._count.members === 1 ? 'member' : 'members'}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">
+              <Trophy className="w-3.5 h-3.5" />
+              {club._count.leaderboards}{' '}
+              {club._count.leaderboards === 1 ? 'leaderboard' : 'leaderboards'}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">
+              <Calendar className="w-3.5 h-3.5" />
+              Since {new Date(club.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+      </FadeInItem>
+
+      {/* Leaderboards + Members grid */}
       <FadeInStagger className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Leaderboards */}
         <FadeInItem>

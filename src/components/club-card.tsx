@@ -38,6 +38,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   const router = useRouter();
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId ? club.createdById === currentUserId : false;
+  const isMember = club.isMember;
   const isInactive = !club.isActive;
   const memberCount = club.members ?? 0;
   const queryClient = useQueryClient();
@@ -188,22 +189,24 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
               className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
               align="end"
             >
-              <DropdownMenuItem
-                onClick={() => joinMutation.mutate()}
-                disabled={joinMutation.isPending || isInactive}
-                className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
-              >
-                <LogIn className="w-4 h-4" />
-                {joinMutation.isPending ? 'Joining...' : 'Join'}
-              </DropdownMenuItem>
-              {isCreator && (
+              {!isMember && (
+                <DropdownMenuItem
+                  onClick={() => joinMutation.mutate()}
+                  disabled={joinMutation.isPending || isInactive}
+                  className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  {joinMutation.isPending ? 'Joining...' : 'Join'}
+                </DropdownMenuItem>
+              )}
+              {isMember && club.isPublic && (
                 <DropdownMenuItem
                   onClick={() => inviteMutation.mutate()}
                   disabled={inviteMutation.isPending || isInactive}
                   className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
                 >
                   <UserPlus className="w-4 h-4" />
-                  Invite
+                  {inviteMutation.isPending ? 'Generating...' : 'Invite'}
                 </DropdownMenuItem>
               )}
               {isCreator && (

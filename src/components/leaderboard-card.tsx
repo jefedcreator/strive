@@ -39,6 +39,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   const router = useRouter();
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId ? data.createdById === currentUserId : false;
+  const isMember = data.isMember;
   const isCompleted = data.expiryDate
     ? new Date(data.expiryDate) < new Date()
     : false;
@@ -198,15 +199,17 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
               className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
               align="end"
             >
-              <DropdownMenuItem
-                onClick={() => joinMutation.mutate()}
-                disabled={joinMutation.isPending || isCompleted}
-                className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
-              >
-                <LogIn className="w-4 h-4" />
-                {joinMutation.isPending ? 'Joining...' : 'Join'}
-              </DropdownMenuItem>
-              {isCreator && (
+              {!isMember && (
+                <DropdownMenuItem
+                  onClick={() => joinMutation.mutate()}
+                  disabled={joinMutation.isPending || isCompleted}
+                  className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  {joinMutation.isPending ? 'Joining...' : 'Join'}
+                </DropdownMenuItem>
+              )}
+              {isMember && data.isPublic && (
                 <DropdownMenuItem
                   onClick={() => inviteMutation.mutate()}
                   disabled={inviteMutation.isPending || isCompleted}

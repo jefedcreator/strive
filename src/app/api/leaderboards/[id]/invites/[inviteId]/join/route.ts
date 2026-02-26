@@ -12,6 +12,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@/utils/exceptions';
+import { type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -35,6 +36,7 @@ export const POST = withMiddleware<unknown>(
 
       const leaderboard = await db.leaderboard.findUnique({
         where: { id: leaderboardId },
+        select: { id: true, name: true, createdById: true, clubId: true },
       });
 
       if (!leaderboard) {
@@ -76,8 +78,8 @@ export const POST = withMiddleware<unknown>(
         throw new ForbiddenException('This invite was sent to another user');
       }
 
-      // Join the leaderboard
-      await db.$transaction([
+      // Join the leaderboard (and auto-join its club if applicable)
+      const transactionOps: Prisma.PrismaPromise<unknown>[] = [
         db.userLeaderboard.create({
           data: {
             userId: currentUser.id,
@@ -96,7 +98,34 @@ export const POST = withMiddleware<unknown>(
             leaderboardId,
           },
         }),
-      ]);
+      ];
+
+      // If the leaderboard belongs to a club, also add the user to that club
+      if (leaderboard.clubId) {
+        const existingClubMembership = await db.userClub.findUnique({
+          where: {
+            userId_clubId: {
+              userId: currentUser.id,
+              clubId: leaderboard.clubId,
+            },
+          },
+        });
+
+        if (!existingClubMembership) {
+          transactionOps.push(
+            db.userClub.create({
+              data: {
+                userId: currentUser.id,
+                clubId: leaderboard.clubId,
+                role: 'MEMBER',
+                isActive: true,
+              },
+            })
+          );
+        }
+      }
+
+      await db.$transaction(transactionOps);
 
       const response: ApiResponse<null> = {
         status: 200,

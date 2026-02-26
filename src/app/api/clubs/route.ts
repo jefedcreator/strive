@@ -124,12 +124,20 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
       const user = request.user!;
 
       const where: Prisma.ClubWhereInput = {
-        members: {
-          some: {
-            userId: user.id,
-            isActive: true,
+        OR: [
+          // Public clubs — always visible
+          { isPublic: true },
+          // Private clubs — only if the user is an active member
+          {
+            isPublic: false,
+            members: {
+              some: {
+                userId: user.id,
+                isActive: true,
+              },
+            },
           },
-        },
+        ],
       };
 
       if (payload.isActive !== undefined) {
@@ -163,6 +171,12 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
             leaderboards: true,
           },
         },
+        // Include only the current user's membership to determine isMember
+        members: {
+          where: { userId: user.id, isActive: true },
+          select: { id: true },
+          take: 1,
+        },
       };
 
       if (payload.all) {
@@ -174,11 +188,14 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
 
         const count = data.length;
 
-        const mappedData = data.map(({ _count, memberCount, ...rest }) => ({
-          ...rest,
-          leaderboards: _count.leaderboards,
-          members: _count.members,
-        }));
+        const mappedData = data.map(
+          ({ _count, memberCount, members, ...rest }) => ({
+            ...rest,
+            leaderboards: _count.leaderboards,
+            members: _count.members,
+            isMember: members.length > 0,
+          })
+        );
 
         const response: PaginatedApiResponse<ClubListItem[]> = {
           status: 200,
@@ -208,11 +225,14 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
         }),
       ]);
 
-      const mappedData = data.map(({ _count, memberCount, ...rest }) => ({
-        ...rest,
-        leaderboards: _count.leaderboards,
-        members: _count.members,
-      }));
+      const mappedData = data.map(
+        ({ _count, memberCount, members, ...rest }) => ({
+          ...rest,
+          leaderboards: _count.leaderboards,
+          members: _count.members,
+          isMember: members.length > 0,
+        })
+      );
 
       const response: PaginatedApiResponse<ClubListItem[]> = {
         status: 200,

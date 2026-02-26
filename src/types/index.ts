@@ -32,6 +32,7 @@ export interface PaginatedApiResponse<T = unknown>
 export type ClubListItem = Omit<Club, 'memberCount'> & {
   leaderboards: number;
   members: number;
+  isMember: boolean;
 };
 
 /** A member record in a club */
@@ -70,6 +71,7 @@ export type LeaderboardListItem = Leaderboard & {
   _count: {
     entries: number;
   };
+  isMember: boolean;
 };
 
 export type NotificationWithRelations = Notification & {

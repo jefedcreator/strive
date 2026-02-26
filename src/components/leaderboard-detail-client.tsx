@@ -30,7 +30,15 @@ import {
   Calendar,
   LogOut,
   Edit2,
+  MoreHorizontal,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/primitives/dropdown-menu';
 
 interface LeaderboardDetailClientProps {
   initialData: ApiResponse<LeaderboardDetail | null>;
@@ -47,7 +55,6 @@ export const LeaderboardDetailClient: React.FC<
     ? initialData.data?.createdById === currentUserId
     : false;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  // const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const { data: response } = useQuery<ApiResponse<LeaderboardDetail | null>>({
     queryKey: ['leaderboard', initialData.data?.id],
@@ -63,7 +70,6 @@ export const LeaderboardDetailClient: React.FC<
   });
 
   const leaderboard = response.data!;
-
   const entries = leaderboard.entries ?? [];
   const isCompleted = leaderboard.expiryDate
     ? new Date(leaderboard.expiryDate) < new Date()
@@ -118,7 +124,6 @@ export const LeaderboardDetailClient: React.FC<
       });
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
       setIsEditModalOpen(false);
-      // setThumbnail(null);
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(
@@ -162,102 +167,117 @@ export const LeaderboardDetailClient: React.FC<
       <FadeInItem>
         <Link
           href="/leaderboards"
-          className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6 w-fit"
+          className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-5 w-fit"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Back to Leaderboards
+          Leaderboards
         </Link>
       </FadeInItem>
 
-      {/* Header */}
+      {/* Hero Banner */}
       <FadeInItem>
-        <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft p-6 md:p-8 mb-8">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 md:gap-4">
-            {/* Identity & Metadata Stack */}
-            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-              <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white shrink-0">
-                <Trophy className="w-6 h-6 sm:w-8 sm:h-8" />
-              </div>
+        <div className="relative w-full rounded-2xl overflow-hidden mb-3 bg-gradient-to-br from-primary/30 via-purple-500/20 to-blue-500/10 dark:from-primary/20 dark:via-purple-500/15 dark:to-blue-600/5 border border-white/20 dark:border-white/10">
+          {/* Decorative blobs */}
+          <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-purple-500/20 blur-3xl pointer-events-none" />
 
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                    {leaderboard.name}
-                  </h1>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
-                      leaderboard.isPublic
-                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                        : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'
-                    }`}
-                  >
-                    {leaderboard.isPublic ? 'Public' : 'Private'}
-                  </span>
-                  <span
-                    className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
-                      isCompleted
-                        ? 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
-                        : 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
-                    }`}
-                  >
-                    {isCompleted ? 'Ended' : 'Active'}
-                  </span>
-                </div>
-
-                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl leading-relaxed mb-4">
-                  {leaderboard.description ?? 'No description provided.'}
-                </p>
-
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-                  {leaderboard.club && (
-                    <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{leaderboard.club.name}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>
-                      {leaderboard._count.entries}{' '}
-                      {leaderboard._count.entries === 1
-                        ? 'participant'
-                        : 'participants'}
-                    </span>
-                  </div>
-                  {leaderboard.expiryDate && (
-                    <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 px-2.5 py-1 rounded-md">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>
-                        {isCompleted ? 'Ended' : 'Expires'}{' '}
-                        {new Date(leaderboard.expiryDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
+          {/* Banner content */}
+          <div className="relative flex flex-col items-center justify-center text-center px-16 py-12 md:py-16">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 dark:bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 shadow-inner">
+              <Trophy className="w-6 h-6 text-white drop-shadow" />
             </div>
-
-            {/* Actions Stack */}
-            <div className="flex flex-row sm:flex-col items-stretch sm:items-end gap-2 w-full md:w-auto shrink-0 mt-2 md:mt-0 pt-4 md:pt-0 border-t border-gray-100 dark:border-gray-800 md:border-t-0 p-1 md:p-0">
-              <button
-                onClick={() => exitMutation.mutate()}
-                disabled={exitMutation.isPending}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-red-200 dark:border-red-800/50 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors shadow-sm"
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white drop-shadow-sm mb-3">
+              {leaderboard.name}
+            </h1>
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              <span
+                className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide backdrop-blur-sm ${
+                  leaderboard.isPublic
+                    ? 'text-blue-700 dark:text-blue-300 bg-blue-100/70 dark:bg-blue-900/40'
+                    : 'text-purple-700 dark:text-purple-300 bg-purple-100/70 dark:bg-purple-900/40'
+                }`}
               >
-                <LogOut className="w-4 h-4" />
-                {exitMutation.isPending ? 'Leaving...' : 'Leave'}
-              </button>
-
-              {isCreator && (
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  Edit
-                </button>
-              )}
+                {leaderboard.isPublic ? 'Public' : 'Private'}
+              </span>
+              <span
+                className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide backdrop-blur-sm ${
+                  isCompleted
+                    ? 'text-gray-600 dark:text-gray-400 bg-white/40 dark:bg-white/10'
+                    : 'text-green-700 dark:text-green-300 bg-green-100/70 dark:bg-green-900/40'
+                }`}
+              >
+                {isCompleted ? 'Ended' : 'Active'}
+              </span>
             </div>
+          </div>
+
+          {/* ··· Menu */}
+          <div className="absolute top-3 right-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/30 dark:bg-white/10 backdrop-blur-sm hover:bg-white/50 dark:hover:bg-white/20 transition-colors text-gray-700 dark:text-gray-200">
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-48 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+              >
+                {isCreator && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-gray-800"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Edit Leaderboard
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+                  </>
+                )}
+                <DropdownMenuItem
+                  onClick={() => exitMutation.mutate()}
+                  disabled={exitMutation.isPending}
+                  className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
+                >
+                  <LogOut className="w-4 h-4" />
+                  {exitMutation.isPending ? 'Leaving…' : 'Leave Leaderboard'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </FadeInItem>
+
+      {/* Metadata pill row */}
+      <FadeInItem>
+        <div className="flex flex-wrap items-center gap-2 mb-8 px-1">
+          {leaderboard.description && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mr-2">
+              {leaderboard.description}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-2 ml-auto">
+            {leaderboard.club && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">
+                <Users className="w-3.5 h-3.5" />
+                {leaderboard.club.name}
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">
+              <Users className="w-3.5 h-3.5" />
+              {leaderboard._count.entries}{' '}
+              {leaderboard._count.entries === 1
+                ? 'participant'
+                : 'participants'}
+            </span>
+            {leaderboard.expiryDate && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">
+                <Calendar className="w-3.5 h-3.5" />
+                {isCompleted ? 'Ended' : 'Expires'}{' '}
+                {new Date(leaderboard.expiryDate).toLocaleDateString()}
+              </span>
+            )}
           </div>
         </div>
       </FadeInItem>
@@ -286,7 +306,6 @@ export const LeaderboardDetailClient: React.FC<
         onSubmit={onSubmit}
         isPending={editMutation.isPending}
         clubs={clubs}
-        // onThumbnailChange={(file) => setThumbnail(file)}
       />
     </FadeInStagger>
   );

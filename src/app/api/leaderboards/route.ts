@@ -116,13 +116,25 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
       const payload = request.query!;
       const user = request.user!;
 
-      const where: Prisma.LeaderboardWhereInput = {
-        entries: {
-          some: {
-            userId: user.id,
-            isActive: true,
+      // Visibility: public leaderboards are always visible;
+      // private ones only if the user has an active entry.
+      const visibilityCondition: Prisma.LeaderboardWhereInput = {
+        OR: [
+          { isPublic: true },
+          {
+            isPublic: false,
+            entries: {
+              some: {
+                userId: user.id,
+                isActive: true,
+              },
+            },
           },
-        },
+        ],
+      };
+
+      const where: Prisma.LeaderboardWhereInput = {
+        AND: [visibilityCondition],
       };
 
       if (payload.isActive !== undefined) {
@@ -142,10 +154,13 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
       }
 
       if (payload.query) {
-        where.OR = [
-          { name: { contains: payload.query, mode: 'insensitive' } },
-          { description: { contains: payload.query, mode: 'insensitive' } },
-        ];
+        // Append search OR alongside the visibility AND — avoids overwriting it
+        (where.AND as Prisma.LeaderboardWhereInput[]).push({
+          OR: [
+            { name: { contains: payload.query, mode: 'insensitive' } },
+            { description: { contains: payload.query, mode: 'insensitive' } },
+          ],
+        });
       }
 
       const orderBy: Prisma.LeaderboardOrderByWithRelationInput = {
@@ -166,6 +181,12 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
             entries: true,
           },
         },
+        // Include only the current user's entry to determine isMember
+        entries: {
+          where: { userId: user.id, isActive: true },
+          select: { id: true },
+          take: 1,
+        },
       };
 
       if (payload.all) {
@@ -177,10 +198,15 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
 
         const count = data.length;
 
+        const mappedData = data.map(({ entries, ...rest }) => ({
+          ...rest,
+          isMember: entries.length > 0,
+        }));
+
         const response: PaginatedApiResponse<LeaderboardListItem[]> = {
           status: 200,
           message: 'Leaderboards retrieved successfully',
-          data,
+          data: mappedData,
           total: count,
           page: 1,
           size: count > 0 ? count : 1,
@@ -205,10 +231,15 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
         }),
       ]);
 
+      const mappedData = data.map(({ entries, ...rest }) => ({
+        ...rest,
+        isMember: entries.length > 0,
+      }));
+
       const response: PaginatedApiResponse<LeaderboardListItem[]> = {
         status: 200,
         message: 'Leaderboards retrieved successfully',
-        data,
+        data: mappedData,
         total: count,
         page,
         size,
