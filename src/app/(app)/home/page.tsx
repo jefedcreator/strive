@@ -1,16 +1,12 @@
-import { auth } from '@/server/auth';
-import { redirect } from 'next/navigation';
 import Background from '@/components/background';
 import { LastRunCard } from '@/components/last-run-card';
+import { auth } from '@/server/auth';
 import {
-  Clock,
-  CheckCircle2,
-  ArrowRight,
-  Activity,
-  PlusCircle,
-  Share2,
   Award,
+  PlusCircle,
+  Share2
 } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 const leaderboard = [
   {
@@ -202,7 +198,7 @@ export default async function HomePage() {
           <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft p-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                Club Activity
+                Notifications
               </h2>
               <button className="text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                 View All

@@ -20,6 +20,15 @@ export const GET = withMiddleware(
     }
 
     if (runs.length > 0) {
+      // Assign a consistent ID based on inherent run attributes
+      runs = runs.map((r) => {
+        const timestamp = new Date(r.date).getTime();
+        return {
+          ...r,
+          id: `${timestamp}-${r.distance}-${r.duration}`,
+        };
+      });
+
       // Deduplicate runs by id
       const unique = Array.from(new Map(runs.map((r) => [r.id, r])).values());
 
@@ -30,7 +39,7 @@ export const GET = withMiddleware(
             OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
           },
         },
-        select: { id: true, createdAt: true },
+        select: { id: true, createdAt: true, runId: true },
       });
 
       // For each membership, compute stats from runs after the join date
@@ -41,6 +50,13 @@ export const GET = withMiddleware(
           );
 
           if (sinceJoin.length === 0) return;
+
+          const latest = sinceJoin.reduce((prev, curr) =>
+            curr.date > prev.date ? curr : prev
+          );
+
+          // Skip DB update if this leaderboard already has this run as its latest
+          if (membership.runId === latest.id) return;
 
           const totalDistance = sinceJoin.reduce(
             (sum, r) => sum + r.distance,
@@ -56,10 +72,6 @@ export const GET = withMiddleware(
           const paceMin = Math.floor(avgPaceMinPerKm);
           const paceSec = Math.round((avgPaceMinPerKm - paceMin) * 60);
           const avgPace = `${paceMin}:${String(paceSec).padStart(2, '0')}`;
-
-          const latest = sinceJoin.reduce((prev, curr) =>
-            curr.date > prev.date ? curr : prev
-          );
 
           await db.userLeaderboard.update({
             where: { id: membership.id },
