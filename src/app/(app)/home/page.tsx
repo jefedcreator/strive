@@ -2,11 +2,11 @@ import Background from '@/components/background';
 import { HomeNotifications } from '@/components/home-notifications';
 import { HomeQuickActions } from '@/components/home-quick-actions';
 import { LastRunCard } from '@/components/last-run-card';
+import { getLeaderboards } from '@/server';
 import { auth } from '@/server/auth';
-import { getLeaderboards, getLeaderboard } from '@/server';
 import { Award } from 'lucide-react';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export default async function HomePage() {
   const session = await auth();
