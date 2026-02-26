@@ -6,7 +6,7 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  output: 'standalone',
+  // output: 'standalone',
   images: {
     remotePatterns: [new URL("https://lh3.googleusercontent.com/**"),new URL("https://res.cloudinary.com/**")],
     localPatterns: [
