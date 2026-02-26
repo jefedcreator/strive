@@ -31,6 +31,14 @@ interface LeaderboardProps {
   currentUserId?: string;
 }
 
+/** Format total minutes → "1h 23m" or "45m" */
+function formatDuration(minutes: number | null): string {
+  if (!minutes) return '—';
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
 export const Leaderboard: React.FC<LeaderboardProps> = ({
   entries,
   currentUserId,
@@ -51,10 +59,16 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   Athlete
                 </TableHead>
                 <TableHead className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400 text-right">
-                  Score
+                  Distance
                 </TableHead>
                 <TableHead className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400 text-right">
-                  Last Updated
+                  Avg Pace
+                </TableHead>
+                <TableHead className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400 text-right">
+                  Total Time
+                </TableHead>
+                <TableHead className="px-8 py-4 uppercase text-[10px] font-bold tracking-widest text-gray-500 dark:text-gray-400 text-right">
+                  Last Run
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -70,7 +84,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                       isCurrentUser ? 'bg-gray-50/80 dark:bg-white/10' : ''
                     }`}
                   >
-                    {/* Rank Pillar */}
+                    {/* Rank */}
                     <TableCell className="px-8 py-5">
                       <div
                         className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold shadow-sm ${
@@ -87,7 +101,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                       </div>
                     </TableCell>
 
-                    {/* Athlete Identity */}
+                    {/* Athlete */}
                     <TableCell className="px-8 py-5">
                       <div className="flex items-center gap-4 min-w-[200px]">
                         <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
@@ -130,14 +144,35 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                       </div>
                     </TableCell>
 
-                    {/* Metric/Score */}
+                    {/* Distance */}
                     <TableCell className="px-8 py-5 text-right">
                       <Badge className="bg-primary/5 text-primary hover:bg-primary/10 dark:bg-primary/10 dark:text-white dark:hover:bg-primary/20 px-3 py-1.5 text-[13px] font-black tracking-tight tabular-nums border border-primary/10 dark:border-primary/20 rounded-xl shadow-sm whitespace-nowrap">
-                        {entry.score.toLocaleString()}
+                        {entry.runDistance != null
+                          ? `${entry.runDistance.toFixed(2)} km`
+                          : '—'}
                       </Badge>
                     </TableCell>
 
-                    {/* Timestamp */}
+                    {/* Avg Pace */}
+                    <TableCell className="px-8 py-5 text-right whitespace-nowrap">
+                      <span className="text-sm font-semibold tabular-nums text-gray-700 dark:text-gray-300">
+                        {entry.runPace ?? '—'}
+                        {entry.runPace && (
+                          <span className="ml-1 text-[10px] font-normal text-gray-400 dark:text-gray-500">
+                            /km
+                          </span>
+                        )}
+                      </span>
+                    </TableCell>
+
+                    {/* Total Time */}
+                    <TableCell className="px-8 py-5 text-right whitespace-nowrap">
+                      <span className="text-sm font-semibold tabular-nums text-gray-700 dark:text-gray-300">
+                        {formatDuration(entry.runDuration)}
+                      </span>
+                    </TableCell>
+
+                    {/* Last Run date */}
                     <TableCell className="px-8 py-5 text-right whitespace-nowrap">
                       <span className="text-xs font-medium text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
                         {entry.lastScoreDate

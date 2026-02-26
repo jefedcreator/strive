@@ -139,16 +139,25 @@ model UserClub {
 }
 
 model UserLeaderboard {
-    id            String      @id @default(auto()) @map("_id") @db.ObjectId
-    userId        String      @db.ObjectId
-    leaderboardId String      @db.ObjectId
-    score         Int         @default(0)
-    createdAt     DateTime    @default(now())
-    updatedAt     DateTime    @updatedAt
+    id            String    @id @default(auto()) @map("_id") @db.ObjectId
+    userId        String    @db.ObjectId
+    leaderboardId String    @db.ObjectId
+    score         Int       @default(0)
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
     lastScoreDate DateTime?
-    isActive      Boolean     @default(true)
-    user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-    leaderboard   Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
+    isActive      Boolean   @default(true)
+
+    // Best run data (populated/updated whenever the user fetches their runs)
+    runId       String? // external activity ID (Strava/NRC)
+    runName     String?
+    runDate     String?
+    runDistance Float? // km
+    runDuration Float? // minutes
+    runPace     String? // "5:30" format
+
+    user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    leaderboard Leaderboard @relation(fields: [leaderboardId], references: [id], onDelete: Cascade)
 
     @@unique([userId, leaderboardId])
     @@index([userId])

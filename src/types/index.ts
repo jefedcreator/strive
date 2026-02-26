@@ -99,6 +99,13 @@ export interface LeaderboardEntryRecord {
   updatedAt: string;
   lastScoreDate: string | null;
   isActive: boolean;
+  // Best run data
+  runId: string | null;
+  runName: string | null;
+  runDate: string | null;
+  runDistance: number | null;
+  runDuration: number | null;
+  runPace: string | null;
   user: LeaderboardEntryUser;
 }
 
@@ -118,7 +125,6 @@ export interface RunData {
   distance: number; // in km
   duration: number; // in minutes
   pace: string; // in min/km (e.g. "5:30")
-  type: string; // e.g. "run", "Run", "Trail Run"
   name: string; // activity name
 }
 

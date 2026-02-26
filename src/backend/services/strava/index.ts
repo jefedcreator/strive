@@ -166,7 +166,6 @@ export class StravaService {
         distance: parseFloat(distanceKm.toFixed(2)),
         duration: parseFloat(durationMin.toFixed(2)),
         pace,
-        type: activity.type,
         name: activity.name,
       };
     });

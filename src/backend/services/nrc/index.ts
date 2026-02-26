@@ -73,7 +73,6 @@ class NRC {
             distance: parseFloat(distance.toFixed(2)),
             duration: parseFloat(durationInMinutes.toFixed(2)),
             pace,
-            type: activity.type,
             name: 'Nike Run Club Activity',
           });
         }

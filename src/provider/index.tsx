@@ -8,9 +8,12 @@ import {
 } from 'next-themes';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { ReactNode } from 'react';
+import { StoreProvider } from './store-provider';
+import type { RunData } from '@/types';
 
 interface QueryProviderProps {
   children: ReactNode;
+  data?: RunData[];
 }
 
 const queryClient = new QueryClient({
@@ -27,7 +30,7 @@ function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
 
-export const Provider = ({ children }: QueryProviderProps) => {
+export const Provider = ({ children, data }: QueryProviderProps) => {
   // useViewportHandler();
 
   return (
@@ -42,8 +45,10 @@ export const Provider = ({ children }: QueryProviderProps) => {
           <MetaThemeColorMeta />
           <NuqsAdapter>
             {/* <SocketProvider> */}
-            {children}
-            {/* </SocketProvider> */}
+            <StoreProvider initialRuns={data ?? []}>
+              {children}
+              {/* </SocketProvider> */}
+            </StoreProvider>
           </NuqsAdapter>
         </ThemeProvider>
       </SessionProvider>

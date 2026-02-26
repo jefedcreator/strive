@@ -1,9 +1,7 @@
 import { auth } from '@/server/auth';
 import { redirect } from 'next/navigation';
 import Background from '@/components/background';
-
-import { getRuns } from '@/server';
-import { type RunData } from '@/types';
+import { LastRunCard } from '@/components/last-run-card';
 import {
   Clock,
   CheckCircle2,
@@ -13,7 +11,6 @@ import {
   Share2,
   Award,
 } from 'lucide-react';
-import type { UserType } from '@prisma/client';
 
 const leaderboard = [
   {
@@ -89,125 +86,6 @@ const activities = [
   },
 ];
 
-function formatDuration(minutes: number): string {
-  const mins = Math.floor(minutes);
-  const secs = Math.round((minutes - mins) * 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-function formatRunDate(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const isYesterday = date.toDateString() === yesterday.toDateString();
-
-  const timeStr = date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
-
-  if (isToday) return `Today at ${timeStr}`;
-  if (isYesterday) return `Yesterday at ${timeStr}`;
-  return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${timeStr}`;
-}
-
-function LastRunCard({ run, type }: { run: RunData; type: UserType | null }) {
-  return (
-    <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden transition-transform duration-300 hover:scale-[1.005]">
-      <div className="p-8 pb-4">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              {run.name}
-            </h2>
-            <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 text-sm font-medium">
-              <Clock className="w-4 h-4" />
-              <span>{formatRunDate(run.date)}</span>
-            </div>
-          </div>
-          {type && (
-            <div className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-3 py-1 rounded text-[10px] font-black uppercase tracking-tighter">
-              {type}
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-8">
-          <div className="space-y-1">
-            <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
-              Distance
-            </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
-              {run.distance}{' '}
-              <span className="text-lg font-medium text-gray-400 dark:text-gray-500">
-                km
-              </span>
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
-              Duration
-            </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
-              {formatDuration(run.duration)}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase tracking-wider">
-              Avg Pace
-            </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
-              {run.pace}
-              <span className="text-lg font-medium text-gray-400 dark:text-gray-500">
-                {' '}
-                /km
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-gray-50/50 dark:bg-white/5 px-8 py-5 flex items-center justify-between border-t border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-500">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-          <span className="font-bold text-gray-900 dark:text-white text-sm">
-            Latest Activity
-          </span>
-        </div>
-        <button className="flex items-center gap-1.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-          View Details <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function NoRunsCard() {
-  return (
-    <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden p-8">
-      <div className="flex flex-col items-center justify-center text-center gap-4 py-8">
-        <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-          <Activity className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-            No Recent Runs
-          </h2>
-          <p className="text-gray-400 dark:text-gray-500 text-sm font-medium">
-            Connect your Strava or Nike Run Club account to see your activity
-            here.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default async function HomePage() {
   const session = await auth();
 
@@ -217,13 +95,6 @@ export default async function HomePage() {
 
   const { user } = session;
   const username = user.fullname ?? user.name ?? 'Runner';
-
-  const runsResponse = await getRuns();
-  const runs = runsResponse.data ?? [];
-  const lastRun = runs.length > 0 ? runs[0] : null;
-
-  console.log('user', user);
-  console.log('lastRun', lastRun);
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-10 relative">
@@ -243,12 +114,8 @@ export default async function HomePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Left Column: Stats & Leaderboard */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Main Activity Card */}
-          {lastRun ? (
-            <LastRunCard run={lastRun} type={user.type} />
-          ) : (
-            <NoRunsCard />
-          )}
+          {/* Main Activity Card (Client Component using Zustand) */}
+          <LastRunCard type={user.type} />
 
           {/* Leaderboard Table */}
           <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden">

@@ -2,6 +2,7 @@ import { Sidebar } from '@/components/sidebar';
 import { TooltipProvider } from '@/components/tooltip';
 import { TopNav } from '@/components/top-nav';
 import { Provider } from '@/provider';
+import { getRuns } from '@/server';
 import '@/styles/globals.css';
 import { type Metadata, type Viewport } from 'next';
 import NextTopLoader from 'nextjs-toploader';
@@ -60,11 +61,13 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { data } = await getRuns();
+
   return (
     <html
       lang="en"
@@ -87,7 +90,7 @@ export default function RootLayout({
       </head>
       <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-[100dvh] transition-colors duration-300 relative overflow-x-hidden antialiased">
         <NextTopLoader showSpinner={false} color="#ff014e" />
-        <Provider>
+        <Provider data={data}>
           <TooltipProvider delayDuration={0}>
             <div className="flex min-h-[100dvh]">
               <Sidebar />
