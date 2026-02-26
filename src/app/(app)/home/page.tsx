@@ -1,11 +1,9 @@
 import Background from '@/components/background';
+import { HomeNotifications } from '@/components/home-notifications';
+import { HomeQuickActions } from '@/components/home-quick-actions';
 import { LastRunCard } from '@/components/last-run-card';
 import { auth } from '@/server/auth';
-import {
-  Award,
-  PlusCircle,
-  Share2
-} from 'lucide-react';
+import { Award } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 const leaderboard = [
@@ -195,60 +193,10 @@ export default async function HomePage() {
         {/* Right Column: Activity & Quick Actions */}
         <div className="space-y-8">
           {/* Club Activity */}
-          <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft p-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                Notifications
-              </h2>
-              <button className="text-xs font-bold text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
-                View All
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              {activities.map((act) => (
-                <div key={act.id} className="flex gap-4 group">
-                  <div
-                    className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold ${act.color}`}
-                  >
-                    {act.initials}
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors cursor-pointer">
-                      {act.club}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-                      {act.description}
-                    </p>
-                    <p className="text-[10px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-widest">
-                      {act.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <HomeNotifications token={session?.user?.token ?? ''} />
 
           {/* Quick Actions */}
-          <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft p-8">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
-              Quick Actions
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200 group">
-                <PlusCircle className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white w-6 h-6" />
-                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                  Manual Entry
-                </span>
-              </button>
-              <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200 group">
-                <Share2 className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white w-6 h-6" />
-                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                  Export Data
-                </span>
-              </button>
-            </div>
-          </div>
+          <HomeQuickActions />
 
           {/* Pro Insights CTA */}
           <div className="relative overflow-hidden bg-gray-900 dark:bg-white rounded-3xl p-8 group">

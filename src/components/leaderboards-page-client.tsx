@@ -1,7 +1,6 @@
 'use client';
 
 import { leaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
-import { type Activity } from '@/components/activity-list';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
 import { LeaderboardCard } from '@/components/leaderboard-card';
 import {
@@ -134,7 +133,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     createMutation.mutate(data);
   };
 
-  const recentActivities: Activity[] = [];
 
   return (
     <div className="flex flex-col h-full">
