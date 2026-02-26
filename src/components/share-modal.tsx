@@ -148,30 +148,16 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                 <div className="flex flex-col items-center px-5 pt-5 pb-4 gap-3">
                   {/* Cover thumbnail */}
                   <div className="w-[140px] h-[100px] rounded-[12px] overflow-hidden border border-black/6 dark:border-white/8 shadow-sm">
-                    {image ? (
-                      <Image
-                        src={image}
-                        alt={name}
-                        width={140}
-                        height={100}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div
-                        className={`w-full h-full flex items-center justify-center
-                          ${
-                            variant === 'club'
-                              ? 'bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 dark:from-blue-900/50 dark:via-purple-900/30 dark:to-pink-900/20'
-                              : 'bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 dark:from-amber-900/40 dark:via-orange-900/20 dark:to-yellow-900/20'
-                          }`}
-                      >
-                        {variant === 'club' ? (
-                          <Users className="w-8 h-8 text-blue-400/60 dark:text-blue-300/40" />
-                        ) : (
-                          <Trophy className="w-8 h-8 text-amber-400/70 dark:text-amber-300/40" />
-                        )}
-                      </div>
-                    )}
+                    <Image
+                      src={
+                        image ??
+                        `/api/og?name=${encodeURIComponent(name)}&type=${variant}`
+                      }
+                      alt={name}
+                      width={140}
+                      height={100}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
 
                   {/* Name */}

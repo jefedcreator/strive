@@ -119,19 +119,32 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
             {/* Notification Feed */}
             <div className="lg:col-span-2 space-y-4">
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
-                  {[...Array(6)].map((_, i) => (
+                <div className="space-y-4 pb-20 md:pb-0">
+                  {[...Array(5)].map((_, i) => (
                     <div
                       key={i}
-                      className="bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 h-[220px] animate-pulse"
+                      className="bg-white dark:bg-card-dark rounded-xl p-5 border border-gray-200 dark:border-gray-800 flex items-start gap-4 shadow-sm animate-pulse"
                     >
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700" />
-                        <div className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 w-20 h-6" />
-                      </div>
-                      <div className="space-y-3">
-                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                      {/* Icon circle */}
+                      <div className="shrink-0 w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700" />
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        {/* Badge row + timestamp */}
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="w-16 h-4 rounded-full bg-gray-200 dark:bg-gray-700" />
+                          <div className="w-10 h-3 rounded bg-gray-200 dark:bg-gray-700" />
+                        </div>
+                        {/* Message lines */}
+                        <div className="space-y-2 mb-3">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+                        </div>
+                        {/* Action buttons */}
+                        <div className="flex gap-3">
+                          <div className="h-8 w-20 rounded-lg bg-gray-200 dark:bg-gray-700" />
+                          <div className="h-8 w-20 rounded-lg bg-gray-200 dark:bg-gray-700" />
+                        </div>
                       </div>
                     </div>
                   ))}

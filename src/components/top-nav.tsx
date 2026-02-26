@@ -13,8 +13,147 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 // import { Button } from "@/primitives"; // Using custom buttons elements from home.html for exact match, or adapt.
 import ToggleTheme from './toggle-theme';
-import { Home, ChevronRight, Search, Bell } from 'lucide-react';
+import {
+  Home,
+  ChevronRight,
+  Search,
+  Bell,
+  Info,
+  Users,
+  Trophy,
+} from 'lucide-react';
 import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import type { NotificationWithRelations, PaginatedApiResponse } from '@/types';
+
+// ─── Notification type config (mirrors notification-card.tsx) ─────────────────
+const typeConfig = {
+  info: {
+    icon: Info,
+    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+    iconText: 'text-blue-600 dark:text-blue-400',
+  },
+  club: {
+    icon: Users,
+    iconBg: 'bg-green-100 dark:bg-green-900/30',
+    iconText: 'text-green-600 dark:text-green-400',
+  },
+  leaderboard: {
+    icon: Trophy,
+    iconBg: 'bg-orange-100 dark:bg-orange-900/30',
+    iconText: 'text-orange-600 dark:text-orange-400',
+  },
+} as const;
+
+function timeAgo(date: Date | string) {
+  const diffMs = Date.now() - new Date(date).getTime();
+  const m = Math.floor(diffMs / 60000);
+  if (m < 1) return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+// ─── Bell with dropdown ───────────────────────────────────────────────────────
+function NotificationBell({ token }: { token?: string }) {
+  const { data } = useQuery<PaginatedApiResponse<NotificationWithRelations[]>>({
+    queryKey: ['notifications', 'preview'],
+    queryFn: async () => {
+      const res = await axios.get<
+        PaginatedApiResponse<NotificationWithRelations[]>
+      >('/api/notifications?size=3', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    },
+    enabled: !!token,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+
+  const notifications = data?.data ?? [];
+  const hasUnread = notifications.some((n) => !n.isRead);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors relative group outline-none">
+          <Bell className="w-6 h-6 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+          {hasUnread && (
+            <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark" />
+          )}
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        className="w-80 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800 p-0"
+        align="end"
+        sideOffset={8}
+      >
+        <DropdownMenuLabel className="flex items-center justify-between px-4 py-3 font-normal border-b border-gray-100 dark:border-gray-800">
+          <span className="text-sm font-bold text-gray-900 dark:text-white">
+            Notifications
+          </span>
+          {hasUnread && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase tracking-wide">
+              New
+            </span>
+          )}
+        </DropdownMenuLabel>
+
+        {notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center text-gray-400 dark:text-gray-500">
+            <Bell className="w-6 h-6 mb-2 opacity-40" />
+            <p className="text-xs">No notifications yet</p>
+          </div>
+        ) : (
+          notifications.map((n) => {
+            const cfg = typeConfig[n.type] ?? typeConfig.info;
+            const Icon = cfg.icon;
+            return (
+              <DropdownMenuItem
+                key={n.id}
+                asChild
+                className={`flex items-start gap-3 px-4 py-3 cursor-pointer focus:bg-gray-50 dark:focus:bg-white/5 ${n.isRead ? 'opacity-60' : ''}`}
+              >
+                <Link href="/notifications">
+                  <div
+                    className={`shrink-0 w-8 h-8 rounded-full ${cfg.iconBg} ${cfg.iconText} flex items-center justify-center mt-0.5`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-2 leading-snug">
+                        {n.message}
+                      </p>
+                      {!n.isRead && (
+                        <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-primary mt-1" />
+                      )}
+                    </div>
+                    <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                      {timeAgo(n.createdAt)}
+                    </p>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+            );
+          })
+        )}
+
+        <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+        <DropdownMenuItem
+          asChild
+          className="flex items-center justify-center cursor-pointer py-3 text-xs font-semibold text-primary focus:text-primary focus:bg-gray-50 dark:focus:bg-white/5"
+        >
+          <Link href="/notifications">View all notifications</Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export function TopNav() {
   const pathname = usePathname();
@@ -86,10 +225,7 @@ export function TopNav() {
         </div>
 
         {/* Notifications */}
-        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors relative group">
-          <Bell className="w-6 h-6 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
-          <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></span>
-        </button>
+        <NotificationBell token={session?.user?.token ?? undefined} />
 
         {/* Theme Toggle */}
         {/* <button
