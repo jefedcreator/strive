@@ -12,20 +12,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 // import { Button } from "@/primitives"; // Using custom buttons elements from home.html for exact match, or adapt.
-import ToggleTheme from './toggle-theme';
 import {
-  Home,
   ChevronRight,
-  Search,
-  Bell,
+  Home,
   Info,
-  Users,
+  Search,
   Trophy,
+  Users
 } from 'lucide-react';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import type { NotificationWithRelations, PaginatedApiResponse } from '@/types';
+import ToggleTheme from './toggle-theme';
 
 // ─── Notification type config (mirrors notification-card.tsx) ─────────────────
 export const typeConfig = {

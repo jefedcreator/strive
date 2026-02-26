@@ -26,7 +26,7 @@ export interface ApiError {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-    PaginationMeta {}
+  PaginationMeta { }
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -65,12 +65,39 @@ export interface LeaderboardClubSummary {
   slug: string;
 }
 
-/** Shape returned by GET /api/leaderboards — Leaderboard with partial club and entry count */
 export type LeaderboardListItem = Leaderboard & {
-  club: LeaderboardClubSummary | null;
+  club: {
+    name: string;
+    id: string;
+    image: string | null;
+    slug: string;
+  } | null;
   _count: {
     entries: number;
   };
+  entries?: ({
+    user: {
+      id: string;
+      avatar: string | null;
+      fullname: string | null;
+      username: string | null;
+    };
+  } & {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    isActive: boolean;
+    userId: string;
+    leaderboardId: string;
+    score: number;
+    lastScoreDate: Date | null;
+    runId: string | null;
+    runName: string | null;
+    runDate: string | null;
+    runDistance: number | null;
+    runDuration: number | null;
+    runPace: string | null;
+  })[];
   isMember: boolean;
 };
 
@@ -191,11 +218,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-    | {
-        1: string;
-        2?: string | undefined;
-      }
-    | undefined;
+  | {
+    1: string;
+    2?: string | undefined;
+  }
+  | undefined;
 };
 
 enum DateRangeFilters {

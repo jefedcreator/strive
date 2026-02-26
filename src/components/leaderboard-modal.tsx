@@ -1,21 +1,20 @@
 'use client';
 
 import { type LeaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
-import { Form, Field, Input, Textarea, Button } from '@/primitives';
+import { Button, Field, Form, Input, Textarea } from '@/primitives';
 import { Calendar } from '@/primitives/Calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/primitives/Popover';
 import { Modal } from '@/primitives/Modal';
+import { Popover, PopoverContent, PopoverTrigger } from '@/primitives/Popover';
 import { type ClubListItem } from '@/types';
 import * as Switch from '@radix-ui/react-switch';
-import React from 'react';
-import Image from 'next/image';
 import { format } from 'date-fns';
+import React from 'react';
 import {
   Controller,
   type Control,
   type FieldErrors,
-  type UseFormRegister,
   type UseFormHandleSubmit,
+  type UseFormRegister,
 } from 'react-hook-form';
 
 export type { LeaderboardValidatorSchema as LeaderboardFormValues };
@@ -42,7 +41,7 @@ interface LeaderboardModalProps {
   // onThumbnailChange: (file: File) => void;
 }
 
-import { X, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronDown, X } from 'lucide-react';
 
 export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   isOpen,

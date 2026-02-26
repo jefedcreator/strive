@@ -116,6 +116,75 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
       const payload = request.query!;
       const user = request.user!;
 
+      // If 'latest' is true, return the single most recently active leaderboard for the user, with top 5 entries
+      if (payload.latest) {
+        const latestMembership = await db.userLeaderboard.findFirst({
+          where: {
+            userId: user.id,
+            isActive: true,
+            leaderboard: {
+              isActive: true,
+            },
+          },
+          orderBy: {
+            updatedAt: 'desc',
+          },
+          include: {
+            leaderboard: {
+              include: {
+                club: {
+                  select: { name: true, slug: true, image: true, id: true },
+                },
+                entries: {
+                  where: { isActive: true },
+                  orderBy: { score: 'desc' },
+                  take: 5,
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        fullname: true,
+                        username: true,
+                        avatar: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (!latestMembership) {
+          return NextResponse.json({
+            status: 200,
+            message: 'No active leaderboards found',
+            data: [],
+            total: 0,
+            page: 1,
+            size: 1,
+            totalPages: 0,
+          });
+        }
+
+        const lbData = latestMembership.leaderboard;
+        const mappedLatest = {
+          ...lbData,
+          isMember: true,
+          _count: { entries: lbData.entries.length } // We don't have total entries easily here, just the top 5
+        };
+
+        return NextResponse.json({
+          status: 200,
+          message: 'Latest leaderboard retrieved successfully',
+          data: [mappedLatest],
+          total: 1,
+          page: 1,
+          size: 1,
+          totalPages: 1,
+        });
+      }
+
       // Visibility: public leaderboards are always visible;
       // private ones only if the user has an active entry.
       const visibilityCondition: Prisma.LeaderboardWhereInput = {

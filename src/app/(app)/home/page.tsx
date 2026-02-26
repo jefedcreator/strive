@@ -3,82 +3,12 @@ import { HomeNotifications } from '@/components/home-notifications';
 import { HomeQuickActions } from '@/components/home-quick-actions';
 import { LastRunCard } from '@/components/last-run-card';
 import { auth } from '@/server/auth';
+import { getLeaderboards, getLeaderboard } from '@/server';
 import { Award } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
-const leaderboard = [
-  {
-    rank: 1,
-    athlete: 'James Miller',
-    distance: '84.5 km',
-    avgPace: '4\'45" /km',
-    initials: 'JM',
-    color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-  },
-  {
-    rank: 2,
-    athlete: 'Sarah Jenkins',
-    distance: '72.1 km',
-    avgPace: '5\'02" /km',
-    initials: 'SJ',
-    color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
-  },
-  {
-    rank: 3,
-    athlete: 'You',
-    distance: '68.4 km',
-    avgPace: '5\'10" /km',
-    initials: 'R',
-    color: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400',
-  },
-  {
-    rank: 4,
-    athlete: 'Mike K.',
-    distance: '65.0 km',
-    avgPace: '5\'22" /km',
-    initials: 'MK',
-    color:
-      'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
-  },
-  {
-    rank: 5,
-    athlete: 'Anna Lee',
-    distance: '61.8 km',
-    avgPace: '5\'15" /km',
-    initials: 'AL',
-    color:
-      'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-  },
-];
 
-const activities = [
-  {
-    id: '1',
-    club: 'The Runners Club',
-    description: 'Alex just finished a 10k run',
-    time: '2 mins ago',
-    initials: 'TR',
-    color:
-      'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
-  },
-  {
-    id: '2',
-    club: 'NRC Chicago',
-    description: 'New challenge posted: "Winter Warrior"',
-    time: '1 hour ago',
-    initials: 'NRC',
-    color:
-      'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-  },
-  {
-    id: '3',
-    club: 'Mountain Trail',
-    description: 'Sarah commented on your route.',
-    time: '3 hours ago',
-    initials: 'MT',
-    color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
-  },
-];
 
 export default async function HomePage() {
   const session = await auth();
@@ -89,6 +19,43 @@ export default async function HomePage() {
 
   const { user } = session;
   const username = user.fullname ?? user.name ?? 'Runner';
+
+  // Fetch the user's latest active leaderboard participation via API
+  const leaderboardsList = await getLeaderboards({ latest: true });
+  const latestMembership = leaderboardsList.data[0];
+
+  const leaderboard =
+    latestMembership?.entries?.slice(0, 5).map((entry: any, index: number) => {
+      const isMe = entry.userId === user.id;
+      const athleteName = isMe
+        ? 'You'
+        : entry.user.fullname ?? entry.user.username ?? 'Unknown Athlete';
+      const initials = isMe ? 'R' : athleteName.slice(0, 2).toUpperCase();
+
+      let color = 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500';
+      if (index === 0)
+        color = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400';
+      else if (index === 1)
+        color = 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
+      else if (index === 2)
+        color = 'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300';
+      else if (isMe)
+        color = 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
+
+      return {
+        rank: index + 1,
+        athlete: athleteName,
+        distance: entry.score > 0 ? `${(entry.score / 1000).toFixed(1)} km` : '0 km',
+        avgPace: entry.runPace ? `${entry.runPace} /km` : '--',
+        initials,
+        color,
+      };
+    }) ?? [];
+
+  const leaderboardName = latestMembership?.name ?? 'Leaderboard Overview';
+  const leaderboardSubtitle = latestMembership?.club?.name
+    ? `Top performers in ${latestMembership.club.name}`
+    : 'Top performers from your latest competition';
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-10 relative">
@@ -116,15 +83,19 @@ export default async function HomePage() {
             <div className="p-8 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                  Leaderboard Overview
+                  {leaderboardName}
                 </h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm font-medium">
-                  Top performers in The Runners Club (This Week)
+                  {leaderboardSubtitle}
                 </p>
               </div>
-              <button className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-left sm:text-right">
-                View Full Leaderboard
-              </button>
+              {latestMembership ? (
+                <Link 
+                  href={`/leaderboards/${latestMembership.id}`}
+                  className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-left sm:text-right"
+                >View Full Leaderboard
+                </Link>
+              ) : null}
             </div>
 
             <div className="overflow-x-auto">
@@ -138,22 +109,29 @@ export default async function HomePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                  {leaderboard.map((row) => (
-                    <tr
+                  {leaderboard.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-8 py-12 text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-4">
+                          You have not joined any active leaderboards yet.
+                        </p>
+                        <Link
+                          href="/leaderboards?isPublic=true"
+                          className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                        >
+                          Explore Leaderboards
+                        </Link>
+                      </td>
+                    </tr>
+                  ) : (
+                    leaderboard.map((row: any) => (
+                      <tr
                       key={row.rank}
                       className={`group transition-colors ${row.athlete === 'You' ? 'bg-gray-50/50 dark:bg-white/5' : 'hover:bg-gray-50/30 dark:hover:bg-white/5'}`}
                     >
                       <td className="px-8 py-5">
                         <div
-                          className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${
-                            row.rank === 1
-                              ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-                              : row.rank === 2
-                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
-                                : row.rank === 3
-                                  ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300'
-                                  : 'text-gray-400 dark:text-gray-500'
-                          }`}
+                          className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${row.color}`}
                         >
                           {row.rank}
                         </div>
@@ -183,7 +161,7 @@ export default async function HomePage() {
                         </span>
                       </td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
             </div>

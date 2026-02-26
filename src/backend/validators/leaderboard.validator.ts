@@ -65,6 +65,15 @@ export const leaderboardQueryValidatorSchema = baseQueryValidatorSchema
         })
       )
       .optional(),
+    latest: z
+      .string()
+      .transform((val) => val === 'true')
+      .pipe(
+        z.boolean({
+          invalid_type_error: 'latest must be a boolean value'
+        })
+      )
+      .optional(),
     clubId: mongoIdValidator.optional(),
     createdById: mongoIdValidator.optional(),
   })
