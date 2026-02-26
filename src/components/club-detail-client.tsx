@@ -135,13 +135,9 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
       return res.data;
     },
     onSuccess: async () => {
-      toast.success('You have left the club.');
       await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
       router.push('/clubs');
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message ?? 'Failed to leave club');
     },
   });
 
@@ -250,7 +246,14 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                   </>
                 )}
                 <DropdownMenuItem
-                  onClick={() => exitMutation.mutate()}
+                  onClick={() =>
+                    toast.promise(exitMutation.mutateAsync(), {
+                      loading: 'Leaving club…',
+                      success: 'You have left the club.',
+                      error: (err: AxiosError<ApiError>) =>
+                        err.response?.data?.message ?? 'Failed to leave club',
+                    })
+                  }
                   disabled={exitMutation.isPending}
                   className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
                 >

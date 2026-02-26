@@ -174,69 +174,65 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
 
           {/* Overflow menu */}
           {hasMenuItems && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/8 transition-colors outline-none">
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
-              align="end"
-            >
-              {!isMember && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    toast.promise(
-                      joinMutation.mutateAsync(),
-                      {
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/8 transition-colors outline-none">
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+                align="end"
+              >
+                {!isMember && (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      toast.promise(joinMutation.mutateAsync(), {
                         loading: 'Joining leaderboard…',
                         success: data.isPublic
                           ? 'Successfully joined the leaderboard!'
                           : 'Join request sent. Waiting for owner approval.',
                         error: (err: AxiosError<ApiError>) =>
-                          err.response?.data?.message ?? 'Failed to join leaderboard',
-                      }
-                    )
-                  }
-                  disabled={joinMutation.isPending || isCompleted}
-                  className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
-                >
-                  <LogIn className="w-4 h-4" />
-                  {joinMutation.isPending ? 'Joining...' : 'Join'}
-                </DropdownMenuItem>
-              )}
-              {isMember && data.isPublic && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    toast.promise(
-                      inviteMutation.mutateAsync(),
-                      {
+                          err.response?.data?.message ??
+                          'Failed to join leaderboard',
+                      })
+                    }
+                    disabled={joinMutation.isPending || isCompleted}
+                    className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    {joinMutation.isPending ? 'Joining...' : 'Join'}
+                  </DropdownMenuItem>
+                )}
+                {isMember && data.isPublic && (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      toast.promise(inviteMutation.mutateAsync(), {
                         loading: 'Generating invite link…',
                         success: 'Invite link ready!',
                         error: (err: AxiosError<ApiError>) =>
-                          err.response?.data?.message ?? 'Failed to generate invite',
-                      }
-                    )
-                  }
-                  disabled={inviteMutation.isPending || isCompleted}
-                  className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {inviteMutation.isPending ? 'Generating...' : 'Invite'}
-                </DropdownMenuItem>
-              )}
-              {isCreator && (
-                <DropdownMenuItem
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                          err.response?.data?.message ??
+                          'Failed to generate invite',
+                      })
+                    }
+                    disabled={inviteMutation.isPending || isCompleted}
+                    className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    {inviteMutation.isPending ? 'Generating...' : 'Invite'}
+                  </DropdownMenuItem>
+                )}
+                {isCreator && (
+                  <DropdownMenuItem
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </motion.div>
@@ -282,15 +278,13 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
                 <Button
                   variant="destructive"
                   onClick={() =>
-                    toast.promise(
-                      deleteMutation.mutateAsync(),
-                      {
-                        loading: 'Deleting leaderboard…',
-                        success: 'Leaderboard deleted successfully!',
-                        error: (err: AxiosError<ApiError>) =>
-                          err.response?.data?.message ?? 'Failed to delete leaderboard',
-                      }
-                    )
+                    toast.promise(deleteMutation.mutateAsync(), {
+                      loading: 'Deleting leaderboard…',
+                      success: 'Leaderboard deleted successfully!',
+                      error: (err: AxiosError<ApiError>) =>
+                        err.response?.data?.message ??
+                        'Failed to delete leaderboard',
+                    })
                   }
                   disabled={deleteMutation.isPending}
                 >

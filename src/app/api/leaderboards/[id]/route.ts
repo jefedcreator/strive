@@ -192,7 +192,9 @@ export const GET = withMiddleware<
 
       const isMember = leaderboard.entries.some((e) => e.userId === user.id);
       if (!leaderboard.isPublic && !isMember) {
-        throw new ForbiddenException('You are not authorized to view this leaderboard');
+        throw new ForbiddenException(
+          'You are not authorized to view this leaderboard'
+        );
       }
 
       const response: ApiResponse<typeof leaderboard> = {

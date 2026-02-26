@@ -143,17 +143,11 @@ export const LeaderboardDetailClient: React.FC<
       return res.data;
     },
     onSuccess: async () => {
-      toast.success('You have left the leaderboard.');
       await queryClient.invalidateQueries({
         queryKey: ['leaderboard', leaderboard.id],
       });
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
       router.push('/leaderboards');
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to leave leaderboard'
-      );
     },
   });
 
@@ -236,7 +230,15 @@ export const LeaderboardDetailClient: React.FC<
                   </>
                 )}
                 <DropdownMenuItem
-                  onClick={() => exitMutation.mutate()}
+                  onClick={() =>
+                    toast.promise(exitMutation.mutateAsync(), {
+                      loading: 'Leaving leaderboard…',
+                      success: 'You have left the leaderboard.',
+                      error: (err: AxiosError<ApiError>) =>
+                        err.response?.data?.message ??
+                        'Failed to leave leaderboard',
+                    })
+                  }
                   disabled={exitMutation.isPending}
                   className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
                 >

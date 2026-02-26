@@ -182,7 +182,9 @@ export const GET = withMiddleware<unknown>(
 
       const isMember = club.members.some((m) => m.userId === user.id);
       if (!club.isPublic && !isMember) {
-        throw new ForbiddenException('You are not authorized to view this club');
+        throw new ForbiddenException(
+          'You are not authorized to view this club'
+        );
       }
 
       const response: ApiResponse<typeof club> = {
