@@ -70,7 +70,7 @@ export const leaderboardQueryValidatorSchema = baseQueryValidatorSchema
       .transform((val) => val === 'true')
       .pipe(
         z.boolean({
-          invalid_type_error: 'latest must be a boolean value'
+          invalid_type_error: 'latest must be a boolean value',
         })
       )
       .optional(),

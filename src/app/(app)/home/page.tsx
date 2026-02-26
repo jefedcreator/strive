@@ -8,8 +8,6 @@ import { Award } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
-
-
 export default async function HomePage() {
   const session = await auth();
 
@@ -29,23 +27,28 @@ export default async function HomePage() {
       const isMe = entry.userId === user.id;
       const athleteName = isMe
         ? 'You'
-        : entry.user.fullname ?? entry.user.username ?? 'Unknown Athlete';
+        : (entry.user.fullname ?? entry.user.username ?? 'Unknown Athlete');
       const initials = isMe ? 'R' : athleteName.slice(0, 2).toUpperCase();
 
-      let color = 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500';
+      let color =
+        'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500';
       if (index === 0)
-        color = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400';
+        color =
+          'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400';
       else if (index === 1)
         color = 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
       else if (index === 2)
-        color = 'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300';
+        color =
+          'bg-orange-50 dark:bg-orange-900/20 text-orange-400 dark:text-orange-300';
       else if (isMe)
-        color = 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
+        color =
+          'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
 
       return {
         rank: index + 1,
         athlete: athleteName,
-        distance: entry.score > 0 ? `${(entry.score / 1000).toFixed(1)} km` : '0 km',
+        distance:
+          entry.score > 0 ? `${(entry.score / 1000).toFixed(1)} km` : '0 km',
         avgPace: entry.runPace ? `${entry.runPace} /km` : '--',
         initials,
         color,
@@ -90,10 +93,11 @@ export default async function HomePage() {
                 </p>
               </div>
               {latestMembership ? (
-                <Link 
+                <Link
                   href={`/leaderboards/${latestMembership.id}`}
                   className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-left sm:text-right"
-                >View Full Leaderboard
+                >
+                  View Full Leaderboard
                 </Link>
               ) : null}
             </div>
@@ -126,42 +130,43 @@ export default async function HomePage() {
                   ) : (
                     leaderboard.map((row: any) => (
                       <tr
-                      key={row.rank}
-                      className={`group transition-colors ${row.athlete === 'You' ? 'bg-gray-50/50 dark:bg-white/5' : 'hover:bg-gray-50/30 dark:hover:bg-white/5'}`}
-                    >
-                      <td className="px-8 py-5">
-                        <div
-                          className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${row.color}`}
-                        >
-                          {row.rank}
-                        </div>
-                      </td>
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-3">
+                        key={row.rank}
+                        className={`group transition-colors ${row.athlete === 'You' ? 'bg-gray-50/50 dark:bg-white/5' : 'hover:bg-gray-50/30 dark:hover:bg-white/5'}`}
+                      >
+                        <td className="px-8 py-5">
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold ${row.color}`}
+                            className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${row.color}`}
                           >
-                            {row.initials}
+                            {row.rank}
                           </div>
-                          <span
-                            className={`text-sm font-bold ${row.athlete === 'You' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}
-                          >
-                            {row.athlete}
+                        </td>
+                        <td className="px-8 py-5">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold ${row.color}`}
+                            >
+                              {row.initials}
+                            </div>
+                            <span
+                              className={`text-sm font-bold ${row.athlete === 'You' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                            >
+                              {row.athlete}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-8 py-5">
+                          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                            {row.distance}
                           </span>
-                        </div>
-                      </td>
-                      <td className="px-8 py-5">
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                          {row.distance}
-                        </span>
-                      </td>
-                      <td className="px-8 py-5 text-right">
-                        <span className="text-sm font-medium text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                          {row.avgPace}
-                        </span>
-                      </td>
-                    </tr>
-                  )))}
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                          <span className="text-sm font-medium text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                            {row.avgPace}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

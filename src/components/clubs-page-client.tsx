@@ -21,7 +21,8 @@ import { useQueryStates } from 'nuqs';
 import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Plus, Search, SearchX } from 'lucide-react';
+import { usePaginationScroll } from '@/hooks/usePaginationScroll';
+import { Loader2, Plus, Search, SearchX } from 'lucide-react';
 
 interface ClubsPageClientProps {
   initialData: PaginatedApiResponse<ClubListItem[]>;
@@ -40,7 +41,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [{ isActive, isPublic, query }, setStates] = useQueryStates(
+  const [{ isActive, isPublic, query, page }, setStates] = useQueryStates(
     parseParams,
     {
       shallow: false,
@@ -56,10 +57,40 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
     return 'all';
   }, [isActive, isPublic]);
 
-  const isLoading =
+  const isNavigating =
     isActive !== currentFilters.isActive ||
     isPublic !== currentFilters.isPublic ||
     query !== currentFilters.query;
+
+  const fetchClubs = async (page: number) => {
+    const res = await axios.get<PaginatedApiResponse<ClubListItem[]>>(
+      '/api/clubs',
+      {
+        params: {
+          page,
+          ...(isActive !== null && { isActive }),
+          ...(isPublic !== null && { isPublic }),
+          ...(query && { query }),
+        },
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      }
+    );
+    return res.data;
+  };
+
+  const {
+    items: clubs,
+    ref,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePaginationScroll<ClubListItem>({
+    queryKey: ['clubs', isActive, isPublic, query],
+    fetchData: fetchClubs,
+    page,
+    setPage: (p) => setStates({ page: p }, { shallow: true }),
+    initialData,
+    isNavigating,
+  });
 
   const {
     register,
@@ -128,8 +159,6 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
   const onSubmit = (data: ClubFormValues) => {
     createClubMutation.mutate(data);
   };
-
-  const clubs = initialData.data;
 
   return (
     <div className="flex flex-col h-full">
@@ -202,7 +231,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 outline-none">
-          {isLoading ? (
+          {isNavigating ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
               {[...Array(6)].map((_, i) => (
                 <div
@@ -220,18 +249,35 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
                 </div>
               ))}
             </div>
-          ) : clubs.length > 0 ? (
-            <FadeInStagger
-              key={`${tab}-${clubs.length}`}
-              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0"
-            >
-              {clubs.map((club) => (
-                <FadeInItem key={club.id}>
-                  <ClubCard club={club} />
-                </FadeInItem>
-              ))}
-            </FadeInStagger>
-          ) : (
+          ) : !isNavigating && clubs.length > 0 ? (
+            <>
+              <FadeInStagger
+                key={`${tab}-${clubs.length}`}
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6"
+              >
+                {clubs.map((club) => (
+                  <FadeInItem key={club.id}>
+                    <ClubCard club={club} />
+                  </FadeInItem>
+                ))}
+              </FadeInStagger>
+
+              <div
+                ref={ref}
+                className="w-full flex justify-center py-6 pb-20 md:pb-6"
+              >
+                {isFetchingNextPage ? (
+                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                ) : hasNextPage ? (
+                  <span className="text-sm text-gray-400">Scroll for more</span>
+                ) : (
+                  <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6 w-full text-center">
+                    No more clubs
+                  </span>
+                )}
+              </div>
+            </>
+          ) : !isNavigating ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <SearchX className="w-10 h-10 mb-2 opacity-50 text-gray-400 dark:text-gray-500" />
               <h3 className="font-bold text-gray-900 dark:text-white mb-1">
@@ -241,7 +287,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
                 Try adjusting your filters or search term.
               </p>
             </div>
-          )}
+          ) : null}
         </TabsContent>
       </Tabs>
 

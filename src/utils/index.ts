@@ -9,6 +9,7 @@ import {
   parseAsBoolean,
   parseAsString,
   parseAsStringEnum,
+  parseAsInteger,
 } from 'nuqs/server';
 import { HttpException } from './exceptions';
 import { NotificationType } from '@prisma/client';
@@ -126,6 +127,7 @@ const parseParams = {
   isActive: parseAsBoolean,
   isPublic: parseAsBoolean,
   query: parseAsString,
+  page: parseAsInteger.withDefault(1),
   type: parseAsStringEnum<NotificationType>(Object.values(NotificationType)),
 };
 

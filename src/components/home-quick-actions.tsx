@@ -13,7 +13,10 @@ import { PlusCircle, Users } from 'lucide-react';
 import { clubValidatorSchema } from '@/backend/validators/club.validator';
 import { leaderboardValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
-import { LeaderboardModal, type LeaderboardFormValues } from '@/components/leaderboard-modal';
+import {
+  LeaderboardModal,
+  type LeaderboardFormValues,
+} from '@/components/leaderboard-modal';
 import { type ApiError, type ApiResponse, type ClubListItem } from '@/types';
 
 export function HomeQuickActions() {
@@ -92,7 +95,11 @@ export function HomeQuickActions() {
 
   // --- Leaderboard Form & Mutation ---
   // We need the user's clubs for the dropdown in the leaderboard modal
-  const { data: clubs = [] } = useQuery<ApiResponse<ClubListItem[]>, Error, ClubListItem[]>({
+  const { data: clubs = [] } = useQuery<
+    ApiResponse<ClubListItem[]>,
+    Error,
+    ClubListItem[]
+  >({
     queryKey: ['clubs'],
     queryFn: async () => {
       const res = await axios.get('/api/clubs', {
@@ -136,7 +143,9 @@ export function HomeQuickActions() {
       resetLeaderboard();
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message ?? 'Failed to create leaderboard');
+      toast.error(
+        error.response?.data?.message ?? 'Failed to create leaderboard'
+      );
     },
   });
 

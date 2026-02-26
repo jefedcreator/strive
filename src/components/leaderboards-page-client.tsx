@@ -18,15 +18,17 @@ import {
 } from '@/types';
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import axios, { type AxiosError } from 'axios';
-import { Plus, Search, SearchX } from 'lucide-react';
+import { toast } from 'sonner';
+import { useQueryStates } from 'nuqs';
+import React, { useState, useEffect } from 'react';
+import { useInView } from 'react-intersection-observer';
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
+import { Loader2, Plus, Search, SearchX } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useQueryStates } from 'nuqs';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import axios, { type AxiosError } from 'axios';
+import { usePaginationScroll } from '@/hooks/usePaginationScroll';
 
 interface LeaderboardsPageClientProps {
   initialData: PaginatedApiResponse<LeaderboardListItem[]>;
@@ -44,7 +46,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
   const { data: session } = useSession();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [{ isActive, isPublic, query }, setStates] = useQueryStates(
+  const [{ isActive, isPublic, query, page }, setStates] = useQueryStates(
     parseParams,
     {
       shallow: false,
@@ -60,21 +62,41 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     return 'all';
   }, [isActive, isPublic]);
 
-  // Determine if we are in a loading state (navigating between tabs)
-  // This happens when the URL params (isActive/isPublic from nuqs)
-  // do not match the server-side props (currentFilters) yet.
-  const isLoading =
+  const isNavigating =
     isActive !== currentFilters.isActive ||
     isPublic !== currentFilters.isPublic ||
     query !== currentFilters.query;
 
-  // We rely on server-side data (initialData) passed via props.
-  // When tabs change, the URL updates (nuqs), triggering a server re-render.
-  // The isLoading state handles the visual transition until new props arrive.
-  // We rely on server-side data (initialData) passed via props.
-  // When tabs change or search query updates, the URL updates (nuqs), triggering a server re-render.
-  // The isLoading state handles the visual transition until new props arrive.
-  const leaderboards = initialData.data;
+  const fetchLeaderboards = async (page: number) => {
+    const res = await axios.get<PaginatedApiResponse<LeaderboardListItem[]>>(
+      '/api/leaderboards',
+      {
+        params: {
+          page,
+          ...(isActive !== null && { isActive }),
+          ...(isPublic !== null && { isPublic }),
+          ...(query && { query }),
+        },
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      }
+    );
+
+    return res.data;
+  };
+
+  const {
+    items: leaderboards,
+    ref,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePaginationScroll<LeaderboardListItem>({
+    queryKey: ['leaderboards', isActive, isPublic, query],
+    fetchData: fetchLeaderboards,
+    page,
+    setPage: (p) => setStates({ page: p }, { shallow: true }),
+    initialData,
+    isNavigating,
+  });
 
   const { data: clubs = [] } = useQuery<
     ApiResponse<ClubListItem[]>,
@@ -132,7 +154,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
   const onSubmit = (data: LeaderboardFormValues) => {
     createMutation.mutate(data);
   };
-
 
   return (
     <div className="flex flex-col h-full">
@@ -205,7 +226,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 outline-none">
-          {isLoading ? (
+          {isNavigating ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0">
               {[...Array(6)].map((_, i) => (
                 <div
@@ -223,18 +244,36 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
                 </div>
               ))}
             </div>
-          ) : !isLoading && leaderboards.length > 0 ? (
-            <FadeInStagger
-              key={`${tab}-${leaderboards.length}`}
-              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-20 md:pb-0"
-            >
-              {leaderboards.map((board) => (
-                <FadeInItem key={board.id}>
-                  <LeaderboardCard data={board} />
-                </FadeInItem>
-              ))}
-            </FadeInStagger>
-          ) : !isLoading ? (
+          ) : !isNavigating && leaderboards.length > 0 ? (
+            <>
+              <FadeInStagger
+                key={`${tab}-${leaderboards.length}`}
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6"
+              >
+                {leaderboards.map((board) => (
+                  <FadeInItem key={board.id}>
+                    <LeaderboardCard data={board} />
+                  </FadeInItem>
+                ))}
+              </FadeInStagger>
+
+              {/* Intersection Observer target element */}
+              <div
+                ref={ref}
+                className="w-full flex justify-center py-6 pb-20 md:pb-6"
+              >
+                {isFetchingNextPage ? (
+                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                ) : hasNextPage ? (
+                  <span className="text-sm text-gray-400">Scroll for more</span>
+                ) : (
+                  <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6 w-full text-center">
+                    No more leaderboards
+                  </span>
+                )}
+              </div>
+            </>
+          ) : !isNavigating ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <SearchX className="w-10 h-10 mb-2 opacity-50 text-gray-400 dark:text-gray-500" />
               <h3 className="font-bold text-gray-900 dark:text-white mb-1">
@@ -248,8 +287,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         </TabsContent>
       </Tabs>
 
-      {/* <ActivityList activities={recentActivities} className="mt-12" /> */}
-
       <LeaderboardModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -261,7 +298,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         onSubmit={onSubmit}
         isPending={createMutation.isPending}
         clubs={clubs}
-        // onThumbnailChange={(file) => setThumbnail(file)}
       />
     </div>
   );

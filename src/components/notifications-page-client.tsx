@@ -1,19 +1,19 @@
 'use client';
 
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
+import { usePaginationScroll } from '@/hooks/usePaginationScroll';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
-  type FilterOption,
   type NotificationWithRelations,
   type PaginatedApiResponse,
 } from '@/types';
 import { parseParams } from '@/utils';
-import { Search, SearchX } from 'lucide-react';
+import axios from 'axios';
+import { Loader2, Search, SearchX } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useQueryStates } from 'nuqs';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { NotificationCard } from './notification-card';
-
 interface NotificationsPageClientProps {
   initialData: PaginatedApiResponse<NotificationWithRelations[]>;
   currentFilters: {
@@ -27,7 +27,7 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
   currentFilters,
 }) => {
   const { data: session } = useSession();
-  const [{ type, query }, setStates] = useQueryStates(parseParams, {
+  const [{ type, query, page }, setStates] = useQueryStates(parseParams, {
     shallow: false,
     throttleMs: 1000,
   });
@@ -42,35 +42,34 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
   const isLoading =
     type !== currentFilters.type || query !== currentFilters.query;
 
-  // const { data: notificationsResponse } = useQuery<
-  //   PaginatedApiResponse<NotificationWithRelations[]>
-  // >({
-  //   queryKey: ['notifications'],
-  //   queryFn: async () => {
-  //     const { data } = await axios.get<
-  //       PaginatedApiResponse<NotificationWithRelations[]>
-  //     >('/api/notifications', {
-  //       headers: { Authorization: `Bearer ${session?.user.token}` },
-  //     });
-  //     return data;
-  //   },
-  //   initialData,
-  //   staleTime: Infinity,
-  // });
+  const fetchNotifications = async (page: number) => {
+    const res = await axios.get<
+      PaginatedApiResponse<NotificationWithRelations[]>
+    >('/api/notifications', {
+      params: {
+        page,
+        ...(type && { type }),
+        ...(query && { query }),
+      },
+      headers: { Authorization: `Bearer ${session?.user.token}` },
+    });
 
-  const notifications = notificationsResponse.data;
+    return res.data;
+  };
 
-  // const todayNotifications = useMemo(() => {
-  //   const today = new Date();
-  //   today.setHours(0, 0, 0, 0);
-  //   return filteredNotifications.filter((n) => new Date(n.createdAt) >= today);
-  // }, [filteredNotifications]);
-
-  // const olderNotifications = useMemo(() => {
-  //   const today = new Date();
-  //   today.setHours(0, 0, 0, 0);
-  //   return filteredNotifications.filter((n) => new Date(n.createdAt) < today);
-  // }, [filteredNotifications]);
+  const {
+    items: notifications,
+    ref,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePaginationScroll<NotificationWithRelations>({
+    queryKey: ['notifications', type, query],
+    fetchData: fetchNotifications,
+    page,
+    setPage: (p) => setStates({ page: p }, { shallow: true }),
+    initialData: notificationsResponse,
+    isNavigating: isLoading,
+  });
 
   return (
     <div className="flex flex-col h-full">
@@ -150,13 +149,31 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
                   ))}
                 </div>
               ) : !isLoading && notifications.length > 0 ? (
-                <FadeInStagger className="space-y-4">
-                  {notifications.map((notification) => (
-                    <FadeInItem key={notification.id}>
-                      <NotificationCard notification={notification} />
-                    </FadeInItem>
-                  ))}
-                </FadeInStagger>
+                <>
+                  <FadeInStagger className="space-y-4">
+                    {notifications.map((notification) => (
+                      <FadeInItem key={notification.id}>
+                        <NotificationCard notification={notification} />
+                      </FadeInItem>
+                    ))}
+                  </FadeInStagger>
+                  <div
+                    ref={ref}
+                    className="w-full flex justify-center py-6 pb-20 md:pb-6"
+                  >
+                    {isFetchingNextPage ? (
+                      <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                    ) : hasNextPage ? (
+                      <span className="text-sm text-gray-400">
+                        Scroll for more
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 mt-6 pt-6 w-full text-center">
+                        No more notifications
+                      </span>
+                    )}
+                  </div>
+                </>
               ) : !isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <SearchX className="w-10 h-10 mb-2 opacity-50 text-gray-400 dark:text-gray-500" />

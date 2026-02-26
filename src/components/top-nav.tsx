@@ -12,14 +12,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 // import { Button } from "@/primitives"; // Using custom buttons elements from home.html for exact match, or adapt.
-import {
-  ChevronRight,
-  Home,
-  Info,
-  Search,
-  Trophy,
-  Users
-} from 'lucide-react';
+import { ChevronRight, Home, Info, Search, Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
 import ToggleTheme from './toggle-theme';
 

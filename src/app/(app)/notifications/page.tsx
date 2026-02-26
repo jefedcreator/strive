@@ -4,6 +4,9 @@ import { getNotifications } from '@/server';
 import type { PageProps } from '@/types';
 import { loadParams } from '@/utils';
 
+export const dynamic = 'force-dynamic';
+
+
 export default async function NotificationsPage({ searchParams }: PageProps) {
   const { type, query } = loadParams.parse(await searchParams);
 

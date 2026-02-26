@@ -171,7 +171,7 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
         const mappedLatest = {
           ...lbData,
           isMember: true,
-          _count: { entries: lbData.entries.length } // We don't have total entries easily here, just the top 5
+          _count: { entries: lbData.entries.length }, // We don't have total entries easily here, just the top 5
         };
 
         return NextResponse.json({
