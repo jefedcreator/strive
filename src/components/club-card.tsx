@@ -195,7 +195,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
                     {joinMutation.isPending ? 'Joining...' : 'Join'}
                   </DropdownMenuItem>
                 )}
-                {isMember && club.isPublic && (
+                {isMember && (club.isPublic || isCreator) && (
                   <DropdownMenuItem
                     onClick={() =>
                       toast.promise(inviteMutation.mutateAsync(), {

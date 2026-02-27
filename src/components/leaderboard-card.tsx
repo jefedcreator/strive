@@ -204,7 +204,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
                     {joinMutation.isPending ? 'Joining...' : 'Join'}
                   </DropdownMenuItem>
                 )}
-                {isMember && data.isPublic && (
+                {isMember && (data.isPublic || isCreator) && (
                   <DropdownMenuItem
                     onClick={() =>
                       toast.promise(inviteMutation.mutateAsync(), {

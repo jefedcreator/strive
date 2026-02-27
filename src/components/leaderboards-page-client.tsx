@@ -89,6 +89,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     ref,
     hasNextPage,
     isFetchingNextPage,
+    hasFetchedNextPage,
   } = usePaginationScroll<LeaderboardListItem>({
     queryKey: ['leaderboards', isActive, isPublic, query],
     fetchData: fetchLeaderboards,
@@ -266,11 +267,11 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
                   <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
                 ) : hasNextPage ? (
                   <span className="text-sm text-gray-400">Scroll for more</span>
-                ) : (
+                ) : hasFetchedNextPage ? (
                   <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6 w-full text-center">
                     No more leaderboards
                   </span>
-                )}
+                ) : null}
               </div>
             </>
           ) : !isNavigating ? (

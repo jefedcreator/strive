@@ -83,6 +83,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
     ref,
     hasNextPage,
     isFetchingNextPage,
+    hasFetchedNextPage,
   } = usePaginationScroll<ClubListItem>({
     queryKey: ['clubs', isActive, isPublic, query],
     fetchData: fetchClubs,
@@ -270,11 +271,11 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
                   <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
                 ) : hasNextPage ? (
                   <span className="text-sm text-gray-400">Scroll for more</span>
-                ) : (
+                ) : hasFetchedNextPage ? (
                   <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6 w-full text-center">
                     No more clubs
                   </span>
-                )}
+                ) : null}
               </div>
             </>
           ) : !isNavigating ? (

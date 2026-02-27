@@ -55,6 +55,10 @@ export const GET = withMiddleware(
             curr.date > prev.date ? curr : prev
           );
 
+          console.log('latest', latest);
+          console.log('membership.runId', membership.runId);
+          console.log('latest.runId', latest.id);
+
           // Skip DB update if this leaderboard already has this run as its latest
           if (membership.runId === latest.id) return;
 

@@ -61,6 +61,7 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
     items: notifications,
     ref,
     hasNextPage,
+    hasFetchedNextPage,
     isFetchingNextPage,
   } = usePaginationScroll<NotificationWithRelations>({
     queryKey: ['notifications', type, query],
@@ -167,11 +168,11 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
                       <span className="text-sm text-gray-400">
                         Scroll for more
                       </span>
-                    ) : (
-                      <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 mt-6 pt-6 w-full text-center">
-                        No more notifications
+                    ) : hasFetchedNextPage ? (
+                      <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6 w-full text-center">
+                        No more clubs
                       </span>
-                    )}
+                    ) : null}
                   </div>
                 </>
               ) : !isLoading ? (

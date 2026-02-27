@@ -69,5 +69,6 @@ export function usePaginationScroll<T>({
     isFetchingNextPage,
     isLoading,
     isError,
+    hasFetchedNextPage: data ? data.pages.length > 1 : false,
   };
 }
