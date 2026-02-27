@@ -42,6 +42,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Install minimal Chromium dependencies
 RUN apt-get update && apt-get install -y \
     chromium \
+    xvfb \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
@@ -102,6 +103,6 @@ EXPOSE 3000
 ENV PORT=3000
 
 # Start the application using next start (via npm run start)
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npm run start"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24' npm run start"]
 
 

@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useInfiniteQuery, type QueryKey } from '@tanstack/react-query';
-import { useInView } from 'react-intersection-observer';
 import type { PaginatedApiResponse } from '@/types';
+import { useInfiniteQuery, type QueryKey } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useInView } from 'react-intersection-observer';
 
 interface UsePaginationScrollProps<T> {
   queryKey: QueryKey;

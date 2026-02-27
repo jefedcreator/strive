@@ -122,13 +122,15 @@ export class PuppeteerSessionManager {
   public async initSession(options: CaptureOptions = {}): Promise<string> {
     const sessionId = uuidv4();
     const { headless = false, userDataDir, timeout = 0 } = options;
-    const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
+    const environment = process.env.NODE_ENV;
+    const isProduction = environment === 'production';
 
     console.log(`[PuppeteerSessionManager] Starting new session: ${sessionId}`);
 
     const browser = (await puppeteer.launch({
-      headless,
-      executablePath: chromePath,
+      headless: isProduction ? 'new' : headless,
+      ...(isProduction && { executablePath: process.env.CHROMIUM_PATH }),
+      ...(!isProduction && { executablePath: process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH }),
       userDataDir,
       defaultViewport: null,
       args: [
@@ -136,12 +138,26 @@ export class PuppeteerSessionManager {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-blink-features=AutomationControlled',
+        '--disable-dev-shm-usage', // critical for Docker
+        '--disable-web-security',
+        '--disable-features=IsolateOrigins,site-per-process',
       ],
       ignoreDefaultArgs: ['--enable-automation'],
     })) as Browser;
 
     try {
       const page = (await browser.pages())[0] ?? (await browser.newPage());
+
+      // Try to obscure headless/automation
+      await page.setUserAgent(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      );
+      await page.setExtraHTTPHeaders({
+        'Accept-Language': 'en-US,en;q=0.9',
+      });
+      await page.evaluateOnNewDocument(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      });
 
       let resolvePromise!: (
         value: NikeAuthResult | PromiseLike<NikeAuthResult>
