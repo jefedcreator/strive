@@ -7,6 +7,7 @@ import {
   LeaderboardModal,
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
+import { usePaginationScroll } from '@/hooks/usePaginationScroll';
 import { Button } from '@/primitives/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
@@ -18,17 +19,15 @@ import {
 } from '@/types';
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { useQueryStates } from 'nuqs';
-import React, { useState, useEffect } from 'react';
-import { useInView } from 'react-intersection-observer';
-import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import axios, { type AxiosError } from 'axios';
 import { Loader2, Plus, Search, SearchX } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import axios, { type AxiosError } from 'axios';
-import { usePaginationScroll } from '@/hooks/usePaginationScroll';
+import { useQueryStates } from 'nuqs';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface LeaderboardsPageClientProps {
   initialData: PaginatedApiResponse<LeaderboardListItem[]>;

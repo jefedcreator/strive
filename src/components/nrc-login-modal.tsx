@@ -48,8 +48,9 @@ export function NRCLoginModal({
     sessionStep === 'code-modal' ||
     sessionStep === 'processing' ||
     sessionStep === 'success';
+  const isErrorScreen = sessionStep === 'error';
 
-  const isOpen = isEmailScreen || isCodeScreen || sessionStep === 'error';
+  const isOpen = isEmailScreen || isCodeScreen || isErrorScreen;
 
   return (
     <Modal
@@ -85,25 +86,9 @@ export function NRCLoginModal({
           )}
 
           <div className="relative p-8 md:p-10">
-            {/* {error && (
-              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl flex items-start space-x-3 text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-top-2 duration-300">
-                <svg
-                  className="w-5 h-5 mt-0.5 shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <p className="text-sm font-semibold leading-relaxed">{error}</p>
-              </div>
-            )} */}
-            {isEmailScreen ? (
+            {isErrorScreen ? (
+              <ErrorStep error={error} reset={reset} />
+            ) : isEmailScreen ? (
               <EmailStep
                 email={email}
                 setEmail={setEmail}
@@ -349,5 +334,54 @@ function CodeStep({
         </p>
       </Form>
     </>
+  );
+}
+function ErrorStep({
+  error,
+  reset,
+}: {
+  error: string | null;
+  reset: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-6 shadow-sm">
+        <svg
+          className="h-8 w-8 text-red-600 dark:text-red-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+        Login Error
+      </h2>
+      <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl w-full">
+        <p className="text-sm font-semibold text-red-600 dark:text-red-400 leading-relaxed">
+          {error || 'An unexpected error occurred during login.'}
+        </p>
+      </div>
+
+      <div className="mt-8 w-full">
+        <Button
+          onClick={reset}
+          className="w-full h-14 text-lg font-black bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 rounded-2xl shadow-xl transform active:scale-[0.98] transition-all"
+        >
+          Try Again
+        </Button>
+      </div>
+
+      <p className="mt-6 text-xs text-center text-gray-400 dark:text-gray-500 leading-relaxed">
+        If this persists, please try clearing your browser cache or wait a few
+        minutes before attempting to sign in again.
+      </p>
+    </div>
   );
 }

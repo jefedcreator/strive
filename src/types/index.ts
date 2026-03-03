@@ -6,6 +6,7 @@ import {
   type User,
 } from '@prisma/client';
 import type { SearchParams } from 'nuqs/server';
+import type { Browser, Page } from 'puppeteer';
 
 export interface PaginationMeta {
   total: number;
@@ -26,7 +27,7 @@ export interface ApiError {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-    PaginationMeta {}
+  PaginationMeta { }
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -218,11 +219,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-    | {
-        1: string;
-        2?: string | undefined;
-      }
-    | undefined;
+  | {
+    1: string;
+    2?: string | undefined;
+  }
+  | undefined;
 };
 
 enum DateRangeFilters {
@@ -278,6 +279,28 @@ interface NikeAuthResult {
   avatar?: string | null;
 }
 
+interface PuppeteerNikeAuthResult {
+  email: string | null;
+  token: string | null;
+  username: string | null;
+  avatar: string | null;
+}
+
+interface CaptureOptions {
+  headless?: boolean | 'new';
+  userDataDir?: string;
+  timeout?: number;
+}
+
+interface ActiveSession {
+  browser: Browser;
+  page: Page;
+  startTime: number;
+  resolve: (value: PuppeteerNikeAuthResult | PromiseLike<PuppeteerNikeAuthResult>) => void;
+  reject: (reason?: any) => void;
+}
+
+
 export { DateRangeFilters };
 export type {
   Activity,
@@ -287,5 +310,5 @@ export type {
   LeaderboardEntry,
   NRCLoginStep,
   Option,
-  PageProps,
+  PageProps, PuppeteerNikeAuthResult, CaptureOptions, ActiveSession
 };

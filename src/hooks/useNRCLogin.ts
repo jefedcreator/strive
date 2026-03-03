@@ -120,10 +120,14 @@ export function useNRCLogin(): UseNRCLoginReturn {
         };
         if (data.sessionId !== sessionIdRef.current) return;
 
-        if (data.step === 'awaiting-code') {
-          // Email was accepted — show the OTP / code modal
-          setCurrentStep('code-modal');
-        }
+        setStep((current) => {
+          if (current === 'error') return current;
+          if (data.step === 'awaiting-code') {
+            setSessionStep('code-modal');
+            return 'code-modal';
+          }
+          return current;
+        });
       });
 
       // ── Code modal trigger ────────────────────────────────────────────────
@@ -132,11 +136,11 @@ export function useNRCLogin(): UseNRCLoginReturn {
       });
 
       es.onerror = () => {
-        setStep((current) => {
-          if (current === 'success' || current === 'error') return current;
-          setError('Connection to server lost. Please try again.');
-          return 'error';
+        setError((prev) => {
+          if (prev) return prev;
+          return 'Connection to server lost. Please try again.';
         });
+        setCurrentStep('error');
         es.close();
       };
     },

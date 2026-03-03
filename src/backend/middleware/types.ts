@@ -8,6 +8,7 @@ export type MiddlewareResponse = {
   message: string;
   statusCode: number;
   next: boolean;
+  redirect?: string;
 };
 
 export type MiddlewareFunction<B = unknown, Q = QueryParameters> = (

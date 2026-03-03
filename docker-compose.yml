@@ -1,29 +1,41 @@
 services:
   web:
+    # platform: linux/x86_64
     build: .
     container_name: strive
     restart: always
     environment:
       - NODE_ENV=production
-      # Pass through sensitive envs from host or .env file
+      # Database
       - DATABASE_URL=${DATABASE_URL}
       - AUTH_SECRET=${AUTH_SECRET}
+      # Cloudinary
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      # Strava
       - AUTH_STRAVA_ID=${AUTH_STRAVA_ID}
       - AUTH_STRAVA_SECRET=${AUTH_STRAVA_SECRET}
+      # Next Auth
       - NEXTAUTH_URL=http://localhost
       - AUTH_TRUST_HOST=true
       - NEXT_PUBLIC_APP_URL=http://localhost
       - PORT=3000
       - INTERNAL_API_URL=http://localhost:3000
-      - CHROMIUM_PATH=/usr/bin/google-chrome-stable
+      # Chrome/Puppeteer - CRITICAL: Must match Dockerfile installation path
+      # - CHROME_PATH=/usr/bin/google-chrome-stable
+      # - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      - DOCKER_ENV=true
+      # - DOCKER_DEFAULT_PLATFORM=linux/amd64
     expose:
       - "3000"
+    shm_size: '2gb'
+    security_opt:
+      - seccomp:unconfined
     networks:
       - app-network
-
+    volumes:
+      - ./debug:/app/public/debug
   nginx:
     image: nginx:alpine
     container_name: strive-nginx
