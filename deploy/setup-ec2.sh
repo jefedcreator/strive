@@ -11,16 +11,50 @@ echo " Strive — EC2 Bare Metal Setup (Amazon Linux 2023)"
 echo "═══════════════════════════════════════════════════════"
 
 # ── 1. System packages ──────────────────────────────────────
+# NOTE: AL2023 ships curl-minimal, gnupg2-minimal, vim-minimal etc.
+# Do NOT install the full versions — they conflict with the minimal ones.
 echo "→ Installing system dependencies..."
+
+# Chrome/Puppeteer runtime dependencies (AL2023-safe package names)
 dnf install -y \
-  ca-certificates \
+  alsa-lib \
+  at-spi2-atk \
+  atk \
+  cups-libs \
+  libdrm \
+  expat \
+  fontconfig \
+  libxkbcommon \
+  mesa-libgbm \
+  gtk3 \
+  nspr \
+  nss \
+  nss-util \
+  pango \
+  libX11 \
+  libXcomposite \
+  libXcursor \
+  libXdamage \
+  libXext \
+  libXfixes \
+  libXi \
+  libXrandr \
+  libXrender \
+  libXScrnSaver \
+  libXtst \
+  libxcb \
+  dbus-libs
+
+# Fonts, Xvfb, and tooling
+dnf install -y \
   xorg-x11-server-Xvfb \
-  liberation-fonts google-noto-emoji-color-fonts \
-  alsa-lib atk at-spi2-atk cups-libs libdrm expat \
-  fontconfig mesa-libgbm gtk3 nspr nss pango \
-  libX11 libXcomposite libXcursor libXdamage libXext \
-  libXfixes libXi libXrandr libXrender libXScrnSaver libXtst \
-  xdg-utils nginx openssl git
+  liberation-fonts \
+  google-noto-emoji-color-fonts \
+  xdg-utils \
+  nginx \
+  openssl \
+  git \
+  ca-certificates
 
 # ── 2. Google Chrome (not Chromium) ─────────────────────────
 echo "→ Installing Google Chrome stable..."
