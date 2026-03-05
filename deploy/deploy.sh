@@ -16,6 +16,7 @@ echo "🚦 Restarting with PM2..."
 pm2 delete "strive" || true
 
 echo "🚀 Starting app via Ecosystem..."
+mkdir -p logs
 pm2 start ecosystem.config.cjs
 
 echo "💾 Saving PM2 state..."
