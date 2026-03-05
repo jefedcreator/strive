@@ -13,6 +13,8 @@ export interface NikeAuthResult {
   username: string | null;
 }
 
+// const wsUrl = `wss://brd-customer-hl_d063dc7f-zone-strive_browser1:i9gep3lg6frd@brd.superproxy.io:9222`;
+
 export interface CaptureOptions {
   headless?: boolean | 'new';
   userDataDir?: string;
