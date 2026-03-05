@@ -392,7 +392,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          Member
+                          {member.user.fullname ?? member.user.username}
                         </p>
                         <p className="text-xs text-gray-400 dark:text-gray-500">
                           Joined{' '}

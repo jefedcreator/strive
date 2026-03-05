@@ -11,7 +11,7 @@ import {
 } from '@/backend/validators/club.validator';
 import { paramValidator } from '@/backend/validators/index.validator';
 import { db } from '@/server/db';
-import { type ApiResponse } from '@/types';
+import { type ApiResponse, type ClubDetail } from '@/types';
 import {
   ConflictException,
   ForbiddenException,
@@ -156,7 +156,7 @@ export const DELETE = withMiddleware<unknown>(
  * @pathParams paramValidator
  * @description Retrieves a single club.
  */
-export const GET = withMiddleware<unknown>(
+export const GET = withMiddleware<ClubDetail>(
   async (request, { params }) => {
     try {
       const { id } = params;
@@ -165,7 +165,11 @@ export const GET = withMiddleware<unknown>(
       const club = await db.club.findUnique({
         where: { id },
         include: {
-          members: true,
+          members: {
+            include: {
+              user: true,
+            },
+          },
           leaderboards: true,
           _count: {
             select: {
@@ -187,7 +191,7 @@ export const GET = withMiddleware<unknown>(
         );
       }
 
-      const response: ApiResponse<typeof club> = {
+      const response: ApiResponse<ClubDetail> = {
         status: 200,
         message: 'Club retrieved successfully',
         data: club,

@@ -27,7 +27,7 @@ export interface ApiError {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-    PaginationMeta {}
+  PaginationMeta { }
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -40,11 +40,12 @@ export type ClubListItem = Omit<Club, 'memberCount'> & {
 export interface ClubMember {
   id: string;
   userId: string;
+  user: User;
   clubId: string;
   role: string;
-  joinedAt: string;
-  createdAt: string;
-  updatedAt: string;
+  joinedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
   isActive: boolean;
 }
 
@@ -219,11 +220,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-    | {
-        1: string;
-        2?: string | undefined;
-      }
-    | undefined;
+  | {
+    1: string;
+    2?: string | undefined;
+  }
+  | undefined;
 };
 
 enum DateRangeFilters {

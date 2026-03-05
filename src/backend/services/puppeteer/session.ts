@@ -159,6 +159,67 @@ export class PuppeteerSessionManager {
         });
       }
 
+      // ── Anti-fingerprinting patches (Xvfb / Linux) ────────────────────
+      // Forter detects Xvfb via WebGL renderer (Mesa/llvmpipe), navigator
+      // properties (Linux platform), and screen dimensions. These patches
+      // make EC2 + Xvfb look like a normal Windows desktop to Forter.
+      if (process.platform === 'linux') {
+        console.log(
+          `[PuppeteerSessionManager] 🛡️ Applying anti-fingerprint patches (Linux/Xvfb)`
+        );
+
+        await page.evaluateOnNewDocument(() => {
+          // ── Spoof WebGL renderer & vendor ──────────────────────────
+          const getParameterProto = WebGLRenderingContext.prototype.getParameter;
+          WebGLRenderingContext.prototype.getParameter = function (param: number) {
+            // UNMASKED_VENDOR_WEBGL
+            if (param === 0x9245) return 'Google Inc. (NVIDIA)';
+            // UNMASKED_RENDERER_WEBGL
+            if (param === 0x9246) return 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)';
+            return getParameterProto.call(this, param);
+          };
+
+          // Also patch WebGL2
+          if (typeof WebGL2RenderingContext !== 'undefined') {
+            const getParameterProto2 = WebGL2RenderingContext.prototype.getParameter;
+            WebGL2RenderingContext.prototype.getParameter = function (param: number) {
+              if (param === 0x9245) return 'Google Inc. (NVIDIA)';
+              if (param === 0x9246) return 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)';
+              return getParameterProto2.call(this, param);
+            };
+          }
+
+          // ── Spoof navigator properties ────────────────────────────
+          Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
+          Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+          Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+
+          // ── Spoof screen dimensions (realistic desktop) ───────────
+          Object.defineProperty(screen, 'colorDepth', { get: () => 24 });
+          Object.defineProperty(screen, 'pixelDepth', { get: () => 24 });
+
+          // ── Patch Permissions API (Forter checks this) ────────────
+          const originalQuery = window.navigator.permissions?.query;
+          if (originalQuery) {
+            (window.navigator.permissions as any).query = (parameters: any) =>
+              parameters.name === 'notifications'
+                ? Promise.resolve({ state: Notification.permission } as PermissionStatus)
+                : originalQuery.call(window.navigator.permissions, parameters);
+          }
+
+          // ── Patch chrome.runtime (make it look like real Chrome) ───
+          if (!(window as any).chrome) {
+            (window as any).chrome = {};
+          }
+          if (!(window as any).chrome.runtime) {
+            (window as any).chrome.runtime = {
+              connect: () => { },
+              sendMessage: () => { },
+            };
+          }
+        });
+      }
+
       let resolvePromise!: (
         value: NikeAuthResult | PromiseLike<NikeAuthResult>
       ) => void;
@@ -347,10 +408,54 @@ export class PuppeteerSessionManager {
         submitBtn?.addEventListener('mousedown', capture);
       }, this.SELECTORS);
 
-      // ── Type email ────────────────────────────────────────────────────
+      // ── Simulate human-like behavior before typing ─────────────────
+      // Forter tracks mouse movement, timing, and interaction patterns.
+      // Without natural movement, it flags the session as automated.
+      console.log(`[${sessionId}] 🖱️  Simulating human behavior...`);
+
+      // Random mouse movements across the page
+      const viewport = page.viewport() || { width: 1920, height: 1080 };
+      for (let i = 0; i < 3 + Math.floor(Math.random() * 3); i++) {
+        const x = 100 + Math.floor(Math.random() * (viewport.width - 200));
+        const y = 100 + Math.floor(Math.random() * (viewport.height - 200));
+        await page.mouse.move(x, y, { steps: 10 + Math.floor(Math.random() * 15) });
+        await new Promise((r) => setTimeout(r, 200 + Math.floor(Math.random() * 400)));
+      }
+
+      // ── Type email with human-like timing ──────────────────────────
       console.log(`[${sessionId}] ⌨️  Typing email into #username...`);
-      await page.focus(this.SELECTORS.EMAIL_INPUT);
-      await page.type(this.SELECTORS.EMAIL_INPUT, emailStr, { delay: 50 });
+
+      // Move mouse to the input field area first
+      const emailBox = await page.$(this.SELECTORS.EMAIL_INPUT);
+      if (emailBox) {
+        const box = await emailBox.boundingBox();
+        if (box) {
+          await page.mouse.move(
+            box.x + box.width / 2 + (Math.random() * 20 - 10),
+            box.y + box.height / 2 + (Math.random() * 6 - 3),
+            { steps: 15 }
+          );
+          await new Promise((r) => setTimeout(r, 300 + Math.floor(Math.random() * 300)));
+          await page.mouse.click(
+            box.x + box.width / 2,
+            box.y + box.height / 2
+          );
+        } else {
+          await page.focus(this.SELECTORS.EMAIL_INPUT);
+        }
+      } else {
+        await page.focus(this.SELECTORS.EMAIL_INPUT);
+      }
+
+      // Type with random per-character delay (80-180ms, like a real human)
+      for (const char of emailStr) {
+        await page.keyboard.type(char, {
+          delay: 80 + Math.floor(Math.random() * 100),
+        });
+      }
+
+      // Small natural pause after typing
+      await new Promise((r) => setTimeout(r, 500 + Math.floor(Math.random() * 500)));
 
       // ── Click Continue ────────────────────────────────────────────────
       console.log(`[${sessionId}] 🖱️  Clicking Continue...`);
@@ -365,7 +470,25 @@ export class PuppeteerSessionManager {
               `[${sessionId}] ℹ️  No full navigation after Continue (SPA flow).`
             );
           }),
-        page.click(this.SELECTORS.NEXT_BUTTON),
+        (async () => {
+          // Click via mouse coordinates (Forter tracks click origin)
+          const btn = await page.$(this.SELECTORS.NEXT_BUTTON);
+          const btnBox = btn ? await btn.boundingBox() : null;
+          if (btnBox) {
+            await page.mouse.move(
+              btnBox.x + btnBox.width / 2 + (Math.random() * 10 - 5),
+              btnBox.y + btnBox.height / 2 + (Math.random() * 4 - 2),
+              { steps: 12 }
+            );
+            await new Promise((r) => setTimeout(r, 100 + Math.floor(Math.random() * 200)));
+            await page.mouse.click(
+              btnBox.x + btnBox.width / 2,
+              btnBox.y + btnBox.height / 2
+            );
+          } else {
+            await page.click(this.SELECTORS.NEXT_BUTTON);
+          }
+        })(),
       ]);
 
       // ── Wait for the next meaningful screen ───────────────────────────
