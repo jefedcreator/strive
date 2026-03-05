@@ -71,8 +71,6 @@ export class PuppeteerSessionManager {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
-
-
   // ─── Session lifecycle ────────────────────────────────────────────────────
 
   private cleanupStaleSessions() {
@@ -170,28 +168,38 @@ export class PuppeteerSessionManager {
 
         await page.evaluateOnNewDocument(() => {
           // ── Spoof WebGL renderer & vendor ──────────────────────────
-          const getParameterProto = WebGLRenderingContext.prototype.getParameter;
-          WebGLRenderingContext.prototype.getParameter = function (param: number) {
+          const getParameterProto =
+            WebGLRenderingContext.prototype.getParameter;
+          WebGLRenderingContext.prototype.getParameter = function (
+            param: number
+          ) {
             // UNMASKED_VENDOR_WEBGL
             if (param === 0x9245) return 'Google Inc. (NVIDIA)';
             // UNMASKED_RENDERER_WEBGL
-            if (param === 0x9246) return 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)';
+            if (param === 0x9246)
+              return 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)';
             return getParameterProto.call(this, param);
           };
 
           // Also patch WebGL2
           if (typeof WebGL2RenderingContext !== 'undefined') {
-            const getParameterProto2 = WebGL2RenderingContext.prototype.getParameter;
-            WebGL2RenderingContext.prototype.getParameter = function (param: number) {
+            const getParameterProto2 =
+              WebGL2RenderingContext.prototype.getParameter;
+            WebGL2RenderingContext.prototype.getParameter = function (
+              param: number
+            ) {
               if (param === 0x9245) return 'Google Inc. (NVIDIA)';
-              if (param === 0x9246) return 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)';
+              if (param === 0x9246)
+                return 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)';
               return getParameterProto2.call(this, param);
             };
           }
 
           // ── Spoof navigator properties ────────────────────────────
           Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
-          Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+          Object.defineProperty(navigator, 'hardwareConcurrency', {
+            get: () => 8,
+          });
           Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
 
           // ── Spoof screen dimensions (realistic desktop) ───────────
@@ -203,7 +211,9 @@ export class PuppeteerSessionManager {
           if (originalQuery) {
             (window.navigator.permissions as any).query = (parameters: any) =>
               parameters.name === 'notifications'
-                ? Promise.resolve({ state: Notification.permission } as PermissionStatus)
+                ? Promise.resolve({
+                    state: Notification.permission,
+                  } as PermissionStatus)
                 : originalQuery.call(window.navigator.permissions, parameters);
           }
 
@@ -213,8 +223,8 @@ export class PuppeteerSessionManager {
           }
           if (!(window as any).chrome.runtime) {
             (window as any).chrome.runtime = {
-              connect: () => { },
-              sendMessage: () => { },
+              connect: () => {},
+              sendMessage: () => {},
             };
           }
         });
@@ -418,8 +428,12 @@ export class PuppeteerSessionManager {
       for (let i = 0; i < 3 + Math.floor(Math.random() * 3); i++) {
         const x = 100 + Math.floor(Math.random() * (viewport.width - 200));
         const y = 100 + Math.floor(Math.random() * (viewport.height - 200));
-        await page.mouse.move(x, y, { steps: 10 + Math.floor(Math.random() * 15) });
-        await new Promise((r) => setTimeout(r, 200 + Math.floor(Math.random() * 400)));
+        await page.mouse.move(x, y, {
+          steps: 10 + Math.floor(Math.random() * 15),
+        });
+        await new Promise((r) =>
+          setTimeout(r, 200 + Math.floor(Math.random() * 400))
+        );
       }
 
       // ── Type email with human-like timing ──────────────────────────
@@ -435,11 +449,10 @@ export class PuppeteerSessionManager {
             box.y + box.height / 2 + (Math.random() * 6 - 3),
             { steps: 15 }
           );
-          await new Promise((r) => setTimeout(r, 300 + Math.floor(Math.random() * 300)));
-          await page.mouse.click(
-            box.x + box.width / 2,
-            box.y + box.height / 2
+          await new Promise((r) =>
+            setTimeout(r, 300 + Math.floor(Math.random() * 300))
           );
+          await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
         } else {
           await page.focus(this.SELECTORS.EMAIL_INPUT);
         }
@@ -455,7 +468,9 @@ export class PuppeteerSessionManager {
       }
 
       // Small natural pause after typing
-      await new Promise((r) => setTimeout(r, 500 + Math.floor(Math.random() * 500)));
+      await new Promise((r) =>
+        setTimeout(r, 500 + Math.floor(Math.random() * 500))
+      );
 
       // ── Click Continue ────────────────────────────────────────────────
       console.log(`[${sessionId}] 🖱️  Clicking Continue...`);
@@ -480,7 +495,9 @@ export class PuppeteerSessionManager {
               btnBox.y + btnBox.height / 2 + (Math.random() * 4 - 2),
               { steps: 12 }
             );
-            await new Promise((r) => setTimeout(r, 100 + Math.floor(Math.random() * 200)));
+            await new Promise((r) =>
+              setTimeout(r, 100 + Math.floor(Math.random() * 200))
+            );
             await page.mouse.click(
               btnBox.x + btnBox.width / 2,
               btnBox.y + btnBox.height / 2
@@ -527,9 +544,11 @@ export class PuppeteerSessionManager {
 
         await page.screenshot({
           path: path.join(debugDir, `error-${sessionId}.png`),
-          fullPage: true
+          fullPage: true,
         });
-        console.log(`[${sessionId}] 📸 Saved debug files to public/debug folder`);
+        console.log(
+          `[${sessionId}] 📸 Saved debug files to public/debug folder`
+        );
       } catch (fsError) {
         console.error(`[${sessionId}] ❌ Failed to save debug files:`, fsError);
       }
@@ -664,8 +683,7 @@ export class PuppeteerSessionManager {
               const url = request.url();
               const hasAuth = !!request.headers().authorization;
               const isNikeApi =
-                url.includes('api.nike.com') ||
-                url.includes('unite.nike.com');
+                url.includes('api.nike.com') || url.includes('unite.nike.com');
               return isNikeApi && hasAuth;
             },
             { timeout: 200_000 }
@@ -717,8 +735,6 @@ export class PuppeteerSessionManager {
             ''
         );
       }
-
-
 
       // ── Log summary ───────────────────────────────────────────────────
       console.log('\n' + '='.repeat(60));
