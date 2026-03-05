@@ -541,19 +541,79 @@ export class PuppeteerSessionManager {
         sessionId,
       });
 
-      // ── Type the code ─────────────────────────────────────────────────
+      // ── Type the code with human-like behavior ────────────────────────
       await page.waitForSelector(this.SELECTORS.CODE_INPUT, {
         visible: true,
         timeout: 10_000,
       });
-      await page.focus(this.SELECTORS.CODE_INPUT);
-      await page.type(this.SELECTORS.CODE_INPUT, code, { delay: 80 });
 
-      // ── Submit code ───────────────────────────────────────────────────
+      console.log(`[${sessionId}] 🌐 Current URL before code: ${page.url()}`);
+
+      // Mouse movement to code input
+      const codeEl = await page.$(this.SELECTORS.CODE_INPUT);
+      if (codeEl) {
+        const codeBox = await codeEl.boundingBox();
+        if (codeBox) {
+          await page.mouse.move(
+            codeBox.x + codeBox.width / 2 + (Math.random() * 10 - 5),
+            codeBox.y + codeBox.height / 2 + (Math.random() * 4 - 2),
+            { steps: 12 }
+          );
+          await new Promise((r) =>
+            setTimeout(r, 200 + Math.floor(Math.random() * 300))
+          );
+          await page.mouse.click(
+            codeBox.x + codeBox.width / 2,
+            codeBox.y + codeBox.height / 2
+          );
+        } else {
+          await page.focus(this.SELECTORS.CODE_INPUT);
+        }
+      } else {
+        await page.focus(this.SELECTORS.CODE_INPUT);
+      }
+
+      // Type code with random per-character delay
+      for (const char of code) {
+        await page.keyboard.type(char, {
+          delay: 80 + Math.floor(Math.random() * 100),
+        });
+      }
+
+      // Natural pause after typing
+      await new Promise((r) =>
+        setTimeout(r, 400 + Math.floor(Math.random() * 400))
+      );
+
+      // ── Submit code via mouse click ───────────────────────────────────
       console.log(`[${sessionId}] 🖱️  Clicking Submit...`);
+      await page.waitForSelector(this.SELECTORS.CODE_SUBMIT, {
+        visible: true,
+        timeout: 5_000,
+      });
+
       await Promise.all([
         page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 100_000 }),
-        page.click(this.SELECTORS.CODE_SUBMIT),
+        (async () => {
+          const submitBtn = await page.$(this.SELECTORS.CODE_SUBMIT);
+          const submitBox = submitBtn ? await submitBtn.boundingBox() : null;
+          if (submitBox) {
+            await page.mouse.move(
+              submitBox.x + submitBox.width / 2 + (Math.random() * 8 - 4),
+              submitBox.y + submitBox.height / 2 + (Math.random() * 4 - 2),
+              { steps: 10 }
+            );
+            await new Promise((r) =>
+              setTimeout(r, 100 + Math.floor(Math.random() * 200))
+            );
+            await page.mouse.click(
+              submitBox.x + submitBox.width / 2,
+              submitBox.y + submitBox.height / 2
+            );
+          } else {
+            await page.click(this.SELECTORS.CODE_SUBMIT);
+          }
+        })(),
       ]);
 
       // ── Handle Intermediate Confirmation Page (If it appears) ─────────
@@ -612,12 +672,40 @@ export class PuppeteerSessionManager {
           `[${sessionId}] 🖱️  Clicking 'Continue' on confirmation page...`
         );
 
+        // Natural pause before clicking
+        await new Promise((r) =>
+          setTimeout(r, 500 + Math.floor(Math.random() * 500))
+        );
+
         await Promise.all([
           page.waitForNavigation({
             waitUntil: 'networkidle2',
             timeout: 60_000,
           }),
-          page.click(this.SELECTORS.CONFIRMATION_CONTINUE_BTN),
+          (async () => {
+            const continueBtn = await page.$(
+              this.SELECTORS.CONFIRMATION_CONTINUE_BTN
+            );
+            const contBox = continueBtn
+              ? await continueBtn.boundingBox()
+              : null;
+            if (contBox) {
+              await page.mouse.move(
+                contBox.x + contBox.width / 2 + (Math.random() * 8 - 4),
+                contBox.y + contBox.height / 2 + (Math.random() * 4 - 2),
+                { steps: 10 }
+              );
+              await new Promise((r) =>
+                setTimeout(r, 100 + Math.floor(Math.random() * 200))
+              );
+              await page.mouse.click(
+                contBox.x + contBox.width / 2,
+                contBox.y + contBox.height / 2
+              );
+            } else {
+              await page.click(this.SELECTORS.CONFIRMATION_CONTINUE_BTN);
+            }
+          })(),
         ]);
       }
 
