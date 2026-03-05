@@ -29,25 +29,6 @@ jobs:
             echo "📦 Pulling latest code..."
             git pull origin main
 
-            echo "🧠 Writing .env..."
-            cat > .env << EOL
-            DATABASE_URL="${{ secrets.DATABASE_URL }}"
-            AUTH_SECRET="${{ secrets.AUTH_SECRET }}"
-            CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}"
-            CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}"
-            CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}"
-            NEXT_PUBLIC_PUSHER_KEY="${{ secrets.NEXT_PUBLIC_PUSHER_KEY }}"
-            NEXT_PUBLIC_PUSHER_CLUSTER="${{ secrets.NEXT_PUBLIC_PUSHER_CLUSTER }}"
-            PUSHER_APP_ID="${{ secrets.PUSHER_APP_ID }}"
-            PUSHER_SECRET="${{ secrets.PUSHER_SECRET }}"
-            BRIGHTDATA_USERNAME="${{ secrets.BRIGHTDATA_USERNAME }}"
-            BRIGHTDATA_PASSWORD="${{ secrets.BRIGHTDATA_PASSWORD }}"
-            NEXT_PUBLIC_APP_URL="${{ secrets.NEXT_PUBLIC_APP_URL }}"
-            NODE_ENV=production
-            PORT=3000
-            SKIP_ENV_VALIDATION=1
-            EOL
-
             echo "� Installing dependencies..."
             yarn install --frozen-lockfile
 
