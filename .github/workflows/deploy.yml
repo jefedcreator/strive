@@ -13,13 +13,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Create .env file for Docker build (if needed)
-        run: |
-          echo "SKIP_ENV_VALIDATION=1" > .env
-          # Add any build-time public envs here if necessary
-          # echo "NEXT_PUBLIC_...=${{ secrets.NEXT_PUBLIC_... }}" >> .env
-
-      - name: Build and Deploy via SSH
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -28,13 +22,14 @@ jobs:
           script: |
             set -e
 
-            echo "📁 Navigating to app directory..."
-            cd /root/strive # Update if your path is different
+            APP_DIR="/home/ubuntu/strive"
+            echo "📁 Navigating to $APP_DIR..."
+            cd "$APP_DIR"
 
             echo "📦 Pulling latest code..."
             git pull origin main
 
-            echo "🧠 Creating/Updating .env file..."
+            echo "🧠 Writing .env..."
             cat > .env << EOL
             DATABASE_URL="${{ secrets.DATABASE_URL }}"
             AUTH_SECRET="${{ secrets.AUTH_SECRET }}"
@@ -45,16 +40,25 @@ jobs:
             NEXT_PUBLIC_PUSHER_CLUSTER="${{ secrets.NEXT_PUBLIC_PUSHER_CLUSTER }}"
             PUSHER_APP_ID="${{ secrets.PUSHER_APP_ID }}"
             PUSHER_SECRET="${{ secrets.PUSHER_SECRET }}"
+            BRIGHTDATA_USERNAME="${{ secrets.BRIGHTDATA_USERNAME }}"
+            BRIGHTDATA_PASSWORD="${{ secrets.BRIGHTDATA_PASSWORD }}"
+            NEXT_PUBLIC_APP_URL="${{ secrets.NEXT_PUBLIC_APP_URL }}"
             NODE_ENV=production
             PORT=3000
             SKIP_ENV_VALIDATION=1
             EOL
 
-            echo "🛠️ Building and restarting containers..."
-            docker-compose down
-            docker-compose up --build -d
+            echo "� Installing dependencies..."
+            yarn install --frozen-lockfile
 
-            echo "🚀 Cleaning up old images..."
-            docker image prune -af
+            echo "🗄️ Running database migrations..."
+            npx prisma db push --accept-data-loss
+
+            echo "🔨 Building application..."
+            yarn build
+
+            echo "� Restarting PM2..."
+            pm2 restart ecosystem.config.cjs || pm2 start ecosystem.config.cjs
+            pm2 save
 
             echo "✅ Deployment successful!"

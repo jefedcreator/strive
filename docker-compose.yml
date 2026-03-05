@@ -26,6 +26,11 @@ services:
       # - CHROME_PATH=/usr/bin/google-chrome-stable
       # - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
       - DOCKER_ENV=true
+      - BRIGHTDATA_PROXY_HOST=brd.superproxy.io:33335
+      - BRIGHTDATA_USERNAME=${BRIGHTDATA_USERNAME}
+      - BRIGHTDATA_PASSWORD=${BRIGHTDATA_PASSWORD}
+      # BrightData Scraping Browser — remote Chrome via WebSocket (bypasses bot detection)
+      - BRIGHTDATA_BROWSER_WS=${BRIGHTDATA_BROWSER_WS}
       # - DOCKER_DEFAULT_PLATFORM=linux/amd64
     expose:
       - "3000"

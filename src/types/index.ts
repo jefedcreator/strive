@@ -27,7 +27,7 @@ export interface ApiError {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-  PaginationMeta { }
+    PaginationMeta {}
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -219,11 +219,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-  | {
-    1: string;
-    2?: string | undefined;
-  }
-  | undefined;
+    | {
+        1: string;
+        2?: string | undefined;
+      }
+    | undefined;
 };
 
 enum DateRangeFilters {
@@ -296,10 +296,11 @@ interface ActiveSession {
   browser: Browser;
   page: Page;
   startTime: number;
-  resolve: (value: PuppeteerNikeAuthResult | PromiseLike<PuppeteerNikeAuthResult>) => void;
+  resolve: (
+    value: PuppeteerNikeAuthResult | PromiseLike<PuppeteerNikeAuthResult>
+  ) => void;
   reject: (reason?: any) => void;
 }
-
 
 export { DateRangeFilters };
 export type {
@@ -310,5 +311,8 @@ export type {
   LeaderboardEntry,
   NRCLoginStep,
   Option,
-  PageProps, PuppeteerNikeAuthResult, CaptureOptions, ActiveSession
+  PageProps,
+  PuppeteerNikeAuthResult,
+  CaptureOptions,
+  ActiveSession,
 };

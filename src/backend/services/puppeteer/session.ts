@@ -17,18 +17,31 @@ import type { Browser, Page } from 'puppeteer';
 import { v4 as uuidv4 } from 'uuid';
 import { sseService } from '../events';
 import type { ActiveSession, PuppeteerNikeAuthResult } from '@/types';
-import type { CaptureOptions } from '.';
+import type { CaptureOptions, NikeAuthResult } from '.';
 
+puppeteer.use(StealthPlugin());
 
+// ─── Anchor to globalThis ─────────────────────────────────────────────────────
+//
+// Next.js re-evaluates modules across API route boundaries within the same
+// process. A module-level `new PuppeteerSessionManager()` at the bottom of
+// this file produces a FRESH instance (with an empty `sessions` Map) every
+// time a different API route imports it — so `initSession()` stores the
+// session on instance A, but `submitEmail()` runs on instance B and can't
+// find it, causing "Session not found or expired".
+//
+// Pinning to `globalThis` guarantees every import across every module
+// boundary returns the exact same object for the lifetime of the process.
+//
 declare global {
   var __puppeteerSessionManager: PuppeteerSessionManager | undefined;
 }
 
-puppeteer.use(StealthPlugin());
-
 export class PuppeteerSessionManager {
   private readonly DEFAULT_CHROME_PATH =
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+    process.platform === 'darwin'
+      ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+      : '/usr/bin/google-chrome-stable';
 
   private readonly URLS = {
     LOGIN: 'https://www.nike.com/login',
@@ -56,87 +69,9 @@ export class PuppeteerSessionManager {
     setInterval(() => this.cleanupStaleSessions(), 60 * 1000);
   }
 
-  // ─── Helper: Detect Docker environment ───────────────────────────────────
+  // ─── Helpers ──────────────────────────────────────────────────────────────
 
-  private isDockerEnvironment(): boolean {
-    return (
-      process.env.DOCKER_ENV === 'true' ||
-      process.env.KUBERNETES_SERVICE_HOST !== undefined ||
-      process.env.HOSTNAME?.includes('docker') ||
-      false
-    );
-  }
 
-  // ─── Helper: Get Chrome args for environment ─────────────────────────────
-
-  // private getChromeArgs(isDocker: boolean): string[] {
-  //   const baseArgs = [
-  //     '--no-sandbox',
-  //     '--disable-setuid-sandbox',
-  //     '--disable-blink-features=AutomationControlled',
-  //     '--disable-dev-shm-usage', // Overcome limited resource problems
-  //   ];
-
-  //   if (isDocker) {
-  //     // Additional args for containerized environments
-  //     return [
-  //       ...baseArgs,
-  //       '--disable-gpu',
-  //       '--disable-software-rasterizer',
-  //       '--disable-extensions',
-  //       '--no-first-run',
-  //       '--no-zygote',
-  //       '--single-process', // Run in single process (important for containers)
-  //       '--disable-background-networking',
-  //       '--disable-default-apps',
-  //       '--disable-sync',
-  //       '--metrics-recording-only',
-  //       '--mute-audio',
-  //       '--no-default-browser-check',
-  //       '--disable-crash-reporter',
-  //       '--disable-hang-monitor',
-  //       '--disable-prompt-on-repost',
-  //       '--disable-client-side-phishing-detection',
-  //     ];
-  //   }
-
-  //   // macOS/local development
-  //   return [...baseArgs, '--start-maximized'];
-  // }
-
-  private getChromeArgs(isDocker: boolean): string[] {
-    const baseArgs = [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-blink-features=AutomationControlled',
-      '--disable-dev-shm-usage', // Overcome limited resource problems
-    ];
-
-    if (isDocker) {
-      return [
-        ...baseArgs,
-        '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--disable-extensions',
-        '--no-first-run',
-        // ❌ REMOVED: '--no-zygote' and '--single-process' (Causes deadlocks in Docker)
-        '--disable-background-networking',
-        '--disable-default-apps',
-        '--disable-sync',
-        '--metrics-recording-only',
-        '--mute-audio',
-        '--no-default-browser-check',
-        '--disable-crash-reporter',
-        '--disable-hang-monitor',
-        '--disable-prompt-on-repost',
-        '--disable-client-side-phishing-detection',
-        '--window-size=1920,1080', // ✅ ADDED: Explicit window size
-      ];
-    }
-
-    // macOS/local development
-    return [...baseArgs, '--start-maximized'];
-  }
 
   // ─── Session lifecycle ────────────────────────────────────────────────────
 
@@ -173,65 +108,62 @@ export class PuppeteerSessionManager {
 
   public async initSession(options: CaptureOptions = {}): Promise<string> {
     const sessionId = uuidv4();
-    const isDocker = this.isDockerEnvironment();
-
-    // Force headless in Docker, allow override in local dev
-    const {
-      headless = isDocker ? true : false,
-      userDataDir,
-      timeout = 0
-    } = options;
-
-    // Get Chrome path with proper fallback
-    const chromePath =
-      process.env.CHROME_PATH ??
-      process.env.PUPPETEER_EXECUTABLE_PATH ??
-      this.DEFAULT_CHROME_PATH;
+    const { headless = false, userDataDir, timeout = 0 } = options;
 
     console.log(`[PuppeteerSessionManager] Starting new session: ${sessionId}`);
-    console.log(`[PuppeteerSessionManager] Environment: ${isDocker ? 'Docker' : 'Local'}`);
-    console.log(`[PuppeteerSessionManager] Headless: ${headless}`);
-    console.log(`[PuppeteerSessionManager] Chrome path: ${chromePath}`);
+
+    const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
+
+    // ── BrightData residential proxy (South African IP) ──────────────
+    // On EC2, datacenter IPs get flagged by Nike/Forter. Route Chrome
+    // through BrightData residential proxy with -country-za to get a
+    // South African residential IP while keeping the real Chrome fingerprint.
+    const proxyUser = process.env.BRIGHTDATA_USERNAME;
+    const proxyPass = process.env.BRIGHTDATA_PASSWORD;
+    const useProxy = !!(proxyUser && proxyPass);
+
+    const launchArgs = [
+      '--start-maximized',
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-blink-features=AutomationControlled',
+    ];
+
+    if (useProxy) {
+      // BrightData super proxy endpoint — append country targeting
+      launchArgs.push('--proxy-server=http://brd.superproxy.io:33335');
+      console.log(
+        `[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA)`
+      );
+    }
+
+    console.log(`[PuppeteerSessionManager] Chrome: ${chromePath}`);
+
+    const browser = (await puppeteer.launch({
+      headless,
+      executablePath: chromePath,
+      userDataDir,
+      defaultViewport: null,
+      args: launchArgs,
+      ignoreDefaultArgs: ['--enable-automation'],
+    })) as Browser;
 
     try {
-      const browser = (await puppeteer.launch({
-        headless,
-        executablePath: chromePath,
-        userDataDir: userDataDir || (isDocker ? '/home/nextjs/chrome-data' : undefined),
-        defaultViewport: isDocker ? { width: 1920, height: 1080 } : null,
-        args: this.getChromeArgs(isDocker),
-        ignoreDefaultArgs: ['--enable-automation'],
-        timeout: 60000, // Increase launch timeout for Docker
-        dumpio: true,
-      })) as Browser;
-
       const page = (await browser.pages())[0] ?? (await browser.newPage());
 
-      // ✅ ADDED: Force a realistic User-Agent to bypass initial WAF blocks
-      await page.setUserAgent(
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      );
-
-      await page.setExtraHTTPHeaders({
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1'
-      });
-
-      // ✅ ADDED: Extra stealth measure for the webdriver flag
-      await page.evaluateOnNewDocument(() => {
-        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-      });
+      // Authenticate with BrightData proxy (country-za for South Africa)
+      if (useProxy) {
+        await page.authenticate({
+          username: `${proxyUser}-country-za`,
+          password: proxyPass,
+        });
+      }
 
       let resolvePromise!: (
-        value: PuppeteerNikeAuthResult | PromiseLike<PuppeteerNikeAuthResult>
+        value: NikeAuthResult | PromiseLike<NikeAuthResult>
       ) => void;
       let rejectPromise!: (reason?: any) => void;
-      const resultPromise = new Promise<PuppeteerNikeAuthResult>((resolve, reject) => {
+      const resultPromise = new Promise<NikeAuthResult>((resolve, reject) => {
         resolvePromise = resolve;
         rejectPromise = reject;
       });
@@ -263,69 +195,13 @@ export class PuppeteerSessionManager {
         .finally(() => this.closeSession(sessionId).catch(console.error));
 
       return sessionId;
-    } catch (err: any) {
-      console.error(`[PuppeteerSessionManager] Failed to launch browser:`, err);
-      throw new Error(
-        `Failed to launch Chrome. Ensure Chrome is installed at ${chromePath}. Error: ${err.message}`
-      );
+    } catch (err) {
+      await browser.close();
+      throw err;
     }
   }
 
   // ─── Phase 1: Navigate to Nike login ─────────────────────────────────────
-
-  // private async startNavigationFlow(
-  //   sessionId: string,
-  //   page: Page,
-  //   timeout: number
-  // ) {
-  //   console.log(`[${sessionId}] 🌐 Navigating to Login...`);
-
-  //   // Add page error listeners to catch silent crashes
-  //   page.on('error', err => console.error(`[${sessionId}] ❌ Page crashed:`, err));
-  //   page.on('pageerror', err => console.error(`[${sessionId}] ❌ Page console error:`, err));
-
-  //   await page.goto(this.URLS.LOGIN, {
-  //     waitUntil: 'domcontentloaded',
-  //     timeout: timeout || 60000,
-  //   });
-
-  //   console.log(`[${sessionId}] 👀 Waiting for email input...`);
-
-  //   try {
-  //     await page.waitForSelector(this.SELECTORS.EMAIL_INPUT, {
-  //       visible: true,
-  //       timeout: 60_000,
-  //     });
-
-  //     console.log(`[${sessionId}] ✅ Email form ready. Notifying client.`);
-  //     sseService.emit(sessionId, 'nrc-login-step', { step: 'ready', sessionId });
-
-  //   } catch (error) {
-  //     // ✅ ADDED: Deep inspection when the selector fails
-  //     console.error(`[${sessionId}] ⚠️ Selector timeout hit. Capturing debug info...`);
-
-  //     const fs = require('fs');
-  //     const debugDir = '/home/nextjs/chrome-data';
-
-  //     // 1. Get the current URL (Did Nike redirect us to an error page?)
-  //     const currentUrl = page.url();
-  //     console.log(`[${sessionId}] 📍 Stuck at URL: ${currentUrl}`);
-
-  //     // 2. Save the HTML content
-  //     const html = await page.content();
-  //     fs.writeFileSync(`${debugDir}/debug-${sessionId}.html`, html);
-  //     console.log(`[${sessionId}] 📄 Saved page HTML to ${debugDir}/debug-${sessionId}.html`);
-
-  //     // 3. Take a screenshot of exactly what Chrome sees
-  //     await page.screenshot({
-  //       path: `${debugDir}/debug-${sessionId}.png`,
-  //       fullPage: true
-  //     }).catch(e => console.error('Screenshot failed:', e));
-  //     console.log(`[${sessionId}] 📸 Saved screenshot to ${debugDir}/debug-${sessionId}.png`);
-
-  //     throw error; // Re-throw to fail the flow properly
-  //   }
-  // }
 
   private async startNavigationFlow(
     sessionId: string,
@@ -333,59 +209,27 @@ export class PuppeteerSessionManager {
     timeout: number
   ) {
     console.log(`[${sessionId}] 🌐 Navigating to Login...`);
-
     await page.goto(this.URLS.LOGIN, {
       waitUntil: 'domcontentloaded',
-      timeout: timeout || 60000,
+      timeout,
     });
 
     console.log(`[${sessionId}] 👀 Waiting for email input...`);
+    await page.waitForSelector(this.SELECTORS.EMAIL_INPUT, {
+      visible: true,
+      timeout: 60_000,
+    });
 
-    try {
-      await page.waitForSelector(this.SELECTORS.EMAIL_INPUT, {
-        visible: true,
-        timeout: 60_000,
-      });
-
-      console.log(`[${sessionId}] ✅ Email form ready. Notifying client.`);
-      sseService.emit(sessionId, 'nrc-login-step', { step: 'ready', sessionId });
-
-    } catch (error) {
-      console.error(`[${sessionId}] ⚠️ Selector timeout hit. Capturing debug info...`);
-
-      // Save directly to the Next.js public directory so we can view it in the browser
-      const debugDir = '/app/public';
-
-      try {
-        const html = await page.content();
-        require('fs').writeFileSync(`${debugDir}/debug.html`, html);
-        console.log(`[${sessionId}] 📄 HTML saved. View at: http://localhost:3000/debug.html`);
-
-        await page.screenshot({
-          path: `${debugDir}/debug.png`,
-          fullPage: true
-        });
-        console.log(`[${sessionId}] 📸 Screenshot saved. View at: http://localhost:3000/debug.png`);
-      } catch (fsError) {
-        console.error(`[${sessionId}] ❌ Failed to save debug files:`, fsError);
-      }
-
-      throw error;
-    }
+    console.log(`[${sessionId}] ✅ Email form ready. Notifying client.`);
+    // → client opens email modal
+    sseService.emit(sessionId, 'nrc-login-step', { step: 'ready', sessionId });
   }
 
   // ─── Network capture setup ────────────────────────────────────────────────
 
   /**
-   * Sets up request interception and the Node↔Browser email bridge.
-   * Called ONCE in submitEmail — the listener stays alive for the entire page.
-   *
-   * Token capture works via a mutable __resolveToken reference on the session:
-   *   - The request listener calls __resolveToken(token) whenever it sees an
-   *     auth header, regardless of when that happens.
-   *   - makeTokenPromise() (called right before page.goto(PROFILE)) creates a
-   *     fresh Promise and sets __resolveToken to its resolve function, so the
-   *     timeout starts at exactly the right moment.
+   * Sets up token & email capture. Uses request interception +
+   * page.exposeFunction() bridge for Chrome running on the host.
    */
   private async setupNetworkCapture(
     sessionId: string,
@@ -394,75 +238,76 @@ export class PuppeteerSessionManager {
   ): Promise<void> {
     const session = this.sessions.get(sessionId)!;
 
-    // ── 1. Node↔Browser email bridge (same pattern as captureNikeAuth) ──
-    await page.exposeFunction('sendEmailToNode', (email: string) => {
-      if (email && !(session as any).__capturedEmail) {
-        console.log(
-          `[${sessionId}] ⚡ bridge: Email captured via DOM listener: ${email}`
-        );
-        (session as any).__capturedEmail = email;
-      }
-    });
-
-    // ── 2. Request interception ───────────────────────────────────────────
-    await page.setRequestInterception(true);
-
-    page.on('request', (request) => {
-      const url = request.url();
-      const headers = request.headers();
-      const postData = request.postData();
-
-      // ── Token capture ─────────────────────────────────────────────────
-      if (
-        (url.includes('api.nike.com') || url.includes('unite.nike.com')) &&
-        headers.authorization
-      ) {
-        const token = headers.authorization;
-        (session as any).__capturedToken = token;
-
-        // Call the current promise resolver if makeTokenPromise() has armed one.
-        // __resolveToken is replaced each time makeTokenPromise() is called,
-        // so this always notifies the most recently created promise.
-        const resolver = (session as any).__resolveToken as
-          | ((t: string) => void)
-          | undefined;
-        if (resolver) {
-          console.log(
-            `[${sessionId}] 🔑 network: Bearer token captured — resolving promise`
-          );
-          (session as any).__resolveToken = undefined; // prevent double-resolve
-          resolver(token);
-        }
-      }
-
-      // ── Email capture (network payload backup) ────────────────────────
-      if (
-        postData &&
-        (url.includes('login') ||
-          url.includes('check') ||
-          url.includes('unite'))
-      ) {
-        try {
-          const json = JSON.parse(postData);
-          const possibleEmail =
-            json.username ?? json.emailAddress ?? json.credential;
-          if (possibleEmail && !(session as any).__capturedEmail) {
-            console.log(
-              `[${sessionId}] 📡 network: Email captured from payload: ${possibleEmail}`
-            );
-            (session as any).__capturedEmail = possibleEmail;
-          }
-        } catch {
-          /* non-JSON body — ignore */
-        }
-      }
-
-      void request.continue();
-    });
-
-    // Seed email from what the user typed — network/bridge may refine it later
+    // Seed email from what the user typed
     if (!(session as any).__capturedEmail) {
       (session as any).__capturedEmail = emailFallback;
+    }
+
+    {
+      // Use request interception + exposeFunction (original approach).
+
+      // 1. Node↔Browser email bridge
+      await page.exposeFunction('sendEmailToNode', (email: string) => {
+        if (email && !(session as any).__capturedEmail) {
+          console.log(
+            `[${sessionId}] ⚡ bridge: Email captured via DOM listener: ${email}`
+          );
+          (session as any).__capturedEmail = email;
+        }
+      });
+
+      // 2. Request interception
+      await page.setRequestInterception(true);
+
+      page.on('request', (request) => {
+        const url = request.url();
+        const headers = request.headers();
+        const postData = request.postData();
+
+        // Token capture
+        if (
+          (url.includes('api.nike.com') || url.includes('unite.nike.com')) &&
+          headers.authorization
+        ) {
+          const token = headers.authorization;
+          (session as any).__capturedToken = token;
+
+          const resolver = (session as any).__resolveToken as
+            | ((t: string) => void)
+            | undefined;
+          if (resolver) {
+            console.log(
+              `[${sessionId}] 🔑 network: Bearer token captured — resolving promise`
+            );
+            (session as any).__resolveToken = undefined;
+            resolver(token);
+          }
+        }
+
+        // Email capture (network payload backup)
+        if (
+          postData &&
+          (url.includes('login') ||
+            url.includes('check') ||
+            url.includes('unite'))
+        ) {
+          try {
+            const json = JSON.parse(postData);
+            const possibleEmail =
+              json.username ?? json.emailAddress ?? json.credential;
+            if (possibleEmail && !(session as any).__capturedEmail) {
+              console.log(
+                `[${sessionId}] 📡 network: Email captured from payload: ${possibleEmail}`
+              );
+              (session as any).__capturedEmail = possibleEmail;
+            }
+          } catch {
+            /* non-JSON body — ignore */
+          }
+        }
+
+        void request.continue();
+      });
     }
   }
 
@@ -483,12 +328,10 @@ export class PuppeteerSessionManager {
     console.log(`[${sessionId}] 📧 Submitting email: ${emailStr}`);
 
     try {
-      // ── Wire up network capture + email bridge ────────────────────────
-      // No tokenPromise here — makeTokenPromise() is called in submitCode
-      // right before page.goto(PROFILE), which is when the token actually appears.
+      // ── Wire up network capture ──────────────────────────────────────
       await this.setupNetworkCapture(sessionId, page, emailStr);
 
-      // ── Attach DOM-side email listener (same as captureNikeAuth) ──────
+      // ── Attach DOM-side email listener ─────────────────────────────
       await page.evaluate((selectors) => {
         const emailInput = document.querySelector(selectors.EMAIL_INPUT);
         const submitBtn = document.querySelector(selectors.NEXT_BUTTON);
@@ -507,18 +350,14 @@ export class PuppeteerSessionManager {
       // ── Type email ────────────────────────────────────────────────────
       console.log(`[${sessionId}] ⌨️  Typing email into #username...`);
       await page.focus(this.SELECTORS.EMAIL_INPUT);
-
-      // ✅ CHANGED: Slower, slightly more random typing delay
-      await page.type(this.SELECTORS.EMAIL_INPUT, emailStr, { delay: Math.floor(Math.random() * 50) + 100 });
-
-      // ✅ ADDED: A realistic human pause before moving to the button
-      await new Promise(r => setTimeout(r, 800));
+      await page.type(this.SELECTORS.EMAIL_INPUT, emailStr, { delay: 50 });
 
       // ── Click Continue ────────────────────────────────────────────────
       console.log(`[${sessionId}] 🖱️  Clicking Continue...`);
       await page.waitForSelector(this.SELECTORS.NEXT_BUTTON, { visible: true });
 
       await Promise.all([
+        // Nike either does a full navigation or a SPA transition — handle both
         page
           .waitForNavigation({ waitUntil: 'networkidle2', timeout: 100_000 })
           .catch(() => {
@@ -526,8 +365,7 @@ export class PuppeteerSessionManager {
               `[${sessionId}] ℹ️  No full navigation after Continue (SPA flow).`
             );
           }),
-        // ✅ CHANGED: Add a slight delay to the click itself
-        page.click(this.SELECTORS.NEXT_BUTTON, { delay: 150 }),
+        page.click(this.SELECTORS.NEXT_BUTTON),
       ]);
 
       // ── Wait for the next meaningful screen ───────────────────────────
@@ -550,10 +388,9 @@ export class PuppeteerSessionManager {
       console.error(`[${sessionId}] ❌ Error submitting email:`, err.message);
 
       const fs = require('fs');
-      // Set the path to the mapped volume folder
-      const debugDir = '/app/public/debug';
+      const path = require('path');
+      const debugDir = path.join(process.cwd(), 'public', 'debug');
 
-      // Ensure the directory exists so fs.writeFileSync doesn't crash
       if (!fs.existsSync(debugDir)) {
         fs.mkdirSync(debugDir, { recursive: true });
       }
@@ -562,17 +399,14 @@ export class PuppeteerSessionManager {
       const debugHtmlUrl = `/debug/error-${sessionId}.html`;
 
       try {
-        // Save HTML
         const html = await page.content();
-        fs.writeFileSync(`/app/public${debugHtmlUrl}`, html);
-        console.log(`[${sessionId}] 📄 HTML saved locally to ./debug folder`);
+        fs.writeFileSync(path.join(debugDir, `error-${sessionId}.html`), html);
 
-        // Save Screenshot
         await page.screenshot({
-          path: `/app/public${debugImageUrl}`,
+          path: path.join(debugDir, `error-${sessionId}.png`),
           fullPage: true
         });
-        console.log(`[${sessionId}] 📸 Screenshot saved locally to ./debug folder`);
+        console.log(`[${sessionId}] 📸 Saved debug files to public/debug folder`);
       } catch (fsError) {
         console.error(`[${sessionId}] ❌ Failed to save debug files:`, fsError);
       }
@@ -581,7 +415,6 @@ export class PuppeteerSessionManager {
         step: 'error',
         sessionId,
         message: err.message,
-        // debugImage: debugImageUrl,
       });
 
       reject(err);
@@ -593,21 +426,12 @@ export class PuppeteerSessionManager {
 
   /**
    * Receives the OTP / verification code from the client, submits it,
-   * navigates to the profile page, and resolves with the final PuppeteerNikeAuthResult.
-   *
-   * Token capture strategy (mirrors captureNikeAuth):
-   *   - The request listener set up in setupNetworkCapture() stays active for
-   *     the lifetime of the page, so it continues intercepting Nike API calls
-   *     that fire during and after code submission.
-   *   - Rather than reading __capturedToken at an arbitrary point in time,
-   *     we await __tokenPromise which resolves the instant the first auth
-   *     header appears on the wire (with a 30 s safety timeout).
-   *   - localStorage is checked as a final fallback, consistent with captureNikeAuth.
+   * navigates to the profile page, and resolves with the final NikeAuthResult.
    */
   public async submitCode(
     sessionId: string,
     code: string
-  ): Promise<PuppeteerNikeAuthResult> {
+  ): Promise<NikeAuthResult> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found or expired.`);
@@ -707,14 +531,18 @@ export class PuppeteerSessionManager {
         `[${sessionId}] 🏃 Navigating to profile and capturing token...`
       );
 
-      const [capturedToken] = await Promise.all([
+      let capturedToken: string | null = null;
+
+      // ── LOCAL: waitForRequest + goto in parallel ──────────────────────
+      const [token] = await Promise.all([
         page
           .waitForRequest(
             (request) => {
               const url = request.url();
               const hasAuth = !!request.headers().authorization;
               const isNikeApi =
-                url.includes('api.nike.com') || url.includes('unite.nike.com');
+                url.includes('api.nike.com') ||
+                url.includes('unite.nike.com');
               return isNikeApi && hasAuth;
             },
             { timeout: 200_000 }
@@ -731,6 +559,7 @@ export class PuppeteerSessionManager {
           timeout: 200_000,
         }),
       ]);
+      capturedToken = token;
 
       // ── Extract username ──────────────────────────────────────────────
       console.log(`[${sessionId}] 👀 Waiting for username...`);
@@ -765,6 +594,8 @@ export class PuppeteerSessionManager {
             ''
         );
       }
+
+
 
       // ── Log summary ───────────────────────────────────────────────────
       console.log('\n' + '='.repeat(60));
