@@ -17,9 +17,9 @@ dnf install -y \
   xorg-x11-server-Xvfb \
   liberation-fonts google-noto-emoji-color-fonts \
   alsa-lib atk at-spi2-atk cups-libs libdrm expat \
-  fontconfig libgbm gtk3 nspr nss pango \
+  fontconfig mesa-libgbm gtk3 nspr nss pango \
   libX11 libXcomposite libXcursor libXdamage libXext \
-  libXfixes libXi libXrandr libXrender libXss libXtst \
+  libXfixes libXi libXrandr libXrender libXScrnSaver libXtst \
   xdg-utils nginx openssl git
 
 # ── 2. Google Chrome (not Chromium) ─────────────────────────
