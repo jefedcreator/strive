@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-
+import Image from 'next/image';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -387,16 +387,25 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                     className="flex items-center justify-between px-6 py-4"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-                        <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                      <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+                        {member.user.avatar ? (
+                          <Image
+                            src={member.user.avatar}
+                            alt={member.user.fullname ?? member.user.username}
+                            className="w-full h-full object-cover"
+                            width={36}
+                            height={36}
+                          />
+                        ) : (
+                          <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                        )}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
                           {member.user.fullname ?? member.user.username}
                         </p>
                         <p className="text-xs text-gray-400 dark:text-gray-500">
-                          Joined{' '}
-                          {new Date(member.joinedAt).toLocaleDateString()}
+                          {`Joined ${new Date(member.joinedAt).toLocaleDateString()}`}
                         </p>
                       </div>
                     </div>
