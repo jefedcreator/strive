@@ -212,8 +212,8 @@ export class PuppeteerSessionManager {
             (window.navigator.permissions as any).query = (parameters: any) =>
               parameters.name === 'notifications'
                 ? Promise.resolve({
-                    state: Notification.permission,
-                  } as PermissionStatus)
+                  state: Notification.permission,
+                } as PermissionStatus)
                 : originalQuery.call(window.navigator.permissions, parameters);
           }
 
@@ -223,8 +223,8 @@ export class PuppeteerSessionManager {
           }
           if (!(window as any).chrome.runtime) {
             (window as any).chrome.runtime = {
-              connect: () => {},
-              sendMessage: () => {},
+              connect: () => { },
+              sendMessage: () => { },
             };
           }
         });
@@ -435,6 +435,7 @@ export class PuppeteerSessionManager {
           setTimeout(r, 200 + Math.floor(Math.random() * 400))
         );
       }
+      console.log(`[${sessionId}] 🌐 Current URL: ${page.url()}`);
 
       // ── Type email with human-like timing ──────────────────────────
       console.log(`[${sessionId}] ⌨️  Typing email into #username...`);
@@ -526,6 +527,11 @@ export class PuppeteerSessionManager {
       });
     } catch (err: any) {
       console.error(`[${sessionId}] ❌ Error submitting email:`, err.message);
+      try {
+        console.log(`[${sessionId}] 🌐 Current URL at error: ${page.url()}`);
+      } catch (e) {
+        console.log(`[${sessionId}] 🌐 Could not retrieve URL`);
+      }
 
       const fs = require('fs');
       const path = require('path');
