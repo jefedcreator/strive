@@ -157,6 +157,32 @@ export class PuppeteerSessionManager {
         });
       }
 
+      // ── Consistent fingerprint (Linux/EC2 only) ───────────────────────
+      // CRITICAL: Every signal must be consistent. A "Win32" platform with
+      // a Linux UA, or a South African IP with a UTC timezone, is an
+      // instant red flag for Forter.
+      if (process.platform === 'linux') {
+        // 1. Windows Chrome User-Agent (matches platform spoof below)
+        const windowsUA =
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+        await page.setUserAgent(windowsUA);
+
+        // 2. South African timezone (matches BrightData ZA proxy IP)
+        await page.emulateTimezone('Africa/Johannesburg');
+
+        // 3. Realistic desktop viewport
+        await page.setViewport({ width: 1920, height: 1080 });
+
+        // 4. Accept-Language matching South Africa
+        await page.setExtraHTTPHeaders({
+          'Accept-Language': 'en-ZA,en;q=0.9,en-US;q=0.8',
+        });
+
+        console.log(
+          `[PuppeteerSessionManager] 🛡️ Fingerprint: Windows Chrome + ZA timezone + 1920x1080`
+        );
+      }
+
       // ── Anti-fingerprinting patches (Xvfb / Linux) ────────────────────
       // Forter detects Xvfb via WebGL renderer (Mesa/llvmpipe), navigator
       // properties (Linux platform), and screen dimensions. These patches
@@ -201,6 +227,22 @@ export class PuppeteerSessionManager {
             get: () => 8,
           });
           Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+          Object.defineProperty(navigator, 'languages', {
+            get: () => ['en-ZA', 'en', 'en-US'],
+          });
+
+          // ── Override Intl timezone (belt-and-suspenders with emulateTimezone)
+          const origDTF = Intl.DateTimeFormat;
+          (Intl as any).DateTimeFormat = function (
+            locales?: string | string[],
+            options?: Intl.DateTimeFormatOptions
+          ) {
+            return new origDTF(locales, {
+              ...options,
+              timeZone: options?.timeZone || 'Africa/Johannesburg',
+            });
+          };
+          (Intl.DateTimeFormat as any).prototype = origDTF.prototype;
 
           // ── Spoof screen dimensions (realistic desktop) ───────────
           Object.defineProperty(screen, 'colorDepth', { get: () => 24 });
