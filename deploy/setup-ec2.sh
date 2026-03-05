@@ -13,7 +13,7 @@ echo "════════════════════════�
 # ── 1. System packages ──────────────────────────────────────
 echo "→ Installing system dependencies..."
 dnf install -y \
-  wget curl gnupg2 ca-certificates \
+  gnupg2 ca-certificates \
   xorg-x11-server-Xvfb \
   liberation-fonts google-noto-emoji-color-fonts \
   alsa-lib atk at-spi2-atk cups-libs libdrm expat \
