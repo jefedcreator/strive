@@ -135,6 +135,26 @@ export class PuppeteerSessionManager {
       );
     }
 
+    // ── Anti-detection via Chrome launch flags (not CDP) ─────────────
+    // IMPORTANT: Do NOT use page.setUserAgent(), page.emulateTimezone(),
+    // page.setExtraHTTPHeaders(), or page.evaluateOnNewDocument() for
+    // fingerprinting. Forter detects CDP protocol modifications at page
+    // load. Chrome launch flags and env vars are invisible to page scripts.
+    if (process.platform === 'linux') {
+      launchArgs.push(
+        '--window-size=1920,1080',
+        '--lang=en-US',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+      );
+      // Set timezone at OS level — Chrome inherits this natively
+      process.env.TZ = 'Africa/Johannesburg';
+      console.log(
+        `[PuppeteerSessionManager] 🛡️ Launch flags: 1920x1080, en-US, TZ=Africa/Johannesburg`
+      );
+    }
+
     console.log(`[PuppeteerSessionManager] Chrome: ${chromePath}`);
 
     const browser = (await puppeteer.launch({
@@ -154,121 +174,6 @@ export class PuppeteerSessionManager {
         await page.authenticate({
           username: `${proxyUser}-country-za`,
           password: proxyPass,
-        });
-      }
-
-      // ── Consistent fingerprint (Linux/EC2 only) ───────────────────────
-      // CRITICAL: Every signal must be consistent. A "Win32" platform with
-      // a Linux UA, or a South African IP with a UTC timezone, is an
-      // instant red flag for Forter.
-      if (process.platform === 'linux') {
-        // 1. Windows Chrome User-Agent (matches platform spoof below)
-        const windowsUA =
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
-        await page.setUserAgent(windowsUA);
-
-        // 2. South African timezone (matches BrightData ZA proxy IP)
-        await page.emulateTimezone('Africa/Johannesburg');
-
-        // 3. Realistic desktop viewport
-        await page.setViewport({ width: 1920, height: 1080 });
-
-        // 4. Accept-Language matching South Africa
-        await page.setExtraHTTPHeaders({
-          'Accept-Language': 'en-ZA,en;q=0.9,en-US;q=0.8',
-        });
-
-        console.log(
-          `[PuppeteerSessionManager] 🛡️ Fingerprint: Windows Chrome + ZA timezone + 1920x1080`
-        );
-      }
-
-      // ── Anti-fingerprinting patches (Xvfb / Linux) ────────────────────
-      // Forter detects Xvfb via WebGL renderer (Mesa/llvmpipe), navigator
-      // properties (Linux platform), and screen dimensions. These patches
-      // make EC2 + Xvfb look like a normal Windows desktop to Forter.
-      if (process.platform === 'linux') {
-        console.log(
-          `[PuppeteerSessionManager] 🛡️ Applying anti-fingerprint patches (Linux/Xvfb)`
-        );
-
-        await page.evaluateOnNewDocument(() => {
-          // ── Spoof WebGL renderer & vendor ──────────────────────────
-          const getParameterProto =
-            WebGLRenderingContext.prototype.getParameter;
-          WebGLRenderingContext.prototype.getParameter = function (
-            param: number
-          ) {
-            // UNMASKED_VENDOR_WEBGL
-            if (param === 0x9245) return 'Google Inc. (NVIDIA)';
-            // UNMASKED_RENDERER_WEBGL
-            if (param === 0x9246)
-              return 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)';
-            return getParameterProto.call(this, param);
-          };
-
-          // Also patch WebGL2
-          if (typeof WebGL2RenderingContext !== 'undefined') {
-            const getParameterProto2 =
-              WebGL2RenderingContext.prototype.getParameter;
-            WebGL2RenderingContext.prototype.getParameter = function (
-              param: number
-            ) {
-              if (param === 0x9245) return 'Google Inc. (NVIDIA)';
-              if (param === 0x9246)
-                return 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)';
-              return getParameterProto2.call(this, param);
-            };
-          }
-
-          // ── Spoof navigator properties ────────────────────────────
-          Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
-          Object.defineProperty(navigator, 'hardwareConcurrency', {
-            get: () => 8,
-          });
-          Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
-          Object.defineProperty(navigator, 'languages', {
-            get: () => ['en-ZA', 'en', 'en-US'],
-          });
-
-          // ── Override Intl timezone (belt-and-suspenders with emulateTimezone)
-          const origDTF = Intl.DateTimeFormat;
-          (Intl as any).DateTimeFormat = function (
-            locales?: string | string[],
-            options?: Intl.DateTimeFormatOptions
-          ) {
-            return new origDTF(locales, {
-              ...options,
-              timeZone: options?.timeZone || 'Africa/Johannesburg',
-            });
-          };
-          (Intl.DateTimeFormat as any).prototype = origDTF.prototype;
-
-          // ── Spoof screen dimensions (realistic desktop) ───────────
-          Object.defineProperty(screen, 'colorDepth', { get: () => 24 });
-          Object.defineProperty(screen, 'pixelDepth', { get: () => 24 });
-
-          // ── Patch Permissions API (Forter checks this) ────────────
-          const originalQuery = window.navigator.permissions?.query;
-          if (originalQuery) {
-            (window.navigator.permissions as any).query = (parameters: any) =>
-              parameters.name === 'notifications'
-                ? Promise.resolve({
-                  state: Notification.permission,
-                } as PermissionStatus)
-                : originalQuery.call(window.navigator.permissions, parameters);
-          }
-
-          // ── Patch chrome.runtime (make it look like real Chrome) ───
-          if (!(window as any).chrome) {
-            (window as any).chrome = {};
-          }
-          if (!(window as any).chrome.runtime) {
-            (window as any).chrome.runtime = {
-              connect: () => { },
-              sendMessage: () => { },
-            };
-          }
         });
       }
 
