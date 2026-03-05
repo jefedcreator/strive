@@ -1,40 +1,39 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 # Strive — EC2 Bare Metal Setup Script
-# Run this on a fresh Ubuntu 22.04+ EC2 instance (amd64)
+# Run this on a fresh Amazon Linux 2023 EC2 instance (amd64)
 # Usage:  chmod +x deploy/setup-ec2.sh && sudo ./deploy/setup-ec2.sh
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
 echo "═══════════════════════════════════════════════════════"
-echo " Strive — EC2 Bare Metal Setup"
+echo " Strive — EC2 Bare Metal Setup (Amazon Linux 2023)"
 echo "═══════════════════════════════════════════════════════"
 
 # ── 1. System packages ──────────────────────────────────────
 echo "→ Installing system dependencies..."
-apt-get update
-apt-get install -y \
-  curl wget gnupg2 ca-certificates apt-transport-https \
-  xvfb \
-  fonts-liberation fonts-noto-color-emoji fonts-freefont-ttf \
-  libasound2 libatk-bridge2.0-0 libatk1.0-0 libcairo2 \
-  libcups2 libdbus-1-3 libdrm2 libexpat1 libfontconfig1 \
-  libgbm1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 \
-  libpango-1.0-0 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 \
-  libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 \
-  libxrandr2 libxrender1 libxshmfence1 libxss1 libxtst6 \
+dnf install -y \
+  wget curl gnupg2 ca-certificates \
+  xorg-x11-server-Xvfb \
+  liberation-fonts google-noto-emoji-color-fonts \
+  alsa-lib atk at-spi2-atk cups-libs libdrm expat \
+  fontconfig libgbm gtk3 nspr nss pango \
+  libX11 libXcomposite libXcursor libXdamage libXext \
+  libXfixes libXi libXrandr libXrender libXss libXtst \
   xdg-utils nginx openssl git
 
 # ── 2. Google Chrome (not Chromium) ─────────────────────────
 echo "→ Installing Google Chrome stable..."
 if ! command -v google-chrome-stable &> /dev/null; then
-  wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | \
-    gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
-  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
-    http://dl.google.com/linux/chrome/deb/ stable main" \
-    > /etc/apt/sources.list.d/google-chrome.list
-  apt-get update
-  apt-get install -y google-chrome-stable
+  cat > /etc/yum.repos.d/google-chrome.repo << 'EOF'
+[google-chrome]
+name=Google Chrome
+baseurl=https://dl.google.com/linux/chrome/rpm/stable/x86_64
+enabled=1
+gpgcheck=1
+gpgkey=https://dl.google.com/linux/linux_signing_key.pub
+EOF
+  dnf install -y google-chrome-stable
   echo "✅ Chrome installed: $(google-chrome-stable --version)"
 else
   echo "✅ Chrome already installed: $(google-chrome-stable --version)"
@@ -43,8 +42,8 @@ fi
 # ── 3. Node.js 20 LTS ──────────────────────────────────────
 echo "→ Installing Node.js 20..."
 if ! command -v node &> /dev/null; then
-  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  apt-get install -y nodejs
+  curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+  dnf install -y nodejs
   echo "✅ Node.js installed: $(node --version)"
 else
   echo "✅ Node.js already installed: $(node --version)"
@@ -81,17 +80,16 @@ echo "✅ Xvfb running on DISPLAY=:99"
 
 # ── 7. Create app directory & logs ──────────────────────────
 echo "→ Setting up app directory..."
-mkdir -p /home/ubuntu/strive/logs
-chown -R ubuntu:ubuntu /home/ubuntu/strive
+mkdir -p /home/ec2-user/strive/logs
+chown -R ec2-user:ec2-user /home/ec2-user/strive
 
 # ── 8. Nginx ────────────────────────────────────────────────
 echo "→ Configuring Nginx..."
-cat > /etc/nginx/sites-available/strive << 'EOF'
+cat > /etc/nginx/conf.d/strive.conf << 'EOF'
 server {
     listen 80;
     server_name _;
 
-    # Gzip
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml;
     gzip_comp_level 6;
@@ -107,7 +105,6 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
 
-        # Extended timeouts for Puppeteer
         proxy_read_timeout 300s;
         proxy_connect_timeout 300s;
         proxy_send_timeout 300s;
@@ -115,22 +112,21 @@ server {
 }
 EOF
 
-ln -sf /etc/nginx/sites-available/strive /etc/nginx/sites-enabled/strive
-rm -f /etc/nginx/sites-enabled/default
+systemctl enable nginx
 nginx -t && systemctl restart nginx
 echo "✅ Nginx configured"
 
 # ── 9. PM2 startup ─────────────────────────────────────────
 echo "→ Configuring PM2 startup..."
-env PATH=$PATH:/usr/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu
+env PATH=$PATH:/usr/bin pm2 startup systemd -u ec2-user --hp /home/ec2-user
 echo "✅ PM2 startup configured"
 
 echo ""
 echo "═══════════════════════════════════════════════════════"
 echo " ✅ Setup complete!"
 echo ""
-echo " Next steps (as ubuntu user):"
-echo "   1. cd /home/ubuntu/strive"
+echo " Next steps (as ec2-user):"
+echo "   1. cd /home/ec2-user/strive"
 echo "   2. git clone <your-repo> . "
 echo "   3. cp .env.example .env  # fill in secrets"
 echo "   4. yarn install"
