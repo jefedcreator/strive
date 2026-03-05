@@ -50,3 +50,5 @@ yarn-error.log*
 .agent
 
 debug/
+
+ecosystem.config.cjs

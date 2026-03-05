@@ -1,27 +1,24 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 # Strive — Deploy / Update Script
-# Run as ubuntu user:  ./deploy/deploy.sh
+# Run as ec2-user after build artifacts are SCP'd to the server
+# Usage:  bash deploy/deploy.sh
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
 APP_DIR="/home/ec2-user/strive"
 cd "$APP_DIR"
 
-echo "→ Pulling latest code..."
-git pull origin main
-
-echo "→ Installing dependencies..."
-yarn install --frozen-lockfile
-
-echo "→ Running database migrations..."
+echo "🗄️ Running database migrations..."
 npx prisma db push --accept-data-loss
 
-echo "→ Building application..."
-yarn build
+echo "🚦 Restarting with PM2..."
+pm2 delete "strive" || true
 
-echo "→ Restarting PM2..."
-pm2 restart ecosystem.config.cjs
+echo "🚀 Starting app via Ecosystem..."
+pm2 start ecosystem.config.cjs
+
+echo "💾 Saving PM2 state..."
 pm2 save
 
 echo "✅ Deploy complete!"

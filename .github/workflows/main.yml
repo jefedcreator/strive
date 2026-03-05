@@ -20,6 +20,27 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Create .env file
+        run: |
+          cat > .env << EOL
+          DATABASE_URL="${{ secrets.DATABASE_URL }}"
+          AUTH_STRAVA_ID="${{ secrets.AUTH_STRAVA_ID }}"
+          AUTH_SECRET="${{ secrets.AUTH_SECRET }}"
+          CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}"
+          CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}"
+          CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}"
+          BRIGHTDATA_USERNAME="${{ secrets.BRIGHTDATA_USERNAME }}"
+          BRIGHTDATA_PASSWORD="${{ secrets.BRIGHTDATA_PASSWORD }}"
+          NEXT_PUBLIC_APP_URL="${{ secrets.NEXT_PUBLIC_APP_URL }}"
+          NEXTAUTH_URL="${{ secrets.NEXTAUTH_URL }}"
+          NODE_ENV=production
+          PORT=3000
+          DISPLAY=:99
+          CHROME_PATH=/usr/bin/google-chrome-stable
+          AUTH_TRUST_HOST=true
+          SKIP_ENV_VALIDATION=1
+          EOL
+
       - name: Run Prisma generate
         run: npx prisma generate
 
@@ -50,7 +71,7 @@ jobs:
           target: '/home/ec2-user/strive'
           strip_components: 1
 
-      - name: Install dependencies and restart PM2 on EC2
+      - name: Run setup script (first-time provisioning)
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -59,7 +80,7 @@ jobs:
           script: |
             set -e
 
-            echo "� Loading NVM and using Node 20..."
+            echo "🔧 Loading NVM and using Node 20..."
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
@@ -70,32 +91,30 @@ jobs:
 
             nvm use 20
 
-            if ! command -v pm2 &> /dev/null; then
-              echo "⬇️ PM2 not found. Installing globally..."
-              npm install -g pm2
+            # Run setup script if Chrome or Xvfb not installed yet
+            if ! command -v google-chrome-stable &> /dev/null || ! systemctl is-active --quiet xvfb; then
+              echo "🛠️ Running first-time setup..."
+              cd /home/ec2-user/strive
+              sudo bash deploy/setup-ec2.sh
+            else
+              echo "✅ Setup already complete, skipping..."
             fi
 
-            echo "📁 Switching to app directory..."
+      - name: Run deploy script
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+
+            echo "🔧 Loading NVM and using Node 20..."
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm use 20
+
             cd /home/ec2-user/strive
-
-            echo "📋 Checking deployment files..."
-            ls -la
-
-            if [ ! -d ".next" ]; then
-              echo "❌ Error: .next directory not found!"
-              exit 1
-            fi
-
-            echo "🗄️ Running database migrations..."
-            npx prisma db push --accept-data-loss
-
-            echo "� Restarting with PM2..."
-            pm2 delete "strive" || true
-
-            echo "🚀 Starting app via Ecosystem..."
-            pm2 start ecosystem.config.cjs
-
-            echo "💾 Saving PM2 state..."
-            pm2 save
+            bash deploy/deploy.sh
 
             echo "✅ Deployment complete!"
