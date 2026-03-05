@@ -4,7 +4,7 @@ module.exports = {
       name: 'strive',
       script: 'node_modules/.bin/next',
       args: 'start',
-      cwd: '/home/ubuntu/strive',
+      cwd: '/home/ec2-user/strive',
       env: {
         NODE_ENV: 'production',
         PORT: 3000,

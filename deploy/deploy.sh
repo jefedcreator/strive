@@ -5,7 +5,7 @@
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
-APP_DIR="/home/ubuntu/strive"
+APP_DIR="/home/ec2-user/strive"
 cd "$APP_DIR"
 
 echo "→ Pulling latest code..."
