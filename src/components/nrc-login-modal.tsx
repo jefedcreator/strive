@@ -303,7 +303,7 @@ function CodeStep({
               type="number"
               disabled={isSubmitting}
               placeholder="00000000"
-              className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-primary text-center text-2xl font-mono tracking-[0.5em] focus:tracking-[0.5em] placeholder:tracking-normal placeholder:font-sans transition-all"
+              className="h-14 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-primary text-center text-2xl font-mono tracking-[0.5em] focus:tracking-[0.5em] placeholder:tracking-normal placeholder:font-sans transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               required
               maxLength={8}
               autoFocus

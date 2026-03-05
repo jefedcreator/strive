@@ -521,7 +521,7 @@ export class PuppeteerSessionManager {
 
   /**
    * Receives the OTP / verification code from the client, submits it,
-   * navigates to the profile page, and resolves with the final NikeAuthResult.
+   *navigates to the profile page, and resolves with the final NikeAuthResult.
    */
   public async submitCode(
     sessionId: string,
