@@ -60,6 +60,7 @@ jobs:
           cp package.json deploy-package/
           cp yarn.lock deploy-package/
           cp ecosystem.config.cjs deploy-package/
+          cp .env deploy-package/
 
       - name: Deploy to EC2
         uses: appleboy/scp-action@master
