@@ -122,7 +122,7 @@ function Hero() {
           <strong className="text-gray-900 dark:text-gray-200 font-bold">
             NRC
           </strong>{' '}
-          to unlock global leaderboards, private clubs, and detailed analytics.
+          to unlock global leaderboards and private clubs.
         </motion.p>
 
         <motion.div
@@ -140,14 +140,14 @@ function Hero() {
             Get Started Free
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </motion.a>
-          <motion.a
+          {/* <motion.a
             whileHover={{ scale: 1.02, backgroundColor: 'rgba(0,0,0,0.02)' }}
             whileTap={{ scale: 0.98 }}
             className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 border border-gray-200 dark:border-white/10 text-lg font-bold rounded-full text-gray-900 dark:text-white bg-white/50 dark:bg-white/5 backdrop-blur-sm hover:border-gray-300 dark:hover:border-white/20 transition-all focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-white/10"
             href="#features"
           >
             Explore Features
-          </motion.a>
+          </motion.a> */}
         </motion.div>
 
         <motion.div

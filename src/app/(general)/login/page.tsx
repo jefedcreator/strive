@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { SiNike, SiStrava } from 'react-icons/si';
+import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 function LoginPageContent() {
@@ -40,36 +41,6 @@ function LoginPageContent() {
   const { status } = useSession();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [stravaStatus, setStravaStatus] = useState<string | null>(null);
-
-  // NRC Flow States
-
-  // --- Real-Time NRC Webhook Listener ---
-  // useEffect(() => {
-  //   if (!socket || !activeSessionId) return;
-
-  //   const handleNrcStep = (data: { step: string; sessionId: string; message?: string }) => {
-  //     if (data.sessionId !== activeSessionId) return;
-
-  //     if (data.step === 'ready') {
-  //       setIsInitializing(false);
-  //       setIsNRCModalOpen(true);
-  //     } else if (data.step === 'success') {
-  //       setIsSubmitting(false);
-  //       setIsNRCModalOpen(false);
-  //       handleLoginSuccess(null);
-  //     } else if (data.step === 'error') {
-  //       setIsSubmitting(false);
-  //       setIsInitializing(false);
-  //       toast.error(data.message ?? 'An error occurred during authentication.');
-  //       setActiveSessionId(null);
-  //     }
-  //   };
-
-  //   socket.on('nrc-login-step', handleNrcStep);
-  //   return () => {
-  //     socket.off('nrc-login-step', handleNrcStep);
-  //   };
-  // }, [socket, activeSessionId]);
 
   const handleLoginSuccess = (payloadUrl: string | null) => {
     toast.success(`Welcome back!`);
@@ -191,7 +162,18 @@ function LoginPageContent() {
       </div>
       {/* Screens */}
       <main className="relative z-10 min-h-screen flex flex-col items-center py-12 px-4 pt-[env(safe-area-inset-top,12px)]">
-        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Back Button */}
+        <div className="absolute top-6 left-6 z-20">
+          <button
+            onClick={() => router.push('/')}
+            className="flex items-center justify-center p-2 rounded-full bg-white/10 hover:bg-white/20 dark:bg-black/10 dark:hover:bg-black/20 backdrop-blur-md border border-gray-200/20 dark:border-gray-800/20 transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            aria-label="Go back home"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700 mt-8">
           <div className="mb-12 text-center">
             <div className="flex items-center justify-center mb-4">
               <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white flex items-center gap-1">

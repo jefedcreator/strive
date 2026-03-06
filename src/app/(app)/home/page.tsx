@@ -70,8 +70,7 @@ export default async function HomePage() {
           Welcome back, {username.split(' ')[0]}
         </h1>
         <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium">
-          You are successfully connected. Here is your fitness overview for this
-          week.
+          You are successfully connected. Here is your overview from your last run
         </p>
       </section>
 
