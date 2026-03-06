@@ -128,7 +128,7 @@ export function Sidebar() {
             {!isCollapsed && (
               <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white flex items-center gap-1">
                 STRIVE
-                <Logo />
+                <Logo cutoutClassName="text-card-light dark:text-card-dark" />
               </span>
             )}
             <button
