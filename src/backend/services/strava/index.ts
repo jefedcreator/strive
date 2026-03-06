@@ -49,7 +49,7 @@ export class StravaService {
     leaderboardId?: string;
     callbackUrl?: string;
   }): string {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
     const params = new URLSearchParams({
       client_id: this.CLIENT_ID!,
       redirect_uri: `${baseUrl}/api/login/callback`,

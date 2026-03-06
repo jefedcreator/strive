@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'https://strive-beige.vercel.app'
+    process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run'
   ),
   title: {
     template: '%s | Strive',

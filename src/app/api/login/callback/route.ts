@@ -152,7 +152,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         redirect: false,
       });
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
 
       if (clubId) {
         return NextResponse.redirect(new URL(`/clubs/${clubId}`, appUrl));
