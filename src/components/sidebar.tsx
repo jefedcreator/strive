@@ -105,8 +105,8 @@ export function Sidebar() {
         {/* --- Mobile Header (Visible only on lg and below) --- */}
         <div className="lg:hidden flex items-center justify-between px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] bg-card-light dark:bg-card-dark border-b border-gray-200 dark:border-gray-800 fixed w-full z-50 top-0 left-0">
           <div className="font-black text-xl tracking-tighter text-gray-900 dark:text-white flex items-center gap-1">
-            STRIVE{' '}
-            <span className="w-2 h-2 rounded-full bg-primary inline-block"></span>
+            STRIVE
+            <Logo cutoutClassName="text-card-light dark:text-card-dark" />
           </div>
           <button
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-colors"

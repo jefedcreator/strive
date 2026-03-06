@@ -5,8 +5,8 @@ interface LogoProps extends React.SVGProps<SVGSVGElement> {
 }
 
 const Logo = ({
-  className = "w-8 h-8 ml-2 bg-primary rounded-lg",
-  cutoutClassName = "text-background-light dark:text-background-dark",
+  className = 'w-8 h-8 ml-2 bg-primary rounded-lg',
+  cutoutClassName = 'text-background-light dark:text-background-dark',
   ...props
 }: LogoProps) => {
   return (
