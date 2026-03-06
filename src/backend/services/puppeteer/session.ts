@@ -94,7 +94,10 @@ export class PuppeteerSessionManager {
       await session.browser.close();
       // Clean up the proxy-chain local proxy server if one was used
       if ((session as any).__proxyUrl) {
-        await ProxyChain.closeAnonymizedProxy((session as any).__proxyUrl, true);
+        await ProxyChain.closeAnonymizedProxy(
+          (session as any).__proxyUrl,
+          true
+        );
         console.log(`[${sessionId}] 🔌 Closed proxy-chain proxy`);
       }
     } catch (err) {
@@ -158,7 +161,7 @@ export class PuppeteerSessionManager {
         '--lang=en-US',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--disable-software-rasterizer',
+        '--disable-software-rasterizer'
       );
       // Set timezone at OS level — Chrome inherits this natively
       process.env.TZ = 'Africa/Johannesburg';

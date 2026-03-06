@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
 import { useTheme } from 'next-themes';
+import Logo from '@/primitives/logo';
 
 interface NavItemProps {
   name: string;
@@ -127,11 +128,7 @@ export function Sidebar() {
             {!isCollapsed && (
               <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white flex items-center gap-1">
                 STRIVE
-                <span className="flex space-x-1 ml-1">
-                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                </span>
+                <Logo />
               </span>
             )}
             <button

@@ -2,6 +2,7 @@
 
 import { NRCLoginModal } from '@/components/nrc-login-modal';
 import { useNRCLogin } from '@/hooks/useNRCLogin';
+import Logo from '@/primitives/logo';
 import type { ApiError } from '@/types';
 import { useMutation } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
@@ -193,18 +194,10 @@ function LoginPageContent() {
         <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="mb-12 text-center">
             <div className="flex items-center justify-center mb-4">
-              <h1 className="text-6xl font-black tracking-tighter text-gray-900 dark:text-white relative">
-                STR
-                <span className="relative inline-block">
-                  I
-                  <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                    <span className="dot dot-red"></span>
-                    <span className="dot dot-green"></span>
-                    <span className="dot dot-blue"></span>
-                  </span>
-                </span>
-                VE
-              </h1>
+              <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white flex items-center gap-1">
+                STRIVE
+                <Logo />
+              </span>
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">
               Sync your fitness journey across platforms.
