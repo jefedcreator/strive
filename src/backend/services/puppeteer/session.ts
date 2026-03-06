@@ -13,6 +13,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const ProxyChain = require('proxy-chain');
 import type { Browser, Page } from 'puppeteer';
 import { v4 as uuidv4 } from 'uuid';
 import { sseService } from '../events';
@@ -91,6 +92,11 @@ export class PuppeteerSessionManager {
     if (!session) return;
     try {
       await session.browser.close();
+      // Clean up the proxy-chain local proxy server if one was used
+      if ((session as any).__proxyUrl) {
+        await ProxyChain.closeAnonymizedProxy((session as any).__proxyUrl, true);
+        console.log(`[${sessionId}] 🔌 Closed proxy-chain proxy`);
+      }
     } catch (err) {
       console.error(
         `[PuppeteerSessionManager] Error closing browser for ${sessionId}:`,
@@ -112,13 +118,16 @@ export class PuppeteerSessionManager {
 
     const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
 
-    // ── BrightData residential proxy (South African IP) ──────────────
-    // On EC2, datacenter IPs get flagged by Nike/Forter. Route Chrome
-    // through BrightData residential proxy with -country-za to get a
-    // South African residential IP while keeping the real Chrome fingerprint.
+    // ── BrightData residential proxy via proxy-chain ────────────────────
+    // IMPORTANT: Do NOT use page.authenticate() — it calls CDP Fetch.enable
+    // which Forter detects. proxy-chain creates a local proxy server that
+    // handles BrightData auth transparently. Chrome connects to localhost
+    // (no auth needed = zero CDP calls).
     const proxyUser = process.env.BRIGHTDATA_USERNAME;
     const proxyPass = process.env.BRIGHTDATA_PASSWORD;
     const useProxy = !!(proxyUser && proxyPass);
+
+    let anonymizedProxyUrl: string | null = null;
 
     const launchArgs = [
       '--start-maximized',
@@ -128,10 +137,13 @@ export class PuppeteerSessionManager {
     ];
 
     if (useProxy) {
-      // BrightData super proxy endpoint — append country targeting
-      launchArgs.push('--proxy-server=http://brd.superproxy.io:33335');
+      // Build the BrightData proxy URL with embedded auth + country targeting
+      const brightdataUrl = `http://${proxyUser}-country-za:${proxyPass}@brd.superproxy.io:33335`;
+      // proxy-chain creates a local proxy that handles auth transparently
+      anonymizedProxyUrl = await ProxyChain.anonymizeProxy(brightdataUrl);
+      launchArgs.push(`--proxy-server=${anonymizedProxyUrl}`);
       console.log(
-        `[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA)`
+        `[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA) via proxy-chain`
       );
     }
 
@@ -169,13 +181,8 @@ export class PuppeteerSessionManager {
     try {
       const page = (await browser.pages())[0] ?? (await browser.newPage());
 
-      // Authenticate with BrightData proxy (country-za for South Africa)
-      if (useProxy) {
-        await page.authenticate({
-          username: `${proxyUser}-country-za`,
-          password: proxyPass,
-        });
-      }
+      // No page.authenticate() needed — proxy-chain handles auth locally
+      // (page.authenticate uses CDP Fetch.enable which Forter detects)
 
       let resolvePromise!: (
         value: NikeAuthResult | PromiseLike<NikeAuthResult>
@@ -193,6 +200,11 @@ export class PuppeteerSessionManager {
         resolve: resolvePromise,
         reject: rejectPromise,
       });
+
+      // Track proxy URL for cleanup on session close
+      if (anonymizedProxyUrl) {
+        (this.sessions.get(sessionId) as any).__proxyUrl = anonymizedProxyUrl;
+      }
 
       this.startNavigationFlow(sessionId, page, timeout).catch((err) => {
         console.error(

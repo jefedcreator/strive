@@ -58,6 +58,7 @@
     "nextjs-toploader": "^3.8.16",
     "nuqs": "^2.8.8",
     "prompt-sync": "^4.2.0",
+    "proxy-chain": "^2.7.1",
     "puppeteer": "^24.37.2",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",

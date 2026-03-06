@@ -84,7 +84,6 @@ export function NRCLoginModal({
               </svg>
             </button>
           )}
-
           <div className="relative p-8 md:p-10">
             {isErrorScreen ? (
               <ErrorStep error={error} reset={reset} />
