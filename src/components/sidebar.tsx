@@ -211,6 +211,7 @@ export function Sidebar() {
             <div className="h-auto flex items-center justify-between px-6 pb-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] border-b border-gray-100 dark:border-gray-800 shrink-0">
               <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white">
                 STRIVE
+                <Logo cutoutClassName="text-card-light dark:text-card-dark" />
               </span>
               <button
                 onClick={() => setIsMobileOpen(false)}
