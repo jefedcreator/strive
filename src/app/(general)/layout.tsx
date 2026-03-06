@@ -8,18 +8,18 @@ export const metadata: Metadata = {
   ),
   title: {
     template: '%s | Strive',
-    default: 'Strive - Sync Your Fitness Journey',
+    default: 'Strive - The Ultimate Running Community & Competition Platform',
   },
   description:
-    'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+    'Join the global running community. Compete on unified leaderboards, join private clubs, and push your limits across Strava and Nike Run Club.',
   icons: {
     icon: '/favicon.png',
     apple: '/favicon.png',
   },
   openGraph: {
-    title: 'Strive - Sync Your Fitness Journey',
+    title: 'Strive - The Ultimate Running Community & Competition Platform',
     description:
-      'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+      'Join the global running community. Compete on unified leaderboards, join private clubs, and push your limits across Strava and Nike Run Club.',
     url: '/',
     siteName: 'Strive',
     images: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
         url: '/banner.png',
         width: 1200,
         height: 1200,
-        alt: 'Strive - Sync Your Fitness Journey',
+        alt: 'Strive - The Ultimate Running Community & Competition Platform',
       },
     ],
     locale: 'en_US',
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Strive - Sync Your Fitness Journey',
+    title: 'Strive - The Ultimate Running Community & Competition Platform',
     description:
-      'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+      'Join the global running community. Compete on unified leaderboards, join private clubs, and push your limits across Strava and Nike Run Club.',
     images: ['/banner.png'],
   },
   appleWebApp: {

@@ -99,11 +99,11 @@ function Hero() {
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-gray-900 dark:text-white mb-6 leading-[1.1] md:leading-[1.05]"
         >
-          Sync. Compete. <br className="hidden md:block" />
+          Run Together. <br className="hidden md:block" />
           <span className="relative inline-block">
             <span className="absolute -inset-1 bg-gradient-to-r from-primary to-orange-400 opacity-20 dark:opacity-30 blur-2xl"></span>
             <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#ff6a00] to-orange-400">
-              Conquer.
+              Compete Globally.
             </span>
           </span>
         </motion.h1>
@@ -114,7 +114,7 @@ function Hero() {
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="mt-6 max-w-2xl mx-auto text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium tracking-tight"
         >
-          Your fitness journey, unified. Automatically sync activities from{' '}
+          Join the ultimate running community. Automatically sync activities from{' '}
           <strong className="text-gray-900 dark:text-gray-200 font-bold">
             Strava
           </strong>{' '}
@@ -122,7 +122,7 @@ function Hero() {
           <strong className="text-gray-900 dark:text-gray-200 font-bold">
             NRC
           </strong>{' '}
-          to unlock global leaderboards and private clubs.
+          to battle on global leaderboards and run with your friends in private clubs.
         </motion.p>
 
         <motion.div
@@ -458,12 +458,12 @@ function Capabilities() {
                     <RefreshCw className="w-5 h-5" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Multi-Platform Sync
+                    Unified Community
                   </h3>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  Connect Strava and Nike Run Club accounts simultaneously. No
-                  more manual entry.
+                  Bring your Strava and NRC friends together. No runner left
+                  behind.
                 </p>
               </div>
             </motion.div>
@@ -487,12 +487,12 @@ function Capabilities() {
                     <Globe className="w-5 h-5" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Global Leaderboards
+                    Fierce Competition
                   </h3>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  See where you stand against runners worldwide, regardless of
-                  which app they use.
+                  Battle for the top spot against runners worldwide. May the best
+                  athlete win.
                 </p>
               </div>
             </motion.div>
@@ -516,12 +516,12 @@ function Capabilities() {
                     <Users className="w-5 h-5" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Private Clubs
+                    Your Running Crew
                   </h3>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  Create exclusive groups for friends, companies, or run clubs
-                  with custom challenges.
+                  Build your own squads. Create custom challenges, hype each other
+                  up, and run as a team.
                 </p>
               </div>
             </motion.div>
@@ -543,12 +543,12 @@ function Capabilities() {
                     <LineChart className="w-5 h-5" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Detailed Analytics
+                    Performance Tracking
                   </h3>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  Deep dive into your performance trends with aggregated data
-                  visualization.
+                  Analyze your stats to gain a competitive edge and crush your
+                  personal records.
                 </p>
               </div>
             </motion.div>
@@ -573,11 +573,10 @@ function Capabilities() {
               <RefreshCw className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-              Multi-Platform Sync
+              Unified Community
             </h3>
             <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-              Connect Strava and Nike Run Club accounts simultaneously. No more
-              manual entry.
+              Bring your Strava and NRC friends together. No runner left behind.
             </p>
           </motion.div>
 
@@ -591,11 +590,11 @@ function Capabilities() {
               <Globe className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-              Global Leaderboards
+              Fierce Competition
             </h3>
             <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-              See where you stand against runners worldwide, regardless of which
-              app they use.
+              Battle for the top spot against runners worldwide. May the best
+              athlete win.
             </p>
           </motion.div>
 
@@ -609,11 +608,11 @@ function Capabilities() {
               <Users className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-              Private Clubs
+              Your Running Crew
             </h3>
             <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-              Create exclusive groups for friends, companies, or run clubs with
-              custom challenges.
+              Build your own squads. Create custom challenges, hype each other
+              up, and run as a team.
             </p>
           </motion.div>
 
@@ -627,11 +626,11 @@ function Capabilities() {
               <LineChart className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-              Detailed Analytics
+              Performance Tracking
             </h3>
             <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-              Deep dive into your performance trends with aggregated data
-              visualization.
+              Analyze your stats to gain a competitive edge and crush your
+              personal records.
             </p>
           </motion.div>
         </motion.div>
@@ -774,7 +773,7 @@ function LeaderboardSection() {
             className="lg:w-1/2"
           >
             <h2 className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
-              Compete on a{' '}
+              Prove Yourself on a{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
                 Level Playing Field.
               </span>
@@ -876,7 +875,7 @@ function CTA() {
           </motion.div>
 
           <h2 className="text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
-            Ready to unite your <br className="hidden md:block" /> running life?
+            Ready to join the ultimate <br className="hidden md:block" /> running community?
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto font-medium">
             Join thousands of runners who have already synced over 1 million
@@ -924,8 +923,7 @@ function Footer() {
               </span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium leading-relaxed">
-              The ultimate dashboard for the modern social athlete. Connect,
-              compete, and analyze.
+              The premier platform for running communities and fierce competition.
             </p>
             <div className="flex gap-4">
               <a

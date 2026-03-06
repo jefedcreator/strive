@@ -16,18 +16,18 @@ export const metadata: Metadata = {
   ),
   title: {
     template: '%s | Strive',
-    default: 'Strive Dashboard',
+    default: 'Strive Dashboard - Your Competitions and Clubs',
   },
   description:
-    'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+    'Track your rank, manage your running clubs, and analyze your competitive performance.',
   icons: {
     icon: '/favicon.png',
     apple: '/favicon.png',
   },
   openGraph: {
-    title: 'Strive Dashboard',
+    title: 'Strive Dashboard - Your Competitions and Clubs',
     description:
-      'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+      'Track your rank, manage your running clubs, and analyze your competitive performance.',
     url: '/home',
     siteName: 'Strive',
     images: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
         url: '/banner.png',
         width: 1200,
         height: 1200,
-        alt: 'Strive Dashboard',
+        alt: 'Strive Dashboard - Your Competitions and Clubs',
       },
     ],
     locale: 'en_US',
@@ -43,9 +43,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Strive Dashboard',
+    title: 'Strive Dashboard - Your Competitions and Clubs',
     description:
-      'A high-performance fitness platform that synchronizes your journey across Strava and Nike Run Club.',
+      'Track your rank, manage your running clubs, and analyze your competitive performance.',
     images: ['/banner.png'],
   },
   appleWebApp: {
