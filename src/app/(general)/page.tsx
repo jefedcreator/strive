@@ -15,6 +15,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 const Noise = () => (
   <div className="pointer-events-none fixed inset-0 z-50 h-full w-full opacity-[0.03] mix-blend-overlay">
@@ -37,7 +38,11 @@ const Noise = () => (
   </div>
 );
 
-function Navbar() {
+function Navbar({
+  status,
+}: {
+  status: 'authenticated' | 'unauthenticated' | 'loading';
+}) {
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -61,10 +66,10 @@ function Navbar() {
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="/login"
+              href={status === 'authenticated' ? '/home' : '/login'}
               className="hidden md:inline-flex items-center justify-center px-6 py-2.5 text-sm font-bold rounded-full text-white bg-primary hover:bg-[#e04000] focus:ring-4 focus:ring-primary/20 transition-all shadow-[0_4px_14px_0_rgba(252,76,2,0.39)] hover:shadow-[0_6px_20px_rgba(252,76,2,0.23)] border border-primary/50"
             >
-              Log in
+              {status === 'authenticated' ? 'Home' : 'Log in'}
             </motion.a>
           </div>
         </div>
@@ -73,7 +78,11 @@ function Navbar() {
   );
 }
 
-function Hero() {
+function Hero({
+  status,
+}: {
+  status: 'authenticated' | 'unauthenticated' | 'loading';
+}) {
   return (
     <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden selection:bg-primary/30">
       {/* Background Ambience Removed for iOS Safari Compatibility */}
@@ -114,7 +123,8 @@ function Hero() {
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="mt-6 max-w-2xl mx-auto text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium tracking-tight"
         >
-          Join the ultimate running community. Automatically sync activities from{' '}
+          Join the ultimate running community. Automatically sync activities
+          from{' '}
           <strong className="text-gray-900 dark:text-gray-200 font-bold">
             Strava
           </strong>{' '}
@@ -122,7 +132,8 @@ function Hero() {
           <strong className="text-gray-900 dark:text-gray-200 font-bold">
             NRC
           </strong>{' '}
-          to battle on global leaderboards and run with your friends in private clubs.
+          to battle on global leaderboards and run with your friends in private
+          clubs.
         </motion.p>
 
         <motion.div
@@ -135,7 +146,7 @@ function Hero() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-full text-white bg-primary hover:bg-[#e04000] transition-colors shadow-[0_8px_30px_rgb(252,76,2,0.3)] focus:outline-none focus:ring-4 focus:ring-primary/20"
-            href="/login"
+            href={status === 'authenticated' ? '/home' : '/login'}
           >
             Get Started Free
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -491,8 +502,8 @@ function Capabilities() {
                   </h3>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  Battle for the top spot against runners worldwide. May the best
-                  athlete win.
+                  Battle for the top spot against runners worldwide. May the
+                  best athlete win.
                 </p>
               </div>
             </motion.div>
@@ -520,8 +531,8 @@ function Capabilities() {
                   </h3>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  Build your own squads. Create custom challenges, hype each other
-                  up, and run as a team.
+                  Build your own squads. Create custom challenges, hype each
+                  other up, and run as a team.
                 </p>
               </div>
             </motion.div>
@@ -779,7 +790,7 @@ function LeaderboardSection() {
               </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-10 leading-relaxed font-medium">
-              It doesn't matter if your friends use different apps. Strive
+              It doesn&apos;t matter if your friends use different apps. Strive
               normalizes the data to create fair, engaging leaderboards. Track
               distance, elevation, pace, and consistency across your entire
               network.
@@ -814,7 +825,11 @@ function LeaderboardSection() {
   );
 }
 
-function CTA() {
+function CTA({
+  status,
+}: {
+  status: 'authenticated' | 'unauthenticated' | 'loading';
+}) {
   return (
     <section
       className="py-32 relative overflow-hidden bg-white dark:bg-[#06080D]"
@@ -875,7 +890,8 @@ function CTA() {
           </motion.div>
 
           <h2 className="text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
-            Ready to join the ultimate <br className="hidden md:block" /> running community?
+            Ready to join the ultimate <br className="hidden md:block" />{' '}
+            running community?
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto font-medium">
             Join thousands of runners who have already synced over 1 million
@@ -887,7 +903,7 @@ function CTA() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               className="w-full sm:w-auto px-10 py-5 bg-primary text-white text-lg font-bold rounded-full shadow-[0_10px_30px_rgba(252,76,2,0.3)] hover:bg-[#e04000] hover:shadow-[0_15px_40px_rgba(252,76,2,0.4)] transition-all flex items-center justify-center gap-3"
-              href="/login"
+              href={status === 'authenticated' ? '/home' : '/login'}
             >
               Get Started
               <ArrowRight className="w-5 h-5" />
@@ -923,7 +939,8 @@ function Footer() {
               </span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium leading-relaxed">
-              The premier platform for running communities and fierce competition.
+              The premier platform for running communities and fierce
+              competition.
             </p>
             <div className="flex gap-4">
               <a
@@ -1076,15 +1093,16 @@ function Footer() {
 }
 
 export default function App() {
+  const { status } = useSession();
   return (
     <div className="min-h-screen font-sans">
-      <Navbar />
+      <Navbar status={status} />
       <main>
-        <Hero />
+        <Hero status={status} />
         <Integrations />
         <Capabilities />
         <LeaderboardSection />
-        <CTA />
+        <CTA status={status} />
       </main>
       <Footer />
     </div>
