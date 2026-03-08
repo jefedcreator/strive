@@ -138,13 +138,22 @@ export function useNRCLogin(): UseNRCLoginReturn {
       es.onerror = () => {
         setError((prev) => {
           if (prev) return prev;
+
+          // If the socket closes and we are still processing/waiting, we should try to reconnect
+          if (sessionStep !== 'idle' && sessionStep !== 'success' && sessionStep !== 'error') {
+            return 'Connection lost. Please wait while we reconnect...';
+          }
           return 'Connection to server lost. Please try again.';
         });
-        setCurrentStep('error');
+
+        // Don't change step if we just temporarily lost connection while waiting
+        if (sessionStep === 'idle' || sessionStep === 'success') {
+          setCurrentStep('error');
+        }
         es.close();
       };
     },
-    [setCurrentStep, setEmail, setCode, setSessionStep]
+    [setCurrentStep, setEmail, setCode, setSessionStep, sessionStep]
   );
 
   // ─── Reset on Refresh logic ──────────────────────────────────────────────
@@ -159,7 +168,54 @@ export function useNRCLogin(): UseNRCLoginReturn {
       setSessionStep('idle');
       setStep('idle');
     }
-  }, []);
+  }, [sessionStep, setSessionStep]);
+
+  // ─── Connection Recovery (iOS / Chrome backgrounding) ──────────────────────
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // Re-establish connection if the app comes back to the foreground
+      // and we have an active session that isn't finished
+      if (
+        document.visibilityState === 'visible' &&
+        sessionIdRef.current &&
+        sessionStep !== 'idle' &&
+        sessionStep !== 'success' &&
+        sessionStep !== 'error'
+      ) {
+        // Only reopen if the connection is closed or closing
+        if (
+          !eventSourceRef.current ||
+          eventSourceRef.current.readyState === EventSource.CLOSED
+        ) {
+          console.log('[useNRCLogin] 🔄 Reconnecting EventSource after backgrounding');
+          openStream(sessionIdRef.current);
+          setError(null);
+        }
+      }
+    };
+
+    const handleOnline = () => {
+      if (
+        sessionIdRef.current &&
+        sessionStep !== 'idle' &&
+        sessionStep !== 'success' &&
+        sessionStep !== 'error'
+      ) {
+        console.log('[useNRCLogin] 🔄 Reconnecting EventSource after going online');
+        openStream(sessionIdRef.current);
+        setError(null);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [openStream, sessionStep]);
 
   // ─── Cleanup on unmount ───────────────────────────────────────────────────
 
