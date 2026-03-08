@@ -175,6 +175,7 @@ export const LeaderboardDetailClient: React.FC<
         queryKey: ['leaderboard', leaderboard.id],
       });
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      // router.refresh()
     },
   });
 

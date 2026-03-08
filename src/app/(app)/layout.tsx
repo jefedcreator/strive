@@ -53,6 +53,24 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'black-translucent',
   },
+  keywords: [
+    'Strive App',
+    'Clubs',
+    'Running Dashboard',
+    'Strava Integration',
+    'Nike Run Club Integration',
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run'}/home`,
+  },
 };
 
 export const viewport: Viewport = {

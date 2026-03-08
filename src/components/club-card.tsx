@@ -60,6 +60,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      router.refresh()
     },
   });
 

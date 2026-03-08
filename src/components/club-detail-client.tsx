@@ -163,6 +163,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      // router.refresh()
     },
   });
 

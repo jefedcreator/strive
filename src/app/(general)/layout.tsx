@@ -45,6 +45,30 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'black-translucent',
   },
+  keywords: [
+    'Strive',
+    'Running',
+    'Community',
+    'Leaderboards',
+    'Nike Run Club',
+    'Strava',
+    'Competition',
+    'Run Tracker',
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run',
+  },
 };
 
 export const viewport: Viewport = {

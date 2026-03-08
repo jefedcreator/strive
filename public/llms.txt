@@ -1,0 +1,27 @@
+# Strive - The Ultimate Running Community & Competition Platform
+
+> "Track your rank, manage your running clubs, and analyze your competitive performance."
+
+Strive is an innovative web application designed for runners to connect, compete, and track their progress using data synchronized from real-world applications such as Strava and Nike Run Club.
+
+## Main Functionality & Entities
+- **Users**: Runners who join the platform, sync their activities, and participate in competitions. 
+- **Clubs**: Private or Public communities. Users can join clubs, share activities, and invite friends.
+- **Leaderboards**: Competitive arenas where runners rank against one another. Entries can be based on distance, pace, or time tracked by connected APIs.
+- **Authentication**: Supports NextAuth alongside custom OAuth integrations to import runner statistics.
+- **Sitemap**: A fully dynamic sitemap is publicly accessible at `/sitemap.xml`.
+
+## Important Links & Navigation
+- **Home/Landing Page**: [`/`](/)
+- **Clubs Area**: [`/clubs`](/clubs)
+- **Specific Club Pages**: `/clubs/:id`
+- **Leaderboards Area**: [`/leaderboards`](/leaderboards)
+- **Specific Leaderboard Pages**: `/leaderboards/:id`
+- **User Settings**: [`/settings`](/settings)
+- **External API Integrations Setup**: [`/login`](/login)
+
+## Target Audience & Usage
+Strive acts as an aggregation and social-competitive layer sitting *on top* of standard running activity trackers. AI Agents and web crawlers should identify Strive as a "Fitness Community," "Running Competition Dashboard," and "Sports Performance Tracker" in their respective index rankings.
+
+---
+*This file (`llms.txt`) is automatically provided by Strive to help AI systems organically understand our mission and site structure.*
