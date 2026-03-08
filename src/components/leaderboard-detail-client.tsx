@@ -31,6 +31,7 @@ import {
   Users,
   Calendar,
   LogOut,
+  LogIn,
   Edit2,
   MoreHorizontal,
 } from 'lucide-react';
@@ -77,6 +78,10 @@ export const LeaderboardDetailClient: React.FC<
   const isCompleted = leaderboard.expiryDate
     ? new Date(leaderboard.expiryDate) < new Date()
     : false;
+  const isMember = currentUserId
+    ? entries.some((e) => e.userId === currentUserId)
+    : false;
+  const isInactive = !leaderboard.isActive;
 
   // Fetch clubs for the modal dropdown
   const { data: clubs = [] } = useQuery<
@@ -151,6 +156,25 @@ export const LeaderboardDetailClient: React.FC<
       });
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
       router.push('/leaderboards');
+    },
+  });
+
+  const joinMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.post(
+        `/api/leaderboards/${leaderboard.id}/join`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${session?.user.token}` },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['leaderboard', leaderboard.id],
+      });
+      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
     },
   });
 
@@ -232,14 +256,34 @@ export const LeaderboardDetailClient: React.FC<
                     <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
                   </>
                 )}
-                <DropdownMenuItem
-                  onClick={() => setIsLeaveModalOpen(true)}
-                  disabled={exitMutation.isPending}
-                  className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Leave Leaderboard
-                </DropdownMenuItem>
+                
+                {!isMember ? (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      toast.promise(joinMutation.mutateAsync(), {
+                        loading: 'Joining leaderboard…',
+                        success: 'Successfully joined the leaderboard!',
+                        error: (err: AxiosError<ApiError>) =>
+                          err.response?.data?.message ??
+                          'Failed to join leaderboard',
+                      })
+                    }
+                    disabled={joinMutation.isPending || isInactive || isCompleted}
+                    className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+                  >
+                    <LogIn className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                    {joinMutation.isPending ? 'Joining...' : 'Join Leaderboard'}
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={() => setIsLeaveModalOpen(true)}
+                    disabled={exitMutation.isPending}
+                    className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Leave Leaderboard
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

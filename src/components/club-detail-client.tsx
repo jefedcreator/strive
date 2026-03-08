@@ -29,6 +29,7 @@ import {
   Calendar,
   Edit2,
   LogOut,
+  LogIn,
   MoreHorizontal,
   Trophy,
   User,
@@ -69,6 +70,10 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
   });
 
   const club = response.data!;
+  const isMember = currentUserId
+    ? club.members.some((m) => m.userId === currentUserId)
+    : false;
+  const isInactive = !club.isActive;
 
   const {
     register,
@@ -144,6 +149,23 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
     },
   });
 
+  const joinMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axios.post(
+        `/api/clubs/${club.id}/join`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${session?.user.token}` },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
+      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+    },
+  });
+
   const onSubmit = (data: ClubFormValues) => {
     editClubMutation.mutate(data);
   };
@@ -165,7 +187,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
       <FadeInItem>
         <div className="relative w-full rounded-2xl overflow-hidden mb-3">
           {/* Background: image or gradient */}
-          {/* {club.image ? (
+          {club.image ? (
             <>
               <Image
                 src={club.image}
@@ -181,12 +203,12 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
               <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
               <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
             </>
-          )} */}
-          <>
+          )}
+          {/* <>
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 via-teal-500/20 to-blue-500/10 dark:from-emerald-500/20 dark:via-teal-600/15 dark:to-blue-700/5" />
             <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
             <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
-          </>
+          </> */}
 
           {/* Banner content */}
           <div className="relative flex flex-col items-center justify-center text-center px-16 py-12 md:py-16">
@@ -248,14 +270,35 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                     <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
                   </>
                 )}
-                <DropdownMenuItem
-                  onClick={() => setIsLeaveModalOpen(true)}
-                  disabled={exitMutation.isPending}
-                  className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Leave Club
-                </DropdownMenuItem>
+                
+                {!isMember ? (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      toast.promise(joinMutation.mutateAsync(), {
+                        loading: 'Joining club…',
+                        success: club.isPublic
+                          ? 'Successfully joined the club!'
+                          : 'Join request sent. Waiting for owner approval.',
+                        error: (err: AxiosError<ApiError>) =>
+                          err.response?.data?.message ?? 'Failed to join club',
+                      })
+                    }
+                    disabled={joinMutation.isPending || isInactive}
+                    className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+                  >
+                    <LogIn className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                    {joinMutation.isPending ? 'Joining...' : 'Join Club'}
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={() => setIsLeaveModalOpen(true)}
+                    disabled={exitMutation.isPending}
+                    className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Leave Club
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
