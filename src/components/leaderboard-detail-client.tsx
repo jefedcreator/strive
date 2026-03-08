@@ -6,7 +6,9 @@ import {
   LeaderboardModal,
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
+import { Button } from '@/primitives/Button';
 import { Leaderboard } from '@/primitives/leaderboard';
+import { Modal } from '@/primitives/Modal';
 import {
   type ApiError,
   type ApiResponse,
@@ -55,6 +57,7 @@ export const LeaderboardDetailClient: React.FC<
     ? initialData.data?.createdById === currentUserId
     : false;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
 
   const { data: response } = useQuery<ApiResponse<LeaderboardDetail | null>>({
     queryKey: ['leaderboard', initialData.data?.id],
@@ -230,20 +233,12 @@ export const LeaderboardDetailClient: React.FC<
                   </>
                 )}
                 <DropdownMenuItem
-                  onClick={() =>
-                    toast.promise(exitMutation.mutateAsync(), {
-                      loading: 'Leaving leaderboard…',
-                      success: 'You have left the leaderboard.',
-                      error: (err: AxiosError<ApiError>) =>
-                        err.response?.data?.message ??
-                        'Failed to leave leaderboard',
-                    })
-                  }
+                  onClick={() => setIsLeaveModalOpen(true)}
                   disabled={exitMutation.isPending}
                   className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
                 >
                   <LogOut className="w-4 h-4" />
-                  {exitMutation.isPending ? 'Leaving…' : 'Leave Leaderboard'}
+                  Leave Leaderboard
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -309,6 +304,56 @@ export const LeaderboardDetailClient: React.FC<
         isPending={editMutation.isPending}
         clubs={clubs}
       />
+
+      <Modal open={isLeaveModalOpen} onOpenChange={setIsLeaveModalOpen}>
+        <Modal.Portal>
+          <Modal.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-[400px] bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-xl z-[100] transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                  <LogOut className="w-5 h-5" />
+                </div>
+                <Modal.Title className="text-lg font-bold">
+                  Leave Leaderboard
+                </Modal.Title>
+              </div>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Are you sure you want to leave{' '}
+                <span className="font-bold text-gray-900 dark:text-white">
+                  &quot;{leaderboard.name}&quot;
+                </span>
+                ? Your past activities will be removed from the rankings.
+              </p>
+
+              <div className="flex gap-3 justify-end mt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsLeaveModalOpen(false)}
+                  disabled={exitMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() =>
+                    toast.promise(exitMutation.mutateAsync(), {
+                      loading: 'Leaving leaderboard…',
+                      success: 'You have left the leaderboard.',
+                      error: (err: AxiosError<ApiError>) =>
+                        err.response?.data?.message ??
+                        'Failed to leave leaderboard',
+                    })
+                  }
+                  disabled={exitMutation.isPending}
+                >
+                  {exitMutation.isPending ? 'Leaving...' : 'Leave'}
+                </Button>
+              </div>
+            </div>
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal>
     </FadeInStagger>
   );
 };

@@ -3,6 +3,8 @@
 import { clubValidatorSchema } from '@/backend/validators/club.validator';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
+import { Button } from '@/primitives/Button';
+import { Modal } from '@/primitives/Modal';
 import { type ApiError, type ApiResponse, type ClubDetail } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -50,6 +52,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
     : false;
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   const { data: response } = useQuery<ApiResponse<ClubDetail | null>>({
@@ -246,19 +249,12 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                   </>
                 )}
                 <DropdownMenuItem
-                  onClick={() =>
-                    toast.promise(exitMutation.mutateAsync(), {
-                      loading: 'Leaving club…',
-                      success: 'You have left the club.',
-                      error: (err: AxiosError<ApiError>) =>
-                        err.response?.data?.message ?? 'Failed to leave club',
-                    })
-                  }
+                  onClick={() => setIsLeaveModalOpen(true)}
                   disabled={exitMutation.isPending}
                   className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
                 >
                   <LogOut className="w-4 h-4" />
-                  {exitMutation.isPending ? 'Leaving…' : 'Leave Club'}
+                  Leave Club
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -441,6 +437,55 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
         nameRegister={nameRegister}
         onNameChange={handleNameChange}
       />
+
+      <Modal open={isLeaveModalOpen} onOpenChange={setIsLeaveModalOpen}>
+        <Modal.Portal>
+          <Modal.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-[400px] bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-xl z-[100] transform -translate-x-1/2 -translate-y-1/2">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                  <LogOut className="w-5 h-5" />
+                </div>
+                <Modal.Title className="text-lg font-bold">
+                  Leave Club
+                </Modal.Title>
+              </div>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Are you sure you want to leave{' '}
+                <span className="font-bold text-gray-900 dark:text-white">
+                  &quot;{club.name}&quot;
+                </span>
+                ? You will lose access to its leaderboards and chat instantly.
+              </p>
+
+              <div className="flex gap-3 justify-end mt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsLeaveModalOpen(false)}
+                  disabled={exitMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() =>
+                    toast.promise(exitMutation.mutateAsync(), {
+                      loading: 'Leaving club…',
+                      success: 'You have left the club.',
+                      error: (err: AxiosError<ApiError>) =>
+                        err.response?.data?.message ?? 'Failed to leave club',
+                    })
+                  }
+                  disabled={exitMutation.isPending}
+                >
+                  {exitMutation.isPending ? 'Leaving...' : 'Leave'}
+                </Button>
+              </div>
+            </div>
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal>
     </FadeInStagger>
   );
 };
