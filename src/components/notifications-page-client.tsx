@@ -1,7 +1,6 @@
 'use client';
 
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
-import { usePaginationScroll } from '@/hooks/usePaginationScroll';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
   type NotificationWithRelations,
@@ -42,35 +41,7 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
   const isLoading =
     type !== currentFilters.type || query !== currentFilters.query;
 
-  const fetchNotifications = async (page: number) => {
-    const res = await axios.get<
-      PaginatedApiResponse<NotificationWithRelations[]>
-    >('/api/notifications', {
-      params: {
-        page,
-        ...(type && { type }),
-        ...(query && { query }),
-      },
-      headers: { Authorization: `Bearer ${session?.user.token}` },
-    });
-
-    return res.data;
-  };
-
-  const {
-    items: notifications,
-    ref,
-    hasNextPage,
-    hasFetchedNextPage,
-    isFetchingNextPage,
-  } = usePaginationScroll<NotificationWithRelations>({
-    queryKey: ['notifications', type, query],
-    fetchData: fetchNotifications,
-    page,
-    setPage: (p) => setStates({ page: p }, { shallow: true }),
-    initialData: notificationsResponse,
-    isNavigating: isLoading,
-  });
+  const notifications = notificationsResponse.data;
 
   return (
     <div className="flex flex-col h-full">
@@ -158,22 +129,7 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
                       </FadeInItem>
                     ))}
                   </FadeInStagger>
-                  <div
-                    ref={ref}
-                    className="w-full flex justify-center py-6 pb-20 md:pb-6"
-                  >
-                    {isFetchingNextPage ? (
-                      <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-                    ) : hasNextPage ? (
-                      <span className="text-sm text-gray-400">
-                        Scroll for more
-                      </span>
-                    ) : hasFetchedNextPage ? (
-                      <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6 w-full text-center">
-                        No more clubs
-                      </span>
-                    ) : null}
-                  </div>
+                  {/* Pagination scroll target was here */}
                 </>
               ) : !isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">

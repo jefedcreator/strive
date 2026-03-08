@@ -11,7 +11,7 @@ import {
 import axios, { type AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Modal } from '@/primitives/Modal';
 import { Button } from '@/primitives/Button';
 import { useRouter } from 'next/navigation';
@@ -45,7 +45,6 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
     : false;
   const isInactive = !data.isActive || isCompleted;
   const participantsCount = data._count?.entries ?? 0;
-  const queryClient = useQueryClient();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [shareInviteUrl, setShareInviteUrl] = React.useState('');
@@ -64,7 +63,6 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
     },
     onSuccess: async () => {
       router.refresh();
-      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
     },
   });
 
@@ -85,7 +83,6 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
       setShareInviteUrl(inviteUrl);
       setIsShareModalOpen(true);
       router.refresh();
-      await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
     },
   });
 

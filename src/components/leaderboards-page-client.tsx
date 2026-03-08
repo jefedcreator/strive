@@ -7,7 +7,6 @@ import {
   LeaderboardModal,
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
-import { usePaginationScroll } from '@/hooks/usePaginationScroll';
 import { Button } from '@/primitives/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
@@ -66,37 +65,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     isPublic !== currentFilters.isPublic ||
     query !== currentFilters.query;
 
-  const fetchLeaderboards = async (page: number) => {
-    const res = await axios.get<PaginatedApiResponse<LeaderboardListItem[]>>(
-      '/api/leaderboards',
-      {
-        params: {
-          page,
-          ...(isActive !== null && { isActive }),
-          ...(isPublic !== null && { isPublic }),
-          ...(query && { query }),
-        },
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      }
-    );
-
-    return res.data;
-  };
-
-  const {
-    items: leaderboards,
-    ref,
-    hasNextPage,
-    isFetchingNextPage,
-    hasFetchedNextPage,
-  } = usePaginationScroll<LeaderboardListItem>({
-    queryKey: ['leaderboards', isActive, isPublic, query],
-    fetchData: fetchLeaderboards,
-    page,
-    setPage: (p) => setStates({ page: p }, { shallow: true }),
-    initialData,
-    isNavigating,
-  });
+  const leaderboards = initialData.data;
 
   const { data: clubs = [] } = useQuery<
     ApiResponse<ClubListItem[]>,
@@ -258,20 +227,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
               </FadeInStagger>
 
               {/* Intersection Observer target element */}
-              <div
-                ref={ref}
-                className="w-full flex justify-center py-6 pb-20 md:pb-6"
-              >
-                {isFetchingNextPage ? (
-                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-                ) : hasNextPage ? (
-                  <span className="text-sm text-gray-400">Scroll for more</span>
-                ) : hasFetchedNextPage ? (
-                  <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6 w-full text-center">
-                    No more leaderboards
-                  </span>
-                ) : null}
-              </div>
+              {/* Pagination scroll target was here */}
             </>
           ) : !isNavigating ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">

@@ -11,7 +11,7 @@ import {
 import axios, { type AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Modal } from '@/primitives/Modal';
 import { Button } from '@/primitives/Button';
 import { useRouter } from 'next/navigation';
@@ -41,7 +41,6 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
   const isMember = club.isMember;
   const isInactive = !club.isActive;
   const memberCount = club.members ?? 0;
-  const queryClient = useQueryClient();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [shareInviteUrl, setShareInviteUrl] = React.useState('');
@@ -59,8 +58,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
       return res.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
-      router.refresh()
+      router.refresh();
     },
   });
 
@@ -80,7 +78,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
       const inviteUrl = `${window.location.origin}/clubs/${club.id}/invites/${inviteId}`;
       setShareInviteUrl(inviteUrl);
       setIsShareModalOpen(true);
-      await queryClient.invalidateQueries({ queryKey: ['clubs'] });
+      router.refresh();
     },
   });
 

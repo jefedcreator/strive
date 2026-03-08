@@ -21,7 +21,6 @@ import { useQueryStates } from 'nuqs';
 import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { usePaginationScroll } from '@/hooks/usePaginationScroll';
 import { Loader2, Plus, Search, SearchX } from 'lucide-react';
 
 interface ClubsPageClientProps {
@@ -62,36 +61,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
     isPublic !== currentFilters.isPublic ||
     query !== currentFilters.query;
 
-  const fetchClubs = async (page: number) => {
-    const res = await axios.get<PaginatedApiResponse<ClubListItem[]>>(
-      '/api/clubs',
-      {
-        params: {
-          page,
-          ...(isActive !== null && { isActive }),
-          ...(isPublic !== null && { isPublic }),
-          ...(query && { query }),
-        },
-        headers: { Authorization: `Bearer ${session?.user.token}` },
-      }
-    );
-    return res.data;
-  };
-
-  const {
-    items: clubs,
-    ref,
-    hasNextPage,
-    isFetchingNextPage,
-    hasFetchedNextPage,
-  } = usePaginationScroll<ClubListItem>({
-    queryKey: ['clubs', isActive, isPublic, query],
-    fetchData: fetchClubs,
-    page,
-    setPage: (p) => setStates({ page: p }, { shallow: true }),
-    initialData,
-    isNavigating,
-  });
+  const clubs = initialData.data;
 
   const {
     register,
@@ -263,20 +233,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
                 ))}
               </FadeInStagger>
 
-              <div
-                ref={ref}
-                className="w-full flex justify-center py-6 pb-20 md:pb-6"
-              >
-                {isFetchingNextPage ? (
-                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-                ) : hasNextPage ? (
-                  <span className="text-sm text-gray-400">Scroll for more</span>
-                ) : hasFetchedNextPage ? (
-                  <span className="text-sm text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6 w-full text-center">
-                    No more clubs
-                  </span>
-                ) : null}
-              </div>
+              {/* Pagination scroll target was here */}
             </>
           ) : !isNavigating ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
