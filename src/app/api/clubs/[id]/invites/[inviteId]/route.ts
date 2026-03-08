@@ -52,6 +52,9 @@ export const GET = withMiddleware<unknown>(
         },
       });
 
+      console.log('invite', invite);
+
+
       if (!invite) {
         throw new NotFoundException('Invite not found');
       }

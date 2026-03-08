@@ -63,7 +63,12 @@ export async function POST(req: NextRequest) {
           where: { id: clubId },
           select: { createdById: true, name: true },
         });
-        await db.$transaction([
+
+        const invite = await db.clubInvites.findUnique({
+          where: { id: inviteId }
+        });
+
+        const transactions: any[] = [
           db.userClub.create({
             data: { userId: user.id, clubId, role: 'MEMBER', isActive: true },
           }),
@@ -78,8 +83,13 @@ export async function POST(req: NextRequest) {
             where: { id: clubId },
             data: { memberCount: { increment: 1 } },
           }),
-          db.clubInvites.delete({ where: { id: inviteId } }),
-        ]);
+        ];
+
+        if (invite?.userId) {
+          transactions.push(db.clubInvites.delete({ where: { id: inviteId } }));
+        }
+
+        await db.$transaction(transactions);
       }
     }
 
@@ -93,7 +103,12 @@ export async function POST(req: NextRequest) {
           where: { id: leaderboardId },
           select: { createdById: true, name: true },
         });
-        await db.$transaction([
+
+        const invite = await db.leaderboardInvites.findUnique({
+          where: { id: inviteId }
+        });
+
+        const transactions: any[] = [
           db.userLeaderboard.create({
             data: { userId: user.id, leaderboardId },
           }),
@@ -104,8 +119,14 @@ export async function POST(req: NextRequest) {
               type: 'info',
             },
           }),
-          db.leaderboardInvites.delete({ where: { id: inviteId } }),
-        ]);
+        ];
+
+        // Only delete the invite if it was specifically generated for a single user (userId is not null)
+        if (invite?.userId) {
+          transactions.push(db.leaderboardInvites.delete({ where: { id: inviteId } }));
+        }
+
+        await db.$transaction(transactions);
       }
     }
 

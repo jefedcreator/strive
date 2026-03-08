@@ -1,18 +1,18 @@
 'use client';
 
+import { Button } from '@/primitives/Button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/primitives/avatar';
 import {
   type ApiResponse,
   type ClubInviteDetail,
   type LeaderboardInviteDetail,
 } from '@/types';
-import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, ShieldCheck, ArrowRight, X } from 'lucide-react';
-import { Button } from '@/primitives/Button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/primitives/avatar';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { ArrowRight, ShieldCheck, Users, X } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const InviteDetailClient = ({
   initialData,

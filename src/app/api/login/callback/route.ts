@@ -78,8 +78,13 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
               name: true,
             },
           });
+
+          const invite = await db.clubInvites.findUnique({
+            where: { id: inviteId }
+          });
+
           // Join the club
-          await db.$transaction([
+          const transactions: any[] = [
             db.userClub.create({
               data: {
                 userId: user.id,
@@ -99,10 +104,17 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
               where: { id: clubId },
               data: { memberCount: { increment: 1 } },
             }),
-            db.clubInvites.delete({
-              where: { id: inviteId },
-            }),
-          ]);
+          ];
+
+          if (invite?.userId) {
+            transactions.push(
+              db.clubInvites.delete({
+                where: { id: inviteId },
+              })
+            );
+          }
+
+          await db.$transaction(transactions);
         }
       }
 
@@ -118,17 +130,28 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         });
 
         if (!existingEntry) {
-          await db.$transaction([
+          const invite = await db.leaderboardInvites.findUnique({
+            where: { id: inviteId }
+          });
+
+          const transactions: any[] = [
             db.userLeaderboard.create({
               data: {
                 userId: user.id,
                 leaderboardId,
               },
             }),
-            db.leaderboardInvites.delete({
-              where: { id: inviteId },
-            }),
-          ]);
+          ];
+
+          if (invite?.userId) {
+            transactions.push(
+              db.leaderboardInvites.delete({
+                where: { id: inviteId },
+              })
+            );
+          }
+
+          await db.$transaction(transactions);
         }
       }
 
