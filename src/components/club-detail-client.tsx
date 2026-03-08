@@ -195,7 +195,8 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+              <div className="absolute inset-0 bg-black/40 dark:bg-black/50" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
             </>
           ) : (
             <>
@@ -218,7 +219,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
               </div>
             )}
             <h1
-              className={`text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm mb-3 ${
+              className={`text-2xl md:text-3xl font-black tracking-tight drop-shadow-md mb-3 ${
                 club.image ? 'text-white' : 'text-gray-900 dark:text-white'
               }`}
             >
