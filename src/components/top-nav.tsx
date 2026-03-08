@@ -149,7 +149,6 @@ export function TopNav() {
   const pathSegments = pathname.split('/').filter(Boolean);
   const { data: session } = useSession();
   const user = session?.user;
-  console.log('user', user);
 
   return (
     <header className="hidden lg:flex h-[70px] items-center justify-between px-6 lg:px-8 bg-background-light dark:bg-background-dark sticky top-0 z-30 transition-colors duration-300">
@@ -242,7 +241,7 @@ export function TopNav() {
                       alt={user.name ?? 'User'}
                       width={40}
                       height={40}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
                     (

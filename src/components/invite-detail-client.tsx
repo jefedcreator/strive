@@ -82,8 +82,8 @@ const InviteDetailClient = ({
     setIsAccepting(true);
     router.push(
       type === 'club'
-        ? `/?clubId=${entityId}&inviteId=${invite.id}`
-        : `/?leaderboardId=${entityId}&inviteId=${invite.id}`
+        ? `/login?clubId=${entityId}&inviteId=${invite.id}`
+        : `/login?leaderboardId=${entityId}&inviteId=${invite.id}`
     );
   };
 
