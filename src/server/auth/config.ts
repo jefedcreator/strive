@@ -19,6 +19,7 @@ declare module 'next-auth' {
       fullname?: string | null;
       token?: string | null;
       type?: UserType | null;
+      avatar?: string | null;
     } & DefaultSession['user'];
   }
 
@@ -62,8 +63,8 @@ export const authConfig = {
           fullname: user.fullname,
           avatar: user.avatar,
           type: user.type,
-          image: (credentials.image as string) ?? user.avatar ?? null,
-          token: (credentials.token as string) ?? null,
+          image: credentials.image && credentials.image !== 'null' && credentials.image !== 'undefined' ? (credentials.image as string) : (user.avatar ?? null),
+          token: credentials.token && credentials.token !== 'null' && credentials.token !== 'undefined' ? (credentials.token as string) : null,
         };
       },
     }),
@@ -82,6 +83,7 @@ export const authConfig = {
         fullname: token.fullname as string | null,
         token: token.accessToken as string | null,
         type: token.type as UserType | null,
+        avatar: token.picture as string | null,
       },
     }),
     jwt: ({ token, user }) => {

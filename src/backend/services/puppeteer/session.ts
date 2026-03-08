@@ -56,11 +56,12 @@ export class PuppeteerSessionManager {
     USERNAME: 'h1[data-testid="subheader-username"]',
     CODE_INPUT: 'input[name="verificationCode"]',
     CODE_SUBMIT: 'button[aria-label="Sign In"][type="submit"]',
-
+    AVATAR: 'img.profile-image',
     // ── New Confirmation Page Selectors ──
     CONFIRMATION_EMAIL: 'span[data-testid="username"]',
     CONFIRMATION_AVATAR: 'img[alt="Avatar"]',
     CONFIRMATION_CONTINUE_BTN: 'form[action="#"] button[type="submit"].nds-btn',
+
   };
 
   private sessions = new Map<string, ActiveSession>();
@@ -541,7 +542,7 @@ export class PuppeteerSessionManager {
   public async submitCode(
     sessionId: string,
     code: string
-  ): Promise<NikeAuthResult> {
+  ): Promise<PuppeteerNikeAuthResult> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found or expired.`);
@@ -759,7 +760,7 @@ export class PuppeteerSessionManager {
       capturedToken = token;
 
       // ── Extract username ──────────────────────────────────────────────
-      console.log(`[${sessionId}] 👀 Waiting for username...`);
+      console.log(`[${sessionId}] 👀 Waiting for username and avatar...`);
       let username = extractedName;
 
       // Only scrape the profile username if we didn't already get it from the confirmation page
@@ -773,11 +774,40 @@ export class PuppeteerSessionManager {
             this.SELECTORS.USERNAME,
             (el) => (el as HTMLElement).innerText
           );
+          console.log(`[${sessionId}] ✅ Username extracted: ${username}`);
         } catch (err) {
           console.log(
             `[${sessionId}] ⚠️ Could not extract username from profile page.`
           );
         }
+      }
+
+      console.log(`[${sessionId}] 🔍 Avatar extraction starting...`);
+      console.log(`[${sessionId}] Current extractedAvatar value:`, extractedAvatar);
+
+      // Extract avatar from profile page if we don't have it yet
+      if (!extractedAvatar) {
+        console.log(`[${sessionId}] 🔎 No avatar from confirmation page, extracting from profile...`);
+        try {
+          console.log(`[${sessionId}] Waiting for selector: ${this.SELECTORS.AVATAR}`);
+          await page.waitForSelector(this.SELECTORS.AVATAR, {
+            visible: true,
+            timeout: 10_000,
+          });
+          console.log(`[${sessionId}] ✅ Avatar element found`);
+
+          extractedAvatar = await page.$eval(
+            this.SELECTORS.AVATAR,
+            (el) => (el as HTMLImageElement).src
+          );
+          console.log(`[${sessionId}] 🖼️ Extracted avatar from profile page: ${extractedAvatar}`);
+        } catch (err: any) {
+          console.log(
+            `[${sessionId}] ⚠️ Could not extract avatar from profile page: ${err.message}`
+          );
+        }
+      } else {
+        console.log(`[${sessionId}] ✅ Using avatar from confirmation page: ${extractedAvatar}`);
       }
 
       // ── Final email fallback ──────────────────────────────────────────
@@ -805,7 +835,7 @@ export class PuppeteerSessionManager {
       if (capturedToken) console.log(capturedToken);
       console.log('='.repeat(60) + '\n');
 
-      const result: PuppeteerNikeAuthResult = {
+      const result = {
         email: emailValue,
         token: capturedToken,
         username: username || '',

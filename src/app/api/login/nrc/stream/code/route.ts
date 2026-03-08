@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, token, username } = await puppeteerSessionManager.submitCode(
+    const { email, token, username, avatar } = await puppeteerSessionManager.submitCode(
       sessionId,
       code
     );
@@ -42,12 +42,15 @@ export async function POST(req: NextRequest) {
       type: UserType.NRC,
       email,
       token,
-      fullname: username,
+      fullname: username, avatar
     });
 
     if (!user) {
       throw new Error('User authentication failed.');
     }
+
+    console.log('user', user);
+
 
     // --- Handle Club/Leaderboard Joining ---
     if (clubId && inviteId) {

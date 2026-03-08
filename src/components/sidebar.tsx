@@ -62,7 +62,6 @@ export function Sidebar() {
   const { data: session } = useSession();
   const user = session?.user;
 
-
   const NavItem = ({ item, onClick }: { item: NavItemProps; onClick?: () => void }) => {
     const isActive = pathname === item.href;
     return (
@@ -247,9 +246,9 @@ export function Sidebar() {
               {/* User Profile Snippet (Mobile) */}
               <div className="mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden shadow-sm">
-                  {user?.image?.startsWith('http') ? (
+                  {user?.avatar ? (
                     <Image
-                      src={user.image}
+                      src={user.avatar}
                       alt={user.name ?? 'User'}
                       width={40}
                       height={40}
