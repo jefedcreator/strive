@@ -46,7 +46,7 @@ export function usePaginationScroll<T>({
       !isNavigating && initialData
         ? { pages: [initialData], pageParams: [page] }
         : undefined,
-    enabled: page > 1 ,
+    enabled: page > 1,
     // || !initialData || isNavigating,
     // refetchOnMount: !isNavigating && initialData ? false : 'always',
     staleTime: 1000 * 60,

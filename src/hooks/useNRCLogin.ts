@@ -140,7 +140,11 @@ export function useNRCLogin(): UseNRCLoginReturn {
           if (prev) return prev;
 
           // If the socket closes and we are still processing/waiting, we should try to reconnect
-          if (sessionStep !== 'idle' && sessionStep !== 'success' && sessionStep !== 'error') {
+          if (
+            sessionStep !== 'idle' &&
+            sessionStep !== 'success' &&
+            sessionStep !== 'error'
+          ) {
             return 'Connection lost. Please wait while we reconnect...';
           }
           return 'Connection to server lost. Please try again.';
@@ -188,7 +192,9 @@ export function useNRCLogin(): UseNRCLoginReturn {
           !eventSourceRef.current ||
           eventSourceRef.current.readyState === EventSource.CLOSED
         ) {
-          console.log('[useNRCLogin] 🔄 Reconnecting EventSource after backgrounding');
+          console.log(
+            '[useNRCLogin] 🔄 Reconnecting EventSource after backgrounding'
+          );
           openStream(sessionIdRef.current);
           setError(null);
         }
@@ -202,7 +208,9 @@ export function useNRCLogin(): UseNRCLoginReturn {
         sessionStep !== 'success' &&
         sessionStep !== 'error'
       ) {
-        console.log('[useNRCLogin] 🔄 Reconnecting EventSource after going online');
+        console.log(
+          '[useNRCLogin] 🔄 Reconnecting EventSource after going online'
+        );
         openStream(sessionIdRef.current);
         setError(null);
       }
