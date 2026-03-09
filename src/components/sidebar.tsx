@@ -179,7 +179,21 @@ export function Sidebar() {
               )}
             >
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                J
+                {user?.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={user.name ?? 'User'}
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  (
+                    user?.fullname?.[0] ??
+                    user?.name?.[0] ??
+                    'G'
+                  ).toUpperCase()
+                )}
               </div>
               {!isCollapsed && (
                 <div className="min-w-0">
@@ -189,7 +203,7 @@ export function Sidebar() {
                       : 'Guest'}
                   </p>
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
-                    Pro Member
+                    Member
                   </p>
                 </div>
               )}
@@ -288,7 +302,7 @@ export function Sidebar() {
                             : 'Guest'}
                         </p>
                         <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
-                          {user ? 'Pro Member' : 'Not logged in'}
+                          {user ? 'Member' : 'Not logged in'}
                         </p>
                       </button>
                     </DropdownMenuTrigger>
