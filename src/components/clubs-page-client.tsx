@@ -211,7 +211,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
           else void setStates({ isActive: null, isPublic: null, page: 1 });
         }}
       >
-        <TabsList className="mb-8">
+        <TabsList className="mb-8 sticky top-[64px] z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md py-2">
           <TabsTrigger value="all" onClick={() => handleTabClick('all')}>
             All
           </TabsTrigger>
