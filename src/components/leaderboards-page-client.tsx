@@ -222,7 +222,10 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
           <TabsTrigger value="public" onClick={() => handleTabClick('public')}>
             Public
           </TabsTrigger>
-          <TabsTrigger value="private" onClick={() => handleTabClick('private')}>
+          <TabsTrigger
+            value="private"
+            onClick={() => handleTabClick('private')}
+          >
             Private
           </TabsTrigger>
         </TabsList>

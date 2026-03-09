@@ -1,18 +1,15 @@
 'use client';
 
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
+import { useInfiniteScroll } from '@/hooks/useinfiniteScroll';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
   type NotificationWithRelations,
   type PaginatedApiResponse,
 } from '@/types';
 import { parseParams } from '@/utils';
-import axios from 'axios';
 import { Loader2, Search, SearchX } from 'lucide-react';
-import { useSession } from 'next-auth/react';
 import { useQueryStates } from 'nuqs';
-import { useInfiniteScroll } from '@/hooks/useinfiniteScroll';
-import { getNotifications } from '@/server';
 import { useMemo, useState } from 'react';
 import { NotificationCard } from './notification-card';
 interface NotificationsPageClientProps {
@@ -27,7 +24,6 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
   initialData: notificationsResponse,
   currentFilters,
 }) => {
-  const { data: session } = useSession();
   const [{ type, query, page }, setStates] = useQueryStates(parseParams, {
     shallow: false,
     throttleMs: 1000,
@@ -56,8 +52,6 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
       void setStates({ page: null });
     }
   };
-
-  const notifications = notificationsResponse.data;
 
   return (
     <div className="flex flex-col h-full">

@@ -1,6 +1,5 @@
 // hooks/use-infinite-scroll.ts
 'use client';
-
 import { useEffect, useState, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import type { PaginatedApiResponse } from '@/types';
@@ -9,7 +8,7 @@ interface UseInfiniteScrollProps<T extends { id: string | number }> {
   data: PaginatedApiResponse<T[]>;
   page: number;
   setPage: (page: number) => void;
-  refresh?: number; // Optional dependency to force re-sync
+  refresh?: number;
 }
 
 export function useInfiniteScroll<T extends { id: string | number }>({

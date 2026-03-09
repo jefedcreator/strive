@@ -4,6 +4,7 @@ import { clubValidatorSchema } from '@/backend/validators/club.validator';
 import { ClubCard } from '@/components/club-card';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
+import { useInfiniteScroll } from '@/hooks/useinfiniteScroll';
 import { Button } from '@/primitives/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
@@ -11,19 +12,17 @@ import {
   type ClubListItem,
   type PaginatedApiResponse,
 } from '@/types';
-import { useInfiniteScroll } from '@/hooks/useinfiniteScroll';
-import { getClubs } from '@/server';
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import axios, { type AxiosError } from 'axios';
+import { Loader2, Plus, Search, SearchX } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useQueryStates } from 'nuqs';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Loader2, Plus, Search, SearchX } from 'lucide-react';
 
 interface ClubsPageClientProps {
   initialData: PaginatedApiResponse<ClubListItem[]>;
@@ -199,17 +198,17 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
       <Tabs
         value={tab}
         className="flex flex-col min-w-0 w-full"
-          onValueChange={(value) => {
-            if (value === 'active')
-              void setStates({ isActive: true, isPublic: null, page: 1 });
-            else if (value === 'inactive')
-              void setStates({ isActive: false, isPublic: null, page: 1 });
-            else if (value === 'public')
-              void setStates({ isPublic: true, isActive: null, page: 1 });
-            else if (value === 'private')
-              void setStates({ isPublic: false, isActive: null, page: 1 });
-            else void setStates({ isActive: null, isPublic: null, page: 1 });
-          }}
+        onValueChange={(value) => {
+          if (value === 'active')
+            void setStates({ isActive: true, isPublic: null, page: 1 });
+          else if (value === 'inactive')
+            void setStates({ isActive: false, isPublic: null, page: 1 });
+          else if (value === 'public')
+            void setStates({ isPublic: true, isActive: null, page: 1 });
+          else if (value === 'private')
+            void setStates({ isPublic: false, isActive: null, page: 1 });
+          else void setStates({ isActive: null, isPublic: null, page: 1 });
+        }}
       >
         <TabsList className="mb-8">
           <TabsTrigger value="all" onClick={() => handleTabClick('all')}>
@@ -227,7 +226,10 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
           <TabsTrigger value="public" onClick={() => handleTabClick('public')}>
             Public
           </TabsTrigger>
-          <TabsTrigger value="private" onClick={() => handleTabClick('private')}>
+          <TabsTrigger
+            value="private"
+            onClick={() => handleTabClick('private')}
+          >
             Private
           </TabsTrigger>
         </TabsList>
@@ -264,14 +266,14 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
                 ))}
               </FadeInStagger>
 
-                  {hasNextPage && (
-                    <div
-                      ref={ref}
-                      className="flex justify-center py-8 col-span-full"
-                    >
-                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    </div>
-                  )}
+              {hasNextPage && (
+                <div
+                  ref={ref}
+                  className="flex justify-center py-8 col-span-full"
+                >
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              )}
             </>
           ) : !isNavigating ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">

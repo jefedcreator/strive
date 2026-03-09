@@ -263,6 +263,52 @@ export const authMiddleware = async <B = unknown, Q = QueryParameters>(
   };
 };
 
+export const optionalAuthMiddleware = async <B = unknown, Q = QueryParameters>(
+  request: AuthRequest<B, Q>
+): Promise<MiddlewareResponse> => {
+  const authHeader = request.headers.get('authorization');
+
+  if (!authHeader) {
+    request.user = null;
+    return {
+      message: '',
+      statusCode: 200,
+      next: true,
+    };
+  }
+
+  const token = authHeader.split('Bearer')[1]?.trim();
+  if (!token) {
+    request.user = null;
+    return {
+      message: '',
+      statusCode: 200,
+      next: true,
+    };
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.AUTH_SECRET!) as I_JwtPayload;
+
+    if (!decoded || !decoded.uid) {
+      request.user = null;
+    } else {
+      const user = await db.user.findUnique({
+        where: { id: decoded.uid },
+      });
+      request.user = user;
+    }
+  } catch (_error) {
+    request.user = null;
+  }
+
+  return {
+    message: '',
+    statusCode: 200,
+    next: true,
+  };
+};
+
 /**
  *
  * @param request AuthRequest

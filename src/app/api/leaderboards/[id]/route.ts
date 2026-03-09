@@ -4,6 +4,7 @@ import {
   bodyValidatorMiddleware,
   queryValidatorMiddleware,
   withMiddleware,
+  optionalAuthMiddleware,
 } from '@/backend/middleware';
 import { paramValidator } from '@/backend/validators/index.validator';
 import {
@@ -145,7 +146,7 @@ export const GET = withMiddleware<
   async (request, { params }) => {
     try {
       const { id } = params;
-      const user = request.user!;
+      const user = request.user;
       const query = request.query!;
 
       const sortBy = query.sortBy ?? 'score';
@@ -190,7 +191,9 @@ export const GET = withMiddleware<
         throw new NotFoundException('Leaderboard not found');
       }
 
-      const isMember = leaderboard.entries.some((e) => e.userId === user.id);
+      const isMember = user
+        ? leaderboard.entries.some((e) => e.userId === user.id)
+        : false;
       if (!leaderboard.isPublic && !isMember) {
         throw new ForbiddenException(
           'You are not authorized to view this leaderboard'
@@ -212,7 +215,7 @@ export const GET = withMiddleware<
     }
   },
   [
-    authMiddleware,
+    optionalAuthMiddleware,
     pathParamValidatorMiddleware(paramValidator),
     queryValidatorMiddleware(leaderboardEntriesQueryValidatorSchema),
   ]

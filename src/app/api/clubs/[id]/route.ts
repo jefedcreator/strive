@@ -3,6 +3,7 @@ import {
   pathParamValidatorMiddleware,
   bodyValidatorMiddleware,
   withMiddleware,
+  optionalAuthMiddleware,
 } from '@/backend/middleware';
 import { cloudinaryService } from '@/backend/services/cloudinary';
 import {
@@ -160,7 +161,7 @@ export const GET = withMiddleware<ClubDetail>(
   async (request, { params }) => {
     try {
       const { id } = params;
-      const user = request.user!;
+      const user = request.user;
 
       const club = await db.club.findUnique({
         where: { id },
@@ -184,7 +185,9 @@ export const GET = withMiddleware<ClubDetail>(
         throw new NotFoundException('Club not found');
       }
 
-      const isMember = club.members.some((m) => m.userId === user.id);
+      const isMember = user
+        ? club.members.some((m) => m.userId === user.id)
+        : false;
       if (!club.isPublic && !isMember) {
         throw new ForbiddenException(
           'You are not authorized to view this club'
@@ -205,5 +208,5 @@ export const GET = withMiddleware<ClubDetail>(
       );
     }
   },
-  [authMiddleware, pathParamValidatorMiddleware(paramValidator)]
+  [optionalAuthMiddleware, pathParamValidatorMiddleware(paramValidator)]
 );
