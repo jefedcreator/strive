@@ -44,6 +44,12 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
 
   const isPaging = !isNavigating && page !== currentFilters.page;
 
+  const handleTabClick = (value: string) => {
+    if (tab === value) {
+      void setStates({ page: null });
+    }
+  };
+
   const { items, ref, hasNextPage } = useInfiniteScroll({
     data: initialData,
     page: page ?? 1,
@@ -114,10 +120,19 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
           else void setStates({ type: null, page: 1 });
         }}
       >
-        <TabsList className="mb-8">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="clubs">Clubs</TabsTrigger>
-          <TabsTrigger value="leaderboards">Leaderboards</TabsTrigger>
+        <TabsList className="mb-8 sticky top-[64px] z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md py-2">
+          <TabsTrigger value="all" onClick={() => handleTabClick('all')}>
+            All
+          </TabsTrigger>
+          <TabsTrigger value="clubs" onClick={() => handleTabClick('clubs')}>
+            Clubs
+          </TabsTrigger>
+          <TabsTrigger
+            value="leaderboards"
+            onClick={() => handleTabClick('leaderboards')}
+          >
+            Leaderboards
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 outline-none">
