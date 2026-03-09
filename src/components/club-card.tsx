@@ -8,7 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
-import axios, { type AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useMutation } from '@tanstack/react-query';
@@ -48,8 +49,8 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(
-        `/api/clubs/${club.id}/join`,
+      const res = await api.post(
+        `/clubs/${club.id}/join`,
         {},
         {
           headers: { Authorization: `Bearer ${session?.user.token}` },
@@ -64,8 +65,8 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
 
   const inviteMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(
-        `/api/clubs/${club.id}/invites`,
+      const res = await api.post(
+        `/clubs/${club.id}/invites`,
         {},
         {
           headers: { Authorization: `Bearer ${session?.user.token}` },
@@ -84,7 +85,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.delete(`/api/clubs/${club.id}`, {
+      const res = await api.delete(`/clubs/${club.id}`, {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;

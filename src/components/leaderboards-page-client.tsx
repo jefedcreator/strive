@@ -20,7 +20,8 @@ import {
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axios, { type AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
 import { Loader2, Plus, Search, SearchX } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -83,7 +84,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
   >({
     queryKey: ['clubs'],
     queryFn: async () => {
-      const res = await axios.get('/api/clubs', {
+      const res = await api.get('/clubs', {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;
@@ -118,7 +119,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
 
   const createMutation = useMutation({
     mutationFn: async (data: LeaderboardFormValues) => {
-      const res = await axios.post('/api/leaderboards', data, {
+      const res = await api.post('/leaderboards', data, {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;

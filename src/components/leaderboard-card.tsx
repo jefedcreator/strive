@@ -8,7 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
-import axios, { type AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useMutation } from '@tanstack/react-query';
@@ -56,8 +57,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(
-        `/api/leaderboards/${data.id}/join`,
+      const res = await api.post(
+        `/leaderboards/${data.id}/join`,
         {},
         {
           headers: { Authorization: `Bearer ${session?.user.token}` },
@@ -72,8 +73,8 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
 
   const inviteMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(
-        `/api/leaderboards/${data.id}/invites`,
+      const res = await api.post(
+        `/leaderboards/${data.id}/invites`,
         {},
         {
           headers: { Authorization: `Bearer ${session?.user.token}` },
@@ -92,7 +93,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.delete(`/api/leaderboards/${data.id}`, {
+      const res = await api.delete(`/leaderboards/${data.id}`, {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;

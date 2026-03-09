@@ -17,14 +17,14 @@ import {
 } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios, { type AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-
 import {
   ArrowLeft,
   Trophy,
@@ -63,8 +63,8 @@ export const LeaderboardDetailClient: React.FC<
   const { data: response } = useQuery<ApiResponse<LeaderboardDetail | null>>({
     queryKey: ['leaderboard', initialData.data?.id],
     queryFn: async () => {
-      const { data } = await axios.get<ApiResponse<LeaderboardDetail>>(
-        `/api/leaderboards/${initialData.data!.id}`,
+      const { data } = await api.get<ApiResponse<LeaderboardDetail>>(
+        `/leaderboards/${initialData.data!.id}`,
         { headers: { Authorization: `Bearer ${session?.user.token}` } }
       );
       return data;
@@ -91,7 +91,7 @@ export const LeaderboardDetailClient: React.FC<
   >({
     queryKey: ['clubs'],
     queryFn: async () => {
-      const res = await axios.get('/api/clubs', {
+      const res = await api.get('/clubs', {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;
@@ -120,7 +120,7 @@ export const LeaderboardDetailClient: React.FC<
 
   const editMutation = useMutation({
     mutationFn: async (data: LeaderboardFormValues) => {
-      const res = await axios.put(`/api/leaderboards/${leaderboard.id}`, data, {
+      const res = await api.put(`/leaderboards/${leaderboard.id}`, data, {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;
@@ -142,12 +142,9 @@ export const LeaderboardDetailClient: React.FC<
 
   const exitMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.delete(
-        `/api/leaderboards/${leaderboard.id}/exit`,
-        {
-          headers: { Authorization: `Bearer ${session?.user.token}` },
-        }
-      );
+      const res = await api.delete(`/leaderboards/${leaderboard.id}/exit`, {
+        headers: { Authorization: `Bearer ${session?.user.token}` },
+      });
       return res.data;
     },
     onSuccess: async () => {
@@ -161,8 +158,8 @@ export const LeaderboardDetailClient: React.FC<
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(
-        `/api/leaderboards/${leaderboard.id}/join`,
+      const res = await api.post(
+        `/leaderboards/${leaderboard.id}/join`,
         {},
         {
           headers: { Authorization: `Bearer ${session?.user.token}` },

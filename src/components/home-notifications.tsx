@@ -1,8 +1,9 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { type PaginatedApiResponse } from '@/types';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
+import { type PaginatedApiResponse, type ApiResponse } from '@/types'; // Added ApiResponse
 import type { NotificationWithRelations } from '@/types';
 import { typeConfig } from '@/components/top-nav';
 import { Bell } from 'lucide-react';
@@ -36,13 +37,14 @@ export function timeAgo(date: Date | string): string {
 
 export function HomeNotifications({ token }: { token: string }) {
   const { data, isLoading } = useQuery<
-    PaginatedApiResponse<NotificationWithRelations[]>
+    PaginatedApiResponse<NotificationWithRelations[]> // Kept PaginatedApiResponse for consistency with data type
   >({
     queryKey: ['notifications', 'home-preview'],
     queryFn: async () => {
-      const res = await axios.get<
+      const res = await api.get<
         PaginatedApiResponse<NotificationWithRelations[]>
-      >('/api/notifications?size=5', {
+      >('/notifications', {
+        params: { page: 1, limit: 10 },
         headers: { Authorization: `Bearer ${token}` },
       });
       return res.data;

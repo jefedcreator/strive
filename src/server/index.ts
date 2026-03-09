@@ -13,7 +13,7 @@ import type {
   PaginatedApiResponse,
   RunData,
 } from '@/types';
-import { uncachedAuth } from './auth';
+import { uncachedAuth, signOut } from './auth';
 import type { User } from '@prisma/client';
 
 // Server-side fetches must use the internal Next.js port directly.
@@ -22,10 +22,16 @@ const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:3000';
 
 const fetcher = async (url: string): Promise<Response> => {
   const session = await uncachedAuth();
-  return await fetch(url, {
+  const res = await fetch(url, {
     headers: { Authorization: `Bearer ${session?.user.token}` },
     cache: 'no-store',
   });
+
+  if (res.status === 401) {
+    await signOut({ redirect: true });
+  }
+
+  return res;
 };
 
 async function getClubs(

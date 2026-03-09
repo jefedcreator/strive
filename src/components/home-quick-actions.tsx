@@ -6,7 +6,8 @@ import { useSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axios, { type AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { PlusCircle, Users } from 'lucide-react';
 
@@ -73,7 +74,7 @@ export function HomeQuickActions() {
         formData.append('image', clubThumbnail);
       }
 
-      const res = await axios.post('/api/clubs', formData, {
+      const res = await api.post('/clubs', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${session?.user.token}`,
@@ -102,7 +103,7 @@ export function HomeQuickActions() {
   >({
     queryKey: ['clubs'],
     queryFn: async () => {
-      const res = await axios.get('/api/clubs', {
+      const res = await api.get('/clubs', {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;
@@ -131,7 +132,7 @@ export function HomeQuickActions() {
 
   const createLeaderboardMutation = useMutation({
     mutationFn: async (data: LeaderboardFormValues) => {
-      const res = await axios.post('/api/leaderboards', data, {
+      const res = await api.post('/leaderboards', data, {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;

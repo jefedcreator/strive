@@ -18,7 +18,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import axios, { type AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
 import type { ApiError } from '@/types';
 
 export function SettingsClient({ user }: { user: UserType }) {
@@ -55,7 +56,7 @@ export function SettingsClient({ user }: { user: UserType }) {
       if (data.username) formData.append('username', data.username);
       if (data.avatar) formData.append('avatar', data.avatar);
 
-      const res = await axios.put(`/api/users/me`, formData, {
+      const res = await api.put(`/users/me`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${session?.user.token}`,
@@ -80,7 +81,7 @@ export function SettingsClient({ user }: { user: UserType }) {
 
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.delete(`/api/users/me`, {
+      const res = await api.delete(`/users/me`, {
         headers: {
           Authorization: `Bearer ${session?.user.token}`,
         },

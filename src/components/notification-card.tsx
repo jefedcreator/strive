@@ -3,7 +3,8 @@ import { type ApiError, type NotificationWithRelations } from '@/types';
 import { type NotificationType } from '@prisma/client';
 import { Info, Users, Trophy, ArrowRight, Loader2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios, { AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 
 interface NotificationCardProps {
@@ -61,7 +62,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 
   const acceptClubMutation = useMutation({
     mutationFn: async (clubId: string) => {
-      await axios.post(`/api/clubs/${clubId}/accept`, {
+      await api.post(`/clubs/${clubId}/accept`, {
         userId: notification.userId,
       });
     },
@@ -79,7 +80,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 
   const acceptLeaderboardMutation = useMutation({
     mutationFn: async (leaderboardId: string) => {
-      await axios.post(`/api/leaderboards/${leaderboardId}/accept`, {
+      await api.post(`/leaderboards/${leaderboardId}/accept`, {
         userId: notification.userId,
       });
     },
@@ -97,7 +98,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 
   const dismissMutation = useMutation({
     mutationFn: async () => {
-      await axios.patch(`/api/notifications/${notification.id}`, {
+      await api.patch(`/notifications/${notification.id}`, {
         isRead: true,
       });
     },

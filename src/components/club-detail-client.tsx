@@ -8,7 +8,8 @@ import { Modal } from '@/primitives/Modal';
 import { type ApiError, type ApiResponse, type ClubDetail } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios, { type AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -59,8 +60,8 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
   const { data: response } = useQuery<ApiResponse<ClubDetail | null>>({
     queryKey: ['club', initialData.data?.id],
     queryFn: async () => {
-      const { data } = await axios.get<ApiResponse<ClubDetail>>(
-        `/api/clubs/${initialData.data!.id}`,
+      const { data } = await api.get<ApiResponse<ClubDetail>>(
+        `/clubs/${initialData.data!.id}`,
         { headers: { Authorization: `Bearer ${session?.user.token}` } }
       );
       return data;
@@ -115,7 +116,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
       formData.append('isActive', String(data.isActive));
       if (thumbnail) formData.append('image', thumbnail);
 
-      const res = await axios.put(`/api/clubs/${club.id}`, formData, {
+      const res = await api.put(`/clubs/${club.id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${session?.user.token}`,
@@ -137,7 +138,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
 
   const exitMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.delete(`/api/clubs/${club.id}/exit`, {
+      const res = await api.delete(`/clubs/${club.id}/exit`, {
         headers: { Authorization: `Bearer ${session?.user.token}` },
       });
       return res.data;
@@ -151,8 +152,8 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const res = await axios.post(
-        `/api/clubs/${club.id}/join`,
+      const res = await api.post(
+        `/clubs/${club.id}/join`,
         {},
         {
           headers: { Authorization: `Bearer ${session?.user.token}` },

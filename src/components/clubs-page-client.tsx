@@ -15,7 +15,8 @@ import {
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import axios, { type AxiosError } from 'axios';
+import api from '@/utils/axios';
+import { type AxiosError } from 'axios';
 import { Loader2, Plus, Search, SearchX } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -120,7 +121,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
         formData.append('image', thumbnail);
       }
 
-      const res = await axios.post('/api/clubs', formData, {
+      const res = await api.post('/clubs', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${session?.user.token}`,
