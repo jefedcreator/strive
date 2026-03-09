@@ -63,8 +63,18 @@ export const authConfig = {
           fullname: user.fullname,
           avatar: user.avatar,
           type: user.type,
-          image: credentials.image && credentials.image !== 'null' && credentials.image !== 'undefined' ? (credentials.image as string) : (user.avatar ?? null),
-          token: credentials.token && credentials.token !== 'null' && credentials.token !== 'undefined' ? (credentials.token as string) : null,
+          image:
+            credentials.image &&
+            credentials.image !== 'null' &&
+            credentials.image !== 'undefined'
+              ? (credentials.image as string)
+              : (user.avatar ?? null),
+          token:
+            credentials.token &&
+            credentials.token !== 'null' &&
+            credentials.token !== 'undefined'
+              ? (credentials.token as string)
+              : null,
         };
       },
     }),
