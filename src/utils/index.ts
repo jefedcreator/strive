@@ -128,7 +128,7 @@ const parseParams = {
   isPublic: parseAsBoolean,
   query: parseAsString,
   page: parseAsInteger.withDefault(1),
-  type: parseAsStringEnum<NotificationType>(Object.values(NotificationType)),
+  type: parseAsStringEnum(['clubs', 'leaderboards']),
 };
 
 const loadParams = createSearchParamsCache(parseParams);

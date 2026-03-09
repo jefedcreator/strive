@@ -3,6 +3,7 @@ import { type NextRequest } from 'next/server';
 import type z from 'zod';
 import type { ClubQueryValidatorSchema } from '../validators/club.validator';
 import type { LeaderboardQueryValidatorSchema } from '../validators/leaderboard.validator';
+import type { ExploreQueryValidatorSchema } from '../validators/explore.validator';
 
 export type MiddlewareResponse = {
   message: string;
@@ -27,7 +28,9 @@ type Prettify<T> = {
 } & {};
 
 export type QueryParameters = Prettify<
-  LeaderboardQueryValidatorSchema & ClubQueryValidatorSchema
+  LeaderboardQueryValidatorSchema &
+  ClubQueryValidatorSchema &
+  ExploreQueryValidatorSchema
 >;
 
 export interface AuthRequest<B = unknown, Q = QueryParameters>

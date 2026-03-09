@@ -11,6 +11,7 @@ import {
 } from '@/primitives/tooltip';
 import {
   LayoutDashboard,
+  Search,
   Users,
   Trophy,
   Bell,
@@ -44,6 +45,7 @@ interface NavItemProps {
 
 const platformNavigation: NavItemProps[] = [
   { name: 'Home', href: '/home', icon: LayoutDashboard },
+  { name: 'Explore', href: '/explore', icon: Search },
   { name: 'Clubs', href: '/clubs', icon: Users },
   { name: 'Leaderboards', href: '/leaderboards', icon: Trophy },
   { name: 'Notifications', href: '/notifications', icon: Bell },

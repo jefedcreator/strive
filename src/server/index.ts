@@ -1,6 +1,7 @@
 import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validator';
 import type { LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import type { NotificationQueryValidatorSchema } from '@/backend/validators/notification.validator';
+import type { ExploreQueryValidatorSchema } from '@/backend/validators/explore.validator';
 import type {
   ApiResponse,
   ClubDetail,
@@ -11,6 +12,7 @@ import type {
   LeaderboardListItem,
   NotificationWithRelations,
   PaginatedApiResponse,
+  ExploreListItem,
   RunData,
 } from '@/types';
 import { uncachedAuth, signOut } from './auth';
@@ -279,6 +281,42 @@ async function getLeaderboardInvite(
   }
 }
 
+async function getExploreItems(
+  params?: Partial<ExploreQueryValidatorSchema>
+): Promise<PaginatedApiResponse<ExploreListItem[]>> {
+  try {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.set(key, String(value));
+        }
+      });
+    }
+
+    const url = `${baseUrl}/api/explore${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+
+    const res = await fetcher(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch explore items: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<PaginatedApiResponse<ExploreListItem[]>>;
+  } catch (error) {
+    console.error('Error fetching explore items:', error);
+    return {
+      status: 500,
+      message: 'Failed to fetch explore items',
+      data: [],
+      total: 0,
+      page: 1,
+      size: 1,
+      totalPages: 0,
+    };
+  }
+}
+
 export {
   getClubInvite,
   getClubs,
@@ -289,4 +327,5 @@ export {
   getRuns,
   getLeaderboardInvite,
   getProfile,
+  getExploreItems,
 };

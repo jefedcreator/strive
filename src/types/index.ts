@@ -103,6 +103,10 @@ export type LeaderboardListItem = Leaderboard & {
   isMember: boolean;
 };
 
+export type ExploreListItem =
+  | (ClubListItem & { type: 'club' })
+  | (LeaderboardListItem & { type: 'leaderboard' });
+
 export type NotificationWithRelations = Notification & {
   user?: User | null;
   club?: Club | null;
