@@ -3,7 +3,7 @@ import Background from '@/components/background';
 import { ExplorePageClient } from '@/components/explore-page-client';
 import { getExploreItems } from '@/server';
 import type { PageProps } from '@/types';
-import { loadParams } from '@/utils';
+import { loadExploreParams } from '@/utils';
 
 export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ExplorePage({ searchParams }: PageProps) {
-  const { query, page, type } = loadParams.parse(await searchParams);
+  const { query, page, type } = loadExploreParams.parse(await searchParams);
 
   const initialData = await getExploreItems({
     query: query ?? undefined,

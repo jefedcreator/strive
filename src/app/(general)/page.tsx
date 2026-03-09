@@ -151,14 +151,14 @@ function Hero({
             Get Started Free
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </motion.a>
-          {/* <motion.a
+          <motion.a
             whileHover={{ scale: 1.02, backgroundColor: 'rgba(0,0,0,0.02)' }}
             whileTap={{ scale: 0.98 }}
             className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 border border-gray-200 dark:border-white/10 text-lg font-bold rounded-full text-gray-900 dark:text-white bg-white/50 dark:bg-white/5 backdrop-blur-sm hover:border-gray-300 dark:hover:border-white/20 transition-all focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-white/10"
-            href="#features"
+            href="/explore"
           >
-            Explore Features
-          </motion.a> */}
+            Explore 
+          </motion.a>
         </motion.div>
 
         <motion.div
@@ -697,10 +697,13 @@ function LeaderboardSection() {
                   <h4 className="font-extrabold text-xl text-gray-900 dark:text-white tracking-tight">
                     Weekly Distance
                   </h4>
-                  <span className="text-xs text-primary font-bold cursor-pointer hover:text-[#e04000] flex items-center gap-1 group transition-colors">
+                  <motion.a
+                    href="/explore?type=leaderboards"
+                    className="text-xs text-primary font-bold cursor-pointer hover:text-[#e04000] flex items-center gap-1 group transition-colors"
+                  >
                     View Full{' '}
                     <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                  </span>
+                  </motion.a>
                 </div>
 
                 <motion.div
@@ -912,7 +915,7 @@ function CTA({
               whileHover={{ scale: 1.03, backgroundColor: 'rgba(0,0,0,0.03)' }}
               whileTap={{ scale: 0.97 }}
               className="w-full sm:w-auto px-10 py-5 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 text-lg font-bold rounded-full hover:border-gray-300 dark:hover:border-white/20 transition-all flex items-center justify-center"
-              href="#clubs"
+              href="/explore?type=clubs"
             >
               Explore Clubs
             </motion.a>

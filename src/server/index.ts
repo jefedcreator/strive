@@ -36,7 +36,8 @@ const fetcher = async (url: string): Promise<Response> => {
   });
 
   if (res.status === 401) {
-    await signOut({ redirect: true });
+    // Log warning but don't force logout from server side as it can cause loops
+    console.warn(`Internal fetch 401: ${url}`);
   }
 
   return res;

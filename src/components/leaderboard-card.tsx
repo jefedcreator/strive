@@ -34,11 +34,13 @@ import {
 export interface LeaderboardCardProps {
   data: LeaderboardListItem;
   onDelete?: () => void;
+  showType?: boolean;
 }
 
 export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
   data,
   onDelete,
+  showType,
 }) => {
   const { data: session } = useSession();
   const router = useRouter();
@@ -136,6 +138,12 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
             >
               {data.isPublic ? 'Public' : 'Private'}
             </span>
+
+            {showType && (
+              <span className="absolute top-2.5 right-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-white/20 text-white border border-white/20 backdrop-blur-sm">
+                Leaderboard
+              </span>
+            )}
 
             {/* Club association badge */}
             {data.club?.name && (

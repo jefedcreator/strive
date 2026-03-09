@@ -32,9 +32,10 @@ import {
 
 interface ClubCardProps {
   club: ClubListItem;
+  showType?: boolean;
 }
 
-export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
+export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
   const { data: session } = useSession();
   const router = useRouter();
   const currentUserId = session?.user?.id;
@@ -137,6 +138,12 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club }) => {
             >
               {club.isPublic ? 'Public' : 'Private'}
             </span>
+
+            {showType && (
+              <span className="absolute top-2.5 right-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-white/20 text-white border border-white/20 backdrop-blur-sm">
+                Club
+              </span>
+            )}
           </div>
         </Link>
 

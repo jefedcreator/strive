@@ -7,7 +7,7 @@ import {
   type NotificationWithRelations,
   type PaginatedApiResponse,
 } from '@/types';
-import { parseParams } from '@/utils';
+import { notificationParams } from '@/utils';
 import { Loader2, Search, SearchX } from 'lucide-react';
 import { useQueryStates } from 'nuqs';
 import { useMemo, useState } from 'react';
@@ -24,7 +24,7 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
   initialData: notificationsResponse,
   currentFilters,
 }) => {
-  const [{ type, query, page }, setStates] = useQueryStates(parseParams, {
+  const [{ type, query, page }, setStates] = useQueryStates(notificationParams, {
     shallow: false,
     throttleMs: 1000,
   });

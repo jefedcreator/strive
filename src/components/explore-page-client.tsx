@@ -9,8 +9,8 @@ import {
   type ExploreListItem,
   type PaginatedApiResponse,
 } from '@/types';
-import { parseParams } from '@/utils';
-import { Loader2, Search, SearchX } from 'lucide-react';
+import { exploreParams } from '@/utils';
+import { ArrowLeft, Loader2, Search, SearchX } from 'lucide-react';
 import Link from 'next/link';
 import { useQueryStates } from 'nuqs';
 import React from 'react';
@@ -29,7 +29,7 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
   currentFilters,
 }) => {
   const [{ query, page, type }, setStates] = useQueryStates(
-    parseParams,
+    exploreParams,
     {
       shallow: false,
       throttleMs: 1000,
@@ -52,6 +52,17 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Back Button */}
+      <div className="mb-6 md:mb-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Home
+        </Link>
+      </div>
+
       {/* Page Header Area */}
       <div className="mb-6 md:mb-10">
         <nav className="flex text-sm text-gray-500 dark:text-gray-400 mb-2 md:hidden">
@@ -137,9 +148,9 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
                 {items.map((item) => (
                   <FadeInItem key={`${item.type}-${item.id}`}>
                     {item.type === 'club' ? (
-                      <ClubCard club={item} />
+                      <ClubCard club={item} showType={true} />
                     ) : (
-                      <LeaderboardCard data={item} />
+                      <LeaderboardCard data={item} showType={true} />
                     )}
                   </FadeInItem>
                 ))}

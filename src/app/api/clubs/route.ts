@@ -1,6 +1,7 @@
 import {
   authMiddleware,
   bodyValidatorMiddleware,
+  optionalAuthMiddleware,
   queryValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
@@ -125,20 +126,21 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
 
       const where: Prisma.ClubWhereInput = {
         OR: [
-          // Public clubs — always visible
           { isPublic: true },
-          // Private clubs — only if the user is an active member
-          {
-            isPublic: false,
-            members: {
-              some: {
-                userId: user.id,
-                isActive: true,
-              },
-            },
-          },
         ],
       };
+
+      if (user?.id) {
+        (where.OR as any).push({
+          isPublic: false,
+          members: {
+            some: {
+              userId: user.id,
+              isActive: true,
+            },
+          },
+        });
+      }
 
       if (payload.isActive !== undefined) {
         where.isActive = payload.isActive;
@@ -172,11 +174,13 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
           },
         },
         // Include only the current user's membership to determine isMember
-        members: {
-          where: { userId: user.id, isActive: true },
-          select: { id: true },
-          take: 1,
-        },
+        members: user?.id
+          ? {
+            where: { userId: user.id, isActive: true },
+            select: { id: true },
+            take: 1,
+          }
+          : false,
       };
 
       if (payload.all) {
@@ -193,7 +197,7 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
             ...rest,
             leaderboards: _count.leaderboards,
             members: _count.members,
-            isMember: members.length > 0,
+            isMember: (members as any)?.length > 0,
           })
         );
 
@@ -230,7 +234,7 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
           ...rest,
           leaderboards: _count.leaderboards,
           members: _count.members,
-          isMember: members.length > 0,
+          isMember: (members as any)?.length > 0,
         })
       );
 
@@ -251,5 +255,5 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
       );
     }
   },
-  [authMiddleware, queryValidatorMiddleware(clubQueryValidatorSchema)]
+  [optionalAuthMiddleware, queryValidatorMiddleware(clubQueryValidatorSchema)]
 );

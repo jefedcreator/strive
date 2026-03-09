@@ -123,15 +123,28 @@ const mongoIdValidator = z
   .string()
   .regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ID format');
 
-const parseParams = {
-  isActive: parseAsBoolean,
-  isPublic: parseAsBoolean,
+const exploreParams = {
   query: parseAsString,
   page: parseAsInteger.withDefault(1),
   type: parseAsStringEnum(['clubs', 'leaderboards']),
 };
 
+const notificationParams = {
+  query: parseAsString,
+  page: parseAsInteger.withDefault(1),
+  type: parseAsStringEnum(['info', 'club', 'leaderboard']),
+};
+
+const parseParams = {
+  isActive: parseAsBoolean,
+  isPublic: parseAsBoolean,
+  query: parseAsString,
+  page: parseAsInteger.withDefault(1),
+  type: parseAsString,
+};
+
 const loadParams = createSearchParamsCache(parseParams);
+const loadExploreParams = createSearchParamsCache(exploreParams);
 
 export {
   cn,
@@ -152,5 +165,8 @@ export {
   uniqueNumber,
   verifyPassword,
   parseParams,
+  exploreParams,
+  notificationParams,
   loadParams,
+  loadExploreParams,
 };

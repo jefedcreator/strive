@@ -17,6 +17,8 @@ export async function GET(request: Request) {
         ? 'Club'
         : 'Leaderboard';
 
+    const emoji = type === 'club' ? '👥' : '🏆';
+
     return new ImageResponse(
       (
         <div
@@ -40,7 +42,7 @@ export async function GET(request: Request) {
               marginBottom: 40,
             }}
           >
-            🏆
+            {emoji}
           </div>
           <div
             style={{

@@ -98,6 +98,7 @@ export const LeaderboardDetailClient: React.FC<
       return res.data;
     },
     select: (response) => response?.data ?? [],
+    enabled: !!session?.user?.id && isCreator,
   });
 
   const {
