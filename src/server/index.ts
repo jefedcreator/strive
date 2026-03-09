@@ -21,9 +21,19 @@ import type { User } from '@prisma/client';
 const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:3000';
 
 const fetcher = async (url: string): Promise<Response> => {
-  const session = await uncachedAuth();
+  let session = await uncachedAuth();
+
+  if (!session?.user?.token) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    session = await uncachedAuth();
+  }
+
+  if (!session?.user?.token) {
+    throw new Error('No authentication token available');
+  }
+
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${session?.user.token}` },
+    headers: { Authorization: `Bearer ${session.user.token}` },
     cache: 'no-store',
   });
 
