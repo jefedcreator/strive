@@ -7,6 +7,7 @@ import {
   LeaderboardModal,
   type LeaderboardFormValues,
 } from '@/components/leaderboard-modal';
+import { useInfiniteScroll } from '@/hooks/useinfiniteScroll';
 import { Button } from '@/primitives/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
 import {
@@ -34,6 +35,7 @@ interface LeaderboardsPageClientProps {
     isActive: boolean | null;
     isPublic: boolean | null;
     query: string | null;
+    page: number | null;
   };
 }
 
@@ -44,6 +46,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
   const { data: session } = useSession();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [{ isActive, isPublic, query, page }, setStates] = useQueryStates(
     parseParams,
     {
@@ -65,7 +68,13 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     isPublic !== currentFilters.isPublic ||
     query !== currentFilters.query;
 
-  const leaderboards = initialData.data;
+  const isPaging = !isNavigating && page !== currentFilters.page;
+
+  const handleTabClick = (value: string) => {
+    if (tab === value) {
+      void setStates({ page: null });
+    }
+  };
 
   const { data: clubs = [] } = useQuery<
     ApiResponse<ClubListItem[]>,
@@ -80,6 +89,13 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
       return res.data;
     },
     select: (response) => response?.data ?? [],
+  });
+
+  const { items, ref, hasNextPage } = useInfiniteScroll({
+    data: initialData,
+    page: page ?? 1,
+    setPage: (p) => setStates({ page: p }),
+    refresh: refreshKey,
   });
 
   const {
@@ -109,6 +125,8 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     },
     onSuccess: async () => {
       toast.success('Leaderboard created successfully!');
+      setRefreshKey((prev) => prev + 1);
+      void setStates({ page: 1 });
       router.refresh();
       setIsModalOpen(false);
       reset();
@@ -165,7 +183,9 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         <input
           type="text"
           value={query ?? ''}
-          onChange={(e) => setStates({ query: e.target.value || null })}
+          onChange={(e) =>
+            setStates({ query: e.target.value || null, page: 1 })
+          }
           className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card-dark text-sm focus:ring-2 focus:ring-primary dark:focus:ring-white focus:border-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 shadow-sm transition-shadow"
           placeholder="Search your leaderboards..."
         />
@@ -176,22 +196,35 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
         className="flex flex-col w-full min-w-0"
         onValueChange={(value) => {
           if (value === 'active')
-            void setStates({ isActive: true, isPublic: null });
+            void setStates({ isActive: true, isPublic: null, page: 1 });
           else if (value === 'inactive')
-            void setStates({ isActive: false, isPublic: null });
+            void setStates({ isActive: false, isPublic: null, page: 1 });
           else if (value === 'public')
-            void setStates({ isPublic: true, isActive: null });
+            void setStates({ isPublic: true, isActive: null, page: 1 });
           else if (value === 'private')
-            void setStates({ isPublic: false, isActive: null });
-          else void setStates({ isActive: null, isPublic: null });
+            void setStates({ isPublic: false, isActive: null, page: 1 });
+          else void setStates({ isActive: null, isPublic: null, page: 1 });
         }}
       >
         <TabsList className="mb-8">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive</TabsTrigger>
-          <TabsTrigger value="public">Public</TabsTrigger>
-          <TabsTrigger value="private">Private</TabsTrigger>
+          <TabsTrigger value="all" onClick={() => handleTabClick('all')}>
+            All
+          </TabsTrigger>
+          <TabsTrigger value="active" onClick={() => handleTabClick('active')}>
+            Active
+          </TabsTrigger>
+          <TabsTrigger
+            value="inactive"
+            onClick={() => handleTabClick('inactive')}
+          >
+            Inactive
+          </TabsTrigger>
+          <TabsTrigger value="public" onClick={() => handleTabClick('public')}>
+            Public
+          </TabsTrigger>
+          <TabsTrigger value="private" onClick={() => handleTabClick('private')}>
+            Private
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 outline-none">
@@ -213,21 +246,36 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
                 </div>
               ))}
             </div>
-          ) : !isNavigating && leaderboards.length > 0 ? (
+          ) : !isNavigating && items.length > 0 ? (
             <>
               <FadeInStagger
-                key={`${tab}-${leaderboards.length}`}
+                key={`${tab}-${refreshKey}`}
                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6"
               >
-                {leaderboards.map((board) => (
+                {items.map((board) => (
                   <FadeInItem key={board.id}>
-                    <LeaderboardCard data={board} />
+                    <LeaderboardCard
+                      data={board}
+                      onDelete={() => {
+                        setRefreshKey((prev) => prev + 1);
+                        void setStates({ page: 1 });
+                      }}
+                    />
                   </FadeInItem>
                 ))}
               </FadeInStagger>
 
               {/* Intersection Observer target element */}
-              {/* Pagination scroll target was here */}
+              {hasNextPage && (
+                <div
+                  ref={ref}
+                  className="flex justify-center py-8 col-span-full"
+                >
+                  {isPaging && (
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  )}
+                </div>
+              )}
             </>
           ) : !isNavigating ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">

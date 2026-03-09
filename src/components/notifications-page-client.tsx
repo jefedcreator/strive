@@ -11,7 +11,9 @@ import axios from 'axios';
 import { Loader2, Search, SearchX } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useQueryStates } from 'nuqs';
-import { useMemo } from 'react';
+import { useInfiniteScroll } from '@/hooks/useinfiniteScroll';
+import { getNotifications } from '@/server';
+import { useMemo, useState } from 'react';
 import { NotificationCard } from './notification-card';
 interface NotificationsPageClientProps {
   initialData: PaginatedApiResponse<NotificationWithRelations[]>;
@@ -30,6 +32,14 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
     shallow: false,
     throttleMs: 1000,
   });
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const { items, ref, hasNextPage } = useInfiniteScroll({
+    data: notificationsResponse,
+    page: page ?? 1,
+    setPage: (p) => setStates({ page: p }),
+    refresh: refreshKey,
+  });
 
   const tab = useMemo(() => {
     if (type === 'info') return 'info';
@@ -40,6 +50,12 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
 
   const isLoading =
     type !== currentFilters.type || query !== currentFilters.query;
+
+  const handleTabClick = (value: string) => {
+    if (tab === value) {
+      void setStates({ page: null });
+    }
+  };
 
   const notifications = notificationsResponse.data;
 
@@ -61,7 +77,9 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
         <input
           type="text"
           value={query ?? ''}
-          onChange={(e) => setStates({ query: e.target.value || null })}
+          onChange={(e) =>
+            setStates({ query: e.target.value || null, page: 1 })
+          }
           className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card-dark text-sm focus:ring-2 focus:ring-primary dark:focus:ring-white focus:border-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 shadow-sm transition-shadow"
           placeholder="Search your notifications..."
         />
@@ -71,18 +89,29 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
         value={tab}
         className="flex flex-col w-full min-w-0"
         onValueChange={(value) => {
-          if (value === 'info') void setStates({ type: 'info' });
-          else if (value === 'club') void setStates({ type: 'club' });
+          if (value === 'info') void setStates({ type: 'info', page: 1 });
+          else if (value === 'club') void setStates({ type: 'club', page: 1 });
           else if (value === 'leaderboard')
-            void setStates({ type: 'leaderboard' });
-          else void setStates({ type: null });
+            void setStates({ type: 'leaderboard', page: 1 });
+          else void setStates({ type: null, page: 1 });
         }}
       >
         <TabsList className="mb-8">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="info">Info</TabsTrigger>
-          <TabsTrigger value="club">Club</TabsTrigger>
-          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+          <TabsTrigger value="all" onClick={() => handleTabClick('all')}>
+            All
+          </TabsTrigger>
+          <TabsTrigger value="info" onClick={() => handleTabClick('info')}>
+            Info
+          </TabsTrigger>
+          <TabsTrigger value="club" onClick={() => handleTabClick('club')}>
+            Club
+          </TabsTrigger>
+          <TabsTrigger
+            value="leaderboard"
+            onClick={() => handleTabClick('leaderboard')}
+          >
+            Leaderboard
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 outline-none">
@@ -120,16 +149,24 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
                     </div>
                   ))}
                 </div>
-              ) : !isLoading && notifications.length > 0 ? (
+              ) : !isLoading && items.length > 0 ? (
                 <>
-                  <FadeInStagger className="space-y-4">
-                    {notifications.map((notification) => (
+                  <FadeInStagger
+                    key={`${tab}-${refreshKey}`}
+                    className="space-y-4"
+                  >
+                    {items.map((notification) => (
                       <FadeInItem key={notification.id}>
                         <NotificationCard notification={notification} />
                       </FadeInItem>
                     ))}
                   </FadeInStagger>
-                  {/* Pagination scroll target was here */}
+
+                  {hasNextPage && (
+                    <div ref={ref} className="flex justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  )}
                 </>
               ) : !isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">

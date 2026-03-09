@@ -61,6 +61,8 @@ export const FadeInItem: React.FC<{
 }> = ({ children, className }) => {
   return (
     <motion.div
+      initial="hidden"
+      animate="visible"
       variants={{
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 },

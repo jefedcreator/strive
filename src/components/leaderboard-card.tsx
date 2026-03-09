@@ -32,9 +32,13 @@ import {
 
 export interface LeaderboardCardProps {
   data: LeaderboardListItem;
+  onDelete?: () => void;
 }
 
-export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
+export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
+  data,
+  onDelete,
+}) => {
   const { data: session } = useSession();
   const router = useRouter();
   const currentUserId = session?.user?.id;
@@ -95,6 +99,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
     },
     onSuccess: async () => {
       setIsDeleteModalOpen(false);
+      onDelete?.();
       router.refresh();
     },
   });
@@ -102,8 +107,6 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({ data }) => {
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
         whileHover={{
           y: -2,
           transition: { type: 'spring', stiffness: 400, damping: 25 },

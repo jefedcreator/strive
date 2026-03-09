@@ -257,7 +257,7 @@ export const LeaderboardDetailClient: React.FC<
                     <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
                   </>
                 )}
-                
+
                 {!isMember ? (
                   <DropdownMenuItem
                     onClick={() =>
@@ -269,7 +269,9 @@ export const LeaderboardDetailClient: React.FC<
                           'Failed to join leaderboard',
                       })
                     }
-                    disabled={joinMutation.isPending || isInactive || isCompleted}
+                    disabled={
+                      joinMutation.isPending || isInactive || isCompleted
+                    }
                     className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
                   >
                     <LogIn className="w-4 h-4 text-gray-700 dark:text-gray-300" />

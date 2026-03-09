@@ -272,7 +272,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                     <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
                   </>
                 )}
-                
+
                 {!isMember ? (
                   <DropdownMenuItem
                     onClick={() =>

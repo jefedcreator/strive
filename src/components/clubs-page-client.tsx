@@ -11,6 +11,8 @@ import {
   type ClubListItem,
   type PaginatedApiResponse,
 } from '@/types';
+import { useInfiniteScroll } from '@/hooks/useinfiniteScroll';
+import { getClubs } from '@/server';
 import { parseParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -39,6 +41,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
   const { data: session } = useSession();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [{ isActive, isPublic, query, page }, setStates] = useQueryStates(
     parseParams,
@@ -47,6 +50,13 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
       throttleMs: 1000,
     }
   );
+
+  const { items, ref, hasNextPage } = useInfiniteScroll({
+    data: initialData,
+    page: page ?? 1,
+    setPage: (p) => setStates({ page: p }),
+    refresh: refreshKey,
+  });
 
   const tab = React.useMemo(() => {
     if (isActive === true) return 'active';
@@ -61,7 +71,11 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
     isPublic !== currentFilters.isPublic ||
     query !== currentFilters.query;
 
-  const clubs = initialData.data;
+  const handleTabClick = (value: string) => {
+    if (tab === value) {
+      void setStates({ page: null });
+    }
+  };
 
   const {
     register,
@@ -117,6 +131,8 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
     },
     onSuccess: async () => {
       toast.success('Club created successfully!');
+      setRefreshKey((prev) => prev + 1);
+      void setStates({ page: 1 });
       router.refresh();
       setIsModalOpen(false);
       reset();
@@ -171,7 +187,9 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
         <input
           type="text"
           value={query ?? ''}
-          onChange={(e) => setStates({ query: e.target.value || null })}
+          onChange={(e) =>
+            setStates({ query: e.target.value || null, page: 1 })
+          }
           className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-card-dark text-sm focus:ring-2 focus:ring-primary dark:focus:ring-white focus:border-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 shadow-sm transition-shadow"
           placeholder="Search your clubs..."
         />
@@ -181,24 +199,37 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
       <Tabs
         value={tab}
         className="flex flex-col min-w-0 w-full"
-        onValueChange={(value) => {
-          if (value === 'active')
-            void setStates({ isActive: true, isPublic: null });
-          else if (value === 'inactive')
-            void setStates({ isActive: false, isPublic: null });
-          else if (value === 'public')
-            void setStates({ isPublic: true, isActive: null });
-          else if (value === 'private')
-            void setStates({ isPublic: false, isActive: null });
-          else void setStates({ isActive: null, isPublic: null });
-        }}
+          onValueChange={(value) => {
+            if (value === 'active')
+              void setStates({ isActive: true, isPublic: null, page: 1 });
+            else if (value === 'inactive')
+              void setStates({ isActive: false, isPublic: null, page: 1 });
+            else if (value === 'public')
+              void setStates({ isPublic: true, isActive: null, page: 1 });
+            else if (value === 'private')
+              void setStates({ isPublic: false, isActive: null, page: 1 });
+            else void setStates({ isActive: null, isPublic: null, page: 1 });
+          }}
       >
         <TabsList className="mb-8">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive</TabsTrigger>
-          <TabsTrigger value="public">Public</TabsTrigger>
-          <TabsTrigger value="private">Private</TabsTrigger>
+          <TabsTrigger value="all" onClick={() => handleTabClick('all')}>
+            All
+          </TabsTrigger>
+          <TabsTrigger value="active" onClick={() => handleTabClick('active')}>
+            Active
+          </TabsTrigger>
+          <TabsTrigger
+            value="inactive"
+            onClick={() => handleTabClick('inactive')}
+          >
+            Inactive
+          </TabsTrigger>
+          <TabsTrigger value="public" onClick={() => handleTabClick('public')}>
+            Public
+          </TabsTrigger>
+          <TabsTrigger value="private" onClick={() => handleTabClick('private')}>
+            Private
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab} className="mt-6 outline-none">
@@ -220,20 +251,27 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
                 </div>
               ))}
             </div>
-          ) : !isNavigating && clubs.length > 0 ? (
+          ) : !isNavigating && items.length > 0 ? (
             <>
               <FadeInStagger
-                key={`${tab}-${clubs.length}`}
+                key={`${tab}-${refreshKey}`}
                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6"
               >
-                {clubs.map((club) => (
+                {items.map((club) => (
                   <FadeInItem key={club.id}>
                     <ClubCard club={club} />
                   </FadeInItem>
                 ))}
               </FadeInStagger>
 
-              {/* Pagination scroll target was here */}
+                  {hasNextPage && (
+                    <div
+                      ref={ref}
+                      className="flex justify-center py-8 col-span-full"
+                    >
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  )}
             </>
           ) : !isNavigating ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">

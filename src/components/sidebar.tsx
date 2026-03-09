@@ -62,7 +62,13 @@ export function Sidebar() {
   const { data: session } = useSession();
   const user = session?.user;
 
-  const NavItem = ({ item, onClick }: { item: NavItemProps; onClick?: () => void }) => {
+  const NavItem = ({
+    item,
+    onClick,
+  }: {
+    item: NavItemProps;
+    onClick?: () => void;
+  }) => {
     const isActive = pathname === item.href;
     return (
       <Tooltip delayDuration={0}>
@@ -228,7 +234,11 @@ export function Sidebar() {
                 Platform
               </p>
               {platformNavigation.map((item) => (
-                <NavItem key={item.name} item={item} onClick={() => setIsMobileOpen(false)} />
+                <NavItem
+                  key={item.name}
+                  item={item}
+                  onClick={() => setIsMobileOpen(false)}
+                />
               ))}
             </div>
             <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4 shrink-0">
@@ -240,7 +250,11 @@ export function Sidebar() {
               </div>
               <div className="space-y-1">
                 {bottomNavigation.map((item) => (
-                  <NavItem key={item.name} item={item} onClick={() => setIsMobileOpen(false)} />
+                  <NavItem
+                    key={item.name}
+                    item={item}
+                    onClick={() => setIsMobileOpen(false)}
+                  />
                 ))}
               </div>
               {/* User Profile Snippet (Mobile) */}
@@ -294,13 +308,23 @@ export function Sidebar() {
                         asChild
                         className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer"
                       >
-                        <Link href="/settings" onClick={() => setIsMobileOpen(false)}>Profile</Link>
+                        <Link
+                          href="/settings"
+                          onClick={() => setIsMobileOpen(false)}
+                        >
+                          Profile
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         asChild
                         className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer"
                       >
-                        <Link href="/settings" onClick={() => setIsMobileOpen(false)}>Settings</Link>
+                        <Link
+                          href="/settings"
+                          onClick={() => setIsMobileOpen(false)}
+                        >
+                          Settings
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
                       <DropdownMenuItem
