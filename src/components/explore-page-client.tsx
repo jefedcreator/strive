@@ -11,6 +11,7 @@ import {
 } from '@/types';
 import { parseParams } from '@/utils';
 import { Loader2, Search, SearchX } from 'lucide-react';
+import Link from 'next/link';
 import { useQueryStates } from 'nuqs';
 import React from 'react';
 
@@ -52,9 +53,11 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Page Header Area */}
-      <div className="mb-6 md:mb-10 mt-16 lg:mt-0">
+      <div className="mb-6 md:mb-10">
         <nav className="flex text-sm text-gray-500 dark:text-gray-400 mb-2 md:hidden">
-          <span>Home</span>
+          <Link href="/" className="hover:text-primary transition-colors">
+            Home
+          </Link>
           <span className="mx-2">/</span>
           <span className="text-primary dark:text-white font-medium">
             Explore
