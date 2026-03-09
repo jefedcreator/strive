@@ -206,7 +206,7 @@ export const authMiddleware = async <B = unknown, Q = QueryParameters>(
 
   const unauthorized = async (message: string): Promise<MiddlewareResponse> => {
     try {
-      await signOut({ redirect: false });
+      // await signOut({ redirect: false });
     } catch (logoutError) {
       console.error('Logout error during auth failure:', logoutError);
     }

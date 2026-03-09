@@ -36,7 +36,16 @@ export const leaderboardValidatorSchema = z
       .min(new Date(), 'expiryDate cannot be in the past')
       .nullable()
       .optional(),
-    clubId: mongoIdValidator.nullable().optional(),
+    clubId: z
+      .union([
+        mongoIdValidator,
+        z
+          .string()
+          .max(0)
+          .transform(() => undefined),
+      ])
+      .nullable()
+      .optional(),
   })
   .strict();
 

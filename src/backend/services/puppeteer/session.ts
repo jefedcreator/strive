@@ -61,7 +61,6 @@ export class PuppeteerSessionManager {
     CONFIRMATION_EMAIL: 'span[data-testid="username"]',
     CONFIRMATION_AVATAR: 'img[alt="Avatar"]',
     CONFIRMATION_CONTINUE_BTN: 'form[action="#"] button[type="submit"].nds-btn',
-
   };
 
   private sessions = new Map<string, ActiveSession>();
@@ -783,13 +782,20 @@ export class PuppeteerSessionManager {
       }
 
       console.log(`[${sessionId}] 🔍 Avatar extraction starting...`);
-      console.log(`[${sessionId}] Current extractedAvatar value:`, extractedAvatar);
+      console.log(
+        `[${sessionId}] Current extractedAvatar value:`,
+        extractedAvatar
+      );
 
       // Extract avatar from profile page if we don't have it yet
       if (!extractedAvatar) {
-        console.log(`[${sessionId}] 🔎 No avatar from confirmation page, extracting from profile...`);
+        console.log(
+          `[${sessionId}] 🔎 No avatar from confirmation page, extracting from profile...`
+        );
         try {
-          console.log(`[${sessionId}] Waiting for selector: ${this.SELECTORS.AVATAR}`);
+          console.log(
+            `[${sessionId}] Waiting for selector: ${this.SELECTORS.AVATAR}`
+          );
           await page.waitForSelector(this.SELECTORS.AVATAR, {
             visible: true,
             timeout: 10_000,
@@ -800,14 +806,18 @@ export class PuppeteerSessionManager {
             this.SELECTORS.AVATAR,
             (el) => (el as HTMLImageElement).src
           );
-          console.log(`[${sessionId}] 🖼️ Extracted avatar from profile page: ${extractedAvatar}`);
+          console.log(
+            `[${sessionId}] 🖼️ Extracted avatar from profile page: ${extractedAvatar}`
+          );
         } catch (err: any) {
           console.log(
             `[${sessionId}] ⚠️ Could not extract avatar from profile page: ${err.message}`
           );
         }
       } else {
-        console.log(`[${sessionId}] ✅ Using avatar from confirmation page: ${extractedAvatar}`);
+        console.log(
+          `[${sessionId}] ✅ Using avatar from confirmation page: ${extractedAvatar}`
+        );
       }
 
       // ── Final email fallback ──────────────────────────────────────────
