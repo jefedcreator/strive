@@ -188,11 +188,7 @@ export function Sidebar() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  (
-                    user?.fullname?.[0] ??
-                    user?.name?.[0] ??
-                    'G'
-                  ).toUpperCase()
+                  (user?.fullname?.[0] ?? user?.name?.[0] ?? 'G').toUpperCase()
                 )}
               </div>
               {!isCollapsed && (

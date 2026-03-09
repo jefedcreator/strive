@@ -191,7 +191,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
           placeholder="Search your leaderboards..."
         />
       </div>
-
       <Tabs
         value={tab}
         className="flex flex-col w-full min-w-0"

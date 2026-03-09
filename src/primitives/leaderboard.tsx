@@ -108,7 +108,11 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                           {entry.user.avatar && (
                             <AvatarImage
                               src={entry.user.avatar}
-                              alt={entry.user.fullname ?? entry.user.username ?? 'Guest'}
+                              alt={
+                                entry.user.fullname ??
+                                entry.user.username ??
+                                'Guest'
+                              }
                               className="object-cover"
                             />
                           )}

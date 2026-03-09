@@ -42,6 +42,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
+import Image from 'next/image';
 
 interface LeaderboardDetailClientProps {
   initialData: ApiResponse<LeaderboardDetail | null>;
@@ -181,7 +182,7 @@ export const LeaderboardDetailClient: React.FC<
   };
 
   return (
-    <FadeInStagger className="flex flex-col w-full min-w-0 h-full px-4 md:px-0 mt-20 lg:mt-0 pb-10">
+    <FadeInStagger className="flex flex-col w-full min-w-0 h-full px-0 mt-20 lg:mt-0 pb-10">
       {/* Back link */}
       <FadeInItem>
         <Link
@@ -197,15 +198,24 @@ export const LeaderboardDetailClient: React.FC<
       <FadeInItem>
         <div className="relative w-full rounded-2xl overflow-hidden mb-3 bg-gradient-to-br from-primary/30 via-purple-500/20 to-blue-500/10 dark:from-primary/20 dark:via-purple-500/15 dark:to-blue-600/5 border border-white/20 dark:border-white/10">
           {/* Decorative blobs */}
-          <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-purple-500/20 blur-3xl pointer-events-none" />
-
+          {/* <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-purple-500/20 blur-3xl pointer-events-none" /> */}
+          <>
+            <Image
+              src={`/api/og?name=${encodeURIComponent(leaderboard.name)}&type=leaderboard`}
+              alt={leaderboard.name}
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40 dark:bg-black/50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+          </>
           {/* Banner content */}
           <div className="relative flex flex-col items-center justify-center text-center px-16 py-12 md:py-16">
             <div className="w-12 h-12 rounded-2xl bg-white/20 dark:bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 shadow-inner">
               <Trophy className="w-6 h-6 text-white drop-shadow" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white drop-shadow-sm mb-3">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-sm mb-3">
               {leaderboard.name}
             </h1>
             <div className="flex items-center gap-2 flex-wrap justify-center">

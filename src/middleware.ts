@@ -18,11 +18,5 @@ export default NextAuth({
 }).auth;
 
 export const config = {
-  matcher: [
-    '/home',
-    '/leaderboards',
-    '/clubs',
-    '/settings',
-    '/notifications',
-  ],
+  matcher: ['/home', '/leaderboards', '/clubs', '/settings', '/notifications'],
 };

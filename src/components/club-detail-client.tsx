@@ -173,7 +173,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
   };
 
   return (
-    <FadeInStagger className="flex flex-col h-full px-4 md:px-0 mt-20 lg:mt-0 pb-10">
+    <FadeInStagger className="flex flex-col h-full px-0 mt-20 lg:mt-0 pb-10">
       {/* Back link */}
       <FadeInItem>
         <Link
@@ -201,10 +201,20 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
             </>
           ) : (
+            // <>
+            //   <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 via-teal-500/20 to-blue-500/10 dark:from-emerald-500/20 dark:via-teal-600/15 dark:to-blue-700/5" />
+            //   <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
+            //   <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
+            // </>
             <>
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 via-teal-500/20 to-blue-500/10 dark:from-emerald-500/20 dark:via-teal-600/15 dark:to-blue-700/5" />
-              <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
+              <Image
+                src={`/api/og?name=${encodeURIComponent(club.name)}&type=club`}
+                alt={club.name}
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 dark:bg-black/50" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
             </>
           )}
           {/* <>
@@ -220,11 +230,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                 <Users className="w-6 h-6 text-white drop-shadow" />
               </div>
             )}
-            <h1
-              className={`text-2xl md:text-3xl font-black tracking-tight drop-shadow-md mb-3 ${
-                club.image ? 'text-white' : 'text-gray-900 dark:text-white'
-              }`}
-            >
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-md mb-3 text-white">
               {club.name}
             </h1>
             <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -433,7 +439,11 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                         {member.user.avatar ? (
                           <Image
                             src={member.user.avatar}
-                            alt={member.user.fullname ?? member.user.username ?? 'Guest'}
+                            alt={
+                              member.user.fullname ??
+                              member.user.username ??
+                              'Guest'
+                            }
                             className="w-full h-full object-cover"
                             width={36}
                             height={36}
@@ -444,7 +454,9 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {member.user.fullname ?? member.user.username ?? 'Guest'}
+                          {member.user.fullname ??
+                            member.user.username ??
+                            'Guest'}
                         </p>
                         <p className="text-xs text-gray-400 dark:text-gray-500">
                           {`Joined ${new Date(member.joinedAt).toLocaleDateString()}`}
