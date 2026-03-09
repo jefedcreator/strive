@@ -46,12 +46,12 @@ export function ActivityList({
           {activity.user.avatar && (
             <AvatarImage
               src={activity.user.avatar}
-              alt={activity.user.fullname ?? 'User'}
+              alt={activity.user.fullname ?? activity.user.username ?? 'Guest'}
               className="object-cover"
             />
           )}
           <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
-            {activity.user.fullname?.[0] ?? 'U'}
+            {activity.user.fullname?.[0] ?? activity.user.username?.[0] ?? 'G'}
           </AvatarFallback>
         </Avatar>
       </div>
@@ -59,7 +59,7 @@ export function ActivityList({
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-            {activity.user.fullname}
+            {activity.user.fullname ?? activity.user.username ?? 'Guest'}
           </p>
           <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">
             {activity.time}
@@ -118,19 +118,19 @@ export function ActivityList({
             {entry.user.avatar && (
               <AvatarImage
                 src={entry.user.avatar}
-                alt={entry.user.fullname ?? 'User'}
+                alt={entry.user.fullname ?? entry.user.username ?? 'Guest'}
                 className="object-cover"
               />
             )}
             <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
-              {entry.user.fullname?.[0] ?? 'U'}
+              {entry.user.fullname?.[0] ?? entry.user.username?.[0] ?? 'G'}
             </AvatarFallback>
           </Avatar>
         </div>
 
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-            {entry.user.fullname}
+            {entry.user.fullname ?? entry.user.username ?? 'Guest'}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
             @{entry.user.username}

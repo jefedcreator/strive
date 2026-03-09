@@ -184,7 +184,9 @@ export function Sidebar() {
               {!isCollapsed && (
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                    {`${user?.fullname?.split(' ')?.[0] ?? 'John'}. ${user?.fullname?.split(' ')?.[1]?.[0] ?? 'Doe'}`}
+                    {user?.fullname
+                      ? `${user.fullname.split(' ')[0]}. ${user.fullname.split(' ')[1]?.[0] ?? ''}`
+                      : 'Guest'}
                   </p>
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
                     Pro Member
@@ -272,7 +274,7 @@ export function Sidebar() {
                     (
                       user?.fullname?.[0] ??
                       user?.name?.[0] ??
-                      'U'
+                      'G'
                     ).toUpperCase()
                   )}
                 </div>
@@ -281,7 +283,9 @@ export function Sidebar() {
                     <DropdownMenuTrigger asChild>
                       <button className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
                         <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                          {`${user?.fullname?.split(' ')?.[0] ?? 'John'}. ${user?.fullname?.split(' ')?.[1]?.[0] ?? 'Doe'}`}
+                          {user?.fullname
+                            ? `${user.fullname.split(' ')[0]}. ${user.fullname.split(' ')[1]?.[0] ?? ''}`
+                            : 'Guest'}
                         </p>
                         <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-semibold">
                           {user ? 'Pro Member' : 'Not logged in'}

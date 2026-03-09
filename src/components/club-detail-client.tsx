@@ -433,7 +433,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                         {member.user.avatar ? (
                           <Image
                             src={member.user.avatar}
-                            alt={member.user.fullname ?? member.user.username}
+                            alt={member.user.fullname ?? member.user.username ?? 'Guest'}
                             className="w-full h-full object-cover"
                             width={36}
                             height={36}
@@ -444,7 +444,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {member.user.fullname ?? member.user.username}
+                          {member.user.fullname ?? member.user.username ?? 'Guest'}
                         </p>
                         <p className="text-xs text-gray-400 dark:text-gray-500">
                           {`Joined ${new Date(member.joinedAt).toLocaleDateString()}`}

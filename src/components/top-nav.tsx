@@ -238,7 +238,7 @@ export function TopNav() {
                   {user?.image?.startsWith('http') ? (
                     <Image
                       src={user.image}
-                      alt={user.name ?? 'User'}
+                      alt={user?.name ?? user?.username ?? 'Guest'}
                       width={40}
                       height={40}
                       className="w-full h-full object-cover rounded-full"
@@ -247,7 +247,8 @@ export function TopNav() {
                     (
                       user?.fullname?.[0] ??
                       user?.name?.[0] ??
-                      'U'
+                      user?.username?.[0] ??
+                      'G'
                     ).toUpperCase()
                   )}
                 </div>
@@ -261,7 +262,7 @@ export function TopNav() {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">
-                    {user?.name ?? user?.username}
+                    {user?.name ?? user?.username ?? 'Guest'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 leading-none">
                     {user?.email}

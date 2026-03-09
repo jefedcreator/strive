@@ -108,14 +108,14 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                           {entry.user.avatar && (
                             <AvatarImage
                               src={entry.user.avatar}
-                              alt={entry.user.fullname ?? 'User avatar'}
+                              alt={entry.user.fullname ?? entry.user.username ?? 'Guest'}
                               className="object-cover"
                             />
                           )}
                           <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
                             {entry.user.fullname?.[0] ??
                               entry.user.username?.[0] ??
-                              'U'}
+                              'G'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col truncate">
@@ -128,7 +128,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                           >
                             {entry.user.fullname ??
                               entry.user.username ??
-                              'Unknown Athlete'}
+                              'Guest'}
                             {isCurrentUser && (
                               <span className="ml-2 text-[10px] uppercase font-black tracking-widest text-primary/60 dark:text-white/40">
                                 (You)
