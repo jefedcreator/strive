@@ -192,12 +192,12 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
           { isPublic: true },
           {
             isPublic: false,
-            entries: {
-              some: {
-                userId: user.id,
-                isActive: true,
-              },
-            },
+            // entries: {
+            //   some: {
+            //     userId: user.id,
+            //     isActive: true,
+            //   },
+            // },
           },
         ],
       };

@@ -27,10 +27,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, token, username, avatar } = await puppeteerSessionManager.submitCode(
-      sessionId,
-      code
-    );
+    const { email, token, username, avatar } =
+      await puppeteerSessionManager.submitCode(sessionId, code);
 
     if (!email || !token || !username) {
       throw new Error(
@@ -42,7 +40,8 @@ export async function POST(req: NextRequest) {
       type: UserType.NRC,
       email,
       token,
-      fullname: username, avatar
+      fullname: username,
+      avatar,
     });
 
     if (!user) {
@@ -50,7 +49,6 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('user', user);
-
 
     // --- Handle Club/Leaderboard Joining ---
     if (clubId && inviteId) {
@@ -65,7 +63,7 @@ export async function POST(req: NextRequest) {
         });
 
         const invite = await db.clubInvites.findUnique({
-          where: { id: inviteId }
+          where: { id: inviteId },
         });
 
         const transactions: any[] = [
@@ -105,7 +103,7 @@ export async function POST(req: NextRequest) {
         });
 
         const invite = await db.leaderboardInvites.findUnique({
-          where: { id: inviteId }
+          where: { id: inviteId },
         });
 
         const transactions: any[] = [
@@ -123,7 +121,9 @@ export async function POST(req: NextRequest) {
 
         // Only delete the invite if it was specifically generated for a single user (userId is not null)
         if (invite?.userId) {
-          transactions.push(db.leaderboardInvites.delete({ where: { id: inviteId } }));
+          transactions.push(
+            db.leaderboardInvites.delete({ where: { id: inviteId } })
+          );
         }
 
         await db.$transaction(transactions);

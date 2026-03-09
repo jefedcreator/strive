@@ -80,7 +80,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
           });
 
           const invite = await db.clubInvites.findUnique({
-            where: { id: inviteId }
+            where: { id: inviteId },
           });
 
           // Join the club
@@ -131,7 +131,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
 
         if (!existingEntry) {
           const invite = await db.leaderboardInvites.findUnique({
-            where: { id: inviteId }
+            where: { id: inviteId },
           });
 
           const transactions: any[] = [
