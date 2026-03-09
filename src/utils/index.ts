@@ -145,6 +145,7 @@ const parseParams = {
 
 const loadParams = createSearchParamsCache(parseParams);
 const loadExploreParams = createSearchParamsCache(exploreParams);
+const loadNotificationParams = createSearchParamsCache(notificationParams);
 
 export {
   cn,
@@ -169,4 +170,5 @@ export {
   notificationParams,
   loadParams,
   loadExploreParams,
+  loadNotificationParams,
 };
