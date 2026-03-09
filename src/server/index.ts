@@ -28,12 +28,8 @@ const fetcher = async (url: string): Promise<Response> => {
     session = await uncachedAuth();
   }
 
-  if (!session?.user?.token) {
-    throw new Error('No authentication token available');
-  }
-
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${session.user.token}` },
+    headers: { Authorization: `Bearer ${session?.user.token}` },
     cache: 'no-store',
   });
 
