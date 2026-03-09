@@ -16,26 +16,31 @@ export async function generateMetadata({
 
   if (!club) {
     return {
-      title: 'Club Not Found | Strive',
+      title: 'Club Not Found',
     };
   }
 
   const clubName = club.name;
   const description = club.description ?? `Check out ${clubName} on Strive!`;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
+  const pageUrl = `${baseUrl}/clubs/${id}`;
   const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(clubName)}&type=club`;
 
-  const rawImage = club.image ?? imageUrl ?? '/favicon.ico';
+  const rawImage = club.image ?? imageUrl;
   const image = rawImage.startsWith('http')
     ? rawImage
     : `${baseUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
 
   return {
-    title: `${clubName} | Strive`,
+    title: clubName,
     description,
+    alternates: {
+      canonical: pageUrl,
+    },
     openGraph: {
       title: clubName,
       description,
+      url: pageUrl,
       images: [
         {
           url: image,

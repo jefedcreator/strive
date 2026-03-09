@@ -1,11 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import api from '@/utils/axios';
-import { type AxiosError } from 'axios';
-import { type PaginatedApiResponse, type ApiResponse } from '@/types'; // Added ApiResponse
-import type { NotificationWithRelations } from '@/types';
 import { typeConfig } from '@/components/top-nav';
+import type { NotificationWithRelations } from '@/types';
+import { type PaginatedApiResponse } from '@/types';
+import api from '@/utils/axios';
+import { useQuery } from '@tanstack/react-query';
 import { Bell } from 'lucide-react';
 import Link from 'next/link';
 

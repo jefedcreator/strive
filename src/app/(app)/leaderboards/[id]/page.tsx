@@ -16,7 +16,7 @@ export async function generateMetadata({
 
   if (!leaderboard) {
     return {
-      title: 'Leaderboard Not Found | Strive',
+      title: 'Leaderboard Not Found',
     };
   }
 
@@ -24,6 +24,7 @@ export async function generateMetadata({
   const description =
     leaderboard.description ?? `Check out ${leaderboardName} on Strive!`;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
+  const pageUrl = `${baseUrl}/leaderboards/${id}`;
   const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(leaderboardName)}&type=leaderboard`;
 
   // Use club image if available, else og template
@@ -33,11 +34,15 @@ export async function generateMetadata({
     : `${baseUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
 
   return {
-    title: `${leaderboardName} | Strive`,
+    title: leaderboardName,
     description,
+    alternates: {
+      canonical: pageUrl,
+    },
     openGraph: {
       title: leaderboardName,
       description,
+      url: pageUrl,
       images: [
         {
           url: image,
