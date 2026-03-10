@@ -1,22 +1,25 @@
 'use client';
 
-import React from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
+import { Field } from '@/primitives';
+import { Input } from '@/primitives/Input';
 import { Modal } from '@/primitives/Modal';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
-import {
-  Copy,
-  Check,
-  X,
-  Users,
-  Trophy,
-  Search,
-  Loader2,
-  UserPlus,
-} from 'lucide-react';
-import { toast } from 'sonner';
 import api from '@/utils/axios';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Check,
+  Copy,
+  Loader2,
+  Search,
+  UserPlus,
+  X
+} from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 /* ------------------------------------------------------------------ */
 /*  Social share icon SVGs (inline, no extra dep)                       */
@@ -83,70 +86,73 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   // Email search state
   const { data: session } = useSession();
-  const [emailInput, setEmailInput] = React.useState('');
+  // const [emailInput, setEmailInput] = React.useState('');
   const [debouncedEmail, setDebouncedEmail] = React.useState('');
-  const [isSearching, setIsSearching] = React.useState(false);
-  const [foundUser, setFoundUser] = React.useState<any>(null);
-  const [isInviting, setIsInviting] = React.useState(false);
+
+  const {
+    register,
+    formState: { errors },
+    reset,
+  } = useForm<{ email: string }>({
+    mode: 'onChange',
+    defaultValues: { email: '' },
+  });
+
+  const emailRegister = register('email', {
+    pattern: {
+      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+      message: 'Invalid email address',
+    },
+  });
+
+  const debouncedSetEmail = useDebounce(setDebouncedEmail, 600);
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    void emailRegister.onChange(e);
+    debouncedSetEmail(e.target.value);
+  };
 
   React.useEffect(() => {
     if (!open) {
-      setEmailInput('');
-      setFoundUser(null);
+      setDebouncedEmail('');
+      reset({ email: '' });
     }
-  }, [open]);
+  }, [open, reset]);
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setDebouncedEmail(emailInput), 600);
-    return () => clearTimeout(timer);
-  }, [emailInput]);
+  const { data: foundUser, isFetching: isSearching } = useQuery({
+    queryKey: ['userSearch', debouncedEmail],
+    queryFn: async () => {
+      const res = await api.get(
+        `/users/search?email=${encodeURIComponent(debouncedEmail)}`,
+        { headers: { Authorization: `Bearer ${session?.user?.token}` } }
+      );
+      return res.data?.data;
+    },
+    enabled: !!debouncedEmail && debouncedEmail.length >= 3 && debouncedEmail.includes('@') && !!session?.user?.token,
+    retry: false,
+  });
 
-  React.useEffect(() => {
-    if (
-      !debouncedEmail ||
-      debouncedEmail.length < 3 ||
-      !debouncedEmail.includes('@')
-    ) {
-      setFoundUser(null);
-      return;
-    }
-    const searchUser = async () => {
-      setIsSearching(true);
-      try {
-        const res = await api.get(
-          `/users/search?email=${encodeURIComponent(debouncedEmail)}`,
-          {
-            headers: { Authorization: `Bearer ${session?.user?.token}` },
-          }
-        );
-        setFoundUser(res.data?.data);
-      } catch (e) {
-        setFoundUser(null);
-      } finally {
-        setIsSearching(false);
-      }
-    };
-    searchUser();
-  }, [debouncedEmail, session?.user?.token]);
-
-  const handleInviteUser = async () => {
-    if (!foundUser || !entityId) return;
-    setIsInviting(true);
-    try {
-      await api.post(
+  const inviteMutation = useMutation({
+    mutationFn: async () => {
+      if (!foundUser || !entityId) throw new Error('Missing data');
+      return api.post(
         `/${variant}s/${entityId}/invites`,
         { userId: foundUser.id, isExternal: foundUser.isExternal },
         { headers: { Authorization: `Bearer ${session?.user?.token}` } }
       );
-      toast.success(`Invite sent to ${foundUser.fullname}!`);
-      setEmailInput('');
-      setFoundUser(null);
-    } catch (error: any) {
+    },
+    onSuccess: () => {
+      toast.success(`Invite sent to ${foundUser?.fullname}!`);
+      setDebouncedEmail('');
+      reset({ email: '' });
+    },
+    onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to send invite');
-    } finally {
-      setIsInviting(false);
     }
-  };
+  });
+
+  const handleInviteUser = () => inviteMutation.mutate();
+  const isInviting = inviteMutation.isPending;
 
   const handleCopy = () => {
     navigator.clipboard
@@ -276,20 +282,27 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
                 {/* ── Invite by Email ── */}
                 <div className="px-5 pb-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="email"
-                      placeholder="Invite by email address..."
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      className="w-full bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] focus:border-primary/50 dark:focus:border-primary/50 text-[13px] rounded-lg pl-9 pr-10 py-2.5 outline-none transition-all placeholder:text-gray-400 dark:text-white"
-                    />
-                    {isSearching && (
-                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
-                    )}
-                  </div>
-
+                  <Field 
+                    id="email" 
+                    label="Email Address" 
+                    className="hidden" 
+                    formClassName="!gap-0"
+                  >
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        {...emailRegister}
+                        onChange={handleEmailChange}
+                        id="email"
+                        type="email"
+                        placeholder="Invite by email address..."
+                        className="w-full bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] focus:border-primary/50 dark:focus:border-primary/50 text-[13px] rounded-lg pl-9 pr-10 py-2.5 outline-none transition-all placeholder:text-gray-400 dark:text-white"
+                      />
+                      {isSearching && (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
+                      )}
+                    </div>
+                  </Field>
                   <AnimatePresence>
                     {foundUser && !isSearching && (
                       <motion.div

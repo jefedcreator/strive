@@ -35,9 +35,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
       const currentUser = request.user!;
       const { id: clubId = '' } = params;
       const { userId: userToInviteId, isExternal } =
-        request.validatedData as any;
-
-      console.log('userToInviteId', userToInviteId);
+        request.validatedData!;
 
       const club = await db.club.findUnique({
         where: { id: clubId },
@@ -71,12 +69,12 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           });
 
           const appUrl =
-            process.env.NEXT_PUBLIC_APP_URL || 'https://strive.run';
+            process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
           const inviteLink = `${appUrl}/clubs/${clubId}/invites/${invite.id}`;
 
           try {
             await resend.emails.send({
-              from: 'Strive <invites@strive.run>',
+              from: 'Strive <invites@usestrive.run>',
               to: userToInviteId, // It's an email in this case
               subject: `You've been invited to join ${club.name} on Strive`,
               react: InviteEmail({
@@ -118,9 +116,9 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           },
         });
 
-        // if (existingMembership) {
-        //   throw new ConflictException('User is already a member of this club');
-        // }
+        if (existingMembership) {
+          throw new ConflictException('User is already a member of this club');
+        }
 
         const existingInvite = await db.clubInvites.findFirst({
           where: {
@@ -155,12 +153,12 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           }),
         ]);
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://strive.run';
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
         const inviteLink = `${appUrl}/clubs/${clubId}/invites/${invite[0].id}`;
 
         try {
           await resend.emails.send({
-            from: 'Strive <invites@strive.run>',
+            from: 'Strive <invites@usestrive.run>',
             to: userToInvite.email,
             subject: `You've been invited to join ${club.name} on Strive`,
             react: InviteEmail({

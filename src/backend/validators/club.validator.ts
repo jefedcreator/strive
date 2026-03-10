@@ -68,6 +68,14 @@ export const clubInviteValidatorSchema = z
   .object({
     userId: mongoIdValidator.optional(),
   })
+  .extend({
+    isExternal: z
+      .preprocess((val) => {
+        if (typeof val === 'string') return val === 'true';
+        return val;
+      }, z.boolean())
+      .optional(),
+  })
   .strict();
 
 export const acceptInviteValidatorSchema = z

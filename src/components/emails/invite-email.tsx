@@ -28,7 +28,7 @@ export const InviteEmail = ({
   invitedByEmail,
   entityName = 'a group',
   entityType = 'club',
-  inviteLink = 'https://strive.run',
+  inviteLink = 'https://usestrive.run',
   invitedUserAvatar,
 }: InviteEmailProps) => {
   const previewText = `You've been invited to join ${entityName} on Strive!`;

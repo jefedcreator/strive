@@ -69,12 +69,12 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           });
 
           const appUrl =
-            process.env.NEXT_PUBLIC_APP_URL || 'https://strive.run';
+            process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
           const inviteLink = `${appUrl}/leaderboards/${leaderboardId}/invites/${invite.id}`;
 
           try {
             await resend.emails.send({
-              from: 'Strive <invites@strive.run>',
+              from: 'Strive <invites@usestrive.run>',
               to: userToInviteId, // It's an email in this case
               subject: `You've been invited to join ${leaderboard.name} on Strive`,
               react: InviteEmail({
@@ -155,12 +155,12 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           }),
         ]);
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://strive.run';
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
         const inviteLink = `${appUrl}/leaderboards/${leaderboardId}/invites/${invite[0].id}`;
 
         try {
           await resend.emails.send({
-            from: 'Strive <invites@strive.run>',
+            from: 'Strive <invites@usestrive.run>',
             to: userToInvite.email,
             subject: `You've been invited to join ${leaderboard.name} on Strive`,
             react: InviteEmail({

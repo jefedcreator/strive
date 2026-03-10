@@ -4,7 +4,7 @@ export const useDebounce = (
     callback: (value: string) => void,
     delay = 500,
 ) => {
-    const timeoutRef = useRef<NodeJS.Timeout>();
+    const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
     const debouncedSearch = (value: string) => {
         if (timeoutRef.current) {
