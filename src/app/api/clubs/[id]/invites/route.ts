@@ -34,8 +34,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
     try {
       const currentUser = request.user!;
       const { id: clubId = '' } = params;
-      const { userId: userToInviteId, isExternal } =
-        request.validatedData!;
+      const { userId: userToInviteId, isExternal } = request.validatedData!;
 
       const club = await db.club.findUnique({
         where: { id: clubId },
@@ -153,7 +152,8 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           }),
         ]);
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
+        const appUrl =
+          process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
         const inviteLink = `${appUrl}/clubs/${clubId}/invites/${invite[0].id}`;
 
         try {

@@ -1,28 +1,25 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
-export const useDebounce = (
-    callback: (value: string) => void,
-    delay = 500,
-) => {
-    const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+export const useDebounce = (callback: (value: string) => void, delay = 500) => {
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-    const debouncedSearch = (value: string) => {
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
+  const debouncedSearch = (value: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
 
-        timeoutRef.current = setTimeout(() => {
-            callback(value);
-        }, delay);
+    timeoutRef.current = setTimeout(() => {
+      callback(value);
+    }, delay);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
+  }, []);
 
-    useEffect(() => {
-        return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-        };
-    }, []);
-
-    return debouncedSearch;
+  return debouncedSearch;
 };

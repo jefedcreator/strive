@@ -155,7 +155,8 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           }),
         ]);
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
+        const appUrl =
+          process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
         const inviteLink = `${appUrl}/leaderboards/${leaderboardId}/invites/${invite[0].id}`;
 
         try {

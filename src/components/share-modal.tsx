@@ -7,14 +7,7 @@ import { Modal } from '@/primitives/Modal';
 import api from '@/utils/axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Check,
-  Copy,
-  Loader2,
-  Search,
-  UserPlus,
-  X
-} from 'lucide-react';
+import { Check, Copy, Loader2, Search, UserPlus, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import React from 'react';
@@ -83,10 +76,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   subtitle,
 }) => {
   const [copied, setCopied] = React.useState(false);
-
-  // Email search state
   const { data: session } = useSession();
-  // const [emailInput, setEmailInput] = React.useState('');
   const [debouncedEmail, setDebouncedEmail] = React.useState('');
 
   const {
@@ -128,7 +118,11 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       );
       return res.data?.data;
     },
-    enabled: !!debouncedEmail && debouncedEmail.length >= 3 && debouncedEmail.includes('@') && !!session?.user?.token,
+    enabled:
+      !!debouncedEmail &&
+      debouncedEmail.length >= 3 &&
+      debouncedEmail.includes('@') &&
+      !!session?.user?.token,
     retry: false,
   });
 
@@ -148,7 +142,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to send invite');
-    }
+    },
   });
 
   const handleInviteUser = () => inviteMutation.mutate();
@@ -282,10 +276,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
                 {/* ── Invite by Email ── */}
                 <div className="px-5 pb-4">
-                  <Field 
-                    id="email" 
-                    label="Email Address" 
-                    className="hidden" 
+                  <Field
+                    id="email"
+                    label="Email Address"
+                    className="hidden"
                     formClassName="!gap-0"
                   >
                     <div className="relative">
