@@ -24,7 +24,7 @@ import {
   Settings,
   Trophy,
   Users,
-  X
+  X,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';

@@ -18,6 +18,10 @@ import {
   NotFoundException,
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
+import InviteEmail from '@/components/emails/invite-email';
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
 
 /**
  * @pathParams paramValidator
@@ -30,7 +34,8 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
     try {
       const currentUser = request.user!;
       const { id: clubId = '' } = params;
-      const { userId: userToInviteId } = request.validatedData!;
+      const { userId: userToInviteId, isExternal } =
+        request.validatedData as any;
 
       console.log('userToInviteId', userToInviteId);
 
@@ -54,6 +59,48 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
       }
 
       if (userToInviteId) {
+        if (isExternal) {
+          // Handle external email invite
+          const invite = await db.clubInvites.create({
+            data: {
+              clubId,
+              invitedBy: currentUser.id,
+              isRequest: true,
+              // store the email somewhere if possible, here we rely on the email variable for Resend
+            },
+          });
+
+          const appUrl =
+            process.env.NEXT_PUBLIC_APP_URL || 'https://strive.run';
+          const inviteLink = `${appUrl}/clubs/${clubId}/invites/${invite.id}`;
+
+          try {
+            await resend.emails.send({
+              from: 'Strive <invites@strive.run>',
+              to: userToInviteId, // It's an email in this case
+              subject: `You've been invited to join ${club.name} on Strive`,
+              react: InviteEmail({
+                invitedByUsername: currentUser.fullname,
+                invitedByEmail: currentUser.email,
+                entityName: club.name,
+                entityType: 'club',
+                inviteLink: inviteLink,
+                invitedUserAvatar: currentUser.avatar || club.image,
+              }),
+            });
+          } catch (emailError) {
+            console.error('Failed to send invite email:', emailError);
+          }
+
+          const response: ApiResponse<{ id: string }> = {
+            status: 201,
+            message: 'External email invite sent successfully',
+            data: { id: invite.id },
+          };
+
+          return NextResponse.json(response, { status: 201 });
+        }
+
         const userToInvite = await db.user.findUnique({
           where: { id: userToInviteId },
         });
@@ -71,9 +118,9 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           },
         });
 
-        if (existingMembership) {
-          throw new ConflictException('User is already a member of this club');
-        }
+        // if (existingMembership) {
+        //   throw new ConflictException('User is already a member of this club');
+        // }
 
         const existingInvite = await db.clubInvites.findFirst({
           where: {
@@ -107,6 +154,27 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
             },
           }),
         ]);
+
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://strive.run';
+        const inviteLink = `${appUrl}/clubs/${clubId}/invites/${invite[0].id}`;
+
+        try {
+          await resend.emails.send({
+            from: 'Strive <invites@strive.run>',
+            to: userToInvite.email,
+            subject: `You've been invited to join ${club.name} on Strive`,
+            react: InviteEmail({
+              invitedByUsername: currentUser.fullname,
+              invitedByEmail: currentUser.email,
+              entityName: club.name,
+              entityType: 'club',
+              inviteLink: inviteLink,
+              invitedUserAvatar: currentUser.avatar || club.image,
+            }),
+          });
+        } catch (emailError) {
+          console.error('Failed to send invite email:', emailError);
+        }
 
         const response: ApiResponse<{ id: string }> = {
           status: 201,

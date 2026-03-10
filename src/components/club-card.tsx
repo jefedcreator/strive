@@ -236,6 +236,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
       <ShareModal
         open={isShareModalOpen}
         onOpenChange={setIsShareModalOpen}
+        entityId={club.id}
         name={club.name}
         inviteUrl={shareInviteUrl}
         image={club.image}

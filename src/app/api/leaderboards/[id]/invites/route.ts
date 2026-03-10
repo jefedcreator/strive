@@ -16,6 +16,10 @@ import {
   NotFoundException,
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
+import InviteEmail from '@/components/emails/invite-email';
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
 
 /**
  * @pathParams paramValidator
@@ -28,7 +32,8 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
     try {
       const currentUser = request.user!;
       const { id: leaderboardId = '' } = params;
-      const { userId: userToInviteId } = request.validatedData!;
+      const { userId: userToInviteId, isExternal } =
+        request.validatedData as any;
 
       const leaderboard = await db.leaderboard.findUnique({
         where: { id: leaderboardId },
@@ -52,6 +57,48 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
       }
 
       if (userToInviteId) {
+        if (isExternal) {
+          // Handle external email invite
+          const invite = await db.leaderboardInvites.create({
+            data: {
+              leaderboardId,
+              invitedBy: currentUser.id,
+              isRequest: true,
+              // store the email somewhere if possible, here we rely on the email variable for Resend
+            },
+          });
+
+          const appUrl =
+            process.env.NEXT_PUBLIC_APP_URL || 'https://strive.run';
+          const inviteLink = `${appUrl}/leaderboards/${leaderboardId}/invites/${invite.id}`;
+
+          try {
+            await resend.emails.send({
+              from: 'Strive <invites@strive.run>',
+              to: userToInviteId, // It's an email in this case
+              subject: `You've been invited to join ${leaderboard.name} on Strive`,
+              react: InviteEmail({
+                invitedByUsername: currentUser.fullname,
+                invitedByEmail: currentUser.email,
+                entityName: leaderboard.name,
+                entityType: 'leaderboard',
+                inviteLink: inviteLink,
+                invitedUserAvatar: currentUser.avatar,
+              }),
+            });
+          } catch (emailError) {
+            console.error('Failed to send invite email:', emailError);
+          }
+
+          const response: ApiResponse<{ id: string }> = {
+            status: 201,
+            message: 'External email invite sent successfully',
+            data: { id: invite.id },
+          };
+
+          return NextResponse.json(response, { status: 201 });
+        }
+
         const userToInvite = await db.user.findUnique({
           where: { id: userToInviteId },
         });
@@ -107,6 +154,27 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
             },
           }),
         ]);
+
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://strive.run';
+        const inviteLink = `${appUrl}/leaderboards/${leaderboardId}/invites/${invite[0].id}`;
+
+        try {
+          await resend.emails.send({
+            from: 'Strive <invites@strive.run>',
+            to: userToInvite.email,
+            subject: `You've been invited to join ${leaderboard.name} on Strive`,
+            react: InviteEmail({
+              invitedByUsername: currentUser.fullname,
+              invitedByEmail: currentUser.email,
+              entityName: leaderboard.name,
+              entityType: 'leaderboard',
+              inviteLink: inviteLink,
+              invitedUserAvatar: currentUser.avatar,
+            }),
+          });
+        } catch (emailError) {
+          console.error('Failed to send invite email:', emailError);
+        }
 
         const response: ApiResponse<{ id: string }> = {
           status: 201,

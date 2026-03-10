@@ -4,8 +4,19 @@ import React from 'react';
 import { Modal } from '@/primitives/Modal';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Copy, Check, X, Users, Trophy } from 'lucide-react';
+import {
+  Copy,
+  Check,
+  X,
+  Users,
+  Trophy,
+  Search,
+  Loader2,
+  UserPlus,
+} from 'lucide-react';
 import { toast } from 'sonner';
+import api from '@/utils/axios';
+import { useSession } from 'next-auth/react';
 
 /* ------------------------------------------------------------------ */
 /*  Social share icon SVGs (inline, no extra dep)                       */
@@ -37,6 +48,8 @@ const FacebookIcon = () => (
 export interface ShareModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** The id of the entity to invite to */
+  entityId?: string;
   /** Display name of the club / leaderboard */
   name: string;
   /** The invite URL to share */
@@ -58,6 +71,7 @@ export interface ShareModalProps {
 export const ShareModal: React.FC<ShareModalProps> = ({
   open,
   onOpenChange,
+  entityId,
   name,
   inviteUrl,
   image,
@@ -66,6 +80,73 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   subtitle,
 }) => {
   const [copied, setCopied] = React.useState(false);
+
+  // Email search state
+  const { data: session } = useSession();
+  const [emailInput, setEmailInput] = React.useState('');
+  const [debouncedEmail, setDebouncedEmail] = React.useState('');
+  const [isSearching, setIsSearching] = React.useState(false);
+  const [foundUser, setFoundUser] = React.useState<any>(null);
+  const [isInviting, setIsInviting] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!open) {
+      setEmailInput('');
+      setFoundUser(null);
+    }
+  }, [open]);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedEmail(emailInput), 600);
+    return () => clearTimeout(timer);
+  }, [emailInput]);
+
+  React.useEffect(() => {
+    if (
+      !debouncedEmail ||
+      debouncedEmail.length < 3 ||
+      !debouncedEmail.includes('@')
+    ) {
+      setFoundUser(null);
+      return;
+    }
+    const searchUser = async () => {
+      setIsSearching(true);
+      try {
+        const res = await api.get(
+          `/users/search?email=${encodeURIComponent(debouncedEmail)}`,
+          {
+            headers: { Authorization: `Bearer ${session?.user?.token}` },
+          }
+        );
+        setFoundUser(res.data?.data);
+      } catch (e) {
+        setFoundUser(null);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+    searchUser();
+  }, [debouncedEmail, session?.user?.token]);
+
+  const handleInviteUser = async () => {
+    if (!foundUser || !entityId) return;
+    setIsInviting(true);
+    try {
+      await api.post(
+        `/${variant}s/${entityId}/invites`,
+        { userId: foundUser.id, isExternal: foundUser.isExternal },
+        { headers: { Authorization: `Bearer ${session?.user?.token}` } }
+      );
+      toast.success(`Invite sent to ${foundUser.fullname}!`);
+      setEmailInput('');
+      setFoundUser(null);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to send invite');
+    } finally {
+      setIsInviting(false);
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard
@@ -191,6 +272,75 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                       )}
                     </span>
                   </button>
+                </div>
+
+                {/* ── Invite by Email ── */}
+                <div className="px-5 pb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="email"
+                      placeholder="Invite by email address..."
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      className="w-full bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] focus:border-primary/50 dark:focus:border-primary/50 text-[13px] rounded-lg pl-9 pr-10 py-2.5 outline-none transition-all placeholder:text-gray-400 dark:text-white"
+                    />
+                    {isSearching && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
+                    )}
+                  </div>
+
+                  <AnimatePresence>
+                    {foundUser && !isSearching && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex items-center justify-between mt-3 p-2 rounded-lg border border-primary/20 bg-primary/5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 shrink-0">
+                              {foundUser.avatar ? (
+                                <Image
+                                  src={foundUser.avatar}
+                                  alt={foundUser.fullname}
+                                  width={32}
+                                  height={32}
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold uppercase">
+                                  {foundUser.fullname.charAt(0)}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[13px] font-semibold text-gray-900 dark:text-white leading-tight">
+                                {foundUser.fullname}
+                              </span>
+                              {foundUser.username && (
+                                <span className="text-[11px] text-gray-500">
+                                  @{foundUser.username}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={handleInviteUser}
+                            disabled={isInviting}
+                            className="bg-primary text-white text-[12px] font-semibold px-3 py-1.5 rounded-md hover:bg-opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-1"
+                          >
+                            {isInviting ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <UserPlus className="w-3 h-3" />
+                            )}
+                            Invite
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 {/* ── Divider ── */}

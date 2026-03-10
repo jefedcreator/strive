@@ -249,6 +249,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
       <ShareModal
         open={isShareModalOpen}
         onOpenChange={setIsShareModalOpen}
+        entityId={data.id}
         name={data.name}
         inviteUrl={shareInviteUrl}
         isPublic={data.isPublic}
