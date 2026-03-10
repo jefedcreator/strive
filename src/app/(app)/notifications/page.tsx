@@ -5,7 +5,9 @@ import type { PageProps } from '@/types';
 import { loadNotificationParams } from '@/utils';
 
 export default async function NotificationsPage({ searchParams }: PageProps) {
-  const { type, query, page } = loadNotificationParams.parse(await searchParams);
+  const { type, query, page } = loadNotificationParams.parse(
+    await searchParams
+  );
 
   const initialData = await getNotifications({
     type: type ?? undefined,

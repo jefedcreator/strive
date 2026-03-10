@@ -26,7 +26,7 @@ const fetcher = async (url: string): Promise<Response> => {
   let session = await uncachedAuth();
 
   if (!session?.user?.token) {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     session = await uncachedAuth();
   }
 
@@ -38,6 +38,7 @@ const fetcher = async (url: string): Promise<Response> => {
   if (res.status === 401) {
     // Log warning but don't force logout from server side as it can cause loops
     console.warn(`Internal fetch 401: ${url}`);
+    await signOut({ redirectTo: '/login' });
   }
 
   return res;

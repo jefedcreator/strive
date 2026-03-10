@@ -24,10 +24,13 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
   initialData: notificationsResponse,
   currentFilters,
 }) => {
-  const [{ type, query, page }, setStates] = useQueryStates(notificationParams, {
-    shallow: false,
-    throttleMs: 1000,
-  });
+  const [{ type, query, page }, setStates] = useQueryStates(
+    notificationParams,
+    {
+      shallow: false,
+      throttleMs: 1000,
+    }
+  );
   const [refreshKey, setRefreshKey] = useState(0);
 
   const { items, ref, hasNextPage } = useInfiniteScroll({

@@ -5,10 +5,7 @@ import { ClubCard } from '@/components/club-card';
 import { LeaderboardCard } from '@/components/leaderboard-card';
 import { useInfiniteScroll } from '@/hooks/useinfiniteScroll';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/primitives/Tabs';
-import {
-  type ExploreListItem,
-  type PaginatedApiResponse,
-} from '@/types';
+import { type ExploreListItem, type PaginatedApiResponse } from '@/types';
 import { exploreParams } from '@/utils';
 import { ArrowLeft, Loader2, Search, SearchX } from 'lucide-react';
 import Link from 'next/link';
@@ -28,19 +25,15 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
   initialData,
   currentFilters,
 }) => {
-  const [{ query, page, type }, setStates] = useQueryStates(
-    exploreParams,
-    {
-      shallow: false,
-      throttleMs: 1000,
-    }
-  );
+  const [{ query, page, type }, setStates] = useQueryStates(exploreParams, {
+    shallow: false,
+    throttleMs: 1000,
+  });
 
   const tab = type ?? 'all';
 
   const isNavigating =
-    query !== currentFilters.query ||
-    type !== currentFilters.type;
+    query !== currentFilters.query || type !== currentFilters.type;
 
   const isPaging = !isNavigating && page !== currentFilters.page;
 
@@ -87,7 +80,8 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
               Explore Strive
             </h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base mt-1">
-              Discover new clubs and competitive leaderboards across the platform.
+              Discover new clubs and competitive leaderboards across the
+              platform.
             </p>
           </div>
         </div>
@@ -113,8 +107,7 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
         value={tab}
         className="flex flex-col w-full min-w-0"
         onValueChange={(value) => {
-          if (value === 'clubs')
-            void setStates({ type: 'clubs', page: 1 });
+          if (value === 'clubs') void setStates({ type: 'clubs', page: 1 });
           else if (value === 'leaderboards')
             void setStates({ type: 'leaderboards', page: 1 });
           else void setStates({ type: null, page: 1 });

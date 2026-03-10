@@ -12,13 +12,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: 'Explore',
-    description: 'Discover the most active clubs and competitive leaderboards on Strive.',
+    description:
+      'Discover the most active clubs and competitive leaderboards on Strive.',
     alternates: {
       canonical: pageUrl,
     },
     openGraph: {
       title: 'Explore | Strive',
-      description: 'Discover the most active clubs and competitive leaderboards on Strive.',
+      description:
+        'Discover the most active clubs and competitive leaderboards on Strive.',
       url: pageUrl,
       siteName: 'Strive',
       images: [
@@ -34,7 +36,8 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
       title: 'Explore | Strive',
-      description: 'Discover the most active clubs and competitive leaderboards on Strive.',
+      description:
+        'Discover the most active clubs and competitive leaderboards on Strive.',
       images: [imageUrl],
     },
   };

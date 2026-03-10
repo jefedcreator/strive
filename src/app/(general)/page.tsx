@@ -157,7 +157,7 @@ function Hero({
             className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 border border-gray-200 dark:border-white/10 text-lg font-bold rounded-full text-gray-900 dark:text-white bg-white/50 dark:bg-white/5 backdrop-blur-sm hover:border-gray-300 dark:hover:border-white/20 transition-all focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-white/10"
             href="/explore"
           >
-            Explore 
+            Explore
           </motion.a>
         </motion.div>
 

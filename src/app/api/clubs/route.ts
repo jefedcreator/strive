@@ -125,9 +125,7 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
       const user = request.user!;
 
       const where: Prisma.ClubWhereInput = {
-        OR: [
-          { isPublic: true },
-        ],
+        OR: [{ isPublic: true }],
       };
 
       if (user?.id) {
@@ -176,10 +174,10 @@ export const GET = withMiddleware<ClubQueryValidatorSchema>(
         // Include only the current user's membership to determine isMember
         members: user?.id
           ? {
-            where: { userId: user.id, isActive: true },
-            select: { id: true },
-            take: 1,
-          }
+              where: { userId: user.id, isActive: true },
+              select: { id: true },
+              take: 1,
+            }
           : false,
       };
 
