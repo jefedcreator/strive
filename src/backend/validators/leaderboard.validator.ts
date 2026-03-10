@@ -90,7 +90,16 @@ export const leaderboardQueryValidatorSchema = baseQueryValidatorSchema
 
 export const leaderboardInviteValidatorSchema = z
   .object({
-    userId: mongoIdValidator,
+    userId: mongoIdValidator.optional(),
+    email: z.string().email().optional(),
+  })
+  .extend({
+    isExternal: z
+      .boolean({
+        invalid_type_error: 'isExternal must be a boolean value',
+      })
+      .default(false)
+      .optional(),
   })
   .strict();
 

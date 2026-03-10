@@ -1,5 +1,6 @@
 'use client';
 
+import type { ClubInviteValidatorSchema } from '@/backend/validators/club.validator';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Field } from '@/primitives';
 import { Input } from '@/primitives/Input';
@@ -129,9 +130,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const inviteMutation = useMutation({
     mutationFn: async () => {
       if (!foundUser || !entityId) throw new Error('Missing data');
+      const body: ClubInviteValidatorSchema = {
+        userId: foundUser.id,
+        isExternal: foundUser.isExternal,
+      };
+      if (foundUser.isExternal) {
+        body.email = debouncedEmail;
+        delete body.userId;
+      }
       return api.post(
         `/${variant}s/${entityId}/invites`,
-        { userId: foundUser.id, isExternal: foundUser.isExternal },
+        body,
         { headers: { Authorization: `Bearer ${session?.user?.token}` } }
       );
     },

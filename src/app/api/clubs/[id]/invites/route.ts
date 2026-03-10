@@ -34,7 +34,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
     try {
       const currentUser = request.user!;
       const { id: clubId = '' } = params;
-      const { userId: userToInviteId, isExternal } = request.validatedData!;
+      const { userId: userToInviteId, isExternal, email } = request.validatedData!;
 
       const club = await db.club.findUnique({
         where: { id: clubId },
@@ -55,7 +55,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
         throw new ForbiddenException('Only club members can invite users');
       }
 
-      if (userToInviteId) {
+      if (email) {
         if (isExternal) {
           // Handle external email invite
           const invite = await db.clubInvites.create({
@@ -74,7 +74,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           try {
             await resend.emails.send({
               from: 'Strive <invites@usestrive.run>',
-              to: userToInviteId, // It's an email in this case
+              to: email, // It's an email in this case
               subject: `You've been invited to join ${club.name} on Strive`,
               react: InviteEmail({
                 invitedByUsername: currentUser.fullname,
@@ -109,7 +109,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
         const existingMembership = await db.userClub.findUnique({
           where: {
             userId_clubId: {
-              userId: userToInviteId,
+              userId: userToInviteId!,
               clubId,
             },
           },
@@ -121,7 +121,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
 
         const existingInvite = await db.clubInvites.findFirst({
           where: {
-            userId: userToInviteId,
+            userId: userToInviteId!,
             clubId,
           },
         });
@@ -136,7 +136,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
         const invite = await db.$transaction([
           db.clubInvites.create({
             data: {
-              userId: userToInviteId,
+              userId: userToInviteId!,
               clubId,
               invitedBy: currentUser.id,
               isRequest: true,
@@ -144,7 +144,7 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           }),
           db.notification.create({
             data: {
-              userId: userToInviteId,
+              userId: userToInviteId!,
               message: `Request sent to ${userToInvite.fullname} to join your club ${club.name}`,
               type: 'club',
               clubId: clubId,

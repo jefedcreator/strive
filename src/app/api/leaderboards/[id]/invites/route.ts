@@ -32,8 +32,8 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
     try {
       const currentUser = request.user!;
       const { id: leaderboardId = '' } = params;
-      const { userId: userToInviteId, isExternal } =
-        request.validatedData as any;
+      const { userId: userToInviteId, isExternal, email } =
+        request.validatedData!;
 
       const leaderboard = await db.leaderboard.findUnique({
         where: { id: leaderboardId },
@@ -56,7 +56,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
         );
       }
 
-      if (userToInviteId) {
+      if (email) {
         if (isExternal) {
           // Handle external email invite
           const invite = await db.leaderboardInvites.create({
@@ -75,7 +75,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           try {
             await resend.emails.send({
               from: 'Strive <invites@usestrive.run>',
-              to: userToInviteId, // It's an email in this case
+              to: email, // It's an email in this case
               subject: `You've been invited to join ${leaderboard.name} on Strive`,
               react: InviteEmail({
                 invitedByUsername: currentUser.fullname,
@@ -110,7 +110,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
         const existingMembership = await db.userLeaderboard.findUnique({
           where: {
             userId_leaderboardId: {
-              userId: userToInviteId,
+              userId: userToInviteId!,
               leaderboardId,
             },
           },
@@ -124,7 +124,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
 
         const existingInvite = await db.leaderboardInvites.findFirst({
           where: {
-            userId: userToInviteId,
+            userId: userToInviteId!,
             leaderboardId,
           },
         });
@@ -139,7 +139,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
         const invite = await db.$transaction([
           db.leaderboardInvites.create({
             data: {
-              userId: userToInviteId,
+              userId: userToInviteId!,
               leaderboardId,
               invitedBy: currentUser.id,
               isRequest: true,
@@ -147,7 +147,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           }),
           db.notification.create({
             data: {
-              userId: userToInviteId,
+              userId: userToInviteId!,
               message: `Request sent to ${userToInvite.fullname} to join your leaderboard ${leaderboard.name}`,
               type: 'leaderboard',
               leaderboardId,
@@ -169,7 +169,7 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
               invitedByEmail: currentUser.email,
               entityName: leaderboard.name,
               entityType: 'leaderboard',
-              inviteLink: inviteLink,
+              inviteLink,
               invitedUserAvatar: currentUser.avatar,
             }),
           });
