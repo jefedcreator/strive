@@ -34,6 +34,7 @@ jobs:
           BRIGHTDATA_PASSWORD="${{ secrets.BRIGHTDATA_PASSWORD }}"
           NEXT_PUBLIC_APP_URL="${{ secrets.NEXT_PUBLIC_APP_URL }}"
           NEXTAUTH_URL="${{ secrets.NEXTAUTH_URL }}"
+          RESEND_API_KEY="${{ secrets.RESEND_API_KEY }}"
           NODE_ENV=production
           PORT=3000
           DISPLAY=:99
