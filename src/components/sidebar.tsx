@@ -1,30 +1,4 @@
 'use client';
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/utils';
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipProvider,
-  TooltipContent,
-} from '@/primitives/tooltip';
-import {
-  LayoutDashboard,
-  Search,
-  Users,
-  Trophy,
-  Bell,
-  Settings,
-  HelpCircle,
-  Menu,
-  ChevronRight,
-  ChevronLeft,
-  X,
-} from 'lucide-react';
-import ToggleTheme from './toggle-theme';
-import { signOut, useSession } from 'next-auth/react';
-import Image from 'next/image';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,8 +7,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
-import { useTheme } from 'next-themes';
 import Logo from '@/primitives/logo';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/primitives/tooltip';
+import { cn } from '@/utils';
+import {
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  Menu,
+  Settings,
+  Trophy,
+  Users,
+  X
+} from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
+import { useTheme } from 'next-themes';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import ToggleTheme from './toggle-theme';
 
 interface NavItemProps {
   name: string;
@@ -45,7 +43,7 @@ interface NavItemProps {
 
 const platformNavigation: NavItemProps[] = [
   { name: 'Home', href: '/home', icon: LayoutDashboard },
-  { name: 'Explore', href: '/explore', icon: Search },
+  // { name: 'Explore', href: '/explore', icon: Search },
   { name: 'Clubs', href: '/clubs', icon: Users },
   { name: 'Leaderboards', href: '/leaderboards', icon: Trophy },
   { name: 'Notifications', href: '/notifications', icon: Bell },
