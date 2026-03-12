@@ -33,6 +33,11 @@ export const typeConfig = {
     iconBg: 'bg-orange-100 dark:bg-orange-900/30',
     iconText: 'text-orange-600 dark:text-orange-400',
   },
+  reward: {
+    icon: Trophy,
+    iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    iconText: 'text-yellow-600 dark:text-yellow-400',
+  },
 } as const;
 
 function timeAgo(date: Date | string) {

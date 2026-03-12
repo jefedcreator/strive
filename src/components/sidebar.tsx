@@ -16,6 +16,7 @@ import {
 } from '@/primitives/tooltip';
 import { cn } from '@/utils';
 import {
+  Award,
   Bell,
   ChevronLeft,
   ChevronRight,
@@ -46,6 +47,7 @@ const platformNavigation: NavItemProps[] = [
   // { name: 'Explore', href: '/explore', icon: Search },
   { name: 'Clubs', href: '/clubs', icon: Users },
   { name: 'Leaderboards', href: '/leaderboards', icon: Trophy },
+  { name: 'Rewards', href: '/rewards', icon: Award },
   { name: 'Notifications', href: '/notifications', icon: Bell },
 ];
 

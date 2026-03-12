@@ -33,6 +33,12 @@ const typeConfig: Record<
     iconText: 'text-orange-600 dark:text-orange-400',
     label: 'Leaderboard',
   },
+  reward: {
+    icon: Trophy,
+    iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    iconText: 'text-yellow-600 dark:text-yellow-400',
+    label: 'Reward',
+  },
 };
 
 function formatTimeAgo(date: Date | string): string {

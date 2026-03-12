@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/primitives/Popover';
 import { type ClubListItem } from '@/types';
 import * as Switch from '@radix-ui/react-switch';
 import { format } from 'date-fns';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Controller,
   type Control,
@@ -56,6 +56,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   clubs,
   // onThumbnailChange,
 }) => {
+  const [isChallenge, setIsChallenge] = useState(!control._defaultValues.clubId);
   // const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,12 +89,12 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             <div>
               <Modal.Title className="text-xl font-bold text-gray-900 dark:text-white">
                 {type === 'create'
-                  ? 'Create New Leaderboard'
-                  : 'Edit Leaderboard'}
+                  ? `Create New ${isChallenge ? 'Challenge' : 'Leaderboard'}`
+                  : `Edit ${isChallenge ? 'Challenge' : 'Leaderboard'}`}
               </Modal.Title>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Fill in the details to {type === 'create' ? 'launch' : 'update'}{' '}
-                your leaderboard.
+                your {isChallenge ? 'challenge' : 'leaderboard'}.
               </p>
             </div>
             <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
@@ -156,7 +157,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 <Input
                   {...register('name')}
                   id="name"
-                  placeholder="e.g. Summer Sprint Challenge"
+                  placeholder={`e.g. Summer Sprint ${isChallenge ? 'Challenge' : 'Leaderboard'}`}
                 />
               </Field>
 
@@ -168,7 +169,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               >
                 <div className="relative">
                   <select
-                    {...register('clubId')}
+                    {...register('clubId', {
+                      onChange: (e) => setIsChallenge(e.target.value === ''),
+                    })}
                     id="clubId"
                     className="h-11 w-full appearance-none rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/5 px-4 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer"
                   >
@@ -195,7 +198,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               <Textarea
                 {...register('description')}
                 id="description"
-                placeholder="Describe the rules and goals of this leaderboard..."
+                placeholder={`Describe the rules and goals of this ${isChallenge ? 'challenge' : 'leaderboard'}...`}
               />
             </Field>
 
@@ -258,7 +261,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   Visibility
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 relative">
-                  Public leaderboards are visible to everyone.
+                  Public {isChallenge ? 'challenges' : 'leaderboards'} are visible to everyone.
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
@@ -295,9 +298,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
               {type === 'create'
-                ? control._formValues.clubId
-                  ? 'Create Leaderboard'
-                  : 'Create Challenge'
+                ? isChallenge
+                  ? 'Create Challenge'
+                  : 'Create Leaderboard'
                 : 'Save Changes'}
             </Button>
           </div>
