@@ -160,7 +160,12 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 />
               </Field>
 
-              <Field id="clubId" label="Club" error={errors.clubId?.message}>
+              <Field
+                id="clubId"
+                label="Club"
+                error={errors.clubId?.message}
+                description="If no club is selected, this will be presented as a Challenge."
+              >
                 <div className="relative">
                   <select
                     {...register('clubId')}
@@ -289,7 +294,11 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               {isPending && (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               )}
-              {type === 'create' ? 'Create Leaderboard' : 'Save Changes'}
+              {type === 'create'
+                ? control._formValues.clubId
+                  ? 'Create Leaderboard'
+                  : 'Create Challenge'
+                : 'Save Changes'}
             </Button>
           </div>
         </Modal.Content>

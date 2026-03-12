@@ -8,6 +8,7 @@ interface FieldProps {
   children: ReactElement;
   label: string | React.ReactNode;
   error?: string;
+  description?: string;
 }
 
 const Field = ({
@@ -15,6 +16,7 @@ const Field = ({
   children,
   label,
   error,
+  description,
   className,
   formClassName,
 }: FieldProps) => {
@@ -32,6 +34,11 @@ const Field = ({
         {label}
       </label>
       {children}
+      {description && (
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          {description}
+        </p>
+      )}
       {error && (
         <small className="absolute top-0 right-0 text-[10px] font-bold uppercase tracking-wider text-red-500">
           {error}

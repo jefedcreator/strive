@@ -34,6 +34,9 @@ import {
   LogIn,
   Edit2,
   MoreHorizontal,
+  Share2,
+  Download,
+  X,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -60,6 +63,7 @@ export const LeaderboardDetailClient: React.FC<
     : false;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const { data: response } = useQuery<ApiResponse<LeaderboardDetail | null>>({
     queryKey: ['leaderboard', initialData.data?.id],
@@ -83,6 +87,9 @@ export const LeaderboardDetailClient: React.FC<
     ? entries.some((e) => e.userId === currentUserId)
     : false;
   const isInactive = !leaderboard.isActive;
+  const isChallenge = !leaderboard.clubId;
+  const userEntry = currentUserId ? entries.find(e => e.userId === currentUserId) : null;
+  const userRank = currentUserId ? entries.findIndex(e => e.userId === currentUserId) + 1 : null;
 
   // Fetch clubs for the modal dropdown
   const { data: clubs = [] } = useQuery<
@@ -191,7 +198,7 @@ export const LeaderboardDetailClient: React.FC<
           className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-5 w-fit"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Leaderboards
+          {isChallenge ? 'Challenges' : 'Leaderboards'}
         </Link>
       </FadeInItem>
 
@@ -203,7 +210,7 @@ export const LeaderboardDetailClient: React.FC<
           <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-purple-500/20 blur-3xl pointer-events-none" /> */}
           <>
             <Image
-              src={`/api/og?name=${encodeURIComponent(leaderboard.name)}&type=leaderboard`}
+              src={`/api/og?name=${encodeURIComponent(leaderboard.name)}&type=${isChallenge ? 'challenge' : 'leaderboard'}`}
               alt={leaderboard.name}
               fill
               className="object-cover"
@@ -260,9 +267,22 @@ export const LeaderboardDetailClient: React.FC<
                       className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-gray-800"
                     >
                       <Edit2 className="w-4 h-4" />
-                      Edit Leaderboard
+                      Edit {isChallenge ? 'Challenge' : 'Leaderboard'}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
+                  </>
+                )}
+
+                {isCompleted && isMember && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setIsShareModalOpen(true)}
+                      className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-gray-800 text-primary font-bold"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Share My Moment
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-gray-100 dark:border-gray-800" />
                   </>
                 )}
 
@@ -283,7 +303,7 @@ export const LeaderboardDetailClient: React.FC<
                     className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
                   >
                     <LogIn className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                    {joinMutation.isPending ? 'Joining...' : 'Join Leaderboard'}
+                    {joinMutation.isPending ? 'Joining...' : `Join ${isChallenge ? 'Challenge' : 'Leaderboard'}`}
                   </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem
@@ -292,7 +312,7 @@ export const LeaderboardDetailClient: React.FC<
                     className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
                   >
                     <LogOut className="w-4 h-4" />
-                    Leave Leaderboard
+                    Leave {isChallenge ? 'Challenge' : 'Leaderboard'}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -338,7 +358,7 @@ export const LeaderboardDetailClient: React.FC<
       <FadeInItem className="w-full min-w-0 flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-xl text-gray-900 dark:text-white">
-            Leaderboard Rankings
+            {isChallenge ? 'Challenge' : 'Leaderboard'} Rankings
           </h2>
           <span className="text-xs font-bold tracking-widest uppercase text-gray-400 dark:text-gray-500">
             {entries.length} {entries.length === 1 ? 'Athlete' : 'Athletes'}
@@ -360,6 +380,74 @@ export const LeaderboardDetailClient: React.FC<
         clubs={clubs}
       />
 
+      <Modal open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <Modal.Portal>
+          <Modal.Content className="fixed top-1/2 left-1/2 w-[95vw] max-w-[600px] bg-card-light dark:bg-card-dark rounded-2xl p-0 border border-gray-200 dark:border-gray-800 shadow-2xl z-[100] transform -translate-x-1/2 -translate-y-1/2 overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-white/5 flex items-center justify-between">
+              <div>
+                <Modal.Title className="text-xl font-bold text-gray-900 dark:text-white">
+                  Share Your Moment
+                </Modal.Title>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Great work! Download and share your achievements with the world.
+                </p>
+              </div>
+              <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <X className="w-5 h-5" />
+              </Modal.Close>
+            </div>
+
+            <div className="p-8 flex flex-col items-center gap-8">
+              <div className="relative aspect-square w-full max-w-[400px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 ring-1 ring-black/5">
+                <Image
+                  src={`/api/share-card?leaderboardId=${leaderboard.id}&userId=${currentUserId}&name=${encodeURIComponent(session?.user?.fullname || '')}&score=${userEntry?.score || 0}&rank=${userRank || 0}&distance=${userEntry?.runDistance || 0}&pace=${encodeURIComponent(userEntry?.runPace || '0:00')}&duration=${userEntry?.runDuration || 0}&avatar=${encodeURIComponent(session?.user?.image || '')}&leaderboardName=${encodeURIComponent(leaderboard.name)}`}
+                  alt="Share Card"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 w-full max-w-[400px]">
+                <Button
+                  onClick={() => {
+                    const url = `/api/share-card?leaderboardId=${leaderboard.id}&userId=${currentUserId}&name=${encodeURIComponent(session?.user?.fullname || '')}&score=${userEntry?.score || 0}&rank=${userRank || 0}&distance=${userEntry?.runDistance || 0}&pace=${encodeURIComponent(userEntry?.runPace || '0:00')}&duration=${userEntry?.runDuration || 0}&avatar=${encodeURIComponent(session?.user?.image || '')}&leaderboardName=${encodeURIComponent(leaderboard.name)}`;
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `strive-achievement-${leaderboard.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="flex items-center justify-center gap-2 py-6 text-base"
+                >
+                  <Download className="w-5 h-5" />
+                  Download
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    const url = `${window.location.origin}/api/share-card?leaderboardId=${leaderboard.id}&userId=${currentUserId}&name=${encodeURIComponent(session?.user?.fullname || '')}&score=${userEntry?.score || 0}&rank=${userRank || 0}&distance=${userEntry?.runDistance || 0}&pace=${encodeURIComponent(userEntry?.runPace || '0:00')}&duration=${userEntry?.runDuration || 0}&avatar=${encodeURIComponent(session?.user?.image || '')}&leaderboardName=${encodeURIComponent(leaderboard.name)}`;
+                    navigator.clipboard.writeText(url);
+                    toast.success('Link copied to clipboard!');
+                  }}
+                  className="flex items-center justify-center gap-2 py-6 text-base"
+                >
+                  <Share2 className="w-5 h-5" />
+                  Copy Link
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-4 bg-primary/5 border-t border-primary/10 text-center">
+              <p className="text-[10px] uppercase font-bold tracking-widest text-primary/70">
+                Tag @strive on Instagram/X to get featured
+              </p>
+            </div>
+          </Modal.Content>
+        </Modal.Portal>
+      </Modal>
+
       <Modal open={isLeaveModalOpen} onOpenChange={setIsLeaveModalOpen}>
         <Modal.Portal>
           <Modal.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-[400px] bg-card-light dark:bg-card-dark rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-xl z-[100] transform -translate-x-1/2 -translate-y-1/2">
@@ -369,7 +457,7 @@ export const LeaderboardDetailClient: React.FC<
                   <LogOut className="w-5 h-5" />
                 </div>
                 <Modal.Title className="text-lg font-bold">
-                  Leave Leaderboard
+                  Leave {isChallenge ? 'Challenge' : 'Leaderboard'}
                 </Modal.Title>
               </div>
 
