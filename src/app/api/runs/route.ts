@@ -4,6 +4,8 @@ import { nrc } from '@/backend/services/nrc';
 import { stravaService } from '@/backend/services/strava';
 import { db } from '@/server/db';
 import { type ApiResponse, type RunData } from '@/types';
+import { checkClubMilestones } from '@/backend/services/rewards';
+import { syncUserXP } from '@/backend/services/xp';
 
 /**
  * @bodyDescription Get user's runs from connected platforms. Supports Nike Run Club (NRC) and Strava activities
@@ -92,6 +94,19 @@ export const GET = withMiddleware(
           });
         })
       );
+
+      // Check club milestones for all clubs the user belongs to
+      const userClubs = await db.userClub.findMany({
+        where: { userId: user.id, isActive: true },
+        select: { clubId: true },
+      });
+
+      for (const uc of userClubs) {
+        checkClubMilestones(uc.clubId).catch(console.error);
+      }
+
+      // Sync XP from these runs
+      syncUserXP(user.id, runs).catch(console.error);
     }
 
     const response: ApiResponse<RunData[]> = {
