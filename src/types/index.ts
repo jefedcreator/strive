@@ -201,6 +201,7 @@ export interface LeaderboardInviteDetail {
     id: string;
     name: string;
     description: string | null;
+    clubId: string | null;
     _count: {
       entries: number;
     };

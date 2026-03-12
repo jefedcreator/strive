@@ -27,7 +27,8 @@ export async function generateMetadata({
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
   // const baseUrl =
   //   process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://2551-105-113-112-54.ngrok-free.app';
-  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(leaderboardName)}&type=leaderboard`;
+  const ogType = invite.leaderboard.clubId ? 'leaderboard' : 'challenge';
+  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(leaderboardName)}&type=${ogType}`;
 
   return {
     metadataBase: new URL(baseUrl),

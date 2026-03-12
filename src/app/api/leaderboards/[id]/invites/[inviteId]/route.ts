@@ -37,6 +37,7 @@ export const GET = withMiddleware<unknown>(
               id: true,
               name: true,
               description: true,
+              clubId: true,
               _count: {
                 select: {
                   entries: true,

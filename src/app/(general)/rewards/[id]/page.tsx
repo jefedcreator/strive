@@ -86,6 +86,7 @@ export async function generateMetadata({
     type: badgeType,
     title: data.reward.title,
     username,
+    context: data.reward.leaderboard?.name ? 'leaderboard' : 'challenge',
     ...(data.reward.description ? { subtitle: data.reward.description } : {}),
     ...(data.reward.milestone
       ? { milestone: String(data.reward.milestone) }
