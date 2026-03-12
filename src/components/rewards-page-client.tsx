@@ -128,8 +128,8 @@ export const RewardsPageClient: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  const handleCopyLink = (url: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}${url}`);
+  const handleCopyLink = (rewardId: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/rewards/${rewardId}`);
     toast.success('Badge link copied to clipboard!');
   };
 
@@ -207,7 +207,10 @@ export const RewardsPageClient: React.FC = () => {
                   Download
                 </button>
                 <button
-                  onClick={() => handleCopyLink(tierBadgeUrl)}
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}${tierBadgeUrl}`);
+                    toast.success('Tier badge link copied!');
+                  }}
                   className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2.5 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
                 >
                   <Share2 className="w-3.5 h-3.5" />
@@ -459,7 +462,7 @@ export const RewardsPageClient: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleCopyLink(reward.badgeUrl);
+                        handleCopyLink(reward.id);
                       }}
                       className="w-8 h-8 rounded-lg bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
                     >
@@ -519,7 +522,7 @@ export const RewardsPageClient: React.FC = () => {
                     </Button>
                     <Button
                       variant="secondary"
-                      onClick={() => handleCopyLink(selectedReward.badgeUrl)}
+                      onClick={() => handleCopyLink(selectedReward.id)}
                       className="flex items-center justify-center gap-2 py-5"
                     >
                       <Share2 className="w-5 h-5" />
