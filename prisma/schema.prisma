@@ -21,8 +21,18 @@ enum NotificationType {
     info
     club
     leaderboard
+    reward
 
     @@map("notification_types")
+}
+
+enum RewardType {
+    GOLD
+    SILVER
+    BRONZE
+    CLUB_MILESTONE
+
+    @@map("reward_types")
 }
 
 // Necessary for Next auth
@@ -78,6 +88,7 @@ model Leaderboard {
     entries            UserLeaderboard[]
     leaderboardInvites LeaderboardInvites[]
     notifications      Notification[]
+    rewards            Reward[]
 
     @@index([name])
     @@index([createdById])
@@ -106,6 +117,7 @@ model Club {
     leaderboards  Leaderboard[]
     clubInvites   ClubInvites[]
     notifications Notification[]
+    rewards       Reward[]
 
     // @@index([name])
     // @@index([slug])
@@ -182,6 +194,12 @@ model User {
     lastLoginAt  DateTime?
     access_token String?
 
+    // XP & Leveling
+    xp            Int       @default(0)
+    currentStreak Int       @default(0)
+    longestStreak Int       @default(0)
+    lastRunDate   DateTime?
+
     accounts            Account[]
     sessions            Session[]
     createdLeaderboards Leaderboard[]     @relation("LeaderboardCreator")
@@ -189,6 +207,7 @@ model User {
     clubs               UserClub[]
     leaderboards        UserLeaderboard[]
     notifications       Notification[]
+    rewards             UserReward[]
 
     // --- FIXED RELATIONS BELOW ---
 
@@ -255,4 +274,36 @@ enum ClubRole {
     MEMBER
 
     @@map("club_roles")
+}
+
+model Reward {
+    id            String       @id @default(auto()) @map("_id") @db.ObjectId
+    type          RewardType
+    title         String
+    description   String?
+    createdAt     DateTime     @default(now())
+    leaderboardId String?      @db.ObjectId
+    leaderboard   Leaderboard? @relation(fields: [leaderboardId], references: [id])
+    clubId        String?      @db.ObjectId
+    club          Club?        @relation(fields: [clubId], references: [id])
+    milestone     Int?
+    userRewards   UserReward[]
+
+    @@index([leaderboardId])
+    @@index([clubId])
+    @@map("rewards")
+}
+
+model UserReward {
+    id       String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId   String   @db.ObjectId
+    rewardId String   @db.ObjectId
+    earnedAt DateTime @default(now())
+    user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    reward   Reward   @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, rewardId])
+    @@index([userId])
+    @@index([rewardId])
+    @@map("user_rewards")
 }

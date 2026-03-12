@@ -9,6 +9,8 @@ import {
   TableRow,
 } from '@/primitives/table';
 import { type UserLeaderboard } from '@prisma/client';
+import { getTier } from '@/backend/services/xp';
+import { ProfileFrame } from '@/components/profile-frame';
 import React from 'react';
 
 type LeaderboardEntry = Omit<
@@ -23,6 +25,8 @@ type LeaderboardEntry = Omit<
     fullname: string | null;
     username: string | null;
     avatar: string | null;
+    xp?: number;
+    currentStreak?: number;
   };
 };
 
@@ -104,27 +108,33 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     {/* Athlete */}
                     <TableCell className="px-8 py-5">
                       <div className="flex items-center gap-4 min-w-[200px]">
-                        <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
-                          {entry.user.avatar && (
-                            <AvatarImage
-                              src={entry.user.avatar}
-                              alt={
-                                entry.user.fullname ??
-                                entry.user.username ??
-                                'Guest'
-                              }
-                              className="object-cover"
-                            />
-                          )}
-                          <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
-                            {entry.user.fullname?.[0] ??
-                              entry.user.username?.[0] ??
-                              'G'}
-                          </AvatarFallback>
-                        </Avatar>
+                        <ProfileFrame
+                          xp={entry.user.xp}
+                          streak={entry.user.currentStreak}
+                          size="md"
+                        >
+                          <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
+                            {entry.user.avatar && (
+                              <AvatarImage
+                                src={entry.user.avatar}
+                                alt={
+                                  entry.user.fullname ??
+                                  entry.user.username ??
+                                  'Guest'
+                                }
+                                className="object-cover"
+                              />
+                            )}
+                            <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
+                              {entry.user.fullname?.[0] ??
+                                entry.user.username?.[0] ??
+                                'G'}
+                            </AvatarFallback>
+                          </Avatar>
+                        </ProfileFrame>
                         <div className="flex flex-col truncate">
                           <span
-                            className={`text-sm font-bold tracking-tight truncate ${
+                            className={`text-sm font-bold tracking-tight truncate flex items-center gap-1.5 ${
                               isCurrentUser
                                 ? 'text-primary dark:text-white'
                                 : 'text-gray-900 dark:text-gray-100'
@@ -134,8 +144,20 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                               entry.user.username ??
                               'Guest'}
                             {isCurrentUser && (
-                              <span className="ml-2 text-[10px] uppercase font-black tracking-widest text-primary/60 dark:text-white/40">
+                              <span className="text-[10px] uppercase font-black tracking-widest text-primary/60 dark:text-white/40">
                                 (You)
+                              </span>
+                            )}
+                            {/* Tier badge */}
+                            {entry.user.xp != null && (
+                              <span
+                                className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/5"
+                                title={`${getTier(entry.user.xp).name} — ${entry.user.xp.toLocaleString()} XP`}
+                              >
+                                {getTier(entry.user.xp).emoji}
+                                <span className="text-gray-500 dark:text-gray-400">
+                                  {getTier(entry.user.xp).name}
+                                </span>
                               </span>
                             )}
                           </span>
