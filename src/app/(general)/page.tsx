@@ -551,18 +551,18 @@ function Capabilities() {
               className="absolute w-full px-4"
             >
               <div className="p-8 bg-white dark:bg-[#121826] rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-[0_-5px_20px_-10px_rgba(0,0,0,0.1)]">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-b-[4rem] rounded-tl-[2rem]"></div>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-b-[4rem] rounded-tl-[2rem]"></div>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 shrink-0 rounded-xl bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center text-green-500 border border-green-500/10">
-                    <LineChart className="w-5 h-5" />
+                  <div className="w-12 h-12 shrink-0 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center text-orange-500 border border-orange-500/10">
+                    <Award className="w-5 h-5" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Performance Tracking
+                    Rewards & Badges
                   </h3>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  Analyze your stats to gain a competitive edge and crush your
-                  personal records.
+                  Earn custom badges for distance milestones and exclusive rewards
+                  as you climb leaderboards.
                 </p>
               </div>
             </motion.div>
@@ -635,16 +635,16 @@ function Capabilities() {
             whileHover={{ y: -8 }}
             className="group relative p-8 bg-white dark:bg-[#121826] rounded-[2rem] border border-gray-100 dark:border-white/5 transition-all duration-300 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)]"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-b-[4rem] rounded-tl-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="w-14 h-14 rounded-2xl bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center mb-8 text-green-500 shadow-inner border border-green-500/10">
-              <LineChart className="w-6 h-6" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-b-[4rem] rounded-tl-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="w-14 h-14 rounded-2xl bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center mb-8 text-orange-500 shadow-inner border border-orange-500/10">
+              <Award className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-              Performance Tracking
+              Rewards & Badges
             </h3>
             <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-              Analyze your stats to gain a competitive edge and crush your
-              personal records.
+              Earn custom badges for distance milestones and exclusive rewards
+              as you climb leaderboards.
             </p>
           </motion.div>
         </motion.div>
