@@ -1,16 +1,28 @@
 import Background from '@/components/background';
 import { RewardsPageClient } from '@/components/rewards-page-client';
+import { getRewards } from '@/server';
+import type { PageProps } from '@/types';
+import { loadParams } from '@/utils';
 
 export const metadata = {
   title: 'My Rewards | Strive',
   description: 'View and share your earned rewards and badges.',
 };
 
-export default function RewardsPage() {
+export default async function RewardsPage({ searchParams }: PageProps) {
+  const { page } = loadParams.parse(await searchParams);
+
+  const initialData = await getRewards({
+    page: page ?? undefined,
+  });
+
   return (
     <div className="relative">
       <Background />
-      <RewardsPageClient />
+      <RewardsPageClient
+        currentFilters={{ page }}
+        initialData={initialData}
+      />
     </div>
   );
 }

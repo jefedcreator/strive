@@ -4,9 +4,20 @@ import { HomeQuickActions } from '@/components/home-quick-actions';
 import { LastRunCard } from '@/components/last-run-card';
 import { getLeaderboards } from '@/server';
 import { auth } from '@/server/auth';
-import { Award } from 'lucide-react';
+import { db } from '@/server/db';
+import { getTier } from '@/backend/services/xp';
+import { Award, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import React from 'react';
 import { redirect } from 'next/navigation';
+
+const THRESHOLDS = [
+  { name: 'Pacer', emoji: '🥉', threshold: 0 },
+  { name: 'Racer', emoji: '🥈', threshold: 1_000 },
+  { name: 'Contender', emoji: '🥇', threshold: 5_000 },
+  { name: 'Elite', emoji: '💎', threshold: 15_000 },
+  { name: 'Legend', emoji: '👑', threshold: 50_000 },
+];
 
 export default async function HomePage() {
   const session = await auth();
@@ -17,6 +28,8 @@ export default async function HomePage() {
 
   const { user } = session;
   const username = user.fullname ?? user.name ?? 'Runner';
+  const xp = user.xp ?? 0;
+  const tier = getTier(xp);
 
   // Fetch the user's latest active leaderboard participation via API
   const leaderboardsList = await getLeaderboards({ latest: true });
@@ -52,6 +65,7 @@ export default async function HomePage() {
         avgPace: entry.runPace ? `${entry.runPace} /km` : '--',
         initials,
         color,
+        xp: entry.user.xp,
       };
     }) ?? [];
 
@@ -148,9 +162,20 @@ export default async function HomePage() {
                               {row.initials}
                             </div>
                             <span
-                              className={`text-sm font-bold ${row.athlete === 'You' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}
+                              className={`text-sm font-bold flex items-center gap-1.5 ${row.athlete === 'You' ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}
                             >
                               {row.athlete}
+                              {row.xp != null && (
+                                <span
+                                  className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/5 whitespace-nowrap"
+                                  title={`${getTier(row.xp).name} — ${row.xp.toLocaleString()} XP`}
+                                >
+                                  {getTier(row.xp).emoji}
+                                  <span className="text-gray-500 dark:text-gray-400">
+                                    {getTier(row.xp).name}
+                                  </span>
+                                </span>
+                              )}
                             </span>
                           </div>
                         </td>
@@ -175,6 +200,75 @@ export default async function HomePage() {
 
         {/* Right Column: Activity & Quick Actions */}
         <div className="space-y-8">
+          {/* Runner Tier Preview */}
+          <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="font-bold text-lg text-gray-900 dark:text-white">
+                  Runner Tier
+                </h2>
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5">
+                  <span className="text-primary font-bold">
+                    {xp.toLocaleString()} XP
+                  </span>{' '}
+                  — {tier.name}
+                </div>
+              </div>
+              <Link
+                href="/rewards"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                title="View Rewards"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-0 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+              {THRESHOLDS.map((t, i) => {
+                const isActive = xp >= t.threshold;
+                const isCurrent = tier.name === t.name;
+                return (
+                  <React.Fragment key={t.name}>
+                    <div
+                      className={`flex flex-col items-center min-w-[70px] ${
+                        isCurrent
+                          ? 'scale-110 relative z-10'
+                          : isActive
+                            ? 'opacity-100'
+                            : 'opacity-40'
+                      } transition-all`}
+                    >
+                      <div
+                        className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-lg md:text-xl ${
+                          isCurrent
+                            ? 'bg-primary/10 ring-2 ring-primary shadow-lg'
+                            : 'bg-gray-100 dark:bg-white/5'
+                        }`}
+                      >
+                        {t.emoji}
+                      </div>
+                      <span className="text-[10px] font-bold mt-2 text-gray-700 dark:text-gray-300">
+                        {t.name}
+                      </span>
+                      <span className="text-[9px] font-medium text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                        {t.threshold >= 1000 ? `${t.threshold / 1000}k` : 0} XP
+                      </span>
+                    </div>
+                    {i < THRESHOLDS.length - 1 && (
+                      <div
+                        className={`flex-1 h-0.5 min-w-[12px] md:min-w-[20px] mx-1 md:mx-2 rounded ${
+                          xp >= THRESHOLDS[i + 1]!.threshold
+                            ? 'bg-primary'
+                            : 'bg-gray-100 dark:bg-gray-800'
+                        }`}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Club Activity */}
           <HomeNotifications token={session?.user?.token ?? ''} />
 
