@@ -14,9 +14,12 @@ import type {
   PaginatedApiResponse,
   ExploreListItem,
   RunData,
+  RewardItem,
+  RewardsData,
 } from '@/types';
 import { uncachedAuth, signOut } from './auth';
 import type { User } from '@prisma/client';
+import type { RewardsQueryValidatorSchema } from '@/backend/validators/rewards.validator';
 
 // Server-side fetches must use the internal Next.js port directly.
 // NEXT_PUBLIC_APP_URL=http://localhost points to Nginx (a separate container) which is NOT reachable via localhost:80 from here.
@@ -319,6 +322,50 @@ async function getExploreItems(
   }
 }
 
+async function getRewards(
+  params?: Partial<RewardsQueryValidatorSchema>
+): Promise<PaginatedApiResponse<RewardsData>> {
+  try {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.set(key, String(value));
+        }
+      });
+    }
+
+    const url = `${baseUrl}/api/rewards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+
+    const res = await fetcher(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch rewards: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<PaginatedApiResponse<RewardsData>>;
+  } catch (error) {
+    console.error('Error fetching rewards:', error);
+    return {
+      status: 500,
+      message: 'Failed to fetch rewards',
+      data: {
+        data: [],
+        xp: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        tier: { name: 'Pacer', emoji: '🥉', threshold: 0 },
+        nextTier: { name: 'Racer', emoji: '🥈', threshold: 1000 },
+        tierBadgeUrl: '',
+      },
+      total: 0,
+      page: 1,
+      size: 1,
+      totalPages: 0,
+    };
+  }
+}
+
 export {
   getClubInvite,
   getClubs,
@@ -330,4 +377,5 @@ export {
   getLeaderboardInvite,
   getProfile,
   getExploreItems,
+  getRewards,
 };

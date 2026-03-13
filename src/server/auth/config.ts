@@ -20,6 +20,7 @@ declare module 'next-auth' {
       token?: string | null;
       type?: UserType | null;
       avatar?: string | null;
+      xp?: number | null;
     } & DefaultSession['user'];
   }
 
@@ -29,6 +30,7 @@ declare module 'next-auth' {
     token?: string | null;
     avatar?: string | null;
     type: UserType | null;
+    xp?: number | null;
   }
 }
 
@@ -63,6 +65,7 @@ export const authConfig = {
           fullname: user.fullname,
           avatar: user.avatar,
           type: user.type,
+          xp: user.xp,
           image:
             credentials.image &&
             credentials.image !== 'null' &&
@@ -94,6 +97,7 @@ export const authConfig = {
         token: token.accessToken as string | null,
         type: token.type as UserType | null,
         avatar: token.picture as string | null,
+        xp: token.xp as number | null,
       },
     }),
     jwt: ({ token, user }) => {
@@ -102,6 +106,7 @@ export const authConfig = {
         token.fullname = user.fullname;
         token.accessToken = user.token;
         token.type = user.type;
+        token.xp = user.xp;
         if (user.image) {
           token.picture = user.image;
         } else if (user.avatar) {
