@@ -3,12 +3,15 @@ import { motion, useScroll, useTransform, type Variants } from 'framer-motion';
 import { useRef } from 'react';
 import {
   ArrowRight,
+  Award,
   Check,
   Github,
   Globe,
   Instagram,
   LineChart,
+  Medal,
   RefreshCw,
+  Star,
   TrendingUp,
   Trophy,
   Twitter,
@@ -132,8 +135,8 @@ function Hero({
           <strong className="text-gray-900 dark:text-gray-200 font-bold">
             NRC
           </strong>{' '}
-          to battle on global leaderboards and run with your friends in private
-          clubs.
+          to battle on global leaderboards, run with your friends in private
+          clubs, and earn exclusive rewards.
         </motion.p>
 
         <motion.div
@@ -828,6 +831,122 @@ function LeaderboardSection() {
   );
 }
 
+function RewardsSection() {
+  return (
+    <section className="py-32 overflow-hidden bg-background-light dark:bg-[#0B0F19] relative" id="rewards">
+      {/* Decorative Blur */}
+      <div className="absolute top-[20%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 blur-[120px] rounded-full mix-blend-screen opacity-50 dark:opacity-20 pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-24">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: false, margin: '-100px' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:w-1/2"
+          >
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
+              Earn Badges.{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">
+                Showcase Milestones.
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-10 leading-relaxed font-medium">
+              Every step counts. Unlock exclusive tier badges and rewards as you hit new distance milestones and climb the leaderboards. Share your achievements with beautifully generated custom visuals.
+            </p>
+            <ul className="space-y-6">
+              {[
+                'Unlock custom tier badges for distance milestones',
+                'Earn exclusive club and leaderboard rewards',
+                'Share rich, beautifully generated achievement visuals',
+              ].map((item, idx) => (
+                <motion.li
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false }}
+                  transition={{ delay: 0.4 + idx * 0.1 }}
+                  className="flex items-start group"
+                >
+                  <span className="flex-shrink-0 h-8 w-8 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mr-4 group-hover:scale-110 group-hover:bg-orange-500/20 transition-all">
+                    <Check className="text-orange-500 w-4 h-4" />
+                  </span>
+                  <span className="text-lg font-bold text-gray-800 dark:text-gray-200 mt-0.5">
+                    {item}
+                  </span>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 50, rotateY: 10 }}
+            whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+            viewport={{ once: false, margin: '-100px' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:w-1/2 relative w-full perspective-1000"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 via-primary/10 to-transparent rounded-[2.5rem] transform -rotate-3 scale-105 blur-sm opacity-50"></div>
+
+            <motion.div
+              whileHover={{ rotateX: -2, rotateY: -2, scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="relative rounded-[2rem] overflow-hidden shadow-[0_20px_50px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-white/5 bg-white dark:bg-[#121826] transform-gpu"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-8">
+                  <h4 className="font-extrabold text-xl text-gray-900 dark:text-white tracking-tight">
+                    Your Rewards
+                  </h4>
+                  <motion.a
+                    href="/rewards"
+                    className="text-xs text-primary font-bold cursor-pointer hover:text-[#e04000] flex items-center gap-1 group transition-colors"
+                  >
+                    View All{' '}
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </motion.a>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Badge 1 */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="aspect-square rounded-2xl bg-gradient-to-br from-[#FFD700]/10 to-[#FF8C00]/10 border border-[#FFD700]/30 flex flex-col items-center justify-center p-4 relative overflow-hidden group"
+                  >
+                    <div className="absolute top-3 right-3 flex gap-1">
+                      <Star className="w-3 h-3 text-[#FFD700] fill-[#FFD700] opacity-50 group-hover:opacity-100 transition-opacity" />
+                      <Star className="w-3 h-3 text-[#FFD700] fill-[#FFD700] opacity-50 group-hover:opacity-100 transition-opacity delay-75" />
+                      <Star className="w-3 h-3 text-[#FFD700] fill-[#FFD700] opacity-50 group-hover:opacity-100 transition-opacity delay-150" />
+                    </div>
+                    <Award className="w-16 h-16 text-[#FFD700] mb-3 drop-shadow-[0_0_15px_rgba(255,215,0,0.3)] group-hover:scale-110 transition-transform duration-500" />
+                    <span className="font-black text-gray-900 dark:text-white text-lg tracking-tight">Gold Tier</span>
+                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">1000+ km</span>
+                  </motion.div>
+
+                  {/* Badge 2 */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="aspect-square rounded-2xl bg-gradient-to-br from-[#C0C0C0]/10 to-[#A9A9A9]/10 border border-[#C0C0C0]/30 flex flex-col items-center justify-center p-4 relative overflow-hidden group"
+                  >
+                    <div className="absolute top-3 right-3 flex gap-1">
+                      <Star className="w-3 h-3 text-[#C0C0C0] fill-[#C0C0C0] opacity-50 group-hover:opacity-100 transition-opacity" />
+                      <Star className="w-3 h-3 text-[#C0C0C0] fill-[#C0C0C0] opacity-50 group-hover:opacity-100 transition-opacity delay-75" />
+                    </div>
+                    <Medal className="w-16 h-16 text-[#C0C0C0] mb-3 drop-shadow-[0_0_15px_rgba(192,192,192,0.3)] group-hover:scale-110 transition-transform duration-500" />
+                    <span className="font-black text-gray-900 dark:text-white text-lg tracking-tight">Silver Tier</span>
+                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">500+ km</span>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CTA({
   status,
 }: {
@@ -1105,6 +1224,7 @@ export default function App() {
         <Integrations />
         <Capabilities />
         <LeaderboardSection />
+        <RewardsSection />
         <CTA status={status} />
       </main>
       <Footer />
