@@ -4,6 +4,8 @@ import type z from 'zod';
 import type { ClubQueryValidatorSchema } from '../validators/club.validator';
 import type { LeaderboardQueryValidatorSchema } from '../validators/leaderboard.validator';
 import type { ExploreQueryValidatorSchema } from '../validators/explore.validator';
+import type { NotificationQueryValidatorSchema } from '../validators/notification.validator';
+import type { BaseQueryValidatorSchema } from '../validators/index.validator';
 
 export type MiddlewareResponse = {
   message: string;
@@ -28,9 +30,10 @@ type Prettify<T> = {
 } & {};
 
 export type QueryParameters = Prettify<
+  BaseQueryValidatorSchema &
   LeaderboardQueryValidatorSchema &
-    ClubQueryValidatorSchema &
-    ExploreQueryValidatorSchema
+  ClubQueryValidatorSchema &
+  ExploreQueryValidatorSchema & NotificationQueryValidatorSchema
 >;
 
 export interface AuthRequest<B = unknown, Q = QueryParameters>

@@ -114,7 +114,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     queryKey: ['userSearch', debouncedEmail],
     queryFn: async () => {
       const res = await api.get(
-        `/users/search?email=${encodeURIComponent(debouncedEmail)}`,
+        `/users?query=${encodeURIComponent(debouncedEmail)}`,
         { headers: { Authorization: `Bearer ${session?.user?.token}` } }
       );
       return res.data?.data;

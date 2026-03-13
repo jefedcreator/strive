@@ -1,4 +1,5 @@
-import { authMiddleware, withMiddleware } from '@/backend/middleware';
+import { authMiddleware, queryValidatorMiddleware, withMiddleware } from '@/backend/middleware';
+import { baseQueryValidatorSchema, type BaseQueryValidatorSchema } from '@/backend/validators/index.validator';
 import { db } from '@/server/db';
 import { type ApiResponse } from '@/types';
 import { InternalServerErrorException } from '@/utils/exceptions';
@@ -8,13 +9,14 @@ import { NextResponse } from 'next/server';
  * @description Search users by email. Returns public profile data.
  * @auth bearer
  */
-export const GET = withMiddleware<any, any>(
+export const GET = withMiddleware<BaseQueryValidatorSchema>(
   async (request) => {
     try {
-      const { searchParams } = new URL(request.url);
-      const email = searchParams.get('email');
+      const payload = request.query
+      const email = payload?.query;
 
-      if (!email || email.length < 3) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
         const response: ApiResponse<null> = {
           status: 400,
           message: 'Valid email is required',
@@ -39,8 +41,6 @@ export const GET = withMiddleware<any, any>(
       });
 
       if (!user) {
-        // Return a mock user object for unregistered valid emails
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (emailRegex.test(email)) {
           const fallbackNameMatch = email.match(/^([^@]+)@/);
           const fallbackName = fallbackNameMatch ? fallbackNameMatch[1] : email;
@@ -81,5 +81,5 @@ export const GET = withMiddleware<any, any>(
       );
     }
   },
-  [authMiddleware]
+  [authMiddleware, queryValidatorMiddleware(baseQueryValidatorSchema)]
 );

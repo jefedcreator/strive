@@ -21,7 +21,7 @@ import { NextResponse } from 'next/server';
  * @description Retrieves notifications for the authenticated user. Supports filtering by type, read status, and pagination.
  * @auth bearer
  */
-export const GET = withMiddleware<unknown, NotificationQueryValidatorSchema>(
+export const GET = withMiddleware<NotificationQueryValidatorSchema>(
   async (request) => {
     try {
       const payload = request.query!;
