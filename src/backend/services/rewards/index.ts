@@ -129,6 +129,17 @@ export async function checkClubMilestones(clubId: string) {
     existingMilestones.map((r) => r.milestone).filter(Boolean)
   );
 
+  // Retrieve the actual user emails for the members
+  const membersWithEmails = await db.user.findMany({
+    where: {
+      id: { in: memberIds },
+    },
+    select: {
+      id: true,
+      email: true,
+    },
+  });
+
   // Award new milestones
   for (const milestone of CLUB_MILESTONES) {
     if (totalDistanceKm >= milestone && !awardedMilestones.has(milestone)) {
@@ -143,14 +154,21 @@ export async function checkClubMilestones(clubId: string) {
       });
 
       // Award to all current active members
-      for (const userId of memberIds) {
+      for (const member of membersWithEmails) {
         await db.userReward.upsert({
           where: {
-            userId_rewardId: { userId, rewardId: reward.id },
+            userId_rewardId: { userId: member.id, rewardId: reward.id },
           },
-          create: { userId, rewardId: reward.id },
+          create: { userId: member.id, rewardId: reward.id },
           update: {},
         });
+
+        // Send Email
+        if (member.email) {
+          // Import this specific function dynamically or ensure it's imported at the top of the file
+          const { sendClubMilestoneEmail } = await import('../email');
+          await sendClubMilestoneEmail(member.email, club.name, milestone);
+        }
       }
 
       // Notify all members
