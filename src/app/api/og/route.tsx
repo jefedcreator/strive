@@ -1,92 +1,67 @@
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
+const OliveWreath = ({
+  color,
+  size,
+  opacity,
+}: {
+  color: string;
+  size: number;
+  opacity: number;
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 122.88 117.27"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ opacity }}
+  >
+    <path
+      fill={color}
+      d="M87,8.53l-.08-.06C82,10.13,80,5.18,78.14,3.13c2.22.09,6.11-1.64,9.65,3.29a1,1,0,0,1,.27.11L88.9,7c-1-2.41-.36-5.06-.24-7,1.24,1.68,6.4,6.25,3.9,9.32.69.47,1.37,1,2,1.47-.82-2.89.28-6.12.61-7.39,1.08,1.5,5.39,7.14,2.34,9.81,1,.88,2,1.79,2.91,2.75-.48-2.87,1.08-5.47,1.74-7.07.66,1.33,4.64,8,1,10.12q1,1.14,1.86,2.34c-.09-2.91,1.84-5.24,2.86-7.09.41,2.11,3.22,8.69-.59,10.36.31.48.61,1,.91,1.47s.49.83.72,1.25c.26-2.85,2.38-4.93,3.57-6.64.19,2.16,2.32,9.05-1.72,10.26.52,1.13,1,2.29,1.45,3.47.77-2.71,3.15-4.42,4.58-5.91-.16,2.17.87,9.28-3.23,10,.28,1,.53,2,.76,2.95,1.06-2.69,3.69-4.14,5.32-5.49-.41,2.19-.21,9.61-4.56,9.66.14.94.25,1.88.33,2.83l0,.55c1.54-2.57,4.48-3.59,6.38-4.67-.79,2.12-1.88,9.59-6.22,9,0,1,0,2-.1,3,1.94-2.47,5.15-3,7.27-3.76-1.15,2-3.47,9.17-7.67,7.81-.17,1.24-.38,2.46-.64,3.67,2.34-2,5.55-2,7.76-2.39-1.45,1.71-4.94,8.27-8.78,6.42-.3,1-.64,2-1,3,2.59-1.82,5.84-1.35,8.11-1.46-1.16,1.58-6,7.71-9.63,5.18-.49,1.07-1,2.13-1.56,3.17,2.92-1.55,6.25-.74,8.54-.53-1.72,1.48-6.89,7.16-10.53,3.93-.61,1-1.24,1.88-1.9,2.79,3-1.13,6,0,8.18.46-1.9,1.24-7.38,6.7-10.7,2.74-.89,1-1.82,2.06-2.79,3,3.91-1.16,6.93.58,8.51,1.3-2.08,1.08-8.6,5.9-11.2,1.24-.9.79-1.83,1.55-2.78,2.28,3.52-.44,6.45,1.38,8.68,2.42-2.36.75-9.67,4.74-12.09,0-.78.51-1.58,1-2.39,1.48,3.25.23,5.46,2.71,7.48,3.93-1.87.67-9.34,3.21-11.47-1.84-.93.44-1.86.85-2.82,1.24,3.13.64,5,3.29,6.88,4.7-1.94.47-9.71,2.18-11.23-3.15-4.33,1.34-8.9,2-13.42,4.06A40.41,40.41,0,0,1,71,112.84c4.46,3.48.76,7-3.11,1.82a27,27,0,0,0-6.33-5.07,27.37,27.37,0,0,0-6.07,4.85c-4,5.17-7.66,1.61-3.13-1.86a40.87,40.87,0,0,1,6.27-4.5c-4.5-2-9.14-2.72-13.57-4.13-1.47,5.43-9.3,3.7-11.25,3.23,1.89-1.44,3.83-4.17,7.07-4.74-1-.41-2-.85-3-1.31-2.07,5.19-9.64,2.62-11.52,2,2.07-1.25,4.35-3.83,7.75-4-.88-.51-1.75-1-2.59-1.6-2.35,5-9.78.91-12.16.15,2.3-1.07,5.35-3,9-2.37-1-.8-2.05-1.63-3-2.5-2.54,4.94-9.18,0-11.29-1.07,1.63-.75,4.8-2.57,8.9-1.18-.53-.53-1.05-1.07-1.56-1.63s-1-1.12-1.49-1.69c-3.3,4.26-8.9-1.32-10.83-2.58,2.29-.53,5.45-1.69,8.55-.31-.73-1-1.44-2-2.1-3.09-3.65,3.56-9-2.28-10.7-3.78,2.38-.22,5.91-1.09,8.92.74-.62-1.15-1.2-2.33-1.74-3.53-3.69,2.9-8.65-3.43-9.83-5,2.38.11,5.83-.41,8.48,1.74-.41-1.13-.79-2.28-1.13-3.45C5.63,70.2,2,63.41.55,61.66c2.32.41,5.75.33,8.1,2.71q-.44-2-.72-4.08C3.57,62,1.17,54.58,0,52.57c2.23.81,5.67,1.34,7.56,4.17-.08-1.17-.12-2.32-.13-3.48-4.56,1-5.67-6.77-6.48-8.94,2,1.14,5.14,2.2,6.6,5.07.09-1.27.23-2.54.4-3.79-4.6.24-4.38-7.42-4.8-9.65,1.72,1.42,4.53,2.95,5.48,5.91.24-1.12.52-2.24.84-3.34-4.38-.44-3.31-7.79-3.47-10,1.5,1.57,4.05,3.37,4.68,6.31.48-1.29,1-2.56,1.58-3.81-4.35-1-2.14-8.12-2-10.32,1.25,1.79,3.52,4,3.6,7.05l.07-.11q.82-1.5,1.74-2.94c-4.11-1.52-1.2-8.29-.79-10.44C16,16.19,18,18.63,17.76,21.72c.66-.9,1.34-1.77,2-2.62-3.89-2,.2-8.86.87-10.21.68,1.66,2.33,4.39,1.68,7.38,1-1,2-2,3.09-3-3.28-2.62,1.13-8.39,2.22-9.91.34,1.3,1.49,4.67.54,7.63.72-.56,1.45-1.09,2.2-1.61C27.71,6.35,33,1.7,34.22,0c.12,2,.8,4.71-.31,7.18.54-.32,1.1-.63,1.65-.94,3.49-4.61,7.28-2.95,9.46-3-1.84,2.08-3.88,7.09-8.84,5.31q-1.22.68-2.4,1.41c3.57.39,5.39,3.48,7,5.27-2.07-.3-8.83.18-9.55-3.56-.78.56-1.54,1.13-2.28,1.72,3.57,0,5.69,2.9,7.48,4.5-2.08-.07-8.7,1.09-9.86-2.48Q24.76,17,23.09,18.83c3.62-.53,6.14,2.09,8.15,3.46-2.08.19-8.51,2.23-10.11-1.19q-1.06,1.3-2,2.67c3.48-.84,6.24,1.45,8.36,2.58-2,.42-8.06,3.09-10.1,0q-.72,1.16-1.38,2.34l-.51,1c3.23-1.61,6.43,0,8.76.68-1.22,1.07-7.38,5-10.06,2-.63,1.38-1.19,2.8-1.69,4.24,3-1.86,6.34-.64,8.71-.29-1.79,1.08-6.7,5.74-9.68,3.42-.32,1.17-.6,2.35-.84,3.55C13.45,41.13,16.92,42,19.33,42c-1.65,1.29-6,6.45-9.21,4.66-.17,1.31-.29,2.64-.35,4,2.52-2.81,6.27-2.47,8.78-2.76-1.51,1.58-5.2,7.61-8.83,6q0,1.7.18,3.39c2.12-3.06,5.85-3.24,8.29-3.86-1.28,1.76-4.12,8.2-7.9,7.19.22,1.44.49,2.86.83,4.26,1.62-3.55,5.43-4.24,7.81-5.21-1,1.95-3,8.86-7,8.17.35,1.16.75,2.3,1.18,3.41,1.08-3.58,4.6-4.88,6.73-6.21-.69,2.08-1.44,9.18-5.44,9.25.53,1.16,1.12,2.3,1.74,3.41.68-3.77,4.12-5.41,6.15-7-.25,2.17.07,9.51-4.46,9.77.65,1,1.33,2,2.05,2.94.13-3.89,3.35-6,5.17-7.82,0,2.2,1.35,9.49-3.18,10.29.41.48.83,1,1.26,1.42q.95,1,1.95,2c-.49-3.82,2.32-6.42,3.8-8.5.41,2.16,2.92,9.14-1.43,10.68,1,.84,2,1.65,3,2.42C29.26,90.09,32,87.22,33,84.81c.9,1.66,4.32,8.22.08,11,1.21.79,2.46,1.52,3.74,2.21-1.94-4,.54-7.42,1.35-10.11,1.09,1.63,5.27,8,1.25,11.41q1.9.89,3.87,1.62c-2.45-3.51-.74-7.22-.47-10,1.39,1.38,6.74,6.89,3.43,11,5.52,1.68,9.6,2,15.22,4.63,5.36-2.56,9.78-3,15.16-4.57-3.42-4.07,2-9.63,3.37-11,.27,2.78,2,6.55-.57,10.1,1.39-.5,2.75-1.06,4.07-1.67-4.19-3.33,0-9.86,1.15-11.5.83,2.74,3.38,6.21,1.25,10.32,1.36-.72,2.7-1.49,4-2.33-4.46-2.73-1-9.41-.06-11.09,1.09,2.47,3.9,5.42,2.46,9.46,1.14-.84,2.26-1.72,3.33-2.64C91,90.24,93.58,83.08,94,80.89c1.52,2.14,4.44,4.82,3.76,8.82,1.22-1.18,2.39-2.42,3.49-3.71-4.82-.59-3.46-8.09-3.42-10.33,1.87,1.88,5.23,4.06,5.17,8.16.81-1.06,1.58-2.15,2.31-3.28-4.8,0-4.47-7.56-4.72-9.77,2.09,1.6,5.69,3.3,6.21,7.32q1-1.84,2-3.78c-4.24.25-5-7.11-5.71-9.24,2.21,1.38,5.91,2.73,6.84,6.61.5-1.26,1-2.56,1.36-3.87C107.06,68.9,105,61.7,104,59.71c2.47,1,6.47,1.71,8,5.61.39-1.56.71-3.14.95-4.75C109,62,106,55.28,104.69,53.47c2.53.65,6.46.81,8.53,4.23.12-1.28.18-2.58.2-3.88-3.71,2-7.55-4.3-9.09-5.92,2.6.3,6.54-.07,9,3.08q0-1.17-.15-2.34c-.07-.71-.14-1.41-.24-2.11-3.28,2.19-7.75-3.19-9.44-4.51,2.49-.08,6.13-1,9,1.53-.25-1.35-.56-2.67-.92-4-3,2.71-8.06-2.14-9.89-3.25,2.46-.37,6-1.67,9,.51a49.82,49.82,0,0,0-1.85-4.67c-2.58,3.42-9-.7-10.23-1.8,2.41-.67,5.77-2.42,9.12-.48-.46-.89-1-1.77-1.46-2.64-.22-.36-.43-.71-.66-1.06-1.9,3.37-8.17.59-10.23.16,2.19-1.16,5-3.56,8.68-2.49-.72-1-1.48-2-2.27-3-1.44,3.7-8.08,1.59-10.2,1.39,2.06-1.41,4.66-4.14,8.44-3.41a51.65,51.65,0,0,0-3.72-3.68c-1,3.78-7.8,2.57-9.91,2.65,1.83-1.63,4-4.6,7.71-4.5-.81-.64-1.63-1.26-2.48-1.86-.58,3.89-7.49,3.4-9.58,3.7,1.64-1.82,3.49-5,7.19-5.28l-.44-.28c-.64-.39-1.27-.76-1.9-1.1Z"
+    />
+  </svg>
+);
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const name = searchParams.get('name');
     const type = (searchParams.get('type') || 'leaderboard') as
       | 'club'
       | 'leaderboard'
       | 'challenge';
+    const name = searchParams.get('name');
 
-    const text = name
-      ? name.length > 32
-        ? name.substring(0, 32) + '…'
-        : name
-      : type === 'club'
-        ? 'Club'
-        : type === 'challenge'
-          ? 'Challenge'
-          : 'Leaderboard';
-
-    // ── Per-type visual identity (no gradients) ──────────────────────────
     const themes = {
       club: {
         bg: '#0A0F0D',
-        accent: '#34D399',
-        accentDim: '#34D39922',
-        accentBorder: '#34D39933',
+        // accent: '#34D399',
+        accent: '#F97316',
+        // wreathColor: '#94A3B8', // Silver-ish
+        wreathColor: '#EAB308', // Gold
         emoji: '👥',
-        label: 'CLUB',
-        tagline: 'Run together. Rise together.',
-        // Dots pattern
-        patternType: 'dots' as const,
+        label: 'STRIVE CLUB',
       },
       leaderboard: {
         bg: '#09090B',
-        accent: '#14B8A6',
-        accentDim: '#14B8A622',
-        accentBorder: '#14B8A633',
+        // accent: '#14B8A6',
+        accent: '#F97316',
+        wreathColor: '#EAB308', // Gold
         emoji: '🏆',
-        label: 'LEADERBOARD',
-        tagline: 'Compete. Climb. Conquer.',
-        // Grid lines pattern
-        patternType: 'grid' as const,
+        label: 'STRIVE LEADERBOARD',
       },
       challenge: {
         bg: '#0C0A09',
         accent: '#F97316',
-        accentDim: '#F9731622',
-        accentBorder: '#F9731633',
+        // wreathColor: '#B45309', // Bronze-ish
+        wreathColor: '#EAB308', // Gold
         emoji: '⚔️',
-        label: 'CHALLENGE',
-        tagline: 'Accept the challenge. Prove yourself.',
-        // Diagonal streaks pattern
-        patternType: 'diagonals' as const,
+        label: 'STRIVE CHALLENGE',
       },
     };
 
     const t = themes[type] || themes.leaderboard;
-
-    // Build pattern background based on type
-    let patternStyle: React.CSSProperties = {};
-    if (t.patternType === 'dots') {
-      patternStyle = {
-        backgroundImage: `radial-gradient(circle, ${t.accent}0A 1.5px, transparent 1.5px)`,
-        backgroundSize: '28px 28px',
-      };
-    } else if (t.patternType === 'grid') {
-      patternStyle = {
-        backgroundImage: `linear-gradient(${t.accent}08 1px, transparent 1px), linear-gradient(90deg, ${t.accent}08 1px, transparent 1px)`,
-        backgroundSize: '48px 48px',
-      };
-    } else {
-      patternStyle = {
-        backgroundImage: `repeating-linear-gradient(135deg, ${t.accent}06 0px, ${t.accent}06 1px, transparent 1px, transparent 36px)`,
-      };
-    }
-
-    // Icon container shape varies: club = circle, leaderboard = rounded-square, challenge = rotated square (diamond)
-    const iconSize = 120;
-    const iconRadius =
-      type === 'club' ? '60px' : type === 'challenge' ? '24px' : '32px';
-    const iconTransform =
-      type === 'challenge' ? 'rotate(45deg)' : 'none';
-    const emojiTransform =
-      type === 'challenge' ? 'rotate(-45deg)' : 'none';
 
     return new ImageResponse(
       (
@@ -95,312 +70,65 @@ export async function GET(request: Request) {
             height: '100%',
             width: '100%',
             display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: t.bg,
             fontFamily: 'system-ui, -apple-system, sans-serif',
-            position: 'relative',
-            overflow: 'hidden',
-            background: t.bg,
           }}
         >
-          {/* ── Background pattern layer ──────────────── */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              ...patternStyle,
-            }}
-          />
-
-          {/* ── Accent shape (large, behind content) ──── */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              width: '520px',
-              height: '520px',
-              borderRadius: type === 'club' ? '260px' : type === 'challenge' ? '60px' : '80px',
-              border: `1px solid ${t.accent}11`,
-              background: `${t.accent}05`,
-              transform: type === 'challenge'
-                ? 'translate(-50%, -50%) rotate(45deg)'
-                : 'translate(-50%, -50%)',
-              display: 'flex',
-            }}
-          />
-          {/* Inner accent shape for depth */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              width: '320px',
-              height: '320px',
-              borderRadius: type === 'club' ? '160px' : type === 'challenge' ? '40px' : '50px',
-              border: `1px solid ${t.accent}0D`,
-              background: `${t.accent}03`,
-              transform: type === 'challenge'
-                ? 'translate(-50%, -50%) rotate(45deg)'
-                : 'translate(-50%, -50%)',
-              display: 'flex',
-            }}
-          />
-
-          {/* ── Top bar ───────────────────────────────── */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '76px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0 52px',
-            }}
-          >
-            {/* Logo mark + wordmark */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-              }}
-            >
-              <div
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  background: t.accent,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 1024 1024">
-                  <path
-                    d="M 535.775 251.750 C 534.931 252.713, 526.624 264.525, 517.316 278 C 508.008 291.475, 493.705 312.175, 485.532 324 C 477.358 335.825, 464.141 354.950, 456.159 366.500 C 448.178 378.050, 438.206 392.450, 433.999 398.500 C 429.792 404.550, 418.316 421.200, 408.498 435.500 C 398.679 449.800, 386.072 468.025, 380.483 476 C 374.893 483.975, 362.738 501.525, 353.472 515 C 344.205 528.475, 334.586 542.425, 332.095 546 C 329.605 549.575, 322.727 559.475, 316.812 568 L 306.056 583.500 368.778 583.749 C 403.275 583.886, 432 584.185, 432.612 584.415 C 433.382 584.703, 433.468 586.468, 432.890 590.166 C 431.930 596.307, 429.163 617.344, 421.533 676.500 C 418.554 699.600, 414.725 729.049, 413.025 741.942 C 411.325 754.835, 410.153 765.957, 410.422 766.657 C 410.799 767.640, 416.604 767.928, 435.957 767.925 L 461.004 767.920 466.947 760.710 C 478.073 747.211, 505.482 713.755, 510.854 707.116 C 513.799 703.477, 517.184 699.375, 518.377 698 C 519.569 696.625, 527.713 686.725, 536.475 676 C 545.236 665.275, 558.726 648.818, 566.452 639.428 C 574.178 630.039, 586.559 614.964, 593.964 605.928 C 601.369 596.893, 613.942 581.625, 621.904 572 C 639.016 551.312, 648.500 539.830, 676 506.500 C 687.275 492.834, 701.184 475.994, 706.908 469.077 L 717.316 456.500 640.908 456 L 564.500 455.500 564.738 452.500 C 564.950 449.824, 566.232 438.986, 573.965 374.500 C 575.086 365.150, 576.877 350.525, 577.944 342 C 579.012 333.475, 581.532 313.225, 583.545 297 C 585.558 280.775, 587.594 264.575, 588.070 261 C 588.545 257.425, 588.949 253.488, 588.967 252.250 L 589 250 563.155 250 C 539.792 250, 537.163 250.168, 535.775 251.750"
-                    fill="white"
-                    fillRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <span
-                style={{
-                  fontSize: 26,
-                  fontWeight: '900',
-                  color: '#ffffff',
-                  letterSpacing: '-0.5px',
-                }}
-              >
-                STRIVE
-              </span>
-            </div>
-
-            {/* Type pill */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: 12,
-                fontWeight: '800',
-                color: t.accent,
-                textTransform: 'uppercase',
-                letterSpacing: '4px',
-                border: `1.5px solid ${t.accentBorder}`,
-                borderRadius: type === 'challenge' ? '8px' : '100px',
-                padding: '7px 20px',
-                background: `${t.accent}08`,
-              }}
-            >
-              <span style={{ fontSize: 14, display: 'flex' }}>{t.emoji}</span>
-              {t.label}
-            </div>
-          </div>
-
-          {/* ── Center content ─────────────────────────── */}
+          {/* Main Center Seal */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '100%',
-              height: '100%',
-              padding: '96px 80px 76px',
+              position: 'relative',
+              width: 400,
+              height: 400,
+              marginBottom: 32,
             }}
           >
-            {/* Icon container */}
+            {/* Wreath */}
             <div
               style={{
+                position: 'absolute',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: iconSize,
-                height: iconSize,
-                borderRadius: iconRadius,
-                border: `2px solid ${t.accentBorder}`,
-                background: t.accentDim,
-                marginBottom: 28,
-                transform: iconTransform,
               }}
             >
-              <span
-                style={{
-                  fontSize: 56,
-                  display: 'flex',
-                  transform: emojiTransform,
-                }}
-              >
-                {t.emoji}
-              </span>
+              <OliveWreath color={t.wreathColor} size={360} opacity={1} />
             </div>
 
-            {/* Decorative separator — simple line + dot */}
+            {/* Emoji inside Wreath */}
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: 24,
+                fontSize: 130,
+                transform: 'translateY(-18px)',
+                filter: 'drop-shadow(0px 8px 16px rgba(0,0,0,0.5))',
               }}
             >
-              <div
-                style={{
-                  width: '48px',
-                  height: '1px',
-                  background: t.accentBorder,
-                  display: 'flex',
-                }}
-              />
-              <div
-                style={{
-                  width: '5px',
-                  height: '5px',
-                  borderRadius: type === 'challenge' ? '1px' : '3px',
-                  background: t.accent,
-                  display: 'flex',
-                  transform: type === 'challenge' ? 'rotate(45deg)' : 'none',
-                }}
-              />
-              <div
-                style={{
-                  width: '48px',
-                  height: '1px',
-                  background: t.accentBorder,
-                  display: 'flex',
-                }}
-              />
-            </div>
-
-            {/* Title */}
-            <div
-              style={{
-                fontSize: 64,
-                fontWeight: '800',
-                color: '#ffffff',
-                textAlign: 'center',
-                lineHeight: 1.05,
-                letterSpacing: '-3px',
-                maxWidth: '860px',
-                display: 'flex',
-              }}
-            >
-              {text}
-            </div>
-
-            {/* Tagline */}
-            <div
-              style={{
-                fontSize: 16,
-                fontWeight: '500',
-                color: '#71717A',
-                marginTop: 18,
-                letterSpacing: '1.5px',
-                display: 'flex',
-              }}
-            >
-              {t.tagline}
+              {t.emoji}
             </div>
           </div>
 
-          {/* ── Bottom bar ─────────────────────────────── */}
+          {/* Minimal Label Below */}
           <div
             style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '48px',
+              color: t.accent,
+              fontSize: 22,
+              fontWeight: 600,
+              letterSpacing:
+                '12px' /* Wide tracking for a sophisticated, luxury feel */,
+              textTransform: 'uppercase',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderTop: `1px solid ${t.accent}0D`,
-              background: `${t.accent}05`,
+              opacity: 0.9,
             }}
           >
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: '700',
-                color: '#52525B',
-                letterSpacing: '5px',
-                textTransform: 'uppercase',
-                display: 'flex',
-              }}
-            >
-              strive.run
-            </span>
+            {name}
           </div>
-
-          {/* ── Corner accents (solid lines) ────────────── */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '76px',
-              left: '52px',
-              width: '32px',
-              height: '1px',
-              background: t.accentBorder,
-              display: 'flex',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              top: '76px',
-              left: '52px',
-              width: '1px',
-              height: '32px',
-              background: t.accentBorder,
-              display: 'flex',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '48px',
-              right: '52px',
-              width: '32px',
-              height: '1px',
-              background: t.accentBorder,
-              display: 'flex',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '48px',
-              right: '52px',
-              width: '1px',
-              height: '32px',
-              background: t.accentBorder,
-              display: 'flex',
-            }}
-          />
         </div>
       ),
       {

@@ -34,7 +34,11 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
     try {
       const currentUser = request.user!;
       const { id: clubId = '' } = params;
-      const { userId: userToInviteId, isExternal, email } = request.validatedData!;
+      const {
+        userId: userToInviteId,
+        isExternal,
+        email,
+      } = request.validatedData!;
 
       const club = await db.club.findUnique({
         where: { id: clubId },

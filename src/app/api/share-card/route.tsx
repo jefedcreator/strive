@@ -26,7 +26,8 @@ export async function GET(request: Request) {
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: '#050505',
-            backgroundImage: 'radial-gradient(circle at 50% 50%, #1a1a1a 0%, #050505 100%)',
+            backgroundImage:
+              'radial-gradient(circle at 50% 50%, #1a1a1a 0%, #050505 100%)',
             padding: '60px',
             color: 'white',
             fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -89,7 +90,15 @@ export async function GET(request: Request) {
                   />
                 </svg>
               </div>
-              <span style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '-1px' }}>Strive</span>
+              <span
+                style={{
+                  fontSize: '32px',
+                  fontWeight: '900',
+                  letterSpacing: '-1px',
+                }}
+              >
+                Strive
+              </span>
             </div>
             <div
               style={{
@@ -126,12 +135,19 @@ export async function GET(request: Request) {
                 left: 0,
                 right: 0,
                 height: '1px',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                background:
+                  'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
               }}
             />
 
             {/* User Info */}
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '40px',
+              }}
+            >
               {avatar ? (
                 <img
                   src={avatar}
@@ -164,28 +180,75 @@ export async function GET(request: Request) {
                 </div>
               )}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '32px', fontWeight: '800' }}>{name}</span>
-                <span style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.5)' }}>
+                <span style={{ fontSize: '32px', fontWeight: '800' }}>
+                  {name}
+                </span>
+                <span
+                  style={{
+                    fontSize: '18px',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                  }}
+                >
                   Finished &quot;{leaderboardName}&quot;
                 </span>
               </div>
             </div>
 
             {/* Rank and Score */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '60px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                marginBottom: '60px',
+              }}
+            >
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px', color: '#3b82f6', marginBottom: '8px' }}>
+                <span
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    color: '#3b82f6',
+                    marginBottom: '8px',
+                  }}
+                >
                   Leaderboard Rank
                 </span>
-                <span style={{ fontSize: '120px', fontWeight: '900', lineHeight: '1', letterSpacing: '-4px' }}>
+                <span
+                  style={{
+                    fontSize: '120px',
+                    fontWeight: '900',
+                    lineHeight: '1',
+                    letterSpacing: '-4px',
+                  }}
+                >
                   #{rank}
                 </span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <span style={{ fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px', color: 'rgba(255, 255, 255, 0.4)', marginBottom: '8px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    marginBottom: '8px',
+                  }}
+                >
                   Total Score
                 </span>
-                <span style={{ fontSize: '64px', fontWeight: '800' }}>{score}</span>
+                <span style={{ fontSize: '64px', fontWeight: '800' }}>
+                  {score}
+                </span>
               </div>
             </div>
 
@@ -214,10 +277,21 @@ export async function GET(request: Request) {
                     border: '1px solid rgba(255, 255, 255, 0.05)',
                   }}
                 >
-                  <span style={{ fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(255, 255, 255, 0.4)', marginBottom: '8px' }}>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      color: 'rgba(255, 255, 255, 0.4)',
+                      marginBottom: '8px',
+                    }}
+                  >
                     {stat.label}
                   </span>
-                  <span style={{ fontSize: '24px', fontWeight: '800' }}>{stat.value}</span>
+                  <span style={{ fontSize: '24px', fontWeight: '800' }}>
+                    {stat.value}
+                  </span>
                 </div>
               ))}
             </div>
