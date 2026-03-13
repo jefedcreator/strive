@@ -311,6 +311,29 @@ interface ActiveSession {
   reject: (reason?: any) => void;
 }
 
+export interface RewardItem {
+  id: string;
+  rewardId: string;
+  type: 'GOLD' | 'SILVER' | 'BRONZE' | 'CLUB_MILESTONE';
+  title: string;
+  description: string | null;
+  earnedAt: Date;
+  leaderboard: { id: string; name: string; clubId: string | null } | null;
+  club: { id: string; name: string; slug: string } | null;
+  milestone: number | null;
+  badgeUrl: string;
+}
+
+export interface RewardsData {
+  data: RewardItem[];
+  xp: number;
+  currentStreak: number;
+  longestStreak: number;
+  tier: { name: string; emoji: string; threshold: number };
+  nextTier: { name: string; emoji: string; threshold: number } | null;
+  tierBadgeUrl: string;
+}
+
 export { DateRangeFilters };
 export type {
   Activity,
