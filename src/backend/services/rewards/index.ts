@@ -175,7 +175,7 @@ export async function checkClubMilestones(clubId: string) {
       await db.notification.createMany({
         data: memberIds.map((userId) => ({
           userId,
-          message: `🛡️ ${club.name} hit the ${milestone}km milestone! You earned a reward.`,
+          message: `🔥 ${club.name} hit the ${milestone}km milestone! You earned a reward.`,
           type: 'reward' as const,
           clubId: club.id,
         })),

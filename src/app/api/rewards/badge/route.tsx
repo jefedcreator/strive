@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         primary: '#3b82f6',
         secondary: '#8b5cf6',
         glow: 'rgba(59, 130, 246, 0.3)',
-        icon: '🛡️',
+        icon: '🔥',
       },
     };
 
