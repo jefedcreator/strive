@@ -28,7 +28,7 @@ export async function generateMetadata({
   // const baseUrl =
   //   process.env.NEXT_PUBLIC_SERVER_URL ?? 'https://2551-105-113-112-54.ngrok-free.app';
   const ogType = invite.leaderboard.clubId ? 'leaderboard' : 'challenge';
-  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(leaderboardName)}&type=${ogType}`;
+  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(leaderboardName)}&type=${ogType}&footer=true`;
 
   return {
     metadataBase: new URL(baseUrl),

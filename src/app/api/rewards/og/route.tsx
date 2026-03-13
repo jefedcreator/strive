@@ -3,10 +3,6 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-/**
- * OG image for shared badge pages (1200×630, social-optimized).
- * Params: type, title, subtitle, username, milestone, context (leaderboard|challenge)
- */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -72,16 +68,18 @@ export async function GET(request: Request) {
             height: '100%',
             width: '100%',
             display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center', // Center everything vertically in the square
             fontFamily: 'system-ui, -apple-system, sans-serif',
             position: 'relative',
             overflow: 'hidden',
             background: isChallenge ? '#0C0A09' : '#09090B',
           }}
         >
-          {/* Background — different per context */}
+          {/* Backgrounds */}
           {isChallenge ? (
-            <>
-              {/* Challenge: warm diagonal streaks */}
+            <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
               <div
                 style={{
                   position: 'absolute',
@@ -104,23 +102,9 @@ export async function GET(request: Request) {
                   display: 'flex',
                 }}
               />
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: '-80px',
-                  left: '-80px',
-                  width: '400px',
-                  height: '400px',
-                  borderRadius: '200px',
-                  background:
-                    'radial-gradient(circle, rgba(239,68,68,0.06) 0%, transparent 70%)',
-                  display: 'flex',
-                }}
-              />
-            </>
+            </div>
           ) : (
-            <>
-              {/* Leaderboard: cool structured dots */}
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div
                 style={{
                   position: 'absolute',
@@ -133,191 +117,161 @@ export async function GET(request: Request) {
               />
               <div
                 style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '25%',
-                  width: '600px',
-                  height: '600px',
-                  borderRadius: '300px',
+                  width: '800px',
+                  height: '800px',
+                  borderRadius: '400px',
                   background:
                     'radial-gradient(circle, rgba(20,184,166,0.06) 0%, transparent 60%)',
-                  transform: 'translate(-50%, -50%)',
                   display: 'flex',
                 }}
               />
-            </>
+            </div>
           )}
 
-          {/* Left: Badge preview */}
+          {/* Center Column Content */}
           <div
             style={{
-              width: '42%',
-              height: '100%',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              position: 'relative',
+              zIndex: 10,
+              paddingBottom: '40px', // Offset for the bottom bar
             }}
           >
-            {/* Badge shape — challenge uses a hexagonal feel, leaderboard uses circle */}
+            {/* Top: Context label */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: 18,
+                fontWeight: '800',
+                color: contextAccent,
+                letterSpacing: '3px',
+                textTransform: 'uppercase',
+                border: `1.5px solid ${contextAccent}44`,
+                borderRadius: '8px',
+                padding: '6px 16px',
+                background: `${contextAccent}0A`,
+                marginBottom: 40,
+              }}
+            >
+              {contextLabel}
+            </div>
+
+            {/* Middle: Badge shape */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: isChallenge ? '260px' : '280px',
-                height: isChallenge ? '260px' : '280px',
-                borderRadius: isChallenge ? '32px' : '140px',
+                width: '320px', // Slightly larger for the square layout
+                height: '320px',
+                borderRadius: isChallenge ? '40px' : '160px',
                 background: `${c.primary}0D`,
                 border: `3px solid ${c.primary}33`,
-                boxShadow: `0 0 80px ${c.primary}12`,
-                position: 'relative',
-                transform: isChallenge ? 'rotate(0deg)' : 'none',
+                boxShadow: `0 0 100px ${c.primary}12`,
+                marginBottom: 40,
               }}
             >
-              <span style={{ fontSize: 90, display: 'flex', justifyContent: 'center', textAlign: 'center' }}>{c.icon}</span>
+              <span style={{ fontSize: 110, display: 'flex' }}>{c.icon}</span>
               <span
                 style={{
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: '900',
                   color: c.primary,
                   letterSpacing: '4px',
-                  marginTop: 10,
+                  marginTop: 16,
                   display: 'flex',
-                  justifyContent: 'center',
-                  textAlign: 'center',
+                  textTransform: 'uppercase',
                 }}
               >
                 {milestone ? `${milestone}km` : c.label}
               </span>
             </div>
-          </div>
 
-          {/* Right: Info */}
-          <div
-            style={{
-              width: '58%',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              padding: '0 56px 0 16px',
-            }}
-          >
-            {/* Context label */}
+            {/* Bottom: Typography Section */}
             <div
               style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '10px',
-                marginBottom: 16,
+                textAlign: 'center',
+                maxWidth: '700px',
               }}
             >
+              {/* Badge title */}
               <div
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: 18,
-                  fontWeight: '800',
-                  color: contextAccent,
-                  letterSpacing: '3px',
-                  textTransform: 'uppercase',
-                  border: `1.5px solid ${contextAccent}44`,
-                  borderRadius: '8px',
-                  padding: '5px 14px',
-                  background: `${contextAccent}0A`,
-                }}
-              >
-                {contextLabel}
-              </div>
-            </div>
-
-            {/* Badge title */}
-            <div
-              style={{
-                fontSize: 64,
-                fontWeight: '900',
-                color: '#ffffff',
-                lineHeight: 1.1,
-                letterSpacing: '-2px',
-                marginBottom: 10,
-                display: 'flex',
-                maxWidth: '500px',
-              }}
-            >
-              {title.length > 30 ? title.substring(0, 30) + '…' : title}
-            </div>
-
-            {/* Subtitle */}
-            {subtitle && (
-              <div
-                style={{
-                  fontSize: 24,
-                  fontWeight: '600',
-                  color: 'rgba(161,161,170,0.95)',
+                  fontSize: 64,
+                  fontWeight: '900',
+                  color: '#ffffff',
+                  lineHeight: 1.1,
+                  letterSpacing: '-2px',
                   marginBottom: 16,
                   display: 'flex',
-                  maxWidth: '440px',
-                  lineHeight: 1.4,
+                  justifyContent: 'center',
                 }}
               >
-                {subtitle.length > 70
-                  ? subtitle.substring(0, 70) + '…'
-                  : subtitle}
+                {title.length > 35 ? title.substring(0, 35) + '…' : title}
               </div>
-            )}
 
-            {/* Tagline */}
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: '700',
-                color: 'rgba(161,161,170,0.85)',
-                marginBottom: 16,
-                display: 'flex',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {contextTagline}
-            </div>
+              {/* Subtitle */}
+              {subtitle && (
+                <div
+                  style={{
+                    fontSize: 26,
+                    fontWeight: '600',
+                    color: 'rgba(161,161,170,0.95)',
+                    marginBottom: 24,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {subtitle.length > 70
+                    ? subtitle.substring(0, 70) + '…'
+                    : subtitle}
+                </div>
+              )}
 
-            {/* Earned by */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-              }}
-            >
+              {/* Earned by Username */}
               <div
                 style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '17px',
-                  background: `${contextAccent}1A`,
-                  border: `2px solid ${contextAccent}33`,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 22,
-                  fontWeight: '800',
-                  color: contextAccent,
+                  gap: '12px',
                 }}
               >
-                {username[0]?.toUpperCase() ?? 'R'}
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '20px',
+                    background: `${contextAccent}1A`,
+                    border: `2px solid ${contextAccent}33`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 24,
+                    fontWeight: '800',
+                    color: contextAccent,
+                  }}
+                >
+                  {username[0]?.toUpperCase() ?? 'R'}
+                </div>
+                <span
+                  style={{
+                    fontSize: 28,
+                    fontWeight: '700',
+                    color: 'rgba(255,255,255,0.95)',
+                    display: 'flex',
+                  }}
+                >
+                  {username}
+                </span>
               </div>
-              <span
-                style={{
-                  fontSize: 26,
-                  fontWeight: '700',
-                  color: 'rgba(255,255,255,0.95)',
-                  display: 'flex',
-                }}
-              >
-                {username}
-              </span>
             </div>
           </div>
 
@@ -328,27 +282,27 @@ export async function GET(request: Request) {
               bottom: 0,
               left: 0,
               right: 0,
-              height: '44px',
+              height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0 56px',
+              padding: '0 40px',
               borderTop: `1px solid rgba(255,255,255,0.05)`,
-              background: 'rgba(0,0,0,0.25)',
+              background: 'rgba(0,0,0,0.4)',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '10px',
               }}
             >
               <div
                 style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '4px',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '6px',
                   background: contextAccent,
                   display: 'flex',
                   alignItems: 'center',
@@ -356,14 +310,14 @@ export async function GET(request: Request) {
                   overflow: 'hidden',
                 }}
               >
-                <Logo width={18} height={18} fill="white" />
+                <Logo width={24} height={24} fill="white" />
               </div>
               <span
                 style={{
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: '900',
-                  color: 'rgba(255,255,255,0.6)',
-                  letterSpacing: '-0.3px',
+                  color: 'rgba(255,255,255,0.8)',
+                  letterSpacing: '1px',
                   display: 'flex',
                 }}
               >
@@ -372,7 +326,7 @@ export async function GET(request: Request) {
             </div>
             <span
               style={{
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: '700',
                 color: 'rgba(161,161,170,0.6)',
                 letterSpacing: '3px',
@@ -380,14 +334,15 @@ export async function GET(request: Request) {
                 display: 'flex',
               }}
             >
-              strive.run
+              usestrive.run
             </span>
           </div>
         </div>
       ),
       {
-        width: 1200,
-        height: 1200,
+        width: 1080,
+            // Standard social square
+        height: 1080, 
         headers: {
           'Cache-Control': 'public, max-age=31536000, immutable',
         },

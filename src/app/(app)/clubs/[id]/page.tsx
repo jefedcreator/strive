@@ -24,7 +24,7 @@ export async function generateMetadata({
   const description = club.description ?? `Check out ${clubName} on Strive!`;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
   const pageUrl = `${baseUrl}/clubs/${id}`;
-  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(clubName)}&type=club`;
+  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(clubName)}&type=club&footer=true`;
 
   const rawImage = club.image ?? imageUrl;
   const image = rawImage.startsWith('http')

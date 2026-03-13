@@ -24,7 +24,7 @@ export async function generateMetadata({
   const inviterName = invite.inviter?.fullname ?? 'Someone';
   const description = invite.club.description ?? `Join ${clubName} on Strive!`;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
-  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(clubName)}&type=club`;
+  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(clubName)}&type=club&footer=true`;
 
   const rawImage = invite.club.image ?? imageUrl ?? '/favicon.ico';
   const image = rawImage.startsWith('http')

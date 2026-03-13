@@ -1,4 +1,7 @@
+import Logo from '@/primitives/logo';
 import { ImageResponse } from 'next/og';
+
+export const runtime = 'edge';
 
 const OliveWreath = ({
   color,
@@ -32,20 +35,18 @@ export async function GET(request: Request) {
       | 'leaderboard'
       | 'challenge';
     const name = searchParams.get('name');
+    const showFooter = searchParams.get('footer') === 'true';
 
     const themes = {
       club: {
         bg: '#0A0F0D',
-        // accent: '#34D399',
         accent: '#F97316',
-        // wreathColor: '#94A3B8', // Silver-ish
         wreathColor: '#EAB308', // Gold
         emoji: '👥',
         label: 'STRIVE CLUB',
       },
       leaderboard: {
         bg: '#09090B',
-        // accent: '#14B8A6',
         accent: '#F97316',
         wreathColor: '#EAB308', // Gold
         emoji: '🏆',
@@ -54,7 +55,6 @@ export async function GET(request: Request) {
       challenge: {
         bg: '#0C0A09',
         accent: '#F97316',
-        // wreathColor: '#B45309', // Bronze-ish
         wreathColor: '#EAB308', // Gold
         emoji: '⚔️',
         label: 'STRIVE CHALLENGE',
@@ -75,60 +75,136 @@ export async function GET(request: Request) {
             justifyContent: 'center',
             backgroundColor: t.bg,
             fontFamily: 'system-ui, -apple-system, sans-serif',
+            position: 'relative',
           }}
         >
-          {/* Main Center Seal */}
+          {/* Main Content Area (lifted slightly to account for the footer if present) */}
           <div
             style={{
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              position: 'relative',
-              width: 400,
-              height: 400,
-              marginBottom: 32,
+              paddingBottom: showFooter ? '56px' : '0px', // Offsets the height of the absolute footer if shown
             }}
           >
-            {/* Wreath */}
+            {/* Main Center Seal */}
             <div
               style={{
-                position: 'absolute',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                position: 'relative',
+                width: 400,
+                height: 400,
+                marginBottom: 32,
               }}
             >
-              <OliveWreath color={t.wreathColor} size={360} opacity={1} />
+              {/* Wreath */}
+              <div
+                style={{
+                  position: 'absolute',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <OliveWreath color={t.wreathColor} size={360} opacity={1} />
+              </div>
+
+              {/* Emoji inside Wreath */}
+              <div
+                style={{
+                  display: 'flex',
+                  fontSize: 130,
+                  transform: 'translateY(-18px)',
+                  filter: 'drop-shadow(0px 8px 16px rgba(0,0,0,0.5))',
+                }}
+              >
+                {t.emoji}
+              </div>
             </div>
 
-            {/* Emoji inside Wreath */}
+            {/* Minimal Label Below */}
             <div
               style={{
+                color: t.accent,
+                fontSize: 22,
+                fontWeight: 600,
+                letterSpacing: '12px', /* Wide tracking for a sophisticated, luxury feel */
+                textTransform: 'uppercase',
                 display: 'flex',
-                fontSize: 130,
-                transform: 'translateY(-18px)',
-                filter: 'drop-shadow(0px 8px 16px rgba(0,0,0,0.5))',
+                opacity: 0.9,
               }}
             >
-              {t.emoji}
+              {name}
             </div>
           </div>
 
-          {/* Minimal Label Below */}
-          <div
-            style={{
-              color: t.accent,
-              fontSize: 22,
-              fontWeight: 600,
-              letterSpacing:
-                '12px' /* Wide tracking for a sophisticated, luxury feel */,
-              textTransform: 'uppercase',
-              display: 'flex',
-              opacity: 0.9,
-            }}
-          >
-            {name}
-          </div>
+          {/* Optional Footer Area */}
+          {showFooter && (
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 40px',
+                borderTop: `1px solid rgba(255,255,255,0.05)`,
+                background: 'rgba(0,0,0,0.4)',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '6px',
+                    background: '#F97316', // Forces the orange background for the white cutout!
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Logo width={24} height={24} fill="#FFFFFF" />
+                </div>
+                <span
+                  style={{
+                    fontSize: 18,
+                    fontWeight: '900',
+                    color: 'rgba(255,255,255,0.8)',
+                    letterSpacing: '1px',
+                    display: 'flex',
+                  }}
+                >
+                  STRIVE
+                </span>
+              </div>
+              <span
+                style={{
+                  fontSize: 16,
+                  fontWeight: '700',
+                  color: 'rgba(161,161,170,0.6)',
+                  letterSpacing: '3px',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                }}
+              >
+                usestrive.run
+              </span>
+            </div>
+          )}
         </div>
       ),
       {
