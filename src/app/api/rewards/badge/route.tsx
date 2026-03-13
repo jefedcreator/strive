@@ -87,112 +87,87 @@ export async function GET(request: Request) {
               position: 'relative',
             }}
           >
-            {/* Badge body */}
+            {/* Icon */}
             <div
               style={{
+                fontSize: '160px',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '700px',
-                height: '700px',
-                borderRadius: '350px',
-                background: `linear-gradient(145deg, ${c.primary}22, ${c.secondary}11)`,
-                border: `4px solid ${c.primary}44`,
-                position: 'relative',
+                marginBottom: '16px',
               }}
             >
-              {/* Inner circle */}
+              {c.icon}
+            </div>
+
+            {/* Rank label (for podium types) */}
+            {rankLabel && (
               <div
                 style={{
+                  fontSize: '48px',
+                  fontWeight: '900',
+                  color: c.primary,
+                  letterSpacing: '8px',
+                  marginBottom: '8px',
                   display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
                   justifyContent: 'center',
-                  width: '550px',
-                  height: '550px',
-                  borderRadius: '275px',
-                  background: `linear-gradient(145deg, ${c.primary}33, ${c.secondary}22)`,
-                  border: `3px solid ${c.primary}66`,
+                  textAlign: 'center',
                 }}
               >
-                {/* Icon */}
-                <div
-                  style={{
-                    fontSize: '160px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '16px',
-                  }}
-                >
-                  {c.icon}
-                </div>
-
-                {/* Rank label (for podium types) */}
-                {rankLabel && (
-                  <div
-                    style={{
-                      fontSize: '48px',
-                      fontWeight: '900',
-                      color: c.primary,
-                      letterSpacing: '8px',
-                      marginBottom: '8px',
-                      display: 'flex',
-                    }}
-                  >
-                    {rankLabel} PLACE
-                  </div>
-                )}
-
-                {/* Club milestone value */}
-                {isClub && milestone && (
-                  <div
-                    style={{
-                      fontSize: '64px',
-                      fontWeight: '900',
-                      color: c.primary,
-                      letterSpacing: '-2px',
-                      marginBottom: '8px',
-                      display: 'flex',
-                    }}
-                  >
-                    {milestone}km
-                  </div>
-                )}
-
-                {/* Title */}
-                <div
-                  style={{
-                    fontSize: '28px',
-                    fontWeight: '700',
-                    color: 'white',
-                    textAlign: 'center',
-                    maxWidth: '400px',
-                    lineHeight: '1.3',
-                    display: 'flex',
-                  }}
-                >
-                  {title}
-                </div>
-
-                {/* Subtitle */}
-                {subtitle && (
-                  <div
-                    style={{
-                      fontSize: '20px',
-                      fontWeight: '500',
-                      color: 'rgba(255, 255, 255, 0.6)',
-                      marginTop: '8px',
-                      display: 'flex',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {subtitle}
-                  </div>
-                )}
+                {rankLabel} PLACE
               </div>
+            )}
+
+            {/* Club milestone value */}
+            {isClub && milestone && (
+              <div
+                style={{
+                  fontSize: '64px',
+                  fontWeight: '900',
+                  color: c.primary,
+                  letterSpacing: '-2px',
+                  marginBottom: '8px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                {milestone}km
+              </div>
+            )}
+
+            {/* Title */}
+            <div
+              style={{
+                fontSize: '28px',
+                fontWeight: '700',
+                color: 'white',
+                textAlign: 'center',
+                maxWidth: '400px',
+                lineHeight: '1.3',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              {title}
             </div>
+
+            {/* Subtitle */}
+            {subtitle && (
+              <div
+                style={{
+                  fontSize: '20px',
+                  fontWeight: '500',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  marginTop: '8px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                {subtitle}
+              </div>
+            )}
 
             {/* Standardized Strive watermark at bottom */}
             <div
@@ -237,7 +212,7 @@ export async function GET(request: Request) {
         height: 1080,
         headers: {
           'Content-Type': 'image/png',
-          // 'Cache-Control': 'public, max-age=31536000, immutable',
+          'Cache-Control': 'public, max-age=31536000, immutable',
         },
       }
     );

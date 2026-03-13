@@ -176,7 +176,7 @@ export async function GET(request: Request) {
                 transform: isChallenge ? 'rotate(0deg)' : 'none',
               }}
             >
-              <span style={{ fontSize: 90, display: 'flex' }}>{c.icon}</span>
+              <span style={{ fontSize: 90, display: 'flex', justifyContent: 'center', textAlign: 'center' }}>{c.icon}</span>
               <span
                 style={{
                   fontSize: 16,
@@ -185,6 +185,8 @@ export async function GET(request: Request) {
                   letterSpacing: '4px',
                   marginTop: 10,
                   display: 'flex',
+                  justifyContent: 'center',
+                  textAlign: 'center',
                 }}
               >
                 {milestone ? `${milestone}km` : c.label}
@@ -385,7 +387,7 @@ export async function GET(request: Request) {
       ),
       {
         width: 1200,
-        height: 630,
+        height: 1200,
         headers: {
           'Cache-Control': 'public, max-age=31536000, immutable',
         },

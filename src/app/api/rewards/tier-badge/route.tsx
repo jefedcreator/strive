@@ -76,86 +76,56 @@ export async function GET(request: Request) {
               position: 'relative',
             }}
           >
-            {/* Outer ring */}
+            {/* Tier emoji */}
             <div
               style={{
+                fontSize: '150px',
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '720px',
-                height: '720px',
-                borderRadius: '360px',
-                background: design.gradient,
-                border: `4px solid ${design.accent}44`,
+                marginBottom: '10px',
               }}
             >
-              {/* Inner badge */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '560px',
-                  height: '560px',
-                  borderRadius: '280px',
-                  background: `${design.gradient}`,
-                  border: `3px solid ${design.accent}66`,
-                }}
-              >
-                {/* Tier emoji */}
-                <div
-                  style={{
-                    fontSize: '150px',
-                    display: 'flex',
-                    marginBottom: '10px',
-                  }}
-                >
-                  {design.emoji}
-                </div>
+              {design.emoji}
+            </div>
 
-                {/* Tier name */}
-                <div
-                  style={{
-                    fontSize: '52px',
-                    fontWeight: '900',
-                    color: design.accent,
-                    letterSpacing: '6px',
-                    textTransform: 'uppercase',
-                    display: 'flex',
-                    marginBottom: '6px',
-                  }}
-                >
-                  {tierName}
-                </div>
+            {/* Tier name */}
+            <div
+              style={{
+                fontSize: '52px',
+                fontWeight: '900',
+                color: design.accent,
+                letterSpacing: '6px',
+                textTransform: 'uppercase',
+                display: 'flex',
+                marginBottom: '6px',
+              }}
+            >
+              {tierName}
+            </div>
 
-                {/* Username */}
-                <div
-                  style={{
-                    fontSize: '26px',
-                    fontWeight: '600',
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    display: 'flex',
-                    marginBottom: '12px',
-                  }}
-                >
-                  {username}
-                </div>
+            {/* Username */}
+            <div
+              style={{
+                fontSize: '26px',
+                fontWeight: '600',
+                color: 'rgba(255, 255, 255, 0.8)',
+                display: 'flex',
+                marginBottom: '12px',
+              }}
+            >
+              {username}
+            </div>
 
-                {/* XP */}
-                <div
-                  style={{
-                    fontSize: '22px',
-                    fontWeight: '700',
-                    color: 'rgba(255, 255, 255, 0.5)',
-                    display: 'flex',
-                    letterSpacing: '2px',
-                  }}
-                >
-                  {Number(xp).toLocaleString()} XP
-                </div>
-              </div>
+            {/* XP */}
+            <div
+              style={{
+                fontSize: '22px',
+                fontWeight: '700',
+                color: 'rgba(255, 255, 255, 0.5)',
+                display: 'flex',
+                letterSpacing: '2px',
+              }}
+            >
+              {Number(xp).toLocaleString()} XP
             </div>
 
             {/* Strive watermark */}

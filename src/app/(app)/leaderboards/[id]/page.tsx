@@ -20,7 +20,7 @@ export async function generateMetadata({
     };
   }
 
-  const leaderboardName = leaderboard.name;
+  const leaderboardName = `${leaderboard.name}`;
   const description =
     leaderboard.description ?? `Check out ${leaderboardName} on Strive!`;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
