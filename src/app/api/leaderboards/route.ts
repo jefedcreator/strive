@@ -146,6 +146,8 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
                         fullname: true,
                         username: true,
                         avatar: true,
+                        xp: true,
+                        currentStreak: true,
                       },
                     },
                   },

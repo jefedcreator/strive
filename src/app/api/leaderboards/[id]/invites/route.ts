@@ -32,8 +32,11 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
     try {
       const currentUser = request.user!;
       const { id: leaderboardId = '' } = params;
-      const { userId: userToInviteId, isExternal, email } =
-        request.validatedData!;
+      const {
+        userId: userToInviteId,
+        isExternal,
+        email,
+      } = request.validatedData!;
 
       const leaderboard = await db.leaderboard.findUnique({
         where: { id: leaderboardId },
