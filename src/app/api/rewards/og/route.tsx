@@ -219,7 +219,7 @@ export async function GET(request: Request) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  fontSize: 13,
+                  fontSize: 18,
                   fontWeight: '800',
                   color: contextAccent,
                   letterSpacing: '3px',
@@ -237,8 +237,8 @@ export async function GET(request: Request) {
             {/* Badge title */}
             <div
               style={{
-                fontSize: 42,
-                fontWeight: '800',
+                fontSize: 64,
+                fontWeight: '900',
                 color: '#ffffff',
                 lineHeight: 1.1,
                 letterSpacing: '-2px',
@@ -254,9 +254,9 @@ export async function GET(request: Request) {
             {subtitle && (
               <div
                 style={{
-                  fontSize: 16,
-                  fontWeight: '500',
-                  color: 'rgba(161,161,170,0.7)',
+                  fontSize: 24,
+                  fontWeight: '600',
+                  color: 'rgba(161,161,170,0.95)',
                   marginBottom: 16,
                   display: 'flex',
                   maxWidth: '440px',
@@ -272,9 +272,9 @@ export async function GET(request: Request) {
             {/* Tagline */}
             <div
               style={{
-                fontSize: 13,
-                fontWeight: '600',
-                color: 'rgba(161,161,170,0.5)',
+                fontSize: 20,
+                fontWeight: '700',
+                color: 'rgba(161,161,170,0.85)',
                 marginBottom: 16,
                 display: 'flex',
                 letterSpacing: '0.5px',
@@ -301,8 +301,8 @@ export async function GET(request: Request) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 15,
-                  fontWeight: '700',
+                  fontSize: 22,
+                  fontWeight: '800',
                   color: contextAccent,
                 }}
               >
@@ -310,9 +310,9 @@ export async function GET(request: Request) {
               </div>
               <span
                 style={{
-                  fontSize: 17,
-                  fontWeight: '600',
-                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: 26,
+                  fontWeight: '700',
+                  color: 'rgba(255,255,255,0.95)',
                   display: 'flex',
                 }}
               >
@@ -360,9 +360,9 @@ export async function GET(request: Request) {
               </div>
               <span
                 style={{
-                  fontSize: 12,
-                  fontWeight: '800',
-                  color: 'rgba(255,255,255,0.35)',
+                  fontSize: 16,
+                  fontWeight: '900',
+                  color: 'rgba(255,255,255,0.6)',
                   letterSpacing: '-0.3px',
                   display: 'flex',
                 }}
@@ -372,9 +372,9 @@ export async function GET(request: Request) {
             </div>
             <span
               style={{
-                fontSize: 11,
-                fontWeight: '600',
-                color: 'rgba(161,161,170,0.3)',
+                fontSize: 14,
+                fontWeight: '700',
+                color: 'rgba(161,161,170,0.6)',
                 letterSpacing: '3px',
                 textTransform: 'uppercase',
                 display: 'flex',
