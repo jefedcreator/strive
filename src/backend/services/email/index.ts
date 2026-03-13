@@ -10,14 +10,22 @@ export const sendRewardEmail = async (
   to: string,
   badgeType: string,
   leaderboardName: string,
-  contextType: 'leaderboard' | 'challenge'
+  contextType: 'leaderboard' | 'challenge',
+  badgeUrl?: string,
+  rewardUrl?: string
 ) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Strive <hello@yourstrive.com>', // Update this with the verified domain if applicable
+      from: 'Strive <hello@usestrive.run>', // Update this with the verified domain if applicable
       to,
       subject: `You won a ${badgeType} badge in ${leaderboardName}!`,
-      react: React.createElement(RewardNotification, { badgeType, leaderboardName, contextType }),
+      react: RewardNotification({
+        badgeType,
+        leaderboardName,
+        contextType,
+        badgeUrl,
+        rewardUrl,
+      }),
     });
 
     if (error) {
@@ -35,14 +43,21 @@ export const sendRewardEmail = async (
 export const sendClubMilestoneEmail = async (
   to: string,
   clubName: string,
-  milestoneKm: number
+  milestoneKm: number,
+  badgeUrl?: string,
+  rewardUrl?: string
 ) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Strive <hello@yourstrive.com>', // Update this with the verified domain if applicable
+      from: 'Strive <hello@usestrive.run>', // Update this with the verified domain if applicable
       to,
       subject: `Your club ${clubName} hit the ${milestoneKm}km milestone!`,
-      react: React.createElement(ClubMilestoneNotification, { clubName, milestoneKm }),
+      react: ClubMilestoneNotification({
+        clubName,
+        milestoneKm,
+        badgeUrl,
+        rewardUrl,
+      }),
     });
 
     if (error) {

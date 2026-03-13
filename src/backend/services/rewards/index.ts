@@ -1,87 +1,7 @@
 import { db } from '@/server/db';
-import { type RewardType } from '@prisma/client';
+import { sendClubMilestoneEmail } from '../email';
 
-const CLUB_MILESTONES = [500, 1000, 2500, 5000, 10000]; // km
-
-/**
- * Award rewards to top 3 finishers of an expired leaderboard.
- * Idempotent — skips if rewards already exist for this leaderboard.
- */
-export async function awardLeaderboardRewards(leaderboardId: string) {
-  // Check if rewards already awarded for this leaderboard
-  const existingRewards = await db.reward.findFirst({
-    where: { leaderboardId },
-  });
-
-  if (existingRewards) return; // Already processed
-
-  const leaderboard = await db.leaderboard.findUnique({
-    where: { id: leaderboardId },
-    include: {
-      entries: {
-        where: { isActive: true },
-        orderBy: { score: 'desc' },
-        take: 3,
-        include: {
-          user: { select: { id: true, fullname: true } },
-        },
-      },
-    },
-  });
-
-  if (!leaderboard) return;
-
-  // Only award if leaderboard is expired
-  if (
-    !leaderboard.expiryDate ||
-    new Date(leaderboard.expiryDate) > new Date()
-  ) {
-    return;
-  }
-
-  // Only award if there are entries with scores > 0
-  const qualifiedEntries = leaderboard.entries.filter((e) => e.score > 0);
-  if (qualifiedEntries.length === 0) return;
-
-  const isChallenge = !leaderboard.clubId;
-  const typeLabel = isChallenge ? 'Challenge' : 'Leaderboard';
-  const rewardTypes: RewardType[] = ['GOLD', 'SILVER', 'BRONZE'];
-
-  for (let i = 0; i < Math.min(qualifiedEntries.length, 3); i++) {
-    const entry = qualifiedEntries[i]!;
-    const type = rewardTypes[i]!;
-    const placeLabel = i === 0 ? '1st' : i === 1 ? '2nd' : '3rd';
-
-    // Create the reward
-    const reward = await db.reward.create({
-      data: {
-        type,
-        title: `${placeLabel} Place — ${leaderboard.name}`,
-        description: `Earned ${placeLabel} place in the ${typeLabel} "${leaderboard.name}"`,
-        leaderboardId: leaderboard.id,
-        clubId: leaderboard.clubId,
-      },
-    });
-
-    // Assign to the user
-    await db.userReward.create({
-      data: {
-        userId: entry.userId,
-        rewardId: reward.id,
-      },
-    });
-
-    // Send notification
-    await db.notification.create({
-      data: {
-        userId: entry.userId,
-        message: `🏆 You earned ${placeLabel} place in "${leaderboard.name}"! View your reward.`,
-        type: 'reward',
-        leaderboardId: leaderboard.id,
-      },
-    });
-  }
-}
+const CLUB_MILESTONES = [10, 20, 50, 100, 200, 250, 500, 1000, 2500, 5000, 10000]; // km
 
 /**
  * Check and award club milestone rewards based on cumulative distance.
@@ -155,7 +75,7 @@ export async function checkClubMilestones(clubId: string) {
 
       // Award to all current active members
       for (const member of membersWithEmails) {
-        await db.userReward.upsert({
+        const userReward = await db.userReward.upsert({
           where: {
             userId_rewardId: { userId: member.id, rewardId: reward.id },
           },
@@ -163,11 +83,27 @@ export async function checkClubMilestones(clubId: string) {
           update: {},
         });
 
+        // Build URLs for the email
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
+        const rewardUrl = `${baseUrl}/rewards/${userReward.id}`;
+        
+        const badgeParams = new URLSearchParams({
+          type: 'club',
+          title: reward.title,
+          ...(reward.description ? { subtitle: reward.description } : {}),
+          ...(reward.milestone ? { milestone: String(reward.milestone) } : {}),
+        });
+        const badgeUrl = `${baseUrl}/api/rewards/badge?${badgeParams.toString()}`;
+
         // Send Email
         if (member.email) {
-          // Import this specific function dynamically or ensure it's imported at the top of the file
-          const { sendClubMilestoneEmail } = await import('../email');
-          await sendClubMilestoneEmail(member.email, club.name, milestone);
+          await sendClubMilestoneEmail(
+            member.email, 
+            club.name, 
+            milestone,
+            badgeUrl,
+            rewardUrl
+          );
         }
       }
 

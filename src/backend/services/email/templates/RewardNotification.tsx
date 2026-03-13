@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Html,
   Head,
@@ -8,19 +7,25 @@ import {
   Heading,
   Tailwind,
   Section,
+  Img,
+  Button,
 } from '@react-email/components';
 
 interface RewardNotificationProps {
   badgeType: string;
   leaderboardName: string;
   contextType: 'leaderboard' | 'challenge';
+  badgeUrl?: string;
+  rewardUrl?: string;
 }
 
-const RewardNotification: React.FC<RewardNotificationProps> = ({
+const RewardNotification = ({
   badgeType = 'GOLD',
   leaderboardName = 'Weekly Challenge',
   contextType = 'leaderboard',
-}) => {
+  badgeUrl,
+  rewardUrl,
+}:RewardNotificationProps) => {
   return (
     <Html>
       <Head />
@@ -34,6 +39,16 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
             </Section>
             
             <Section className="text-center">
+              {badgeUrl && (
+                <Img
+                  src={badgeUrl}
+                  width="200"
+                  height="200"
+                  alt={`${badgeType} Badge`}
+                  className="mx-auto mb-6 rounded-lg"
+                />
+              )}
+              
               <Text className="text-lg text-gray-700">
                 You've earned a <strong className="text-indigo-600">{badgeType}</strong> badge for your performance in the <strong>{leaderboardName}</strong> {contextType}!
               </Text>
@@ -42,6 +57,17 @@ const RewardNotification: React.FC<RewardNotificationProps> = ({
                 Keep up the great work and continue striving for more achievements.
               </Text>
             </Section>
+
+            {rewardUrl && (
+              <Section className="text-center mt-8">
+                <Button
+                  className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-md"
+                  href={rewardUrl}
+                >
+                  View Your Reward
+                </Button>
+              </Section>
+            )}
 
             <Section className="mt-8 text-center">
               <Text className="text-sm text-gray-400">

@@ -22,7 +22,6 @@ import {
 } from '@/utils/exceptions';
 import { type Leaderboard, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import { awardLeaderboardRewards } from '@/backend/services/rewards';
 
 /**
  * @pathParams paramValidator
@@ -203,14 +202,6 @@ export const GET = withMiddleware<
         );
       }
 
-      // Lazily award rewards if leaderboard is expired
-      if (
-        leaderboard.expiryDate &&
-        new Date(leaderboard.expiryDate) < new Date()
-      ) {
-        // Fire and forget — don't block the response
-        awardLeaderboardRewards(leaderboard.id).catch(console.error);
-      }
 
       const response: ApiResponse<typeof leaderboard> = {
         status: 200,

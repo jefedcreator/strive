@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Html,
   Head,
@@ -8,17 +7,23 @@ import {
   Heading,
   Tailwind,
   Section,
+  Img,
+  Button,
 } from '@react-email/components';
 
 interface ClubMilestoneNotificationProps {
   clubName: string;
   milestoneKm: number;
+  badgeUrl?: string;
+  rewardUrl?: string;
 }
 
-const ClubMilestoneNotification: React.FC<ClubMilestoneNotificationProps> = ({
+const ClubMilestoneNotification = ({
   clubName = 'Your Club',
   milestoneKm = 100,
-}) => {
+  badgeUrl,
+  rewardUrl,
+}:ClubMilestoneNotificationProps) => {
   return (
     <Html>
       <Head />
@@ -32,6 +37,16 @@ const ClubMilestoneNotification: React.FC<ClubMilestoneNotificationProps> = ({
             </Section>
             
             <Section className="text-center">
+              {badgeUrl && (
+                <Img
+                  src={badgeUrl}
+                  width="200"
+                  height="200"
+                  alt={`Club Milestone Badge`}
+                  className="mx-auto mb-6 rounded-lg"
+                />
+              )}
+
               <Text className="text-lg text-gray-700">
                 You and your team at <strong>{clubName}</strong> have officially reached the <strong className="text-indigo-600">{milestoneKm}km</strong> milestone! 
               </Text>
@@ -39,6 +54,17 @@ const ClubMilestoneNotification: React.FC<ClubMilestoneNotificationProps> = ({
                 Thank you for contributing to your club's success. Your Club Milestone Badge has been awarded!
               </Text>
             </Section>
+
+            {rewardUrl && (
+              <Section className="text-center mt-8">
+                <Button
+                  className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-md"
+                  href={rewardUrl}
+                >
+                  View Your Reward
+                </Button>
+              </Section>
+            )}
 
             <Section className="mt-8 text-center">
               <Text className="text-sm text-gray-400">
