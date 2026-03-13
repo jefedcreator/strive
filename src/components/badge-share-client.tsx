@@ -115,7 +115,7 @@ export const BadgeShareClient: React.FC<{ badge: BadgeShareData }> = ({
                   className="object-cover"
                 />
               ) : (
-                badge.username[0]?.toUpperCase() ?? 'R'
+                (badge.username[0]?.toUpperCase() ?? 'R')
               )}
             </div>
             <div>

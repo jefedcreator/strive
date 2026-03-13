@@ -32,7 +32,13 @@ interface LeaderboardModalProps {
   clubs: ClubListItem[];
 }
 
-import { Calendar as CalendarIcon, ChevronDown, X, Trophy, Swords } from 'lucide-react';
+import {
+  Calendar as CalendarIcon,
+  ChevronDown,
+  X,
+  Trophy,
+  Swords,
+} from 'lucide-react';
 
 export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   isOpen,
@@ -46,7 +52,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   isPending,
   clubs,
 }) => {
-  const [isChallenge, setIsChallenge] = useState(!control._defaultValues.clubId);
+  const [isChallenge, setIsChallenge] = useState(
+    !control._defaultValues.clubId
+  );
 
   const ModeIcon = isChallenge ? Swords : Trophy;
 
@@ -62,11 +70,13 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
           {/* ─── Header ──────────────────────────────────────── */}
           <div className="flex items-start justify-between border-b border-gray-100 dark:border-[#1E1E22] p-6">
             <div className="flex items-start gap-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                isChallenge
-                  ? 'bg-orange-500/10 text-orange-500'
-                  : 'bg-teal-500/10 text-teal-500'
-              }`}>
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                  isChallenge
+                    ? 'bg-orange-500/10 text-orange-500'
+                    : 'bg-teal-500/10 text-teal-500'
+                }`}
+              >
                 <ModeIcon className="w-5 h-5" />
               </div>
               <div>
@@ -190,7 +200,8 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   Visibility
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-[#71717A]">
-                  Public {isChallenge ? 'challenges' : 'leaderboards'} are visible to everyone.
+                  Public {isChallenge ? 'challenges' : 'leaderboards'} are
+                  visible to everyone.
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">

@@ -88,8 +88,12 @@ export const LeaderboardDetailClient: React.FC<
     : false;
   const isInactive = !leaderboard.isActive;
   const isChallenge = !leaderboard.clubId;
-  const userEntry = currentUserId ? entries.find(e => e.userId === currentUserId) : null;
-  const userRank = currentUserId ? entries.findIndex(e => e.userId === currentUserId) + 1 : null;
+  const userEntry = currentUserId
+    ? entries.find((e) => e.userId === currentUserId)
+    : null;
+  const userRank = currentUserId
+    ? entries.findIndex((e) => e.userId === currentUserId) + 1
+    : null;
 
   // Fetch clubs for the modal dropdown
   const { data: clubs = [] } = useQuery<
@@ -303,7 +307,9 @@ export const LeaderboardDetailClient: React.FC<
                     className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
                   >
                     <LogIn className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                    {joinMutation.isPending ? 'Joining...' : `Join ${isChallenge ? 'Challenge' : 'Leaderboard'}`}
+                    {joinMutation.isPending
+                      ? 'Joining...'
+                      : `Join ${isChallenge ? 'Challenge' : 'Leaderboard'}`}
                   </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem
@@ -389,7 +395,8 @@ export const LeaderboardDetailClient: React.FC<
                   Share Your Moment
                 </Modal.Title>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Great work! Download and share your achievements with the world.
+                  Great work! Download and share your achievements with the
+                  world.
                 </p>
               </div>
               <Modal.Close className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">

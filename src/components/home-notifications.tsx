@@ -36,14 +36,13 @@ export function timeAgo(date: Date | string): string {
 
 export function HomeNotifications({ token }: { token: string }) {
   const { data, isLoading } = useQuery<
-    PaginatedApiResponse<NotificationWithRelations[]> // Kept PaginatedApiResponse for consistency with data type
+    PaginatedApiResponse<NotificationWithRelations[]> 
   >({
     queryKey: ['notifications', 'home-preview'],
     queryFn: async () => {
       const res = await api.get<
         PaginatedApiResponse<NotificationWithRelations[]>
-      >('/notifications', {
-        params: { page: 1, limit: 10 },
+      >('/notifications?size=3', {
         headers: { Authorization: `Bearer ${token}` },
       });
       return res.data;

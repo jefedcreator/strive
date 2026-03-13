@@ -138,11 +138,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         body.email = debouncedEmail;
         delete body.userId;
       }
-      return api.post(
-        `/${variant}s/${entityId}/invites`,
-        body,
-        { headers: { Authorization: `Bearer ${session?.user?.token}` } }
-      );
+      return api.post(`/${variant}s/${entityId}/invites`, body, {
+        headers: { Authorization: `Bearer ${session?.user?.token}` },
+      });
     },
     onSuccess: () => {
       toast.success(`Invite sent to ${foundUser?.fullname}!`);
