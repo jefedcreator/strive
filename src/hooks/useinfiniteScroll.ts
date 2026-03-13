@@ -4,21 +4,20 @@ import { useEffect, useState, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import type { PaginatedApiResponse } from '@/types';
 
-interface UseInfiniteScrollProps<T extends { id: string | number }> {
+interface UseInfiniteScrollProps<T> {
   data: PaginatedApiResponse<T[]>;
   page: number;
   setPage: (page: number) => void;
   refresh?: number;
 }
 
-export function useInfiniteScroll<T extends { id: string | number }>({
+export function useInfiniteScroll<T>({
   data,
   page,
   setPage,
   refresh = 0,
 }: UseInfiniteScrollProps<T>) {
   const [allItems, setAllItems] = useState<T[]>(data.data);
-  // Track which pages have been successfully integrated to avoid duplicate appends
   const processedPages = useRef<Set<number>>(new Set([data.page]));
 
   useEffect(() => {
@@ -27,9 +26,11 @@ export function useInfiniteScroll<T extends { id: string | number }>({
       processedPages.current = new Set([1]);
     } else if (!processedPages.current.has(data.page)) {
       setAllItems((prev) => {
-        // Use a Map to ensure unique items by ID during accumulation
-        const itemsMap = new Map(prev.map((item) => [item.id, item]));
-        data.data.forEach((item) => itemsMap.set(item.id, item));
+        const getIdentifier = (item: any) =>
+          item.id || item._id || JSON.stringify(item);
+
+        const itemsMap = new Map(prev.map((item) => [getIdentifier(item), item]));
+        data.data.forEach((item) => itemsMap.set(getIdentifier(item), item));
         return Array.from(itemsMap.values());
       });
       processedPages.current.add(data.page);
