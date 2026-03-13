@@ -17,7 +17,7 @@ import {
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import InviteEmail from '@/components/emails/invite-email';
+import InviteEmail from '@/backend/services/email/templates/invite-email';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
 
