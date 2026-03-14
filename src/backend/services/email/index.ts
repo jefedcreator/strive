@@ -3,8 +3,30 @@ import { Resend } from 'resend';
 import { env } from '@/env';
 import RewardNotification from './templates/RewardNotification';
 import ClubMilestoneNotification from './templates/ClubMilestoneNotification';
+import WelcomeNotification from './templates/WelcomeNotification';
 
 const resend = new Resend(env.RESEND_API_KEY);
+
+export const sendWelcomeEmail = async (to: string, fullname: string) => {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Strive <hello@usestrive.run>',
+      to,
+      subject: 'Welcome to Strive! 🚀',
+      react: WelcomeNotification({ fullname }),
+    });
+
+    if (error) {
+      console.error('Error sending welcome email:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Unexpected error sending welcome email:', error);
+    return { success: false, error };
+  }
+};
 
 export const sendRewardEmail = async (
   to: string,

@@ -63,6 +63,13 @@ class AuthService {
         data,
       });
 
+      // Send welcome email to newly registered user
+      if (createdUser.email) {
+        // Use dynamic import to avoid potential circular dependencies if email service imports AuthService
+        const { sendWelcomeEmail } = await import('../email');
+        void sendWelcomeEmail(createdUser.email, createdUser.fullname ?? 'Runner');
+      }
+
       return createdUser;
     } catch (error) {
       console.error('Error in findOrCreateUser:', error);
