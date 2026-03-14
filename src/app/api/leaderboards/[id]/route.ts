@@ -49,6 +49,12 @@ export const PUT = withMiddleware<UpdateLeaderboardValidatorSchema>(
         );
       }
 
+      if (leaderboard.createdAt < new Date() || !leaderboard.isActive) {
+        throw new ForbiddenException(
+          'You cannot updated an expired or inactive leaderboard'
+        );
+      }
+
       const data: Prisma.LeaderboardUpdateInput = {};
 
       if (payload.name) data.name = payload.name;
