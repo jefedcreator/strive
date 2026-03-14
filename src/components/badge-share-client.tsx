@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { cn } from '@/utils';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { Download, Share2, ExternalLink } from 'lucide-react';
@@ -20,9 +21,10 @@ interface BadgeShareData {
   clubName: string | null;
 }
 
-export const BadgeShareClient: React.FC<{ badge: BadgeShareData }> = ({
-  badge,
-}) => {
+export const BadgeShareClient: React.FC<{
+  badge: BadgeShareData;
+  canDownload?: boolean;
+}> = ({ badge, canDownload = false }) => {
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = badge.badgeUrl;
@@ -146,21 +148,28 @@ export const BadgeShareClient: React.FC<{ badge: BadgeShareData }> = ({
           )}
 
           {/* Actions */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <Button
-              onClick={handleDownload}
-              className="flex items-center justify-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Download
-            </Button>
+          <div
+            className={cn(
+              'grid gap-3 pt-2',
+              canDownload ? 'grid-cols-2' : 'grid-cols-1'
+            )}
+          >
+            {canDownload && (
+              <Button
+                onClick={handleDownload}
+                className="flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download
+              </Button>
+            )}
             <Button
               variant="secondary"
               onClick={handleShare}
               className="flex items-center justify-center gap-2"
             >
               <Share2 className="w-4 h-4" />
-              Share
+              {canDownload ? 'Share' : 'Share Badge'}
             </Button>
           </div>
         </div>

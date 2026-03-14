@@ -19,9 +19,7 @@ import {
   NotFoundException,
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
 
 /**
  * @pathParams paramValidator

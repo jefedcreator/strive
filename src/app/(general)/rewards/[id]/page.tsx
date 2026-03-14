@@ -3,6 +3,7 @@ import { BadgeShareClient } from '@/components/badge-share-client';
 import { db } from '@/server/db';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { auth } from '@/server/auth';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -122,6 +123,7 @@ export async function generateMetadata({
 export default async function BadgeSharePage({ params }: PageProps) {
   const { id } = await params;
   const data = await getBadge(id);
+  const session = await auth();
 
   if (!data) {
     notFound();
@@ -129,6 +131,7 @@ export default async function BadgeSharePage({ params }: PageProps) {
 
   const badgeUrl = buildBadgeImageUrl(data.reward);
   const username = data.user.fullname ?? data.user.username ?? 'Runner';
+  const canDownload = !!session?.user?.id && session.user.id === data.userId;
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
@@ -148,6 +151,7 @@ export default async function BadgeSharePage({ params }: PageProps) {
             leaderboardName: data.reward.leaderboard?.name ?? null,
             clubName: data.reward.club?.name ?? null,
           }}
+          canDownload={canDownload}
         />
       </div>
     </div>
