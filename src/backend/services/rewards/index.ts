@@ -1,5 +1,5 @@
 import { db } from '@/server/db';
-import { sendClubMilestoneEmail } from '../email';
+import { emailService } from '../email';
 
 const CLUB_MILESTONES = [10, 20, 50, 100, 200, 250, 500, 1000, 2500, 5000, 10000]; // km
 
@@ -97,7 +97,7 @@ export async function checkClubMilestones(clubId: string) {
 
         // Send Email
         if (member.email) {
-          await sendClubMilestoneEmail(
+          await emailService.sendClubMilestoneEmail(
             member.email, 
             club.name, 
             milestone,

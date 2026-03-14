@@ -5,91 +5,99 @@ import RewardNotification from './templates/RewardNotification';
 import ClubMilestoneNotification from './templates/ClubMilestoneNotification';
 import WelcomeNotification from './templates/WelcomeNotification';
 
-const resend = new Resend(env.RESEND_API_KEY);
+class EmailService {
+  private resend: Resend;
 
-export const sendWelcomeEmail = async (to: string, fullname: string) => {
-  try {
-    const { data, error } = await resend.emails.send({
-      from: 'Strive <hello@usestrive.run>',
-      to,
-      subject: 'Welcome to Strive! 🚀',
-      react: WelcomeNotification({ fullname }),
-    });
+  constructor() {
+    this.resend = new Resend(env.RESEND_API_KEY);
+  }
 
-    if (error) {
-      console.error('Error sending welcome email:', error);
+  async sendWelcomeEmail(to: string, fullname: string) {
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: 'Strive <hello@usestrive.run>',
+        to,
+        subject: 'Welcome to Strive! 🚀',
+        react: WelcomeNotification({ fullname }),
+      });
+
+      if (error) {
+        console.error('Error sending welcome email:', error);
+        return { success: false, error };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Unexpected error sending welcome email:', error);
       return { success: false, error };
     }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('Unexpected error sending welcome email:', error);
-    return { success: false, error };
   }
-};
 
-export const sendRewardEmail = async (
-  to: string,
-  badgeType: string,
-  leaderboardName: string,
-  contextType: 'leaderboard' | 'challenge',
-  badgeUrl?: string,
-  rewardUrl?: string
-) => {
-  try {
-    const { data, error } = await resend.emails.send({
-      from: 'Strive <hello@usestrive.run>', // Update this with the verified domain if applicable
-      to,
-      subject: `You won a ${badgeType} badge in ${leaderboardName}!`,
-      react: RewardNotification({
-        badgeType,
-        leaderboardName,
-        contextType,
-        badgeUrl,
-        rewardUrl,
-      }),
-    });
+  async sendRewardEmail(
+    to: string,
+    badgeType: string,
+    leaderboardName: string,
+    contextType: 'leaderboard' | 'challenge',
+    badgeUrl?: string,
+    rewardUrl?: string
+  ) {
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: 'Strive <hello@usestrive.run>',
+        to,
+        subject: `You won a ${badgeType} badge in ${leaderboardName}!`,
+        react: RewardNotification({
+          badgeType,
+          leaderboardName,
+          contextType,
+          badgeUrl,
+          rewardUrl,
+        }),
+      });
 
-    if (error) {
-      console.error('Error sending reward email:', error);
+      if (error) {
+        console.error('Error sending reward email:', error);
+        return { success: false, error };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Unexpected error sending reward email:', error);
       return { success: false, error };
     }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('Unexpected error sending reward email:', error);
-    return { success: false, error };
   }
-};
 
-export const sendClubMilestoneEmail = async (
-  to: string,
-  clubName: string,
-  milestoneKm: number,
-  badgeUrl?: string,
-  rewardUrl?: string
-) => {
-  try {
-    const { data, error } = await resend.emails.send({
-      from: 'Strive <hello@usestrive.run>', // Update this with the verified domain if applicable
-      to,
-      subject: `Your club ${clubName} hit the ${milestoneKm}km milestone!`,
-      react: ClubMilestoneNotification({
-        clubName,
-        milestoneKm,
-        badgeUrl,
-        rewardUrl,
-      }),
-    });
+  async sendClubMilestoneEmail(
+    to: string,
+    clubName: string,
+    milestoneKm: number,
+    badgeUrl?: string,
+    rewardUrl?: string
+  ) {
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: 'Strive <hello@usestrive.run>',
+        to,
+        subject: `Your club ${clubName} hit the ${milestoneKm}km milestone!`,
+        react: ClubMilestoneNotification({
+          clubName,
+          milestoneKm,
+          badgeUrl,
+          rewardUrl,
+        }),
+      });
 
-    if (error) {
-      console.error('Error sending club milestone email:', error);
+      if (error) {
+        console.error('Error sending club milestone email:', error);
+        return { success: false, error };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Unexpected error sending club milestone email:', error);
       return { success: false, error };
     }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('Unexpected error sending club milestone email:', error);
-    return { success: false, error };
   }
-};
+}
+
+export const emailService = new EmailService();

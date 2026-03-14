@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { db } from '@/server/db';
 import { RewardType } from '@prisma/client';
-import { sendRewardEmail } from '../services/email';
+import { emailService } from '../services/email';
 
 export const processExpiredLeaderboards = async () => {
   try {
@@ -114,7 +114,7 @@ export const processExpiredLeaderboards = async () => {
 
           // Send Email
           if (entry.user.email) {
-            await sendRewardEmail(
+            await emailService.sendRewardEmail(
               entry.user.email,
               badgeType || RewardType.GOLD,
               leaderboard.name,
