@@ -11,7 +11,7 @@ export default function NotFoundPage() {
   const router = useRouter();
 
   return (
-    <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center -mt-16">
+    <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
       <motion.div
         className="relative z-10 flex flex-col items-center text-center max-w-md px-4"
         initial={{ opacity: 0, y: 20 }}
