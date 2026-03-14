@@ -120,9 +120,9 @@ export function LastRunCard({ type }: LastRunCardProps) {
             Latest Activity
           </span>
         </div>
-        <button className="flex items-center gap-1.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+        {/* <button className="flex items-center gap-1.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
           View Details <ArrowRight className="w-4 h-4" />
-        </button>
+        </button> */}
       </div>
     </div>
   );
