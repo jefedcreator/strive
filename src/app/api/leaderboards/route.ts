@@ -82,12 +82,51 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
         data,
       });
 
-      await db.userLeaderboard.create({
-        data: {
-          userId: user.id,
-          leaderboardId: leaderboard.id,
-        },
-      });
+      const transactionOps: any[] = [
+        db.userLeaderboard.create({
+          data: {
+            userId: user.id,
+            leaderboardId: leaderboard.id,
+          },
+        }),
+      ];
+
+      // If the leaderboard belongs to a club, also add the creator to that club
+      if (payload.clubId) {
+        const existingClubMembership = await db.userClub.findUnique({
+          where: {
+            userId_clubId: {
+              userId: user.id,
+              clubId: payload.clubId,
+            },
+          },
+        });
+
+        if (!existingClubMembership) {
+          transactionOps.push(
+            db.userClub.create({
+              data: {
+                userId: user.id,
+                clubId: payload.clubId,
+                role: 'MEMBER',
+              },
+            })
+          );
+
+          transactionOps.push(
+            db.notification.create({
+              data: {
+                userId: user.id,
+                message: `You've been added to the club associated with your new leaderboard ${leaderboard.name}`,
+                type: 'club',
+                clubId: payload.clubId,
+              },
+            })
+          );
+        }
+      }
+
+      await db.$transaction(transactionOps);
 
       const response: ApiResponse<Leaderboard> = {
         status: 201,

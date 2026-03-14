@@ -34,6 +34,11 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
 
       const leaderboard = await db.leaderboard.findUnique({
         where: { id: leaderboardId },
+        include: {
+          club: {
+            select: { name: true, createdById: true }
+          }
+        }
       });
 
       if (!leaderboard) {
@@ -68,7 +73,7 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
       // Check if the invite/request exists
 
       // Add user to leaderboard and remove invite
-      await db.$transaction([
+      const transactionOps: any[] = [
         db.userLeaderboard.create({
           data: {
             userId: userToAcceptId,
@@ -85,9 +90,58 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
               ? `Your request to join the leaderboard ${leaderboard.name} has been accepted!`
               : `You have been added to the leaderboard ${leaderboard.name}`,
             type: 'info',
+            leaderboardId,
           },
         }),
-      ]);
+      ];
+
+      // If the leaderboard belongs to a club, also add the user to that club
+      if (leaderboard.clubId) {
+        const existingClubMembership = await db.userClub.findUnique({
+          where: {
+            userId_clubId: {
+              userId: userToAcceptId,
+              clubId: leaderboard.clubId,
+            },
+          },
+        });
+
+        if (!existingClubMembership) {
+          transactionOps.push(
+            db.userClub.create({
+              data: {
+                userId: userToAcceptId,
+                clubId: leaderboard.clubId,
+                role: 'MEMBER',
+              },
+            })
+          );
+
+          transactionOps.push(
+            db.notification.create({
+              data: {
+                userId: userToAcceptId,
+                message: `You've been added to the club associated with ${leaderboard.name}`,
+                type: 'club',
+                clubId: leaderboard.clubId,
+              },
+            })
+          );
+
+          transactionOps.push(
+            db.notification.create({
+              data: {
+                userId: leaderboard.club?.createdById!,
+                message: `${currentUser.fullname} joined your club ${leaderboard.club?.name}`,
+                type: 'info',
+                clubId: leaderboard.clubId!,
+              },
+            })
+          );
+        }
+      }
+
+      await db.$transaction(transactionOps);
 
       const response: ApiResponse<null> = {
         status: 200,

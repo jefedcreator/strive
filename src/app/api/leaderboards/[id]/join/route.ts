@@ -27,6 +27,11 @@ export const POST = withMiddleware<unknown>(
 
       const leaderboard = await db.leaderboard.findUnique({
         where: { id: leaderboardId },
+        include: {
+          club: {
+            select: { name: true, createdById: true },
+          },
+        },
       });
 
       if (!leaderboard) {
@@ -56,8 +61,7 @@ export const POST = withMiddleware<unknown>(
 
       if (leaderboard.isPublic) {
         // Direct join for public leaderboards
-
-        await db.$transaction([
+        const transactionOps: any[] = [
           db.userLeaderboard.create({
             data: {
               userId: user.id,
@@ -72,7 +76,55 @@ export const POST = withMiddleware<unknown>(
               leaderboardId,
             },
           }),
-        ]);
+        ];
+
+        // If the leaderboard belongs to a club, also add the user to that club
+        if (leaderboard.clubId) {
+          const existingClubMembership = await db.userClub.findUnique({
+            where: {
+              userId_clubId: {
+                userId: user.id,
+                clubId: leaderboard.clubId,
+              },
+            },
+          });
+
+          if (!existingClubMembership) {
+            transactionOps.push(
+              db.userClub.create({
+                data: {
+                  userId: user.id,
+                  clubId: leaderboard.clubId,
+                  role: 'MEMBER',
+                },
+              })
+            );
+
+            transactionOps.push(
+              db.notification.create({
+                data: {
+                  userId: user.id,
+                  message: `You've been added to the club associated with ${leaderboard.name}`,
+                  type: 'club',
+                  clubId: leaderboard.clubId,
+                },
+              })
+            );
+
+            transactionOps.push(
+              db.notification.create({
+                data: {
+                  userId: leaderboard.club?.createdById!,
+                  message: `${user.fullname} joined your club ${leaderboard.club?.name}`,
+                  type: 'info',
+                  clubId: leaderboard.clubId!,
+                },
+              })
+            );
+          }
+        }
+
+        await db.$transaction(transactionOps);
 
         const response: ApiResponse<null> = {
           status: 200,
