@@ -75,7 +75,7 @@ export const LeaderboardDetailClient: React.FC<
       return data;
     },
     initialData,
-    staleTime: Infinity,
+    // staleTime: Infinity,
   });
 
   const leaderboard = response.data!;

@@ -258,7 +258,7 @@ export function Sidebar() {
             <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4 shrink-0">
               <div className="flex items-center justify-between px-3">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  <p>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
+                  {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
                 </span>
                 <ToggleTheme />
               </div>

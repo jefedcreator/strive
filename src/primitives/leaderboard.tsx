@@ -9,7 +9,7 @@ import {
   TableRow,
 } from '@/primitives/table';
 import { type UserLeaderboard } from '@prisma/client';
-import { getTier } from '@/backend/services/xp';
+import { getTier } from '@/backend/services/xp/logic';
 import { ProfileFrame } from '@/components/profile-frame';
 import React from 'react';
 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/utils';
-import { getTier } from '@/backend/services/xp';
+import { getTier } from '@/backend/services/xp/logic';
 
 interface ProfileFrameProps {
   children: React.ReactNode;

@@ -1,4 +1,3 @@
-import { env } from '@/env';
 import { Resend } from 'resend';
 import ClubMilestoneNotification from './templates/ClubMilestoneNotification';
 import InviteEmail from './templates/invite-email';
@@ -9,7 +8,7 @@ class EmailService {
   private resend: Resend;
 
   constructor() {
-    this.resend = new Resend(env.RESEND_API_KEY);
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
   async sendInviteEmail({
