@@ -16,10 +16,7 @@ import {
   NotFoundException,
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
-import InviteEmail from '@/backend/services/email/templates/invite-email';
-
-const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
+import { emailService } from '@/backend/services/email';
 
 /**
  * @pathParams paramValidator
@@ -76,18 +73,14 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
           const inviteLink = `${appUrl}/leaderboards/${leaderboardId}/invites/${invite.id}`;
 
           try {
-            await resend.emails.send({
-              from: 'Strive <invites@usestrive.run>',
-              to: email, // It's an email in this case
-              subject: `You've been invited to join ${leaderboard.name} on Strive`,
-              react: InviteEmail({
-                invitedByUsername: currentUser.fullname,
-                invitedByEmail: currentUser.email,
-                entityName: leaderboard.name,
-                entityType: 'leaderboard',
-                inviteLink: inviteLink,
-                invitedUserAvatar: currentUser.avatar,
-              }),
+            await emailService.sendInviteEmail({
+              to: email,
+              invitedByUsername: currentUser.fullname,
+              invitedByEmail: currentUser.email,
+              entityName: leaderboard.name,
+              entityType: 'leaderboard',
+              inviteLink: inviteLink,
+              invitedUserAvatar: currentUser.avatar,
             });
           } catch (emailError) {
             console.error('Failed to send invite email:', emailError);
@@ -163,18 +156,14 @@ export const POST = withMiddleware<LeaderboardInviteValidatorSchema>(
         const inviteLink = `${appUrl}/leaderboards/${leaderboardId}/invites/${invite[0].id}`;
 
         try {
-          await resend.emails.send({
-            from: 'Strive <invites@usestrive.run>',
+          await emailService.sendInviteEmail({
             to: userToInvite.email,
-            subject: `You've been invited to join ${leaderboard.name} on Strive`,
-            react: InviteEmail({
-              invitedByUsername: currentUser.fullname,
-              invitedByEmail: currentUser.email,
-              entityName: leaderboard.name,
-              entityType: 'leaderboard',
-              inviteLink,
-              invitedUserAvatar: currentUser.avatar,
-            }),
+            invitedByUsername: currentUser.fullname,
+            invitedByEmail: currentUser.email,
+            entityName: leaderboard.name,
+            entityType: 'leaderboard',
+            inviteLink,
+            invitedUserAvatar: currentUser.avatar,
           });
         } catch (emailError) {
           console.error('Failed to send invite email:', emailError);

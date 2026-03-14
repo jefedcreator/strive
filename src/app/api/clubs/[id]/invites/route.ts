@@ -4,6 +4,7 @@ import {
   pathParamValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
+import { emailService } from '@/backend/services/email';
 import {
   clubInviteValidatorSchema,
   type ClubInviteValidatorSchema,
@@ -19,7 +20,6 @@ import {
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import InviteEmail from '@/backend/services/email/templates/invite-email';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
 
@@ -76,18 +76,14 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
           const inviteLink = `${appUrl}/clubs/${clubId}/invites/${invite.id}`;
 
           try {
-            await resend.emails.send({
-              from: 'Strive <invites@usestrive.run>',
-              to: email, // It's an email in this case
-              subject: `You've been invited to join ${club.name} on Strive`,
-              react: InviteEmail({
-                invitedByUsername: currentUser.fullname,
-                invitedByEmail: currentUser.email,
-                entityName: club.name,
-                entityType: 'club',
-                inviteLink: inviteLink,
-                invitedUserAvatar: currentUser.avatar || club.image,
-              }),
+            await emailService.sendInviteEmail({
+              to: email,
+              invitedByUsername: currentUser.fullname,
+              invitedByEmail: currentUser.email,
+              entityName: club.name,
+              entityType: 'club',
+              inviteLink: inviteLink,
+              invitedUserAvatar: currentUser.avatar || club.image,
             });
           } catch (emailError) {
             console.error('Failed to send invite email:', emailError);
@@ -161,18 +157,14 @@ export const POST = withMiddleware<ClubInviteValidatorSchema>(
         const inviteLink = `${appUrl}/clubs/${clubId}/invites/${invite[0].id}`;
 
         try {
-          await resend.emails.send({
-            from: 'Strive <invites@usestrive.run>',
-            to: userToInvite.email,
-            subject: `You've been invited to join ${club.name} on Strive`,
-            react: InviteEmail({
-              invitedByUsername: currentUser.fullname,
-              invitedByEmail: currentUser.email,
-              entityName: club.name,
-              entityType: 'club',
-              inviteLink: inviteLink,
-              invitedUserAvatar: currentUser.avatar || club.image,
-            }),
+          await emailService.sendInviteEmail({
+            to: email,
+            invitedByUsername: currentUser.fullname,
+            invitedByEmail: currentUser.email,
+            entityName: club.name,
+            entityType: 'club',
+            inviteLink: inviteLink,
+            invitedUserAvatar: currentUser.avatar,
           });
         } catch (emailError) {
           console.error('Failed to send invite email:', emailError);

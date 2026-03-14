@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { Resend } from 'resend';
 import { env } from '@/env';
-import RewardNotification from './templates/RewardNotification';
+import { Resend } from 'resend';
 import ClubMilestoneNotification from './templates/ClubMilestoneNotification';
+import InviteEmail from './templates/invite-email';
+import RewardNotification from './templates/RewardNotification';
 import WelcomeNotification from './templates/WelcomeNotification';
 
 class EmailService {
@@ -10,6 +10,50 @@ class EmailService {
 
   constructor() {
     this.resend = new Resend(env.RESEND_API_KEY);
+  }
+
+  async sendInviteEmail({
+    to,
+    invitedByUsername,
+    invitedByEmail,
+    entityName,
+    entityType,
+    inviteLink,
+    invitedUserAvatar,
+  }: {
+    to: string;
+    invitedByUsername: string | null;
+    invitedByEmail: string | null;
+    entityName: string;
+    entityType: 'leaderboard' | 'club';
+    inviteLink: string;
+    invitedUserAvatar: string | null;
+  }) {
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: 'Strive <invites@usestrive.run>',
+        to,
+        subject: `You've been invited to join ${entityName} on Strive`,
+        react: InviteEmail({
+          invitedByUsername: invitedByUsername ?? undefined,
+          invitedByEmail: invitedByEmail ?? undefined,
+          entityName,
+          entityType,
+          inviteLink,
+          invitedUserAvatar: invitedUserAvatar ?? undefined,
+        }),
+      });
+
+      if (error) {
+        console.error('Error sending invite email:', error);
+        return { success: false, error };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Unexpected error sending invite email:', error);
+      return { success: false, error };
+    }
   }
 
   async sendWelcomeEmail(to: string, fullname: string) {
