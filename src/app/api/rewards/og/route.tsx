@@ -159,36 +159,85 @@ export async function GET(request: Request) {
               {contextLabel}
             </div>
 
-            {/* Middle: Badge shape */}
+            {/* Middle: Unified Badge Section */}
             <div
               style={{
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '320px', // Slightly larger for the square layout
-                height: '320px',
-                borderRadius: isChallenge ? '40px' : '160px',
-                background: `${c.primary}0D`,
-                border: `3px solid ${c.primary}33`,
-                boxShadow: `0 0 100px ${c.primary}12`,
+                position: 'relative',
+                width: '400px',
+                height: '400px',
                 marginBottom: 40,
               }}
             >
-              <span style={{ fontSize: 110, display: 'flex' }}>{c.icon}</span>
-              <span
+              {/* Glow */}
+              <div
                 style={{
-                  fontSize: 18,
-                  fontWeight: '900',
-                  color: c.primary,
-                  letterSpacing: '4px',
-                  marginTop: 16,
+                  position: 'absolute',
+                  width: '500px',
+                  height: '500px',
+                  borderRadius: '250px',
+                  background: `radial-gradient(circle, ${c.primary}1A 0%, transparent 70%)`,
+                }}
+              />
+
+              {/* Main Badge */}
+              <div
+                style={{
                   display: 'flex',
-                  textTransform: 'uppercase',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '320px',
+                  height: '320px',
+                  borderRadius: '160px',
+                  background: `linear-gradient(135deg, ${c.primary} 0%, ${c.secondary} 100%)`,
+                  border: '12px solid white',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                {milestone ? `${milestone}km` : c.label}
-              </span>
+                <div style={{ fontSize: 110, display: 'flex', textShadow: '0 4px 8px rgba(0,0,0,0.2)' }}>
+                   {c.icon}
+                </div>
+                <div
+                  style={{
+                    fontSize: 24,
+                    fontWeight: '900',
+                    color: 'white',
+                    letterSpacing: '6px',
+                    marginTop: 8,
+                    display: 'flex',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {milestone ? `${milestone}K` : type}
+                </div>
+              </div>
+
+              {/* Decorations */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-10px',
+                  right: '20px',
+                  fontSize: '48px',
+                }}
+              >
+                ⭐
+              </div>
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '20px',
+                  left: '-10px',
+                  fontSize: '64px',
+                }}
+              >
+                ✨
+              </div>
             </div>
 
             {/* Bottom: Typography Section */}

@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import ClubMilestoneNotification from './templates/ClubMilestoneNotification';
-import InviteEmail from './templates/invite-email';
+import InviteEmail from './templates/InviteNotification';
 import RewardNotification from './templates/RewardNotification';
 import WelcomeNotification from './templates/WelcomeNotification';
 import type { RewardType } from '@prisma/client';

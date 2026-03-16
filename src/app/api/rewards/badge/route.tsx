@@ -59,6 +59,15 @@ export async function GET(request: Request) {
             ? '3RD'
             : '';
 
+    const badgeColors = {
+      gold: 'linear-gradient(135deg, #FFD02D 0%, #E39D00 50%, #B86B00 100%)',
+      silver: 'linear-gradient(135deg, #CBD5E1 0%, #94A3B8 50%, #475569 100%)',
+      bronze: 'linear-gradient(135deg, #FB923C 0%, #F97316 50%, #C2410C 100%)',
+      club: 'linear-gradient(135deg, #6EE7B7 0%, #10B981 50%, #047857 100%)'
+    };
+
+    const gradient = badgeColors[type] || badgeColors.gold!;
+
     return new ImageResponse(
       (
         <div
@@ -71,139 +80,159 @@ export async function GET(request: Request) {
             justifyContent: 'center',
             fontFamily: 'system-ui, -apple-system, sans-serif',
             backgroundColor: 'transparent',
+            position: 'relative',
           }}
         >
-          {/* Outer glow ring */}
+          {/* Main Badge Container */}
           <div
             style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '800px',
+              height: '800px',
+            }}
+          >
+            {/* Glow effect */}
+            <div
+              style={{
+                position: 'absolute',
+                width: '900px',
+                height: '900px',
+                borderRadius: '450px',
+                background: `radial-gradient(circle, ${c.glow} 0%, transparent 70%)`,
+                opacity: 0.6,
+              }}
+            />
+
+            {/* Shield/Circle Base */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+                borderRadius: '400px',
+                background: gradient,
+                border: '32px solid white',
+                boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                }}
+              >
+                <div style={{ fontSize: '320px', marginBottom: '20px' }}>{c.icon}</div>
+                <div
+                  style={{
+                    fontSize: '80px',
+                    fontWeight: '900',
+                    color: 'white',
+                    letterSpacing: '12px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {isClub && milestone ? `${milestone}K` : type}
+                </div>
+              </div>
+            </div>
+
+            {/* Decorations */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '40px',
+                right: '120px',
+                fontSize: '120px',
+                color: '#FACC15',
+              }}
+            >
+              ⭐
+            </div>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '80px',
+                left: '80px',
+                fontSize: '140px',
+              }}
+            >
+              ✨
+            </div>
+          </div>
+
+          {/* Title/Label Overlay */}
+          <div
+            style={{
+              marginTop: '60px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              width: '900px',
-              height: '900px',
-              borderRadius: '450px',
-              background: `radial-gradient(circle, ${c.glow} 0%, transparent 70%)`,
-              position: 'relative',
             }}
           >
-            {/* Icon */}
             <div
               style={{
-                fontSize: '160px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '16px',
-              }}
-            >
-              {c.icon}
-            </div>
-
-            {/* Rank label (for podium types) */}
-            {rankLabel && (
-              <div
-                style={{
-                  fontSize: '48px',
-                  fontWeight: '900',
-                  color: c.primary,
-                  letterSpacing: '8px',
-                  marginBottom: '8px',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                {rankLabel} PLACE
-              </div>
-            )}
-
-            {/* Club milestone value */}
-            {isClub && milestone && (
-              <div
-                style={{
-                  fontSize: '64px',
-                  fontWeight: '900',
-                  color: c.primary,
-                  letterSpacing: '-2px',
-                  marginBottom: '8px',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                {milestone}km
-              </div>
-            )}
-
-            {/* Title */}
-            <div
-              style={{
-                fontSize: '28px',
-                fontWeight: '700',
+                fontSize: '64px',
+                fontWeight: '800',
                 color: 'white',
                 textAlign: 'center',
-                maxWidth: '400px',
-                lineHeight: '1.3',
-                display: 'flex',
-                justifyContent: 'center',
+                letterSpacing: '-1px',
+                marginBottom: '16px',
               }}
             >
               {title}
             </div>
-
-            {/* Subtitle */}
             {subtitle && (
               <div
                 style={{
-                  fontSize: '20px',
+                  fontSize: '32px',
                   fontWeight: '500',
                   color: 'rgba(255, 255, 255, 0.6)',
-                  marginTop: '8px',
-                  display: 'flex',
-                  justifyContent: 'center',
                   textAlign: 'center',
                 }}
               >
                 {subtitle}
               </div>
             )}
+          </div>
 
-            {/* Standardized Strive watermark at bottom */}
+          {/* Strive Watermark */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              background: 'rgba(0,0,0,0.5)',
+              padding: '12px 24px',
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
             <div
               style={{
-                position: 'absolute',
-                bottom: '60px',
+                width: '32px',
+                height: '32px',
+                backgroundColor: '#F97316',
+                borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                justifyContent: 'center',
               }}
             >
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  backgroundColor: '#F97316', 
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden', // Ensures the SVG doesn't bleed out of the rounded corners
-                }}
-              >
-                <Logo width={28} height={28} fill="#FFFFFF" /> {/* Solid white outer box */}
-              </div>
-              <span
-                style={{
-                  fontSize: '20px',
-                  fontWeight: '800',
-                  color: '#FFFFFF',
-                  letterSpacing: '-0.5px',
-                }}
-              >
-                Strive
-              </span>
+              <Logo width={32} height={32} fill="#FFFFFF" />
             </div>
+            <span style={{ fontSize: '24px', fontWeight: '800', color: 'white' }}>Strive</span>
           </div>
         </div>
       ),
