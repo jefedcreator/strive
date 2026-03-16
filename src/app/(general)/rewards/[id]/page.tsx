@@ -94,7 +94,8 @@ export async function generateMetadata({
       : {}),
   });
 
-  const imageUrl = `${baseUrl}api/rewards/og?${ogParams.toString()}`;
+  const imageUrl = `${baseUrl}/api/rewards/og?${ogParams.toString()}`;
+
   const description =
     data.reward.description ??
     `${username} earned "${data.reward.title}" on Strive`;
@@ -109,7 +110,7 @@ export async function generateMetadata({
       images: [imageUrl],
       type: 'website',
       siteName: 'Strive',
-      url: `${baseUrl}rewards/${id}`,
+      url: `${baseUrl}/rewards/${id}`,
     },
     twitter: {
       card: 'summary_large_image',

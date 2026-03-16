@@ -1,3 +1,5 @@
+import { BadgeIcons, variantStyles } from '@/components/badge';
+import { getFontSize } from '@/utils';
 import Logo from '@/primitives/logo';
 import { ImageResponse } from 'next/og';
 
@@ -7,59 +9,26 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const type = (searchParams.get('type') || 'gold') as
-      | 'gold'
-      | 'silver'
-      | 'bronze'
-      | 'club';
+    const type = (searchParams.get('type') || 'gold') as keyof typeof variantStyles;
     const title = searchParams.get('title') || 'Reward';
     const subtitle = searchParams.get('subtitle') || '';
     const username = searchParams.get('username') || 'Runner';
     const milestone = searchParams.get('milestone') || '';
-    const context = (searchParams.get('context') || 'leaderboard') as
-      | 'leaderboard'
-      | 'challenge';
+    const context = (searchParams.get('context') || 'leaderboard') as 'leaderboard' | 'challenge';
 
     const isChallenge = context === 'challenge';
-
-    const colors: Record<
-      string,
-      { primary: string; secondary: string; icon: string; label: string }
-    > = {
-      gold: {
-        primary: '#FFD700',
-        secondary: '#FFA500',
-        icon: '🥇',
-        label: '1ST PLACE',
-      },
-      silver: {
-        primary: '#C0C0C0',
-        secondary: '#A0A0A0',
-        icon: '🥈',
-        label: '2ND PLACE',
-      },
-      bronze: {
-        primary: '#CD7F32',
-        secondary: '#A0522D',
-        icon: '🥉',
-        label: '3RD PLACE',
-      },
-      club: {
-        primary: '#3b82f6',
-        secondary: '#8b5cf6',
-        icon: '🛡️',
-        label: 'MILESTONE',
-      },
-    };
-
-    const c = colors[type] || colors.gold!;
+    const theme = variantStyles[type] || variantStyles.gold;
+    const label = milestone ? `${milestone}K` : theme.label;
+    const MainIcon = theme.Icon;
 
     // Context-specific visuals
     const contextAccent = isChallenge ? '#F97316' : '#14B8A6';
-    const contextLabel = isChallenge ? '⚔️ CHALLENGE' : '🏆 LEADERBOARD';
-    const contextTagline = isChallenge
-      ? 'Challenge conquered on Strive'
-      : 'Leaderboard finish on Strive';
+    const contextTagline = isChallenge ? 'Challenge conquered on Strive' : 'Leaderboard finish on Strive';
+    const ContextIcon = isChallenge ? BadgeIcons.Sword : BadgeIcons.Trophy;
+    const contextName = isChallenge ? 'CHALLENGE' : 'LEADERBOARD';
+
+    const titleFontSize = getFontSize(title, 64, 32);
+    const subtitleFontSize = getFontSize(subtitle, 26, 18);
 
     return new ImageResponse(
       (
@@ -70,7 +39,7 @@ export async function GET(request: Request) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center', // Center everything vertically in the square
+            justifyContent: 'center',
             fontFamily: 'system-ui, -apple-system, sans-serif',
             position: 'relative',
             overflow: 'hidden',
@@ -78,55 +47,65 @@ export async function GET(request: Request) {
           }}
         >
           {/* Backgrounds */}
-          {isChallenge ? (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
+            {isChallenge ? (
+              <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    backgroundImage:
+                      'repeating-linear-gradient(135deg, rgba(249,115,22,0.03) 0px, rgba(249,115,22,0.03) 1px, transparent 1px, transparent 40px)',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-100px',
+                    right: '-100px',
+                    width: '500px',
+                    height: '500px',
+                    borderRadius: '250px',
+                    background:
+                      'radial-gradient(circle, rgba(249,115,22,0.08) 0%, transparent 70%)',
+                    display: 'flex',
+                  }}
+                />
+              </div>
+            ) : (
               <div
                 style={{
                   position: 'absolute',
                   inset: 0,
                   display: 'flex',
-                  backgroundImage:
-                    'repeating-linear-gradient(135deg, rgba(249,115,22,0.03) 0px, rgba(249,115,22,0.03) 1px, transparent 1px, transparent 40px)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '-100px',
-                  right: '-100px',
-                  width: '500px',
-                  height: '500px',
-                  borderRadius: '250px',
-                  background:
-                    'radial-gradient(circle, rgba(249,115,22,0.08) 0%, transparent 70%)',
-                  display: 'flex',
-                }}
-              />
-            </div>
-          ) : (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  backgroundImage:
-                    'radial-gradient(circle, rgba(20,184,166,0.04) 1px, transparent 1px)',
-                  backgroundSize: '24px 24px',
-                }}
-              />
-              <div
-                style={{
-                  width: '800px',
-                  height: '800px',
-                  borderRadius: '400px',
-                  background:
-                    'radial-gradient(circle, rgba(20,184,166,0.06) 0%, transparent 60%)',
-                  display: 'flex',
-                }}
-              />
-            </div>
-          )}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    backgroundImage:
+                      'radial-gradient(circle, rgba(20,184,166,0.04) 1px, transparent 1px)',
+                    backgroundSize: '24px 24px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '800px',
+                    height: '800px',
+                    borderRadius: '400px',
+                    background:
+                      'radial-gradient(circle, rgba(20,184,166,0.06) 0%, transparent 60%)',
+                    display: 'flex',
+                  }}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Center Column Content */}
           <div
@@ -136,7 +115,7 @@ export async function GET(request: Request) {
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 10,
-              paddingBottom: '40px', // Offset for the bottom bar
+              paddingBottom: '40px',
             }}
           >
             {/* Top: Context label */}
@@ -151,12 +130,14 @@ export async function GET(request: Request) {
                 textTransform: 'uppercase',
                 border: `1.5px solid ${contextAccent}44`,
                 borderRadius: '8px',
-                padding: '6px 16px',
+                padding: '10px 20px',
                 background: `${contextAccent}0A`,
                 marginBottom: 40,
+                gap: '8px',
               }}
             >
-              {contextLabel}
+              <ContextIcon width="20" height="20" stroke={contextAccent} />
+              <div style={{ display: 'flex' }}>{contextName}</div>
             </div>
 
             {/* Middle: Unified Badge Section */}
@@ -178,7 +159,8 @@ export async function GET(request: Request) {
                   width: '500px',
                   height: '500px',
                   borderRadius: '250px',
-                  background: `radial-gradient(circle, ${c.primary}1A 0%, transparent 70%)`,
+                  background: `radial-gradient(circle, ${theme.satoriGlow} 0%, transparent 70%)`,
+                  display: 'flex',
                 }}
               />
 
@@ -192,15 +174,19 @@ export async function GET(request: Request) {
                   width: '320px',
                   height: '320px',
                   borderRadius: '160px',
-                  background: `linear-gradient(135deg, ${c.primary} 0%, ${c.secondary} 100%)`,
+                  background: theme.satoriGradient,
                   border: '12px solid white',
                   boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
                   position: 'relative',
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ fontSize: 110, display: 'flex', textShadow: '0 4px 8px rgba(0,0,0,0.2)' }}>
-                   {c.icon}
+                <div
+                  style={{
+                    display: 'flex',
+                  }}
+                >
+                  <MainIcon width="160" height="160" color="white" />
                 </div>
                 <div
                   style={{
@@ -213,7 +199,7 @@ export async function GET(request: Request) {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {milestone ? `${milestone}K` : type}
+                  {label}
                 </div>
               </div>
 
@@ -221,22 +207,22 @@ export async function GET(request: Request) {
               <div
                 style={{
                   position: 'absolute',
-                  top: '-10px',
-                  right: '20px',
-                  fontSize: '48px',
+                  top: '0px',
+                  right: '30px',
+                  display: 'flex',
                 }}
               >
-                ⭐
+                <BadgeIcons.Star width="48" height="48" color={theme.accent} />
               </div>
               <div
                 style={{
                   position: 'absolute',
-                  bottom: '20px',
-                  left: '-10px',
-                  fontSize: '64px',
+                  bottom: '30px',
+                  left: '0px',
+                  display: 'flex',
                 }}
               >
-                ✨
+                <BadgeIcons.Sparkles width="64" height="64" color={theme.accent} />
               </div>
             </div>
 
@@ -253,7 +239,7 @@ export async function GET(request: Request) {
               {/* Badge title */}
               <div
                 style={{
-                  fontSize: 64,
+                  fontSize: titleFontSize,
                   fontWeight: '900',
                   color: '#ffffff',
                   lineHeight: 1.1,
@@ -261,27 +247,27 @@ export async function GET(request: Request) {
                   marginBottom: 16,
                   display: 'flex',
                   justifyContent: 'center',
+                  textAlign: 'center',
                 }}
               >
-                {title.length > 35 ? title.substring(0, 35) + '…' : title}
+                {title}
               </div>
 
               {/* Subtitle */}
               {subtitle && (
                 <div
                   style={{
-                    fontSize: 26,
+                    fontSize: subtitleFontSize,
                     fontWeight: '600',
                     color: 'rgba(161,161,170,0.95)',
                     marginBottom: 24,
                     display: 'flex',
                     justifyContent: 'center',
                     lineHeight: 1.4,
+                    textAlign: 'center',
                   }}
                 >
-                  {subtitle.length > 70
-                    ? subtitle.substring(0, 70) + '…'
-                    : subtitle}
+                  {subtitle}
                 </div>
               )}
 
@@ -390,8 +376,7 @@ export async function GET(request: Request) {
       ),
       {
         width: 1080,
-            // Standard social square
-        height: 1080, 
+        height: 1080,
         headers: {
           'Cache-Control': 'public, max-age=31536000, immutable',
         },

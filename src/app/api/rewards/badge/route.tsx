@@ -7,9 +7,7 @@ export const runtime = 'edge';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = (searchParams.get('type') || 'gold') as keyof typeof variantStyles;
-    console.log('type',type);
-    
+    const type = (searchParams.get('type') || 'gold') as keyof typeof variantStyles;    
     const title = searchParams.get('title') || 'Reward';
     const subtitle = searchParams.get('subtitle') || '';
     const milestone = searchParams.get('milestone') || '';
@@ -17,7 +15,6 @@ export async function GET(request: Request) {
     const theme = variantStyles[type] || variantStyles.gold;
     const label = milestone ? `${milestone}K` : theme.label;
     const Icon = theme.Icon;
-
 
     const titleFontSize = getFontSize(title, 72, 32);
     const subtitleFontSize = getFontSize(subtitle, 36, 24);
