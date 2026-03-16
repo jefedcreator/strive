@@ -9,3 +9,4 @@ export { Select } from './Select';
 export { Textarea } from './TextArea';
 export { Dialog } from './Dialog';
 export { Loader, PageLoader } from './Loader';
+export { Skeleton } from './skeleton';
