@@ -147,6 +147,17 @@ const loadParams = createSearchParamsCache(parseParams);
 const loadExploreParams = createSearchParamsCache(exploreParams);
 const loadNotificationParams = createSearchParamsCache(notificationParams);
 
+
+const getFontSize = (text: string, baseSize: number, minSize: number) => {
+  const maxContentWidth = 1000;
+
+  const estimatedWidth = text.length * (baseSize * 0.65);
+  if (estimatedWidth > maxContentWidth) {
+    return Math.max(minSize, Math.floor(maxContentWidth / (text.length * 0.65)));
+  }
+  return baseSize;
+};
+
 export {
   cn,
   convertBase64ToFile,
@@ -170,5 +181,5 @@ export {
   notificationParams,
   loadParams,
   loadExploreParams,
-  loadNotificationParams,
+  loadNotificationParams, getFontSize
 };
