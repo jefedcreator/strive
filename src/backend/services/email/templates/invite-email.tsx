@@ -1,6 +1,7 @@
 import {
   Body,
   Button,
+  Column,
   Container,
   Head,
   Heading,
@@ -8,11 +9,11 @@ import {
   Img,
   Link,
   Preview,
+  Row,
   Section,
-  Text,
   Tailwind,
+  Text,
 } from '@react-email/components';
-import * as React from 'react';
 
 interface InviteEmailProps {
   invitedByUsername?: string;
@@ -26,11 +27,13 @@ interface InviteEmailProps {
 export const InviteEmail = ({
   invitedByUsername = 'A fellow runner',
   invitedByEmail,
-  entityName = 'a group',
+  entityName = 'our community',
   entityType = 'club',
-  inviteLink = 'https://usestrive.run',
+  inviteLink = 'https://strive.app',
   invitedUserAvatar,
 }: InviteEmailProps) => {
+  const inviter = invitedByUsername || invitedByEmail || 'A fellow runner';
+  const typeLabel = entityType === 'club' ? 'Club' : 'Leaderboard';
   const previewText = `You've been invited to join ${entityName} on Strive!`;
 
   return (
@@ -42,62 +45,146 @@ export const InviteEmail = ({
           theme: {
             extend: {
               colors: {
-                primary: '#FC4C02',
+                primary: '#f97316', // Typical Strive orange
               },
             },
           },
         }}
       >
-        <Body className="bg-[#F7F9FB] my-auto mx-auto font-sans px-2">
-          <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] max-w-[465px] bg-white text-center">
-            <Section className="mt-[32px]">
-              <Text className="text-[#FC4C02] text-[28px] font-bold text-center p-0 my-[10px] mx-0">
-                STRIVE
+        <Body className="bg-gray-50 py-10 px-4 font-sans">
+          <Container className="max-w-[600px] mx-auto">
+            {/* Main Card Container */}
+            <Section className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
+              {/* Header */}
+              <header className="border-b border-solid border-gray-100 px-8 py-6">
+                <Section className="flex items-center">
+                  <div className="bg-primary rounded-lg p-2 mr-3">
+                    <Text className="text-white text-lg font-bold m-0 leading-none">
+                      ⚡
+                    </Text>
+                  </div>
+                  <Text className="text-gray-900 text-xl font-bold leading-tight tracking-tight m-0">
+                    Strive
+                  </Text>
+                </Section>
+              </header>
+
+              {/* Content Section */}
+              <div className="flex flex-col items-center px-8 py-12 text-center">
+                <div className="mb-6 inline-block bg-orange-100 px-4 py-1 rounded-full">
+                  <Text className="text-primary text-[10px] m-0 font-bold uppercase tracking-wider">
+                    You&apos;re Invited
+                  </Text>
+                </div>
+
+                <Heading className="text-gray-900 tracking-tight text-3xl font-extrabold leading-tight mb-2 mt-0">
+                  Join the Pack!
+                </Heading>
+
+                <Text className="text-gray-600 text-lg font-normal mb-8 max-w-sm mx-auto leading-relaxed">
+                  <strong>{inviter}</strong> has invited you to join the{' '}
+                  <span className="text-primary font-semibold">
+                    {entityName}
+                  </span>{' '}
+                  {entityType}.
+                </Text>
+
+                {/* Visualizer */}
+                <Section className="mb-10 mx-auto w-[280px]">
+                  <div className="relative h-[280px] w-[280px] rounded-full shadow-2xl border-8 border-white bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-600 overflow-hidden">
+                    {invitedUserAvatar ? (
+                      <Img
+                        src={invitedUserAvatar}
+                        width="280"
+                        height="280"
+                        alt={inviter}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex flex-col items-center justify-center text-white">
+                        <Text className="m-0 text-6xl drop-shadow-md">
+                          👋
+                        </Text>
+                        <Text className="m-0 font-black text-3xl uppercase tracking-[0.1em]">
+                          JOIN
+                        </Text>
+                      </div>
+                    )}
+                  </div>
+                </Section>
+
+                {/* Details Section */}
+                <Section className="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-100">
+                  <Row className="mb-4 pb-4 border-b border-gray-200">
+                    <Column>
+                      <Text className="text-gray-500 text-[10px] font-medium uppercase tracking-wider m-0">
+                        Invited By
+                      </Text>
+                    </Column>
+                    <Column align="right">
+                      <Text className="text-gray-900 font-bold m-0 text-sm">
+                        {inviter}
+                      </Text>
+                    </Column>
+                  </Row>
+                  <Row>
+                    <Column>
+                      <Text className="text-gray-500 text-[10px] font-medium uppercase tracking-wider m-0">
+                        {typeLabel}
+                      </Text>
+                    </Column>
+                    <Column align="right">
+                      <Text className="text-gray-900 font-bold m-0 text-sm">
+                        {entityName}
+                      </Text>
+                    </Column>
+                  </Row>
+                </Section>
+
+                {/* CTA */}
+                <Section className="space-y-4">
+                  <Button
+                    className="bg-primary text-white text-base font-bold tracking-wide rounded-xl py-4 w-full block text-center shadow-lg"
+                    href={inviteLink}
+                  >
+                    Accept Invitation
+                  </Button>
+                  <Text className="text-gray-500 text-sm font-medium mt-4">
+                    <Link
+                      href={`${inviteLink}/learn-more`}
+                      className="text-gray-500 hover:text-primary transition-colors no-underline"
+                    >
+                      Learn More
+                    </Link>
+                  </Text>
+                </Section>
+              </div>
+
+              {/* Footer Message */}
+              <footer className="bg-gray-50 px-8 py-8 border-t border-gray-100 text-center">
+                <Text className="text-gray-500 text-xs leading-relaxed m-0">
+                  Ready to hit the ground running? Accept the invitation to
+                  connect with others, share your progress, and stay motivated.
+                </Text>
+                <Section className="mt-6 flex justify-center gap-6">
+                  <Text className="text-gray-400 m-0">
+                    🏃 &nbsp;&bull;&nbsp; 🤝 &nbsp;&bull;&nbsp; 🚀
+                  </Text>
+                </Section>
+              </footer>
+            </Section>
+
+            {/* Unsubscribe / Compliance */}
+            <Section className="py-10 text-center">
+              <Text className="text-gray-400 text-xs mb-2 m-0">
+                Sent with ❤️ from the Strive Team
+              </Text>
+              <Text className="text-gray-400 text-[10px] uppercase tracking-widest m-0">
+                <Link className="underline text-gray-400">Unsubscribe</Link>
+                &nbsp;&bull;&nbsp;
+                <Link className="underline text-gray-400">Privacy Policy</Link>
               </Text>
             </Section>
-
-            {invitedUserAvatar && (
-              <Section className="mb-[20px] text-center">
-                <Img
-                  src={invitedUserAvatar}
-                  width="64"
-                  height="64"
-                  alt="Avatar"
-                  className="rounded-full mx-auto"
-                />
-              </Section>
-            )}
-
-            <Heading className="text-[#0B0F19] text-[24px] font-normal text-center p-0 my-[20px] mx-0">
-              Join <strong>{entityName}</strong> on Strive
-            </Heading>
-
-            <Text className="text-[#0B0F19] text-[14px] leading-[24px]">
-              <strong>{invitedByUsername}</strong> has invited you to join their{' '}
-              {entityType}, <strong>{entityName}</strong>, on Strive. Get ready
-              to compete and run together!
-            </Text>
-
-            <Section className="text-center mt-[32px] mb-[32px]">
-              <Button
-                className="bg-[#FC4C02] rounded-md text-white text-[14px] font-semibold no-underline text-center px-6 py-3"
-                href={inviteLink}
-              >
-                Join {entityType === 'club' ? 'Club' : 'Leaderboard'}
-              </Button>
-            </Section>
-
-            <Text className="text-[#0B0F19] text-[14px] leading-[24px] break-all">
-              or copy and paste this URL into your browser: <br />
-              <Link href={inviteLink} className="text-[#FC4C02] no-underline">
-                {inviteLink}
-              </Link>
-            </Text>
-
-            <Text className="text-[#64748b] text-[12px] leading-[24px] mt-[40px]">
-              If you did not expect this invitation, you can safely ignore this
-              email.
-            </Text>
           </Container>
         </Body>
       </Tailwind>

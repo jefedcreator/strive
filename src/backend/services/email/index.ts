@@ -3,6 +3,7 @@ import ClubMilestoneNotification from './templates/ClubMilestoneNotification';
 import InviteEmail from './templates/invite-email';
 import RewardNotification from './templates/RewardNotification';
 import WelcomeNotification from './templates/WelcomeNotification';
+import type { RewardType } from '@prisma/client';
 
 class EmailService {
   private resend: Resend;
@@ -78,7 +79,7 @@ class EmailService {
 
   async sendRewardEmail(
     to: string,
-    badgeType: string,
+    badgeType: RewardType,
     leaderboardName: string,
     contextType: 'leaderboard' | 'challenge',
     badgeUrl?: string,

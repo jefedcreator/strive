@@ -1,15 +1,14 @@
 import {
-  Html,
-  Head,
   Body,
-  Container,
-  Text,
-  Heading,
-  Tailwind,
-  Section,
   Button,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Section,
+  Tailwind,
+  Text,
 } from '@react-email/components';
-import * as React from 'react';
 
 interface WelcomeNotificationProps {
   fullname: string;
@@ -49,7 +48,7 @@ const WelcomeNotification = ({
             <Section className="text-center mt-8">
               <Button
                 className="bg-orange-500 text-white font-bold py-4 px-8 rounded-md text-lg"
-                href={`${baseUrl}/dashboard`}
+                href={`${baseUrl}/home`}
               >
                 Start Your Journey
               </Button>
