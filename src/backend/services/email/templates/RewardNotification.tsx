@@ -32,7 +32,7 @@ const RewardNotification = ({
   leaderboardName = 'Weekly Challenge',
   contextType = 'leaderboard',
   badgeUrl,
-  rewardUrl = 'https://strive.app/rewards',
+  rewardUrl = 'https://usestrive.run/rewards',
 }: RewardNotificationProps) => {
   const isGold = badgeType === 'GOLD';
   const isSilver = badgeType === 'SILVER';

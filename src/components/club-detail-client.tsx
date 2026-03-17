@@ -87,7 +87,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
     defaultValues: {
       name: club.name,
       slug: club.slug,
-      description: club.description ?? '',
+      description: club.description,
       isPublic: club.isPublic,
       isActive: club.isActive,
     },

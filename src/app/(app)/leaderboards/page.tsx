@@ -14,7 +14,6 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
     isPublic: isPublic ?? undefined,
     query: query ?? undefined,
     page: page ?? undefined,
-    // size:5
   });
 
   return (

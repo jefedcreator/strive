@@ -56,6 +56,13 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     }
   );
 
+  const { items, ref, hasNextPage } = useInfiniteScroll({
+    data: initialData,
+    page: page ?? 1,
+    setPage: (p) => setStates({ page: p }),
+    refresh: refreshKey,
+  });
+
   const tab = React.useMemo(() => {
     if (isActive === true) return 'active';
     if (isActive === false) return 'inactive';
@@ -92,12 +99,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     select: (response) => response?.data ?? [],
   });
 
-  const { items, ref, hasNextPage } = useInfiniteScroll({
-    data: initialData,
-    page: page ?? 1,
-    setPage: (p) => setStates({ page: p }),
-    refresh: refreshKey,
-  });
+
 
   const {
     register,

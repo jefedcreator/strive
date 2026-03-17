@@ -30,7 +30,7 @@ export const InviteEmail = ({
   invitedByEmail,
   entityName = 'our community',
   entityType = 'club',
-  inviteLink = 'https://strive.app',
+  inviteLink = 'https://usestrive.run',
   invitedUserAvatar,
 }: InviteEmailProps) => {
   const inviter = invitedByUsername || invitedByEmail || 'A fellow runner';
@@ -128,7 +128,7 @@ export const InviteEmail = ({
                 </Button>
                 <Text className="text-gray-500 text-sm font-medium mt-6 text-center">
                   <Link
-                    href={`${inviteLink}/learn-more`}
+                    href={`${inviteLink}/`}
                     className="text-gray-500 hover:text-primary transition-colors no-underline"
                   >
                     Learn More

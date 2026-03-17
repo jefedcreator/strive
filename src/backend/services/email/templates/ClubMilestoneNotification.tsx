@@ -27,7 +27,7 @@ const ClubMilestoneNotification = ({
   clubName = 'Your Club',
   milestoneKm = 100,
   badgeUrl,
-  rewardUrl = 'https://strive.app/clubs',
+  rewardUrl = 'https://usestrive.run/rewards',
 }: ClubMilestoneNotificationProps) => {
   return (
     <Html>
