@@ -25,6 +25,7 @@ interface RewardNotificationProps {
   contextType: 'leaderboard' | 'challenge';
   badgeUrl?: string;
   rewardUrl?: string;
+  metricText?: string;
 }
 
 const RewardNotification = ({
@@ -33,6 +34,7 @@ const RewardNotification = ({
   contextType = 'leaderboard',
   badgeUrl,
   rewardUrl = 'https://usestrive.run/rewards',
+  metricText,
 }: RewardNotificationProps) => {
   const isGold = badgeType === 'GOLD';
   const isSilver = badgeType === 'SILVER';
@@ -99,7 +101,7 @@ const RewardNotification = ({
                 <span className="text-primary font-semibold">
                   {leaderboardName}
                 </span>{' '}
-                {contextType}.
+                {contextType}{metricText ? `${metricText}.` : '.'}
               </Text>
 
               {/* Badge Visualizer */}

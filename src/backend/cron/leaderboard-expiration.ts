@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { db } from '@/server/db';
 import { RewardType } from '@prisma/client';
 import { emailService } from '../services/email';
+import { parsePace } from '@/utils';
 
 export const processExpiredLeaderboards = async () => {
   try {
@@ -14,9 +15,7 @@ export const processExpiredLeaderboards = async () => {
       },
       include: {
         entries: {
-          where: { isActive: true, score: { gt: 0 } },
-          orderBy: { score: 'desc' },
-          take: 3,
+          where: { isActive: true },
           include: {
             user: true,
           },
@@ -27,8 +26,29 @@ export const processExpiredLeaderboards = async () => {
     console.log(`[Cron] Found ${expiredLeaderboards.length} expired leaderboards to process.`);
 
     for (const leaderboard of expiredLeaderboards) {
-      const qualifiedEntries = leaderboard.entries;
+      let qualifiedEntries = leaderboard.entries;
       
+      if (leaderboard.type === 'DISTANCE') {
+        qualifiedEntries = qualifiedEntries.filter(
+          (e) => e.runDistance && e.runDistance > 0
+        );
+        qualifiedEntries.sort(
+          (a, b) => (b.runDistance ?? 0) - (a.runDistance ?? 0)
+        );
+      } else if (leaderboard.type === 'PACE') {
+        const isZeroPace = (pace: string | null) =>
+          !pace || pace === '0' || pace === '0:00' || pace === '00:00';
+        qualifiedEntries = qualifiedEntries.filter((e) => !isZeroPace(e.runPace));
+        qualifiedEntries.sort(
+          (a, b) => parsePace(a.runPace) - parsePace(b.runPace)
+        );
+      } else {
+        qualifiedEntries = qualifiedEntries.filter((e) => e.score > 0);
+        qualifiedEntries.sort((a, b) => b.score - a.score);
+      }
+
+      qualifiedEntries = qualifiedEntries.slice(0, 3);
+
       if (qualifiedEntries.length === 0) {
         // Mark the leaderboard as inactive so we don't process it again
         await db.leaderboard.update({
@@ -59,12 +79,19 @@ export const processExpiredLeaderboards = async () => {
         const placeLabel = i === 0 ? '1st' : i === 1 ? '2nd' : '3rd';
         const typeLabel = leaderboard.clubId ? 'Leaderboard' : 'Challenge';
 
+        const metricText =
+          leaderboard.type === 'DISTANCE'
+            ? ` with a distance of ${entry.runDistance}km`
+            : leaderboard.type === 'PACE'
+            ? ` with a pace of ${entry.runPace}/km`
+            : '';
+
         if (!reward) {
           reward = await db.reward.create({
             data: {
               type: badgeType || RewardType.GOLD,
               title: `${placeLabel} Place — ${leaderboard.name}`,
-              description: `Earned ${placeLabel} place in the ${typeLabel} "${leaderboard.name}"`,
+              description: `Earned ${placeLabel} place in the ${typeLabel} "${leaderboard.name}"${metricText}`,
               leaderboardId: leaderboard.id,
               clubId: leaderboard.clubId,
             },
@@ -120,7 +147,8 @@ export const processExpiredLeaderboards = async () => {
               leaderboard.name,
               contextType,
               badgeUrl,
-              rewardUrl
+              rewardUrl,
+              metricText
             );
           }
         }

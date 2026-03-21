@@ -83,7 +83,8 @@ class EmailService {
     leaderboardName: string,
     contextType: 'leaderboard' | 'challenge',
     badgeUrl?: string,
-    rewardUrl?: string
+    rewardUrl?: string,
+    metricText?: string
   ) {
     try {
       const { data, error } = await this.resend.emails.send({
@@ -96,6 +97,7 @@ class EmailService {
           contextType,
           badgeUrl,
           rewardUrl,
+          metricText,
         }),
       });
 
