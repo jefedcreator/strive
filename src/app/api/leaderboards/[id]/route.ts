@@ -157,7 +157,7 @@ export const GET = withMiddleware<
       const query = request.query!;
 
       const sortBy = query.sortBy ?? 'score';
-      const sortOrder = query.sortOrder ?? 'desc';
+      const sortOrder = query.sortOrder ?? (sortBy === 'pace' ? 'asc' : 'desc');
 
       const orderBy: Prisma.UserLeaderboardOrderByWithRelationInput = {};
 
@@ -165,6 +165,10 @@ export const GET = withMiddleware<
         orderBy.user = {
           fullname: sortOrder,
         };
+      } else if (sortBy === 'distance') {
+        orderBy.runDistance = sortOrder;
+      } else if (sortBy === 'pace') {
+        orderBy.runPace = sortOrder;
       } else {
         orderBy[sortBy] = sortOrder;
       }

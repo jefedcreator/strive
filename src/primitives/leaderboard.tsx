@@ -37,20 +37,46 @@ interface LeaderboardProps {
   leaderboardType?: LeaderboardType;
 }
 
+type SortField = 'default' | 'runDistance' | 'runPace';
 
 export const Leaderboard: React.FC<LeaderboardProps> = ({
   entries,
   currentUserId,
   leaderboardType = 'DISTANCE',
 }) => {
-  const sortedEntries = [...entries].sort((a, b) => {
-    if (leaderboardType === 'PACE') {
-      // Lower pace = better (ascending)
-      return parsePace(a.runPace) - parsePace(b.runPace);
+  const [sortField, setSortField] = React.useState<SortField>('default');
+
+  const handleSort = (field: 'runDistance' | 'runPace') => {
+    setSortField((prev) => (prev === field ? 'default' : field));
+  };
+
+  const sortedEntries = React.useMemo(() => {
+    const sorted = [...entries];
+    if (sortField === 'runDistance') {
+      return sorted.sort(
+        (a, b) => (b.runDistance ?? 0) - (a.runDistance ?? 0)
+      );
     }
-    // DISTANCE: higher score = better (descending)
-    return b.score - a.score;
-  });
+    if (sortField === 'runPace') {
+      return sorted.sort(
+        (a, b) => parsePace(a.runPace) - parsePace(b.runPace)
+      );
+    }
+    // Default sort based on leaderboard type
+    if (leaderboardType === 'PACE') {
+      return sorted.sort(
+        (a, b) => parsePace(a.runPace) - parsePace(b.runPace)
+      );
+    }
+    return sorted.sort((a, b) => b.score - a.score);
+  }, [entries, sortField, leaderboardType]);
+
+  const activeSortField =
+    sortField !== 'default'
+      ? sortField
+      : leaderboardType === 'PACE'
+        ? 'runPace'
+        : 'runDistance';
 
   return (
     <div className="grid grid-cols-1 w-full">
