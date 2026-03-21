@@ -213,6 +213,14 @@ export const GET = withMiddleware<
         );
       }
 
+      // Ensure that entries with 0/missing pace stay at the bottom
+      if (sortBy === 'pace') {
+        const isZeroPace = (pace: string | null) => !pace || pace === '0' || pace === '0:00' || pace === '00:00';
+        const validEntries = leaderboard.entries.filter((e) => !isZeroPace(e.runPace));
+        const zeroEntries = leaderboard.entries.filter((e) => isZeroPace(e.runPace));
+        leaderboard.entries = [...validEntries, ...zeroEntries];
+      }
+
 
       const response: ApiResponse<typeof leaderboard> = {
         status: 200,
