@@ -12,7 +12,7 @@ import {
   type ClubListItem,
   type PaginatedApiResponse,
 } from '@/types';
-import { parseParams } from '@/utils';
+import { clubsParams, loadClubsParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import api from '@/utils/axios';
@@ -44,7 +44,7 @@ export const ClubsPageClient: React.FC<ClubsPageClientProps> = ({
   const [refreshKey, setRefreshKey] = useState(0);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [{ isActive, isPublic, query, page }, setStates] = useQueryStates(
-    parseParams,
+    clubsParams,
     {
       shallow: false,
       throttleMs: 1000,

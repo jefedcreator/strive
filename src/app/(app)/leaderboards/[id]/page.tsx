@@ -3,9 +3,11 @@ import { getLeaderboard } from '@/server';
 import { notFound } from 'next/navigation';
 import Background from '@/components/background';
 import { type Metadata } from 'next';
+import { loadLeaderboardParams } from '@/utils';
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata({
@@ -62,9 +64,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function LeaderboardDetailPage({ params }: PageProps) {
+export default async function LeaderboardDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const initialData = await getLeaderboard(id);
+  const { sortBy } = loadLeaderboardParams.parse(
+    await searchParams
+  );
+
+  const initialData = await getLeaderboard(id, {sortBy:sortBy??undefined});
 
   if (!initialData.data) {
     notFound();

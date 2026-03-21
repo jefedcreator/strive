@@ -1,12 +1,11 @@
 import { ClubsPageClient } from '@/components/clubs-page-client';
 import { getClubs } from '@/server';
 import Background from '@/components/background';
-
-import { loadParams } from '@/utils';
+import { loadClubsParams } from '@/utils';
 import type { PageProps } from '@/types';
 
 export default async function ClubsPage({ searchParams }: PageProps) {
-  const { isActive, isPublic, query } = loadParams.parse(await searchParams);
+  const { isActive, isPublic, query } = loadClubsParams.parse(await searchParams);
 
   const initialData = await getClubs({
     isActive: isActive ?? undefined,

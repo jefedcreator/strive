@@ -122,29 +122,44 @@ const mongoIdValidator = z
   .string()
   .regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ID format');
 
-const exploreParams = {
+const baseParams = {
   query: parseAsString,
   page: parseAsInteger.withDefault(1),
+};
+
+const exploreParams = {
+  ...baseParams,
   type: parseAsStringEnum(['clubs', 'leaderboards']),
 };
 
 const notificationParams = {
-  query: parseAsString,
-  page: parseAsInteger.withDefault(1),
+  ...baseParams,
   type: parseAsStringEnum(['info', 'club', 'leaderboard']),
 };
 
-const parseParams = {
+const clubsParams = {
+  ...baseParams,
   isActive: parseAsBoolean,
   isPublic: parseAsBoolean,
-  query: parseAsString,
-  page: parseAsInteger.withDefault(1),
+};
+
+const leaderboardsParams = {
+  ...baseParams,
+  isActive: parseAsBoolean,
+  isPublic: parseAsBoolean,
   type: parseAsString,
 };
 
-const loadParams = createSearchParamsCache(parseParams);
+const leaderboardParams = {
+  sortBy: parseAsStringEnum(['pace', 'distance', 'createdAt']),
+};
+
+const loadLeaderboardsParams = createSearchParamsCache(leaderboardsParams);
 const loadExploreParams = createSearchParamsCache(exploreParams);
 const loadNotificationParams = createSearchParamsCache(notificationParams);
+const loadLeaderboardParams = createSearchParamsCache(leaderboardParams);
+const loadBaseParams = createSearchParamsCache(baseParams);
+const loadClubsParams = createSearchParamsCache(clubsParams);
 
 
 const getFontSize = (text: string, baseSize: number, minSize: number) => {
@@ -184,9 +199,9 @@ export {
   HttpException,
   isFile,
   isValidObjectId, loadExploreParams,
-  loadNotificationParams, loadParams, mongoIdValidator, notificationParams, parseHttpError, parsePace, parseParams, parseTransactionStatus,
+  loadNotificationParams, loadLeaderboardParams, loadLeaderboardsParams, leaderboardsParams, mongoIdValidator, notificationParams, parseHttpError, parsePace, parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword
+  verifyPassword, loadBaseParams, baseParams, loadClubsParams, clubsParams
 };
 

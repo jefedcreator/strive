@@ -187,41 +187,17 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
 
       {/* Hero Banner */}
       <FadeInItem>
-        <div className="relative w-full rounded-2xl overflow-hidden mb-3">
-          {/* Background: image or gradient */}
-          {club.image ? (
-            <>
-              <Image
-                src={club.image}
-                alt={club.name}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-black/40 dark:bg-black/50" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-            </>
-          ) : (
-            // <>
-            //   <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 via-teal-500/20 to-blue-500/10 dark:from-emerald-500/20 dark:via-teal-600/15 dark:to-blue-700/5" />
-            //   <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
-            //   <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
-            // </>
-            <>
-              <Image
-                src={`/api/og?name=${encodeURIComponent(club.name)}&type=club`}
-                alt={club.name}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-black/40 dark:bg-black/50" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-            </>
-          )}
-          {/* <>
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 via-teal-500/20 to-blue-500/10 dark:from-emerald-500/20 dark:via-teal-600/15 dark:to-blue-700/5" />
-            <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
-          </> */}
+        <div className="relative w-full rounded-2xl overflow-hidden mb-3 border border-gray-200 dark:border-gray-800">
+          <Image
+            src={
+              club.image ||
+              `/api/og?name=${encodeURIComponent(club.name)}&type=club`
+            }
+            alt={club.name}
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/60" />
 
           {/* Banner content */}
           <div className="relative flex flex-col items-center justify-center text-center px-16 py-12 md:py-16">
@@ -255,61 +231,63 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
             </div>
           </div>
 
-          {/* ··· Menu */}
-          <div className="absolute top-3 right-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/30 dark:bg-white/10 backdrop-blur-sm hover:bg-white/50 dark:hover:bg-white/20 transition-colors text-gray-700 dark:text-gray-200">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+          {/* Actions Menu */}
+          <div className="absolute top-3 right-3 flex items-center gap-2">
+            {!isMember && !isInactive && (
+              <Button
+                size="sm"
+                disabled={joinMutation.isPending || isInactive}
+                onClick={() =>
+                  toast.promise(joinMutation.mutateAsync(), {
+                    loading: 'Joining club…',
+                    success: club.isPublic
+                      ? 'Successfully joined the club!'
+                      : 'Join request sent. Waiting for owner approval.',
+                    error: (err: AxiosError<ApiError>) =>
+                      err.response?.data?.message ?? 'Failed to join club',
+                  })
+                }
+                className="bg-white hover:bg-gray-100 text-gray-900 shadow-sm border-0 font-semibold"
               >
-                {isCreator && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => setIsEditModalOpen(true)}
-                      className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-gray-800"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      Edit Club
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
-                  </>
-                )}
+                <LogIn className="w-4 h-4 mr-2" />
+                {joinMutation.isPending ? 'Joining...' : 'Join Club'}
+              </Button>
+            )}
 
-                {!isMember ? (
+            {isMember && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={exitMutation.isPending}
+                onClick={() => setIsLeaveModalOpen(true)}
+                className="bg-black/20 hover:bg-black/40 text-white border-white/20 backdrop-blur-md shadow-sm transition-all"
+              >
+                <LogOut className="w-4 h-4 mr-1.5" />
+                Leave
+              </Button>
+            )}
+
+            {isCreator && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 dark:bg-black/40 border border-white/20 backdrop-blur-md dark:hover:bg-black/60 transition-colors text-white shadow-sm">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-44 bg-white dark:bg-[#18181B] border border-gray-200 dark:border-gray-800 shadow-xl"
+                >
                   <DropdownMenuItem
-                    onClick={() =>
-                      toast.promise(joinMutation.mutateAsync(), {
-                        loading: 'Joining club…',
-                        success: club.isPublic
-                          ? 'Successfully joined the club!'
-                          : 'Join request sent. Waiting for owner approval.',
-                        error: (err: AxiosError<ApiError>) =>
-                          err.response?.data?.message ?? 'Failed to join club',
-                      })
-                    }
-                    disabled={joinMutation.isPending || isInactive}
-                    className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-[#2A2A2E]"
                   >
-                    <LogIn className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                    {joinMutation.isPending ? 'Joining...' : 'Join Club'}
+                    <Edit2 className="w-4 h-4" />
+                    Edit Club
                   </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem
-                    onClick={() => setIsLeaveModalOpen(true)}
-                    disabled={exitMutation.isPending}
-                    className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Leave Club
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </FadeInItem>

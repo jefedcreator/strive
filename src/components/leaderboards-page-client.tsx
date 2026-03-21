@@ -17,7 +17,7 @@ import {
   type LeaderboardListItem,
   type PaginatedApiResponse,
 } from '@/types';
-import { parseParams } from '@/utils';
+import { leaderboardsParams } from '@/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import api from '@/utils/axios';
@@ -49,7 +49,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [{ isActive, isPublic, query, page }, setStates] = useQueryStates(
-    parseParams,
+    leaderboardsParams,
     {
       shallow: false,
       throttleMs: 1000,

@@ -9,7 +9,7 @@ import {
   type RewardItem,
   type RewardsData,
 } from '@/types';
-import { parseParams } from '@/utils';
+import { baseParams } from '@/utils';
 import {
   Download,
   Flame,
@@ -70,7 +70,7 @@ export const RewardsPageClient: React.FC<RewardsPageClientProps> = ({
   const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const [{ page }, setStates] = useQueryStates(parseParams, {
+  const [{ page }, setStates] = useQueryStates(baseParams, {
     shallow: false,
     throttleMs: 1000,
   });

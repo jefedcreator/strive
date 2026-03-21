@@ -1,5 +1,5 @@
 import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validator';
-import type { LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
+import type { LeaderboardEntriesQueryValidatorSchema, LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import type { NotificationQueryValidatorSchema } from '@/backend/validators/notification.validator';
 import type { ExploreQueryValidatorSchema } from '@/backend/validators/explore.validator';
 import type {
@@ -140,10 +140,20 @@ async function getLeaderboards(
 }
 
 async function getLeaderboard(
-  id: string
+  id: string,
+  params?: Partial<LeaderboardEntriesQueryValidatorSchema>
 ): Promise<ApiResponse<LeaderboardDetail | null>> {
   try {
-    const url = `${baseUrl}/api/leaderboards/${id}`;
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.set(key, String(value));
+        }
+      });
+    }
+
+    const url = `${baseUrl}/api/leaderboards/${id}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     const res = await fetcher(url);
 
     if (!res.ok) {

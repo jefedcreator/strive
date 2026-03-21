@@ -22,7 +22,8 @@ import { type AxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useQueryState } from 'nuqs';
+import React, { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import {
@@ -37,6 +38,9 @@ import {
   Share2,
   Download,
   X,
+  Filter,
+  ChevronDown,
+  Loader2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -57,6 +61,14 @@ export const LeaderboardDetailClient: React.FC<
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [sortByState, setSortByState] = useQueryState('sortBy', {
+    defaultValue: 'score',
+    shallow: false,
+    history: 'replace',
+    clearOnDefault: true,
+  });
+
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId
     ? initialData.data?.createdById === currentUserId
@@ -65,20 +77,15 @@ export const LeaderboardDetailClient: React.FC<
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-  const { data: response } = useQuery<ApiResponse<LeaderboardDetail | null>>({
-    queryKey: ['leaderboard', initialData.data?.id],
-    queryFn: async () => {
-      const { data } = await api.get<ApiResponse<LeaderboardDetail>>(
-        `/leaderboards/${initialData.data!.id}`,
-        { headers: { Authorization: `Bearer ${session?.user.token}` } }
-      );
-      return data;
-    },
-    initialData,
-    // staleTime: Infinity,
-  });
+  const sortBy = sortByState || 'score';
 
-  const leaderboard = response.data!;
+  const handleSortChange = (newSortBy: string) => {
+    startTransition(async () => {
+      await setSortByState(newSortBy === 'score' ? null : newSortBy);
+    });
+  };
+
+  const leaderboard = initialData.data!;
   const entries = leaderboard.entries ?? [];
   const isCompleted = leaderboard.expiryDate
     ? new Date(leaderboard.expiryDate) < new Date()
@@ -141,10 +148,8 @@ export const LeaderboardDetailClient: React.FC<
     },
     onSuccess: async () => {
       toast.success('Leaderboard updated successfully!');
-      await queryClient.invalidateQueries({
-        queryKey: ['leaderboard', leaderboard.id],
-      });
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      router.refresh();
       setIsEditModalOpen(false);
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -162,10 +167,8 @@ export const LeaderboardDetailClient: React.FC<
       return res.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['leaderboard', leaderboard.id],
-      });
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
+      router.refresh();
       router.push('/leaderboards');
     },
   });
@@ -182,11 +185,8 @@ export const LeaderboardDetailClient: React.FC<
       return res.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['leaderboard', leaderboard.id],
-      });
       await queryClient.invalidateQueries({ queryKey: ['leaderboards'] });
-      // router.refresh()
+      router.refresh();
     },
   });
 
@@ -209,10 +209,7 @@ export const LeaderboardDetailClient: React.FC<
 
       {/* Hero Banner */}
       <FadeInItem>
-        <div className="relative w-full rounded-2xl overflow-hidden mb-3 bg-gradient-to-br from-primary/30 via-purple-500/20 to-blue-500/10 dark:from-primary/20 dark:via-purple-500/15 dark:to-blue-600/5 border border-white/20 dark:border-white/10">
-          {/* Decorative blobs */}
-          {/* <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-purple-500/20 blur-3xl pointer-events-none" /> */}
+        <div className="relative w-full rounded-2xl overflow-hidden mb-3 border border-gray-200 dark:border-gray-800">
           <>
             <Image
               src={`/api/og?name=${encodeURIComponent(leaderboard.name)}&type=${isChallenge ? 'challenge' : 'leaderboard'}`}
@@ -220,8 +217,7 @@ export const LeaderboardDetailClient: React.FC<
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-black/40 dark:bg-black/50" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+            <div className="absolute inset-0 bg-black/60" />
           </>
           {/* Banner content */}
           <div className="relative flex flex-col items-center justify-center text-center px-16 py-12 md:py-16">
@@ -254,76 +250,80 @@ export const LeaderboardDetailClient: React.FC<
           </div>
 
           {/* ··· Menu */}
-          <div className="absolute top-3 right-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/30 dark:bg-white/10 backdrop-blur-sm hover:bg-white/50 dark:hover:bg-white/20 transition-colors text-gray-700 dark:text-gray-200">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-48 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
+          <div className="absolute top-3 right-3 flex items-center gap-2">
+            {!isMember && !isInactive && !isCompleted && (
+              <Button
+                size="sm"
+                disabled={joinMutation.isPending || isInactive || isCompleted}
+                onClick={() =>
+                  toast.promise(joinMutation.mutateAsync(), {
+                    loading: 'Joining leaderboard…',
+                    success: 'Successfully joined the leaderboard!',
+                    error: (err: AxiosError<ApiError>) =>
+                      err.response?.data?.message ??
+                      'Failed to join leaderboard',
+                  })
+                }
+                className="bg-white hover:bg-gray-100 text-gray-900 shadow-sm border-0 font-semibold"
               >
-                {isCreator && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => setIsEditModalOpen(true)}
-                      className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-gray-800"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      Edit {isChallenge ? 'Challenge' : 'Leaderboard'}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
-                  </>
-                )}
+                <LogIn className="w-4 h-4 mr-2" />
+                {joinMutation.isPending
+                  ? 'Joining...'
+                  : `Join ${isChallenge ? 'Challenge' : 'Leaderboard'}`}
+              </Button>
+            )}
 
-                {isCompleted && isMember && (
-                  <>
+            {isMember && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={exitMutation.isPending}
+                onClick={() => setIsLeaveModalOpen(true)}
+                className="bg-black/20 hover:bg-black/40 text-white border-white/20 backdrop-blur-md shadow-sm transition-all"
+              >
+                <LogOut className="w-4 h-4 mr-1.5" />
+                Leave
+              </Button>
+            )}
+
+            {(isCreator || (isCompleted && isMember)) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 dark:bg-black/40 border border-white/20 backdrop-blur-md dark:hover:bg-black/60 transition-colors text-white shadow-sm">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 bg-white dark:bg-[#18181B] border border-gray-200 dark:border-gray-800 shadow-xl"
+                >
+                  {isCreator && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-[#2A2A2E]"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        Edit {isChallenge ? 'Challenge' : 'Leaderboard'}
+                      </DropdownMenuItem>
+                      {isCompleted && isMember && (
+                        <DropdownMenuSeparator className="bg-gray-100 dark:bg-[#2A2A2E]" />
+                      )}
+                    </>
+                  )}
+
+                  {isCompleted && isMember && (
                     <DropdownMenuItem
                       onClick={() => setIsShareModalOpen(true)}
-                      className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-gray-800 text-primary font-bold"
+                      className="flex items-center gap-2 cursor-pointer focus:bg-gray-100 dark:focus:bg-[#2A2A2E] text-primary font-bold"
                     >
                       <Share2 className="w-4 h-4" />
                       Share My Moment
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-100 dark:border-gray-800" />
-                  </>
-                )}
-
-                {!isMember ? (
-                  <DropdownMenuItem
-                    onClick={() =>
-                      toast.promise(joinMutation.mutateAsync(), {
-                        loading: 'Joining leaderboard…',
-                        success: 'Successfully joined the leaderboard!',
-                        error: (err: AxiosError<ApiError>) =>
-                          err.response?.data?.message ??
-                          'Failed to join leaderboard',
-                      })
-                    }
-                    disabled={
-                      joinMutation.isPending || isInactive || isCompleted
-                    }
-                    className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
-                  >
-                    <LogIn className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                    {joinMutation.isPending
-                      ? 'Joining...'
-                      : `Join ${isChallenge ? 'Challenge' : 'Leaderboard'}`}
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem
-                    onClick={() => setIsLeaveModalOpen(true)}
-                    disabled={exitMutation.isPending}
-                    className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Leave {isChallenge ? 'Challenge' : 'Leaderboard'}
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </FadeInItem>
@@ -371,14 +371,38 @@ export const LeaderboardDetailClient: React.FC<
       {/* Rankings */}
       <FadeInItem className="w-full min-w-0 flex flex-col">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-xl text-gray-900 dark:text-white">
+          <h2 className="font-bold text-xl text-gray-900 dark:text-white flex items-center gap-3">
             {isChallenge ? 'Challenge' : 'Leaderboard'} Rankings
+            {isPending && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
           </h2>
-          <span className="text-xs font-bold tracking-widest uppercase text-gray-400 dark:text-gray-500">
-            {entries.length} {entries.length === 1 ? 'Athlete' : 'Athletes'}
-          </span>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-xs font-bold tracking-widest uppercase text-gray-400 dark:text-gray-500 hidden sm:inline-block">
+              {entries.length} {entries.length === 1 ? 'Athlete' : 'Athletes'}
+            </span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-2 text-xs font-medium bg-card-light dark:bg-card-dark cursor-pointer text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-800">
+                  <Filter className="w-3.5 h-3.5" />
+                  Sort: {sortBy === 'score' ? 'Default' : sortBy === 'distance' ? 'Distance' : 'Pace'}
+                  <ChevronDown className="w-3 h-3 ml-1 text-gray-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44 bg-white dark:bg-[#18181B] border border-gray-200 dark:border-gray-800 shadow-xl">
+                <DropdownMenuItem onClick={() => handleSortChange('score')} className={`text-xs cursor-pointer ${sortBy === 'score' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}>
+                  Default
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSortChange('distance')} className={`text-xs cursor-pointer ${sortBy === 'distance' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}>
+                  Distance
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSortChange('pace')} className={`text-xs cursor-pointer ${sortBy === 'pace' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}>
+                  Pace
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <Leaderboard entries={entries} currentUserId={session?.user.id} leaderboardType={leaderboard.type} />
+        <Leaderboard entries={entries} currentUserId={session?.user.id} leaderboardType={leaderboard.type} disableInternalSort />
       </FadeInItem>
 
       <LeaderboardModal

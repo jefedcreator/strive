@@ -35,6 +35,7 @@ interface LeaderboardProps {
   entries: LeaderboardEntry[];
   currentUserId?: string;
   leaderboardType?: LeaderboardType;
+  disableInternalSort?: boolean;
 }
 
 type SortField = 'default' | 'runDistance' | 'runPace';
@@ -43,6 +44,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   entries,
   currentUserId,
   leaderboardType = 'DISTANCE',
+  disableInternalSort = false,
 }) => {
   const [sortField, setSortField] = React.useState<SortField>('default');
 
@@ -51,6 +53,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   };
 
   const sortedEntries = React.useMemo(() => {
+    if (disableInternalSort) return entries;
     const sorted = [...entries];
     if (sortField === 'runDistance') {
       return sorted.sort(
@@ -71,8 +74,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     return sorted.sort((a, b) => b.score - a.score);
   }, [entries, sortField, leaderboardType]);
 
-  const activeSortField =
-    sortField !== 'default'
+  const activeSortField = disableInternalSort
+    ? 'default'
+    : sortField !== 'default'
       ? sortField
       : leaderboardType === 'PACE'
         ? 'runPace'
