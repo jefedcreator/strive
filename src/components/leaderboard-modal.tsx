@@ -139,6 +139,28 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               </Field>
             </div>
 
+            {/* Type */}
+            <Field
+              id="type"
+              label="Leaderboard Type"
+              error={errors.type?.message}
+              description="Distance ranks by total distance. Pace ranks by best pace."
+            >
+              <div className="relative">
+                <select
+                  {...register('type')}
+                  id="type"
+                  className="h-11 w-full appearance-none rounded-xl border border-gray-200 dark:border-[#2A2A2E] bg-white dark:bg-[#18181B] px-4 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer"
+                >
+                  <option value="DISTANCE">Distance</option>
+                  <option value="PACE">Pace</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+              </div>
+            </Field>
+
             {/* Description */}
             <Field
               id="description"

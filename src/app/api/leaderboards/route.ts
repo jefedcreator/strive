@@ -66,6 +66,10 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
         data.expiryDate = payload.expiryDate;
       }
 
+      if (payload.type) {
+        data.type = payload.type;
+      }
+
       const existingLeaderboard = await db.leaderboard.findFirst({
         where: {
           name: payload.name,

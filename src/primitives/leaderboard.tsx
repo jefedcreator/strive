@@ -8,10 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/primitives/table';
-import { type UserLeaderboard } from '@prisma/client';
+import { type UserLeaderboard, type LeaderboardType } from '@prisma/client';
 import { getTier } from '@/backend/services/xp/logic';
 import { ProfileFrame } from '@/components/profile-frame';
 import React from 'react';
+import { parsePace,formatDuration } from '@/utils';
 
 type LeaderboardEntry = Omit<
   UserLeaderboard,
@@ -33,21 +34,23 @@ type LeaderboardEntry = Omit<
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
   currentUserId?: string;
+  leaderboardType?: LeaderboardType;
 }
 
-/** Format total minutes → "1h 23m" or "45m" */
-function formatDuration(minutes: number | null): string {
-  if (!minutes) return '—';
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes % 60);
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
-}
 
 export const Leaderboard: React.FC<LeaderboardProps> = ({
   entries,
   currentUserId,
+  leaderboardType = 'DISTANCE',
 }) => {
-  const sortedEntries = [...entries].sort((a, b) => b.score - a.score);
+  const sortedEntries = [...entries].sort((a, b) => {
+    if (leaderboardType === 'PACE') {
+      // Lower pace = better (ascending)
+      return parsePace(a.runPace) - parsePace(b.runPace);
+    }
+    // DISTANCE: higher score = better (descending)
+    return b.score - a.score;
+  });
 
   return (
     <div className="grid grid-cols-1 w-full">

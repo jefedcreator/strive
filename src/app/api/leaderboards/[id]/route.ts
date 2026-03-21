@@ -62,6 +62,7 @@ export const PUT = withMiddleware<UpdateLeaderboardValidatorSchema>(
       if (payload.isActive !== undefined) data.isActive = payload.isActive;
       if (payload.isPublic !== undefined) data.isPublic = payload.isPublic;
       if (payload.expiryDate) data.expiryDate = payload.expiryDate;
+      if (payload.type) data.type = payload.type;
 
       if (payload.clubId) {
         data.club = {

@@ -116,6 +116,7 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
       isActive: true,
       clubId: undefined,
       expiryDate: undefined,
+      type: 'DISTANCE',
     },
   });
 

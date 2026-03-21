@@ -41,8 +41,14 @@ export const GET = withMiddleware(
             OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
           },
         },
-        select: { id: true, createdAt: true, runId: true },
+        select: { id: true, createdAt: true, runId: true, leaderboard: { select: { type: true } } },
       });
+
+      // Helper: parse pace string "M:SS" → total minutes
+      const parsePace = (pace: string): number => {
+        const [min, sec] = pace.split(':').map(Number);
+        return (min ?? 0) + (sec ?? 0) / 60;
+      };
 
       // For each membership, compute stats from runs after the join date
       await Promise.all(
@@ -79,10 +85,29 @@ export const GET = withMiddleware(
           const paceSec = Math.round((avgPaceMinPerKm - paceMin) * 60);
           const avgPace = `${paceMin}:${String(paceSec).padStart(2, '0')}`;
 
+          // Compute score based on leaderboard type
+          const leaderboardType = membership.leaderboard.type;
+          let score: number;
+
+          if (leaderboardType === 'PACE') {
+            // Best (lowest) pace wins — find the run with the fastest pace
+            const bestPaceRun = sinceJoin.reduce((best, r) => {
+              const bestPaceVal = parsePace(best.pace);
+              const currentPaceVal = parsePace(r.pace);
+              return currentPaceVal < bestPaceVal ? r : best;
+            });
+            const bestPaceVal = parsePace(bestPaceRun.pace);
+            // Invert so higher score = faster pace; ORDER BY score DESC works
+            score = bestPaceVal > 0 ? Math.round(1_000_000 / bestPaceVal) : 0;
+          } else {
+            // DISTANCE: higher total distance = higher score
+            score = Math.round(totalDistance * 1000);
+          }
+
           await db.userLeaderboard.update({
             where: { id: membership.id },
             data: {
-              score: Math.round(totalDistance * 1000),
+              score,
               runId: latest.id,
               runName: latest.name,
               runDate: latest.date,

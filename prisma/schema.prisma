@@ -26,6 +26,13 @@ enum NotificationType {
     @@map("notification_types")
 }
 
+enum LeaderboardType {
+    DISTANCE
+    PACE
+
+    @@map("leaderboard_types")
+}
+
 enum RewardType {
     GOLD
     SILVER
@@ -80,6 +87,7 @@ model Leaderboard {
     updatedAt          DateTime             @updatedAt
     isPublic           Boolean              @default(true)
     isActive           Boolean              @default(true)
+    type               LeaderboardType      @default(DISTANCE)
     expiryDate         DateTime?
     createdBy          User                 @relation("LeaderboardCreator", fields: [createdById], references: [id], onDelete: Cascade)
     createdById        String               @db.ObjectId

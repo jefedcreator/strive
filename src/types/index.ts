@@ -104,8 +104,8 @@ export type LeaderboardListItem = Leaderboard & {
 };
 
 export type ExploreListItem =
-  | (ClubListItem & { type: 'club' })
-  | (LeaderboardListItem & { type: 'leaderboard' });
+  | (ClubListItem & { kind: 'club' })
+  | (LeaderboardListItem & { kind: 'leaderboard' });
 
 export type NotificationWithRelations = Notification & {
   user?: User | null;

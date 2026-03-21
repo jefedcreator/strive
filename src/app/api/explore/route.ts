@@ -114,7 +114,7 @@ export const GET = withMiddleware<unknown, ExploreQueryValidatorSchema>(
         total = count;
         combinedData = clubs.map(({ _count, members, ...rest }) => ({
           ...rest,
-          type: 'club',
+          kind: 'club',
           leaderboards: _count.leaderboards,
           members: _count.members,
           isMember: !!(members && members.length > 0),
@@ -131,11 +131,12 @@ export const GET = withMiddleware<unknown, ExploreQueryValidatorSchema>(
           }),
         ]);
         total = count;
-        combinedData = leaderboards.map(({ entries, ...rest }) => ({
+        combinedData = leaderboards.map(({ entries, type: leaderboardType, ...rest }) => ({
           ...rest,
-          type: 'leaderboard',
+          kind: 'leaderboard' as const,
+          leaderboardType,
           isMember: !!(entries && entries.length > 0),
-        })) as ExploreListItem[];
+        })) as unknown as ExploreListItem[];
       } else {
         // Fetch both for interleaved result
         const [clubCount, lbCount, clubs, leaderboards] = await Promise.all([
@@ -159,15 +160,16 @@ export const GET = withMiddleware<unknown, ExploreQueryValidatorSchema>(
 
         const mappedClubs = clubs.map(({ _count, members, ...rest }) => ({
           ...rest,
-          type: 'club' as const,
+          kind: 'club' as const,
           leaderboards: _count.leaderboards,
           members: _count.members,
           isMember: !!(members && members.length > 0),
         }));
 
-        const mappedLbs = leaderboards.map(({ entries, ...rest }) => ({
+        const mappedLbs = leaderboards.map(({ entries, type: leaderboardType, ...rest }) => ({
           ...rest,
-          type: 'leaderboard' as const,
+          kind: 'leaderboard' as const,
+          leaderboardType,
           isMember: !!(entries && entries.length > 0),
         }));
 

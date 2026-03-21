@@ -178,6 +178,13 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
                   <XCircle className="w-3 h-3" /> Inactive
                 </span>
               )}
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide ${
+                data.type === 'PACE'
+                  ? 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30'
+                  : 'text-teal-600 dark:text-teal-400 bg-teal-100 dark:bg-teal-900/30'
+              }`}>
+                {data.type === 'PACE' ? 'Pace' : 'Distance'}
+              </span>
             </div>
           </Link>
 

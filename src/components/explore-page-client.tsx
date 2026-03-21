@@ -154,8 +154,8 @@ export const ExplorePageClient: React.FC<ExplorePageClientProps> = ({
                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6"
               >
                 {items.map((item) => (
-                  <FadeInItem key={`${item.type}-${item.id}`}>
-                    {item.type === 'club' ? (
+                  <FadeInItem key={`${item.kind}-${item.id}`}>
+                    {item.kind === 'club' ? (
                       <ClubCard club={item} showType={true} />
                     ) : (
                       <LeaderboardCard data={item} showType={true} />

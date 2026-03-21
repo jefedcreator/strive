@@ -1,18 +1,17 @@
 import { getChildId } from '@/utils/getChildId';
 import bcrypt from 'bcryptjs';
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { generateUsername } from 'unique-username-generator';
-import z from 'zod';
 import {
   createSearchParamsCache,
   parseAsBoolean,
+  parseAsInteger,
   parseAsString,
   parseAsStringEnum,
-  parseAsInteger,
 } from 'nuqs/server';
+import { twMerge } from 'tailwind-merge';
+import { generateUsername } from 'unique-username-generator';
+import z from 'zod';
 import { HttpException } from './exceptions';
-import { NotificationType } from '@prisma/client';
 
 const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -158,28 +157,36 @@ const getFontSize = (text: string, baseSize: number, minSize: number) => {
   return baseSize;
 };
 
+/** Format total minutes → "1h 23m" or "45m" */
+function formatDuration(minutes: number | null): string {
+  if (!minutes) return '—';
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+/** Parse pace string "M:SS" → total minutes for sorting */
+function parsePace(pace: string | null): number {
+  if (!pace) return Infinity;
+  const [min, sec] = pace.split(':').map(Number);
+  return (min ?? 0) + (sec ?? 0) / 60;
+}
+
+
 export {
   cn,
   convertBase64ToFile,
-  convertFileToBase64,
-  generateRandomString,
+  convertFileToBase64, exploreParams, formatDuration, generateRandomString,
   genUsername,
-  getChildId,
+  getChildId, getFontSize,
   // getDateRange,
   hashPassword,
   HttpException,
   isFile,
-  isValidObjectId,
-  mongoIdValidator,
-  parseHttpError,
-  parseTransactionStatus,
+  isValidObjectId, loadExploreParams,
+  loadNotificationParams, loadParams, mongoIdValidator, notificationParams, parseHttpError, parsePace, parseParams, parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword,
-  parseParams,
-  exploreParams,
-  notificationParams,
-  loadParams,
-  loadExploreParams,
-  loadNotificationParams, getFontSize
+  verifyPassword
 };
+
