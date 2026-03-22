@@ -4,38 +4,37 @@ import { clubValidatorSchema } from '@/backend/validators/club.validator';
 import { ClubModal, type ClubFormValues } from '@/components/club-modal';
 import { FadeInItem, FadeInStagger } from '@/components/fade-in';
 import { Button } from '@/primitives/Button';
-import { Modal } from '@/primitives/Modal';
-import { type ApiError, type ApiResponse, type ClubDetail } from '@/types';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '@/utils/axios';
-import { type AxiosError } from 'axios';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import Image from 'next/image';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/primitives/dropdown-menu';
+import { Modal } from '@/primitives/Modal';
+import { type ApiError, type ApiResponse, type ClubDetail } from '@/types';
+import api from '@/utils/axios';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type AxiosError } from 'axios';
 import {
   ArrowLeft,
   ArrowRight,
   Calendar,
   Edit2,
-  LogOut,
   LogIn,
+  LogOut,
   MoreHorizontal,
   Trophy,
   User,
   Users,
 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface ClubDetailClientProps {
   initialData: ApiResponse<ClubDetail | null>;
@@ -164,7 +163,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
-      // router.refresh()
+      router.refresh()
     },
   });
 
@@ -236,6 +235,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
             {!isMember && !isInactive && (
               <Button
                 size="sm"
+                variant="outline"
                 disabled={joinMutation.isPending || isInactive}
                 onClick={() =>
                   toast.promise(joinMutation.mutateAsync(), {
@@ -247,9 +247,9 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                       err.response?.data?.message ?? 'Failed to join club',
                   })
                 }
-                className="bg-white hover:bg-gray-100 text-gray-900 shadow-sm border-0 font-semibold"
+                className="bg-black/20 hover:bg-black/40 text-white border-white/20 backdrop-blur-md shadow-sm transition-all"
               >
-                <LogIn className="w-4 h-4 mr-2" />
+                <LogIn className="w-4 h-4 mr-1.5" />
                 {joinMutation.isPending ? 'Joining...' : 'Join Club'}
               </Button>
             )}

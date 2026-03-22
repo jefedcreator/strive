@@ -2,12 +2,6 @@
 
 import React from 'react';
 import { type ApiError, type LeaderboardListItem } from '@/types';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/primitives/dropdown-menu';
 import api from '@/utils/axios';
 import { type AxiosError } from 'axios';
 import { toast } from 'sonner';
@@ -188,67 +182,71 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
             </div>
           </Link>
 
-          {/* Overflow menu */}
+          {/* Action buttons */}
           {hasMenuItems && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="shrink-0 mt-0.5 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/8 transition-colors outline-none">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-44 bg-card-light dark:bg-card-dark border-gray-200 dark:border-gray-800"
-                align="end"
-              >
-                {!isMember && (
-                  <DropdownMenuItem
-                    onClick={() =>
-                      toast.promise(joinMutation.mutateAsync(), {
-                        loading: 'Joining leaderboard…',
-                        success: data.isPublic
-                          ? 'Successfully joined the leaderboard!'
-                          : 'Join request sent. Waiting for owner approval.',
-                        error: (err: AxiosError<ApiError>) =>
-                          err.response?.data?.message ??
-                          'Failed to join leaderboard',
-                      })
-                    }
-                    disabled={joinMutation.isPending || isCompleted}
-                    className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    {joinMutation.isPending ? 'Joining...' : 'Join'}
-                  </DropdownMenuItem>
-                )}
-                {isMember && (data.isPublic || isCreator) && (
-                  <DropdownMenuItem
-                    onClick={() =>
-                      toast.promise(inviteMutation.mutateAsync(), {
-                        loading: 'Generating invite link…',
-                        success: 'Invite link ready!',
-                        error: (err: AxiosError<ApiError>) =>
-                          err.response?.data?.message ??
-                          'Failed to generate invite',
-                      })
-                    }
-                    disabled={inviteMutation.isPending || isCompleted}
-                    className="focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer gap-2"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    {inviteMutation.isPending ? 'Generating...' : 'Invite'}
-                  </DropdownMenuItem>
-                )}
-                {isCreator && (
-                  <DropdownMenuItem
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer gap-2 text-red-600 dark:text-red-400"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-1.5 self-end shrink-0 mb-0.5">
+              {!isMember && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={joinMutation.isPending || isCompleted}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toast.promise(joinMutation.mutateAsync(), {
+                      loading: 'Joining leaderboard…',
+                      success: data.isPublic
+                        ? 'Successfully joined the leaderboard!'
+                        : 'Join request sent. Waiting for owner approval.',
+                      error: (err: AxiosError<ApiError>) =>
+                        err.response?.data?.message ??
+                        'Failed to join leaderboard',
+                    });
+                  }}
+                  className="w-8 h-8 p-0 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white border-gray-200 dark:border-gray-800 shadow-sm transition-all"
+                  title="Join"
+                >
+                  <LogIn className="w-4 h-4" />
+                </Button>
+              )}
+              {isMember && (data.isPublic || isCreator) && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={inviteMutation.isPending || isCompleted}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toast.promise(inviteMutation.mutateAsync(), {
+                      loading: 'Generating invite link…',
+                      success: 'Invite link ready!',
+                      error: (err: AxiosError<ApiError>) =>
+                        err.response?.data?.message ??
+                        'Failed to generate invite',
+                    });
+                  }}
+                  className="w-8 h-8 p-0 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white border-gray-200 dark:border-gray-800 shadow-sm transition-all"
+                  title="Invite"
+                >
+                  <UserPlus className="w-4 h-4" />
+                </Button>
+              )}
+              {isCreator && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDeleteModalOpen(true);
+                  }}
+                  className="w-8 h-8 p-0 bg-transparent hover:bg-red-50 dark:hover:bg-red-900/10 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 border-gray-200 dark:border-gray-800 shadow-sm transition-all"
+                  title="Delete"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </motion.div>

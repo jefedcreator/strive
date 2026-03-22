@@ -254,6 +254,7 @@ export const LeaderboardDetailClient: React.FC<
             {!isMember && !isInactive && !isCompleted && (
               <Button
                 size="sm"
+                variant="outline"
                 disabled={joinMutation.isPending || isInactive || isCompleted}
                 onClick={() =>
                   toast.promise(joinMutation.mutateAsync(), {
@@ -264,9 +265,9 @@ export const LeaderboardDetailClient: React.FC<
                       'Failed to join leaderboard',
                   })
                 }
-                className="bg-white hover:bg-gray-100 text-gray-900 shadow-sm border-0 font-semibold"
+                className="bg-black/20 hover:bg-black/40 text-white border-white/20 backdrop-blur-md shadow-sm transition-all"
               >
-                <LogIn className="w-4 h-4 mr-2" />
+                <LogIn className="w-4 h-4 mr-1.5" />
                 {joinMutation.isPending
                   ? 'Joining...'
                   : `Join ${isChallenge ? 'Challenge' : 'Leaderboard'}`}
