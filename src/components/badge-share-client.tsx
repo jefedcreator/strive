@@ -12,7 +12,7 @@ interface BadgeShareData {
   type: string;
   title: string;
   description: string | null;
-  earnedAt: string;
+  earnedAt: Date;
   username: string;
   userAvatar: string | null;
   badgeUrl: string;

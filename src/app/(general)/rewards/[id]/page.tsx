@@ -118,7 +118,7 @@ export default async function BadgeSharePage({ params }: PageProps) {
             type: data.reward.type,
             title: data.reward.title,
             description: data.reward.description,
-            earnedAt: data.earnedAt.toISOString(),
+            earnedAt: data.earnedAt,
             username,
             userAvatar: data.user.avatar,
             badgeUrl,
