@@ -1,27 +1,26 @@
 import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validator';
+import type { ExploreQueryValidatorSchema } from '@/backend/validators/explore.validator';
 import type { LeaderboardEntriesQueryValidatorSchema, LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
 import type { NotificationQueryValidatorSchema } from '@/backend/validators/notification.validator';
-import type { ExploreQueryValidatorSchema } from '@/backend/validators/explore.validator';
+import type { RewardsQueryValidatorSchema } from '@/backend/validators/rewards.validator';
 import type {
   ApiResponse,
   ClubDetail,
-  ClubListItem,
   ClubInviteDetail,
-  LeaderboardInviteDetail,
+  ClubListItem,
+  ExploreListItem,
   LeaderboardDetail,
+  LeaderboardInviteDetail,
   LeaderboardListItem,
   NotificationWithRelations,
   PaginatedApiResponse,
-  ExploreListItem,
-  RunData,
-  RewardItem,
   RewardsData,
-  UserRewardDetail,
+  RunData,
+  UserRewardDetail
 } from '@/types';
-import { uncachedAuth, signOut } from './auth';
-import type { User } from '@prisma/client';
-import type { RewardsQueryValidatorSchema } from '@/backend/validators/rewards.validator';
 import { undefinedToNull, type WithNull } from '@/utils';
+import type { User } from '@prisma/client';
+import { signOut, uncachedAuth } from './auth';
 
 // Server-side fetches must use the internal Next.js port directly.
 // NEXT_PUBLIC_APP_URL=http://localhost points to Nginx (a separate container) which is NOT reachable via localhost:80 from here.
@@ -35,7 +34,7 @@ const fetcher = async (url: string): Promise<Response> => {
     session = await uncachedAuth();
   }
 
-  const res = await fetch(url, {
+  const res = await fetch(`${baseUrl}/api/${url}`, {
     headers: { Authorization: `Bearer ${session?.user.token}` },
     cache: 'no-store',
   });
@@ -66,7 +65,7 @@ async function getClubs(
   try {
     const searchParams = toSearchParams(params);
 
-    const url = `${baseUrl}/api/clubs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const url = `clubs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
     const res = await fetcher(url);
 
@@ -91,7 +90,7 @@ async function getClubs(
 
 async function getClub(id: string): Promise<ApiResponse<ClubDetail | null>> {
   try {
-    const url = `${baseUrl}/api/clubs/${id}`;
+    const url = `clubs/${id}`;
     const res = await fetcher(url);
 
     if (!res.ok) {
@@ -115,7 +114,7 @@ async function getLeaderboards(
   try {
     const searchParams = toSearchParams(params);
 
-    const url = `${baseUrl}/api/leaderboards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const url = `leaderboards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
     const res = await fetcher(url);
 
@@ -145,7 +144,7 @@ async function getLeaderboard(
   try {
     const searchParams = toSearchParams(params);
 
-    const url = `${baseUrl}/api/leaderboards/${id}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const url = `leaderboards/${id}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     const res = await fetcher(url);
 
     if (!res.ok) {
@@ -169,7 +168,7 @@ async function getNotifications(
   try {
     const searchParams = toSearchParams(params);
 
-    const url = `${baseUrl}/api/notifications${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const url = `notifications${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
     const res = await fetcher(url);
 
@@ -196,7 +195,7 @@ async function getNotifications(
 
 async function getProfile(): Promise<ApiResponse<User | null>> {
   try {
-    const url = `${baseUrl}/api/users/me`;
+    const url = `users/me`;
 
     const res = await fetcher(url);
 
@@ -217,7 +216,7 @@ async function getProfile(): Promise<ApiResponse<User | null>> {
 
 async function getRuns(): Promise<ApiResponse<RunData[]>> {
   try {
-    const url = `${baseUrl}/api/runs`;
+    const url = `runs`;
     const res = await fetcher(url);
 
     if (!res.ok) {
@@ -240,7 +239,7 @@ async function getClubInvite(
   invitesId: string
 ): Promise<ApiResponse<ClubInviteDetail | null>> {
   try {
-    const url = `${baseUrl}/api/clubs/${id}/invites/${invitesId}`;
+    const url = `clubs/${id}/invites/${invitesId}`;
     const res = await fetcher(url);
 
     if (!res.ok) {
@@ -263,7 +262,7 @@ async function getLeaderboardInvite(
   invitesId: string
 ): Promise<ApiResponse<LeaderboardInviteDetail | null>> {
   try {
-    const url = `${baseUrl}/api/leaderboards/${id}/invites/${invitesId}`;
+    const url = `leaderboards/${id}/invites/${invitesId}`;
     const res = await fetcher(url);
 
     if (!res.ok) {
@@ -287,7 +286,7 @@ async function getExploreItems(
   try {
     const searchParams = toSearchParams(params);
 
-    const url = `${baseUrl}/api/explore${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const url = `explore${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
     const res = await fetcher(url);
 
@@ -316,7 +315,7 @@ async function getRewards(
   try {
     const searchParams = toSearchParams(params);
 
-    const url = `${baseUrl}/api/rewards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const url = `rewards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
     const res = await fetcher(url);
 
@@ -351,7 +350,7 @@ async function getReward(
   id: string
 ): Promise<ApiResponse<UserRewardDetail | null>> {
   try {
-    const url = `${baseUrl}/api/rewards/${id}`;
+    const url = `rewards/${id}`;
     const res = await fetcher(url);
 
     if (!res.ok) {
@@ -370,16 +369,7 @@ async function getReward(
 }
 
 export {
-  getClubInvite,
-  getClubs,
-  getClub,
-  getLeaderboards,
-  getLeaderboard,
-  getNotifications,
-  getRuns,
-  getLeaderboardInvite,
-  getProfile,
-  getExploreItems,
-  getRewards,
-  getReward,
+  getClub, getClubInvite,
+  getClubs, getExploreItems, getLeaderboard, getLeaderboardInvite, getLeaderboards, getNotifications, getProfile, getReward, getRewards, getRuns
 };
+
