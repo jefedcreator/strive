@@ -16,6 +16,7 @@ import type {
   RunData,
   RewardItem,
   RewardsData,
+  UserRewardDetail,
 } from '@/types';
 import { uncachedAuth, signOut } from './auth';
 import type { User } from '@prisma/client';
@@ -346,6 +347,28 @@ async function getRewards(
   }
 }
 
+async function getReward(
+  id: string
+): Promise<ApiResponse<UserRewardDetail | null>> {
+  try {
+    const url = `${baseUrl}/api/rewards/${id}`;
+    const res = await fetcher(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch reward: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<ApiResponse<UserRewardDetail>>;
+  } catch (error) {
+    console.error('Error fetching reward:', error);
+    return {
+      status: 500,
+      message: 'Failed to fetch reward',
+      data: null,
+    };
+  }
+}
+
 export {
   getClubInvite,
   getClubs,
@@ -358,4 +381,5 @@ export {
   getProfile,
   getExploreItems,
   getRewards,
+  getReward,
 };

@@ -324,6 +324,25 @@ export interface RewardItem {
   badgeUrl: string;
 }
 
+export interface UserRewardDetail {
+  id: string;
+  userId: string;
+  earnedAt: Date;
+  user: {
+    fullname: string | null;
+    username: string | null;
+    avatar: string | null;
+  };
+  reward: {
+    type: 'GOLD' | 'SILVER' | 'BRONZE' | 'CLUB_MILESTONE';
+    title: string;
+    description: string | null;
+    milestone: number | null;
+    leaderboard: { name: string } | null;
+    club: { name: string } | null;
+  };
+}
+
 export interface RewardsData {
   data: RewardItem[];
   xp: number;

@@ -1,6 +1,6 @@
 import Background from '@/components/background';
 import { BadgeShareClient } from '@/components/badge-share-client';
-import { db } from '@/server/db';
+import { getReward } from '@/server';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { auth } from '@/server/auth';
@@ -9,32 +9,6 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-async function getBadge(userRewardId: string) {
-  try {
-    const userReward = await db.userReward.findUnique({
-      where: { id: userRewardId },
-      include: {
-        user: {
-          select: {
-            fullname: true,
-            username: true,
-            avatar: true,
-          },
-        },
-        reward: {
-          include: {
-            leaderboard: { select: { name: true } },
-            club: { select: { name: true } },
-          },
-        },
-      },
-    });
-
-    return userReward;
-  } catch {
-    return null;
-  }
-}
 
 function buildBadgeImageUrl(reward: {
   type: string;
@@ -65,7 +39,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const data = await getBadge(id);
+  const { data } = await getReward(id);
 
   if (!data) {
     return { title: 'Badge Not Found | Strive' };
@@ -123,7 +97,7 @@ export async function generateMetadata({
 
 export default async function BadgeSharePage({ params }: PageProps) {
   const { id } = await params;
-  const data = await getBadge(id);
+  const { data } = await getReward(id);
   const session = await auth();
 
   if (!data) {
