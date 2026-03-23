@@ -13,7 +13,7 @@ export default async function RewardsPage({ searchParams }: PageProps) {
   const { page } = loadBaseParams.parse(await searchParams);
 
   const initialData = await getRewards({
-    page: page ?? undefined,
+    page,
   });
 
   return (

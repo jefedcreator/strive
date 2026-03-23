@@ -10,10 +10,10 @@ export default async function LeaderboardsPage({ searchParams }: PageProps) {
   );
 
   const initialData = await getLeaderboards({
-    isActive: isActive ?? undefined,
-    isPublic: isPublic ?? undefined,
-    query: query ?? undefined,
-    page: page ?? undefined,
+    isActive,
+    isPublic,
+    query,
+    page,
   });
 
   return (

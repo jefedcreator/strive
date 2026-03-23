@@ -171,6 +171,11 @@ export const LeaderboardDetailClient: React.FC<
       router.refresh();
       router.push('/leaderboards');
     },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to exit leaderboard'
+      );
+    },
   });
 
   const joinMutation = useMutation({

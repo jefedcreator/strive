@@ -47,9 +47,9 @@ export default async function ExplorePage({ searchParams }: PageProps) {
   const { query, page, type } = loadExploreParams.parse(await searchParams);
 
   const initialData = await getExploreItems({
-    query: query ?? undefined,
-    page: page ?? undefined,
-    type: type! ?? undefined,
+    query,
+    page,
+    type,
   });
 
   return (

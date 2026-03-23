@@ -57,6 +57,11 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
     onSuccess: async () => {
       router.refresh();
     },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to join club'
+      );
+    },
   });
 
   const inviteMutation = useMutation({
@@ -77,6 +82,11 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
       setIsShareModalOpen(true);
       router.refresh();
     },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to invite user'
+      );
+    },
   });
 
   const deleteMutation = useMutation({
@@ -89,6 +99,11 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
     onSuccess: async () => {
       router.refresh();
       setIsDeleteModalOpen(false);
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(
+        error.response?.data?.message ?? 'Failed to delete club'
+      );
     },
   });
 

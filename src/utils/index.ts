@@ -187,6 +187,20 @@ function parsePace(pace: string | null): number {
   return (min ?? 0) + (sec ?? 0) / 60;
 }
 
+/** Convert all undefined values in an object to null */
+type WithNull<T> = {
+  [K in keyof T]: T[K] | null;
+};
+
+function undefinedToNull<T extends object>(obj: T): WithNull<T> {
+  const result: any = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      result[key] = obj[key] === undefined ? null : obj[key];
+    }
+  }
+  return result as WithNull<T>;
+}
 
 export {
   cn,
@@ -202,6 +216,9 @@ export {
   loadNotificationParams, loadLeaderboardParams, loadLeaderboardsParams, leaderboardsParams, mongoIdValidator, notificationParams, parseHttpError, parsePace, parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword, loadBaseParams, baseParams, loadClubsParams, clubsParams
+  verifyPassword, loadBaseParams, baseParams, loadClubsParams, clubsParams,
+  undefinedToNull,
 };
+
+export type { WithNull };
 

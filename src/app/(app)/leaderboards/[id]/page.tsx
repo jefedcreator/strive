@@ -70,7 +70,7 @@ export default async function LeaderboardDetailPage({ params, searchParams }: Pa
     await searchParams
   );
 
-  const initialData = await getLeaderboard(id, {sortBy:sortBy??undefined});
+  const initialData = await getLeaderboard(id, {sortBy});
 
   if (!initialData.data) {
     notFound();

@@ -20,6 +20,7 @@ import type {
 import { uncachedAuth, signOut } from './auth';
 import type { User } from '@prisma/client';
 import type { RewardsQueryValidatorSchema } from '@/backend/validators/rewards.validator';
+import { undefinedToNull, type WithNull } from '@/utils';
 
 // Server-side fetches must use the internal Next.js port directly.
 // NEXT_PUBLIC_APP_URL=http://localhost points to Nginx (a separate container) which is NOT reachable via localhost:80 from here.
@@ -47,18 +48,22 @@ const fetcher = async (url: string): Promise<Response> => {
   return res;
 };
 
+const toSearchParams = (params?: Record<string, any>): URLSearchParams => {
+  const searchParams = new URLSearchParams();
+  if (params) {
+    const withNullParams = undefinedToNull(params);
+    Object.entries(withNullParams).forEach(([key, value]) => {
+      searchParams.set(key, String(value));
+    });
+  }
+  return searchParams;
+};
+
 async function getClubs(
-  params?: Partial<ClubQueryValidatorSchema>
+  params?: WithNull<Partial<ClubQueryValidatorSchema>>
 ): Promise<PaginatedApiResponse<ClubListItem[]>> {
   try {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.set(key, String(value));
-        }
-      });
-    }
+    const searchParams = toSearchParams(params);
 
     const url = `${baseUrl}/api/clubs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
@@ -104,17 +109,10 @@ async function getClub(id: string): Promise<ApiResponse<ClubDetail | null>> {
 }
 
 async function getLeaderboards(
-  params?: Partial<LeaderboardQueryValidatorSchema>
+  params?: WithNull<Partial<LeaderboardQueryValidatorSchema>>
 ): Promise<PaginatedApiResponse<LeaderboardListItem[]>> {
   try {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.set(key, String(value));
-        }
-      });
-    }
+    const searchParams = toSearchParams(params);
 
     const url = `${baseUrl}/api/leaderboards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
@@ -141,17 +139,10 @@ async function getLeaderboards(
 
 async function getLeaderboard(
   id: string,
-  params?: Partial<LeaderboardEntriesQueryValidatorSchema>
+  params?: WithNull<Partial<LeaderboardEntriesQueryValidatorSchema>>
 ): Promise<ApiResponse<LeaderboardDetail | null>> {
   try {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.set(key, String(value));
-        }
-      });
-    }
+    const searchParams = toSearchParams(params);
 
     const url = `${baseUrl}/api/leaderboards/${id}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     const res = await fetcher(url);
@@ -172,17 +163,10 @@ async function getLeaderboard(
 }
 
 async function getNotifications(
-  params?: Partial<NotificationQueryValidatorSchema>
+  params?: WithNull<Partial<NotificationQueryValidatorSchema>>
 ): Promise<PaginatedApiResponse<NotificationWithRelations[]>> {
   try {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.set(key, String(value));
-        }
-      });
-    }
+    const searchParams = toSearchParams(params);
 
     const url = `${baseUrl}/api/notifications${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
@@ -297,17 +281,10 @@ async function getLeaderboardInvite(
 }
 
 async function getExploreItems(
-  params?: Partial<ExploreQueryValidatorSchema>
+  params?: WithNull<Partial<ExploreQueryValidatorSchema>>
 ): Promise<PaginatedApiResponse<ExploreListItem[]>> {
   try {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.set(key, String(value));
-        }
-      });
-    }
+    const searchParams = toSearchParams(params);
 
     const url = `${baseUrl}/api/explore${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
@@ -333,17 +310,10 @@ async function getExploreItems(
 }
 
 async function getRewards(
-  params?: Partial<RewardsQueryValidatorSchema>
+  params?: WithNull<Partial<RewardsQueryValidatorSchema>>
 ): Promise<PaginatedApiResponse<RewardsData>> {
   try {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.set(key, String(value));
-        }
-      });
-    }
+    const searchParams = toSearchParams(params);
 
     const url = `${baseUrl}/api/rewards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 

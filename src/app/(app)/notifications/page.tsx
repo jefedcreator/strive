@@ -10,9 +10,9 @@ export default async function NotificationsPage({ searchParams }: PageProps) {
   );
 
   const initialData = await getNotifications({
-    type: type ?? undefined,
-    query: query ?? undefined,
-    page: page ?? 1,
+    type,
+    query,
+    page,
   });
 
   return (
