@@ -52,6 +52,8 @@ export default async function ExplorePage({ searchParams }: PageProps) {
     type,
   });
 
+  // await new Promise(resolve => setTimeout(resolve, 1000000));
+
   return (
     <div className="relative">
       <Background />

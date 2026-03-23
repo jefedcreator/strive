@@ -18,9 +18,9 @@ export default function Loading() {
       </div>
 
       {/* Tabs List Skeleton */}
-      <div className="flex gap-4 mb-8">
+      <div className="flex md:gap-4 gap-3 mb-8">
         {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-10 w-24 rounded-lg" />
+          <Skeleton key={i} className="md:h-10 h-8 md:w-20 w-14 rounded-lg" />
         ))}
       </div>
 
