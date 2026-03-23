@@ -51,9 +51,10 @@ const fetcher = async (url: string): Promise<Response> => {
 const toSearchParams = (params?: Record<string, any>): URLSearchParams => {
   const searchParams = new URLSearchParams();
   if (params) {
-    const withNullParams = undefinedToNull(params);
-    Object.entries(withNullParams).forEach(([key, value]) => {
-      searchParams.set(key, String(value));
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        searchParams.set(key, String(value));
+      }
     });
   }
   return searchParams;
@@ -64,6 +65,9 @@ async function getClubs(
 ): Promise<PaginatedApiResponse<ClubListItem[]>> {
   try {
     const searchParams = toSearchParams(params);
+
+    console.log('searchParams', searchParams);
+
 
     const url = `clubs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
@@ -113,6 +117,7 @@ async function getLeaderboards(
 ): Promise<PaginatedApiResponse<LeaderboardListItem[]>> {
   try {
     const searchParams = toSearchParams(params);
+    console.log('searchParams', searchParams);
 
     const url = `leaderboards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
