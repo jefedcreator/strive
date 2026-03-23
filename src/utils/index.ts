@@ -134,7 +134,7 @@ const exploreParams = {
 
 const notificationParams = {
   ...baseParams,
-  type: parseAsStringEnum(['info', 'club', 'leaderboard']),
+  type: parseAsStringEnum(['info', 'club', 'leaderboard', 'reward']),
 };
 
 const clubsParams = {

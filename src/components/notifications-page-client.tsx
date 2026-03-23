@@ -44,6 +44,7 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
     if (type === 'info') return 'info';
     if (type === 'club') return 'club';
     if (type === 'leaderboard') return 'leaderboard';
+    if (type === 'reward') return 'reward';
     return 'all';
   }, [type]);
 
@@ -108,6 +109,9 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
             onClick={() => handleTabClick('leaderboard')}
           >
             Leaderboard
+          </TabsTrigger>
+          <TabsTrigger value="reward" onClick={() => handleTabClick('reward')}>
+            Reward
           </TabsTrigger>
         </TabsList>
 
