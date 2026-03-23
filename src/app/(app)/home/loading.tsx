@@ -1,8 +1,10 @@
 import { Skeleton } from '@/primitives';
+import Background from '@/components/background';
 
 export default function Loading() {
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-10 animate-in fade-in duration-500">
+    <div className="max-w-7xl mx-auto space-y-10 pb-10 relative animate-in fade-in duration-500">
+      <Background />
       {/* Welcome Message Skeleton */}
       <section className="mt-16 lg:mt-0 px-0 space-y-2">
         <Skeleton className="h-10 w-64 md:h-12" />

@@ -1,8 +1,12 @@
 import { Skeleton } from '@/primitives';
+import Background from '@/components/background';
 
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-4xl space-y-8 animate-in fade-in duration-500 py-8">
+    <div className="relative">
+      <Background />
+      <div className="container mx-auto py-8">
+        <div className="mx-auto max-w-4xl space-y-8 animate-in fade-in duration-500 py-8">
       {/* Header Skeleton */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">
@@ -29,6 +33,8 @@ export default function Loading() {
           </div>
           <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-end">
             <Skeleton className="h-11 w-32 rounded-xl" />
+          </div>
+        </div>
           </div>
         </div>
       </div>

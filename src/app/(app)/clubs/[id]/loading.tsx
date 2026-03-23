@@ -1,8 +1,11 @@
 import { Skeleton } from '@/primitives';
+import Background from '@/components/background';
 
 export default function Loading() {
   return (
-    <div className="flex flex-col h-full px-0 mt-20 lg:mt-0 pb-10 animate-in fade-in duration-500">
+    <div className="relative">
+      <Background />
+      <div className="flex flex-col h-full px-0 mt-20 lg:mt-0 pb-10 animate-in fade-in duration-500">
       {/* Back link */}
       <div className="mb-5">
         <Skeleton className="h-4 w-24" />
@@ -73,6 +76,7 @@ export default function Loading() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

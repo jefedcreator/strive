@@ -1,8 +1,11 @@
 import { Skeleton } from '@/primitives';
+import Background from '@/components/background';
 
 export default function Loading() {
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500 container mx-auto max-w-7xl px-4 py-12 md:py-20">
+    <div className="relative">
+      <Background />
+      <div className="flex flex-col h-full animate-in fade-in duration-500 container mx-auto max-w-7xl px-4 py-12 md:py-20 min-h-screen">
       {/* Back Button Skeleton */}
       <div className="mb-6 md:mb-8">
         <Skeleton className="h-4 w-32" />
@@ -47,6 +50,7 @@ export default function Loading() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

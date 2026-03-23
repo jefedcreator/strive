@@ -1,8 +1,11 @@
 import { Skeleton } from '@/primitives';
+import Background from '@/components/background';
 
 export default function Loading() {
   return (
-    <div className="flex flex-col w-full min-w-0 h-full px-1 mt-20 lg:mt-0 pb-10 animate-in fade-in duration-500">
+    <div className="relative w-full min-w-0 flex flex-col">
+      <Background />
+      <div className="flex flex-col w-full min-w-0 h-full px-1 mt-20 lg:mt-0 pb-10 animate-in fade-in duration-500">
       {/* Back link */}
       <div className="mb-5">
         <Skeleton className="h-4 w-24" />
@@ -39,6 +42,7 @@ export default function Loading() {
         {[...Array(5)].map((_, i) => (
           <Skeleton key={i} className="w-full h-16 rounded-xl" />
         ))}
+      </div>
       </div>
     </div>
   );

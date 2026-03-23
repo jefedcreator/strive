@@ -1,8 +1,11 @@
 import { Skeleton } from '@/primitives';
+import Background from '@/components/background';
 
 export default function Loading() {
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500">
+    <div className="relative">
+      <Background />
+      <div className="flex flex-col h-full animate-in fade-in duration-500">
       {/* Header Skeleton */}
       <div className="mb-6 md:mb-10 mt-16 lg:mt-0">
         <div className="flex text-sm mb-2 md:hidden">
@@ -80,6 +83,7 @@ export default function Loading() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
