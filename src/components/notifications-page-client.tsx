@@ -91,6 +91,8 @@ const NotificationsPageClient: React.FC<NotificationsPageClientProps> = ({
           else if (value === 'club') void setStates({ type: 'club', page: 1 });
           else if (value === 'leaderboard')
             void setStates({ type: 'leaderboard', page: 1 });
+          else if (value === 'reward')
+            void setStates({ type: 'reward', page: 1 });
           else void setStates({ type: null, page: 1 });
         }}
       >
