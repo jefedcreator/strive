@@ -5,7 +5,7 @@ import {
 } from '@/backend/middleware';
 import { paramValidator } from '@/backend/validators/index.validator';
 import { db } from '@/server/db';
-import { type ApiResponse } from '@/types';
+import { type ApiResponse, type ClubRewardItem } from '@/types';
 import {
   InternalServerErrorException,
   NotFoundException,
@@ -58,7 +58,7 @@ export const GET = withMiddleware<unknown>(
         };
       });
 
-      const response: ApiResponse<typeof mapped> = {
+      const response: ApiResponse<ClubRewardItem[]> = {
         status: 200,
         message: 'Club rewards retrieved successfully',
         data: mapped,

@@ -324,6 +324,17 @@ export interface RewardItem {
   badgeUrl: string;
 }
 
+export interface ClubRewardItem {
+  id: string;
+  type: 'GOLD' | 'SILVER' | 'BRONZE' | 'CLUB_MILESTONE';
+  title: string;
+  description: string | null;
+  milestone: number | null;
+  createdAt: Date;
+  earnedBy: number;
+  badgeUrl: string;
+}
+
 export interface UserRewardDetail {
   id: string;
   userId: string;
