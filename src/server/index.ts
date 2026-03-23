@@ -66,9 +66,6 @@ async function getClubs(
   try {
     const searchParams = toSearchParams(params);
 
-    console.log('searchParams', searchParams);
-
-
     const url = `clubs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
     const res = await fetcher(url);
@@ -117,8 +114,6 @@ async function getLeaderboards(
 ): Promise<PaginatedApiResponse<LeaderboardListItem[]>> {
   try {
     const searchParams = toSearchParams(params);
-    console.log('searchParams', searchParams);
-
     const url = `leaderboards${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
     const res = await fetcher(url);
