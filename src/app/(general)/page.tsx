@@ -1,10 +1,17 @@
 'use client';
-import { motion, useScroll, useTransform, type Variants } from 'framer-motion';
-import { useRef } from 'react';
+import {
+  AnimatePresence,
+  motion,
+  useScroll,
+  useTransform,
+  type Variants,
+} from 'framer-motion';
+import { useRef, useState } from 'react';
 import {
   ArrowRight,
   Award,
   Check,
+  ChevronDown,
   Github,
   Globe,
   Instagram,
@@ -1048,6 +1055,143 @@ function CTA({
   );
 }
 
+const faqItems = [
+  {
+    q: 'What is Strive?',
+    a: 'Strive is the ultimate running community platform. It bridges Strava and Nike Run Club (NRC) so you can compete on global leaderboards, run with friends in private clubs, and earn exclusive rewards — all in one place.',
+  },
+  {
+    q: 'How does activity syncing work?',
+    a: 'Once you connect your Strava or NRC account, Strive automatically syncs your running activities. Your distance, pace, and other metrics are normalized across platforms so every runner competes on a level playing field.',
+  },
+  {
+    q: 'What are leaderboards?',
+    a: 'Leaderboards are weekly and monthly competitions where runners are ranked by distance, pace, elevation, and consistency. They update in real-time and work across both Strava and NRC data, so platform choice never limits who you can compete with.',
+  },
+  {
+    q: 'How do clubs work?',
+    a: 'Clubs are private running crews you can create or join. Each club can have its own leaderboards and custom challenges. Invite friends, track collective progress, and push each other to new personal bests.',
+  },
+  {
+    q: 'How do rewards and badges work?',
+    a: 'As you run, you earn XP and climb tiers — Bronze, Silver, and Gold — based on cumulative distance milestones (e.g. 500+ km for Silver, 1000+ km for Gold). You also earn exclusive badges for leaderboard placements and club milestones. Every reward comes with a beautifully generated visual you can share.',
+  },
+  {
+    q: 'Is Strive free to use?',
+    a: 'Yes! Strive is completely free to use. No credit card required. Just connect your Strava or NRC account and start running with the community.',
+  },
+];
+
+function FAQ() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <section
+      className="py-24 md:py-32 bg-background-light dark:bg-[#0B0F19] relative"
+      id="faq"
+    >
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent"></div>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-16 md:mb-20">
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, margin: '-100px' }}
+            className="text-sm text-primary font-black tracking-[0.2em] uppercase mb-4"
+          >
+            FAQ
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, margin: '-100px' }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-6 leading-tight"
+          >
+            Got{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">
+              questions?
+            </span>
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, margin: '-100px' }}
+            transition={{ delay: 0.2 }}
+            className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium"
+          >
+            Everything you need to know about Strive.
+          </motion.p>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: '-100px' }}
+          transition={{ duration: 0.6 }}
+          className="space-y-4"
+        >
+          {faqItems.map((item, idx) => {
+            const isOpen = openIndex === idx;
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false }}
+                transition={{ delay: idx * 0.05 }}
+                className={`rounded-2xl border transition-colors duration-300 ${
+                  isOpen
+                    ? 'bg-white dark:bg-[#121826] border-primary/20 shadow-[0_4px_20px_-5px_rgba(252,76,2,0.08)]'
+                    : 'bg-white/50 dark:bg-[#121826]/50 border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10'
+                }`}
+              >
+                <button
+                  onClick={() => setOpenIndex(isOpen ? null : idx)}
+                  className="flex items-center justify-between w-full text-left p-6 gap-4 cursor-pointer"
+                >
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    {item.q}
+                  </span>
+                  <motion.span
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="flex-shrink-0"
+                  >
+                    <ChevronDown
+                      className={`w-5 h-5 transition-colors duration-300 ${
+                        isOpen
+                          ? 'text-primary'
+                          : 'text-gray-400 dark:text-gray-500'
+                      }`}
+                    />
+                  </motion.span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <p className="px-6 pb-6 text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                        {item.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
     <footer className="bg-white dark:bg-[#06080D] border-t border-gray-100 dark:border-white/5 pt-16 pb-8 relative z-10 transition-colors">
@@ -1226,6 +1370,7 @@ export default function App() {
         <LeaderboardSection />
         <RewardsSection />
         <CTA status={status} />
+        <FAQ />
       </main>
       <Footer />
     </div>
