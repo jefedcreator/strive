@@ -260,98 +260,98 @@ export function useNRCLogin(): UseNRCLoginReturn {
 
   // ─── Step 2: Submit email ─────────────────────────────────────────────────
 
-  // const submitEmail = useCallback(
-  //   async (email: string) => {
-  //     if (!sessionIdRef.current) {
-  //       setError('No active session. Please try again.');
-  //       setCurrentStep('error');
-  //       return;
-  //     }
+  const submitEmail = useCallback(
+    async (email: string) => {
+      if (!sessionIdRef.current) {
+        setError('No active session. Please try again.');
+        setCurrentStep('error');
+        return;
+      }
 
-  //     // Transition to a waiting state while Puppeteer types + clicks Continue
-  //     setCurrentStep('awaiting-code');
+      // Transition to a waiting state while Puppeteer types + clicks Continue
+      setCurrentStep('awaiting-code');
 
-  //     try {
-  //       const res = await fetch('/api/login/nrc/stream/email', {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({ sessionId: sessionIdRef.current, email }),
-  //       });
+      try {
+        const res = await fetch('/api/login/nrc/stream/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: sessionIdRef.current, email }),
+        });
 
-  //       if (!res.ok) {
-  //         const { error: msg } = (await res.json()) as { error: string };
-  //         throw new Error(msg ?? 'Failed to submit email.');
-  //       }
-  //       // The 'login-code' SSE event will drive the step → 'code-modal'
-  //     } catch (err: any) {
-  //       setError(err.message);
-  //       setCurrentStep('error');
-  //       setSessionStep('idle');
-  //     }
-  //   },
-  //   [setCurrentStep, setSessionStep]
-  // );
+        if (!res.ok) {
+          const { error: msg } = (await res.json()) as { error: string };
+          throw new Error(msg ?? 'Failed to submit email.');
+        }
+        // The 'login-code' SSE event will drive the step → 'code-modal'
+      } catch (err: any) {
+        setError(err.message);
+        setCurrentStep('error');
+        setSessionStep('idle');
+      }
+    },
+    [setCurrentStep, setSessionStep]
+  );
 
   // ─── Step 3: Submit OTP code ──────────────────────────────────────────────
 
-  // const submitCode = useCallback(
-  //   async (code: string) => {
-  //     if (!sessionIdRef.current) {
-  //       setError('No active session. Please try again.');
-  //       setCurrentStep('error');
-  //       return;
-  //     }
+  const submitCode = useCallback(
+    async (code: string) => {
+      if (!sessionIdRef.current) {
+        setError('No active session. Please try again.');
+        setCurrentStep('error');
+        return;
+      }
 
-  //     const params = new URLSearchParams(window.location.search);
-  //     const clubId = params.get('clubId');
-  //     const leaderboardId = params.get('leaderboardId');
-  //     const inviteId = params.get('inviteId');
-  //     const callbackUrl = params.get('callbackUrl');
+      const params = new URLSearchParams(window.location.search);
+      const clubId = params.get('clubId');
+      const leaderboardId = params.get('leaderboardId');
+      const inviteId = params.get('inviteId');
+      const callbackUrl = params.get('callbackUrl');
 
-  //     setCurrentStep('processing');
+      setCurrentStep('processing');
 
-  //     try {
-  //       const res = await fetch('/api/login/nrc/stream/code', {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({
-  //           sessionId: sessionIdRef.current,
-  //           code,
-  //           clubId,
-  //           leaderboardId,
-  //           inviteId,
-  //           callbackUrl,
-  //         }),
-  //       });
+      try {
+        const res = await fetch('/api/login/nrc/stream/code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: sessionIdRef.current,
+            code,
+            clubId,
+            leaderboardId,
+            inviteId,
+            callbackUrl,
+          }),
+        });
 
-  //       if (!res.ok) {
-  //         const { error: msg } = (await res.json()) as { error: string };
-  //         throw new Error(msg ?? 'Failed to submit code.');
-  //       }
+        if (!res.ok) {
+          const { error: msg } = (await res.json()) as { error: string };
+          throw new Error(msg ?? 'Failed to submit code.');
+        }
 
-  //       const data = (await res.json()) as any;
+        const data = (await res.json()) as any;
 
-  //       if (data.action === 'redirect' && data.redirectUrl) {
-  //         console.log(
-  //           `[useNRCLogin] 🚀 Server signaled redirect to: ${data.redirectUrl}`
-  //         );
-  //         window.location.href = data.redirectUrl;
-  //         return;
-  //       }
+        if (data.action === 'redirect' && data.redirectUrl) {
+          console.log(
+            `[useNRCLogin] 🚀 Server signaled redirect to: ${data.redirectUrl}`
+          );
+          window.location.href = data.redirectUrl;
+          return;
+        }
 
-  //       setResult(data as NikeAuthResult);
-  //       setCurrentStep('success');
-  //       setEmail('');
-  //       setCode('');
-  //     } catch (err: any) {
-  //       setError(err.message);
-  //       // User requested to delete only code if it breaks at the code phase
-  //       setCode('');
-  //       setCurrentStep('error');
-  //     }
-  //   },
-  //   [setEmail, setCode, setCurrentStep]
-  // );
+        setResult(data as NikeAuthResult);
+        setCurrentStep('success');
+        setEmail('');
+        setCode('');
+      } catch (err: any) {
+        setError(err.message);
+        // User requested to delete only code if it breaks at the code phase
+        setCode('');
+        setCurrentStep('error');
+      }
+    },
+    [setEmail, setCode, setCurrentStep]
+  );
 
   // ─── Reset ────────────────────────────────────────────────────────────────
 
