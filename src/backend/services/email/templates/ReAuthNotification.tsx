@@ -115,7 +115,7 @@ const ReAuthNotification = ({
           </Container>
 
           {/* Unsubscribe / Compliance */}
-          <Section className="py-10 text-center max-w-[600px] mx-auto" style={{ width: '100%' }}>
+          {/* <Section className="py-10 text-center max-w-[600px] mx-auto" style={{ width: '100%' }}>
             <Text className="text-gray-400 text-xs mb-2 m-0 text-center">
               Sent with ❤️ from the Strive Team
             </Text>
@@ -124,7 +124,7 @@ const ReAuthNotification = ({
               &nbsp;&bull;&nbsp;
               <Link className="underline text-gray-400">Privacy Policy</Link>
             </Text>
-          </Section>
+          </Section> */}
         </Body>
       </Tailwind>
     </Html>

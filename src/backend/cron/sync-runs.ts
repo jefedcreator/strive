@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import { db } from '@/server/db';
 import { stravaService } from '../services/strava';
 import { nrc } from '../services/nrc';
-import { processRunsForUser } from '../services/runs/process-runs';
+import { processRunsForUser } from '../services/runs';
 import { emailService } from '../services/email';
 
 const LOG_PREFIX = '[Cron:SyncRuns]';

@@ -2,7 +2,7 @@ import { authMiddleware, withMiddleware } from '@/backend/middleware';
 import type { AuthRequest } from '@/backend/middleware/types';
 import { nrc } from '@/backend/services/nrc';
 import { stravaService } from '@/backend/services/strava';
-import { processRunsForUser } from '@/backend/services/runs/process-runs';
+import { processRunsForUser } from '@/backend/services/runs';
 import { type ApiResponse, type RunData } from '@/types';
 
 /**
