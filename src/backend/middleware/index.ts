@@ -1,5 +1,4 @@
 import { db } from '@/server/db';
-import { signOut } from '@/server/auth';
 import { parseHttpError } from '@/utils';
 import { HttpException, UnauthorizedException } from '@/utils/exceptions';
 import jwt from 'jsonwebtoken';

@@ -200,7 +200,10 @@ model User {
     createdAt    DateTime  @default(now())
     updatedAt    DateTime  @updatedAt
     lastLoginAt  DateTime?
-    access_token String?
+    access_token     String?
+    refresh_token    String?
+    token_expires_at Int?
+    lastSyncAt       DateTime?
 
     // XP & Leveling
     xp            Int       @default(0)

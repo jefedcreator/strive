@@ -18,7 +18,7 @@ import type {
   RunData,
   UserRewardDetail
 } from '@/types';
-import { undefinedToNull, type WithNull } from '@/utils';
+import { type WithNull } from '@/utils';
 import type { User } from '@prisma/client';
 import { signOut, uncachedAuth } from './auth';
 

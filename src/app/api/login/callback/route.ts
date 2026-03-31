@@ -52,6 +52,8 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         fullname: stravaUser.fullName,
         avatar: stravaUser.avatar,
         token: auth.accessToken,
+        refreshToken: auth.refreshToken,
+        tokenExpiresAt: auth.expiresAt,
       });
 
       console.log('user', user);

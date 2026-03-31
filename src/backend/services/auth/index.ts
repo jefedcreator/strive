@@ -1,5 +1,5 @@
 import type { NikeAuthResult } from '@/types';
-import type { Prisma, User, UserType } from '@prisma/client';
+import type { Prisma, User } from '@prisma/client';
 import prisma from 'prisma';
 import { generateUsername } from 'unique-username-generator';
 
@@ -10,7 +10,12 @@ class AuthService {
     email = '',
     fullname,
     avatar,
-  }: NikeAuthResult): Promise<
+    refreshToken,
+    tokenExpiresAt,
+  }: NikeAuthResult & {
+    refreshToken?: string;
+    tokenExpiresAt?: number;
+  }): Promise<
     Pick<User, 'id' | 'type' | 'fullname' | 'avatar' | 'email'>
   > {
     console.log('avatar', avatar);
@@ -34,6 +39,8 @@ class AuthService {
       access_token: token,
       lastLoginAt: new Date(),
       avatar: avatar ?? user?.avatar,
+      ...(refreshToken && { refresh_token: refreshToken }),
+      ...(tokenExpiresAt && { token_expires_at: tokenExpiresAt }),
     };
 
     console.log('data', data);
@@ -57,6 +64,8 @@ class AuthService {
         avatar,
         access_token: token,
         lastLoginAt: new Date(),
+        ...(refreshToken && { refresh_token: refreshToken }),
+        ...(tokenExpiresAt && { token_expires_at: tokenExpiresAt }),
       };
 
       const createdUser = await prisma.user.create({

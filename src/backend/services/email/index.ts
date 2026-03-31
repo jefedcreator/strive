@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import ClubMilestoneNotification from './templates/ClubMilestoneNotification';
 import InviteEmail from './templates/InviteNotification';
+import ReAuthNotification from './templates/ReAuthNotification';
 import RewardNotification from './templates/RewardNotification';
 import WelcomeNotification from './templates/WelcomeNotification';
 import type { RewardType } from '@prisma/client';
@@ -141,6 +142,27 @@ class EmailService {
       return { success: true, data };
     } catch (error) {
       console.error('Unexpected error sending club milestone email:', error);
+      return { success: false, error };
+    }
+  }
+
+  async sendReAuthEmail(to: string, provider: string, fullname: string) {
+    try {
+      const { data, error } = await this.resend.emails.send({
+        from: 'Strive <hello@usestrive.run>',
+        to,
+        subject: `Re-connect ${provider} to keep your runs syncing`,
+        react: ReAuthNotification({ provider, fullname }),
+      });
+
+      if (error) {
+        console.error('Error sending re-auth email:', error);
+        return { success: false, error };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Unexpected error sending re-auth email:', error);
       return { success: false, error };
     }
   }
