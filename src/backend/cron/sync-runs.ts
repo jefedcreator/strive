@@ -59,6 +59,16 @@ export const syncAllUserRuns = async () => {
     const users = await db.user.findMany({
       where: {
         access_token: { not: null },
+        // Only sync users who belong to at least one active leaderboard
+        leaderboards: {
+          some: {
+            isActive: true,
+            leaderboard: {
+              isActive: true,
+              OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
+            },
+          },
+        },
       },
       select: {
         id: true,
@@ -71,7 +81,7 @@ export const syncAllUserRuns = async () => {
       },
     });
 
-    console.log(`${LOG_PREFIX} Found ${users.length} users to sync.`);
+    console.log(`${LOG_PREFIX} Found ${users.length} users with active leaderboards to sync.`);
 
     let synced = 0;
     let failed = 0;
