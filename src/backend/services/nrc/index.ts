@@ -82,6 +82,11 @@ class NRC {
       return runs;
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        // Re-throw auth errors so callers (e.g. cron) can detect expired tokens
+        if (status === 401 || status === 403) {
+          throw new Error(`NRC authentication failed (${status})`);
+        }
         console.error(
           '❌ Error fetching API data:',
           error.response ? error.response.data : error.message
