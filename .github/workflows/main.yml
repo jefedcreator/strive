@@ -1,4 +1,4 @@
-name: Deploy to EC2 Instance
+name: Deploy to GCP VM
 
 on:
   push:
@@ -64,14 +64,14 @@ jobs:
           cp ecosystem.config.cjs deploy-package/
           cp .env deploy-package/
 
-      - name: Deploy to EC2
+      - name: Deploy to GCP VM
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           source: 'deploy-package/*'
-          target: '/home/ec2-user/strive'
+          target: '/home/realjefienemokwu/strive'
           strip_components: 1
 
       - name: Run setup script (first-time provisioning)
@@ -97,7 +97,7 @@ jobs:
             # Run setup script if Chrome or Xvfb not installed yet
             if ! command -v google-chrome-stable &> /dev/null || ! systemctl is-active --quiet xvfb; then
               echo "🛠️ Running first-time setup..."
-              cd /home/ec2-user/strive
+              cd /home/realjefienemokwu/strive
               sudo bash deploy/setup-ec2.sh
             else
               echo "✅ Setup already complete, skipping..."
