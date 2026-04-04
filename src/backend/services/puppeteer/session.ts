@@ -116,6 +116,137 @@ export class PuppeteerSessionManager {
 
   // ─── Phase 0: Init ────────────────────────────────────────────────────────
 
+  // public async initSession(options: CaptureOptions = {}): Promise<string> {
+  //   const sessionId = uuidv4();
+  //   const { headless = false, userDataDir, timeout = 0 } = options;
+
+  //   console.log(`[PuppeteerSessionManager] Starting new session: ${sessionId}`);
+
+  //   const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
+
+  //   // ── BrightData Configuration ────────────────────────────────────
+  //   const proxyUser = process.env.BRIGHTDATA_USERNAME;
+  //   const proxyPass = process.env.BRIGHTDATA_PASSWORD;
+  //   const useProxy = !!(proxyUser && proxyPass);
+
+  //   // Path to BrightData CA certificate
+  //   const certPath = join(process.cwd(), 'brightdata-ca.crt');
+
+  //   // Set CA certificate for Node.js (helps proxy-chain)
+  //   if (existsSync(certPath)) {
+  //     process.env.NODE_EXTRA_CA_CERTS = certPath;
+  //   }
+
+  //   let anonymizedProxyUrl: string | null = null;
+
+  //   const launchArgs = [
+  //     '--start-maximized',
+  //     '--no-sandbox',
+  //     '--disable-setuid-sandbox',
+  //     '--disable-blink-features=AutomationControlled',
+  //   ];
+
+  //   if (useProxy) {
+  //     const brightdataUrl = `http://${proxyUser}-country-za:${proxyPass}@brd.superproxy.io:33335`;
+  //     anonymizedProxyUrl = await ProxyChain.anonymizeProxy(brightdataUrl);
+  //     launchArgs.push(`--proxy-server=${anonymizedProxyUrl}`);
+
+  //     // ── Make Chrome trust BrightData CA ────────────────────────────
+  //     if (existsSync(certPath)) {
+  //       try {
+  //         const spkiHash = this.extractSPKIHash(certPath);
+  //         launchArgs.push(`--ignore-certificate-errors-spki-list=${spkiHash}`);
+  //         console.log(`[PuppeteerSessionManager] 🔐 BrightData CA whitelisted (SPKI: ${spkiHash.substring(0, 20)}...)`);
+  //       } catch (err: any) {
+  //         console.warn(`[PuppeteerSessionManager] ⚠️  Failed to extract SPKI, using fallback:`, err.message);
+  //         launchArgs.push('--ignore-certificate-errors');
+  //       }
+  //     } else {
+  //       console.warn(`[PuppeteerSessionManager] ⚠️  Certificate not found, using fallback`);
+  //       launchArgs.push('--ignore-certificate-errors');
+  //     }
+  //     console.log(`[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA) via proxy-chain`);
+  //   }
+
+  //   if (process.platform === 'linux') {
+  //     launchArgs.push(
+  //       '--window-size=1920,1080',
+  //       '--lang=en-US',
+  //       '--disable-dev-shm-usage',
+  //       '--disable-gpu',
+  //       '--disable-software-rasterizer'
+  //     );
+  //     process.env.TZ = 'Africa/Johannesburg';
+  //     console.log(
+  //       `[PuppeteerSessionManager] 🛡️ Launch flags: 1920x1080, en-US, TZ=Africa/Johannesburg`
+  //     );
+  //   }
+
+  //   console.log(`[PuppeteerSessionManager] Chrome: ${chromePath}`);
+
+  //   const browser = (await puppeteer.launch({
+  //     headless,
+  //     executablePath: chromePath,
+  //     userDataDir,
+  //     defaultViewport: null,
+  //     args: launchArgs,
+  //     ignoreHTTPSErrors: true,
+  //     ignoreDefaultArgs: ['--enable-automation'],
+  //   })) as Browser;
+
+  //   try {
+  //     const page = (await browser.pages())[0] ?? (await browser.newPage());
+
+  //     // No page.authenticate() needed — proxy-chain handles auth locally
+  //     // (page.authenticate uses CDP Fetch.enable which Forter detects)
+
+  //     let resolvePromise!: (
+  //       value: NikeAuthResult | PromiseLike<NikeAuthResult>
+  //     ) => void;
+  //     let rejectPromise!: (reason?: any) => void;
+  //     const resultPromise = new Promise<NikeAuthResult>((resolve, reject) => {
+  //       resolvePromise = resolve;
+  //       rejectPromise = reject;
+  //     });
+
+  //     this.sessions.set(sessionId, {
+  //       browser,
+  //       page,
+  //       startTime: Date.now(),
+  //       resolve: resolvePromise,
+  //       reject: rejectPromise,
+  //     });
+
+  //     // Track proxy URL for cleanup on session close
+  //     if (anonymizedProxyUrl) {
+  //       (this.sessions.get(sessionId) as any).__proxyUrl = anonymizedProxyUrl;
+  //     }
+
+  //     this.startNavigationFlow(sessionId, page, timeout).catch((err) => {
+  //       console.error(
+  //         `[PuppeteerSessionManager] Navigation error for ${sessionId}:`,
+  //         err
+  //       );
+  //       rejectPromise(err);
+  //       this.closeSession(sessionId).catch(console.error);
+  //     });
+
+  //     resultPromise
+  //       .then(() =>
+  //         console.log(`[PuppeteerSessionManager] Flow completed: ${sessionId}`)
+  //       )
+  //       .catch(() =>
+  //         console.log(`[PuppeteerSessionManager] Flow failed: ${sessionId}`)
+  //       )
+  //       .finally(() => this.closeSession(sessionId).catch(console.error));
+
+  //     return sessionId;
+  //   } catch (err) {
+  //     await browser.close();
+  //     throw err;
+  //   }
+  // }
+
   public async initSession(options: CaptureOptions = {}): Promise<string> {
     const sessionId = uuidv4();
     const { headless = false, userDataDir, timeout = 0 } = options;
@@ -124,18 +255,14 @@ export class PuppeteerSessionManager {
 
     const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
 
-    // ── BrightData Configuration ────────────────────────────────────
+    // ── BrightData residential proxy via proxy-chain ────────────────────
+    // IMPORTANT: Do NOT use page.authenticate() — it calls CDP Fetch.enable
+    // which Forter detects. proxy-chain creates a local proxy server that
+    // handles BrightData auth transparently. Chrome connects to localhost
+    // (no auth needed = zero CDP calls).
     const proxyUser = process.env.BRIGHTDATA_USERNAME;
     const proxyPass = process.env.BRIGHTDATA_PASSWORD;
     const useProxy = !!(proxyUser && proxyPass);
-
-    // Path to BrightData CA certificate
-    const certPath = join(process.cwd(), 'brightdata-ca.crt');
-
-    // Set CA certificate for Node.js (helps proxy-chain)
-    if (existsSync(certPath)) {
-      process.env.NODE_EXTRA_CA_CERTS = certPath;
-    }
 
     let anonymizedProxyUrl: string | null = null;
 
@@ -147,28 +274,21 @@ export class PuppeteerSessionManager {
     ];
 
     if (useProxy) {
+      // Build the BrightData proxy URL with embedded auth + country targeting
       const brightdataUrl = `http://${proxyUser}-country-za:${proxyPass}@brd.superproxy.io:33335`;
+      // proxy-chain creates a local proxy that handles auth transparently
       anonymizedProxyUrl = await ProxyChain.anonymizeProxy(brightdataUrl);
       launchArgs.push(`--proxy-server=${anonymizedProxyUrl}`);
-
-      // ── Make Chrome trust BrightData CA ────────────────────────────
-      if (existsSync(certPath)) {
-        try {
-          const spkiHash = this.extractSPKIHash(certPath);
-          launchArgs.push(`--ignore-certificate-errors-spki-list=${spkiHash}`);
-          console.log(`[PuppeteerSessionManager] 🔐 BrightData CA whitelisted (SPKI: ${spkiHash.substring(0, 20)}...)`);
-        } catch (err: any) {
-          console.warn(`[PuppeteerSessionManager] ⚠️  Failed to extract SPKI, using fallback:`, err.message);
-          launchArgs.push('--ignore-certificate-errors');
-        }
-      } else {
-        console.warn(`[PuppeteerSessionManager] ⚠️  Certificate not found, using fallback`);
-        launchArgs.push('--ignore-certificate-errors');
-      }
-
-      console.log(`[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA) via proxy-chain`);
+      console.log(
+        `[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA) via proxy-chain`
+      );
     }
 
+    // ── Anti-detection via Chrome launch flags (not CDP) ─────────────
+    // IMPORTANT: Do NOT use page.setUserAgent(), page.emulateTimezone(),
+    // page.setExtraHTTPHeaders(), or page.evaluateOnNewDocument() for
+    // fingerprinting. Forter detects CDP protocol modifications at page
+    // load. Chrome launch flags and env vars are invisible to page scripts.
     if (process.platform === 'linux') {
       launchArgs.push(
         '--window-size=1920,1080',
@@ -177,6 +297,7 @@ export class PuppeteerSessionManager {
         '--disable-gpu',
         '--disable-software-rasterizer'
       );
+      // Set timezone at OS level — Chrome inherits this natively
       process.env.TZ = 'Africa/Johannesburg';
       console.log(
         `[PuppeteerSessionManager] 🛡️ Launch flags: 1920x1080, en-US, TZ=Africa/Johannesburg`
@@ -191,7 +312,6 @@ export class PuppeteerSessionManager {
       userDataDir,
       defaultViewport: null,
       args: launchArgs,
-      ignoreHTTPSErrors: true,
       ignoreDefaultArgs: ['--enable-automation'],
     })) as Browser;
 
@@ -247,7 +367,6 @@ export class PuppeteerSessionManager {
       throw err;
     }
   }
-
 
   // ── Extract SPKI fingerprint from certificate ────────────────────
   private extractSPKIHash(certPath: string): string {
