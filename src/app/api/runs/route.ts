@@ -18,6 +18,7 @@ export const GET = withMiddleware(
     } else if (user.type === 'STRAVA') {
       runs = await stravaService.fetchAllActivities(user.access_token ?? '');
     }
+    console.log('runs', runs);
 
     // Process runs: deduplicate, update leaderboards, check milestones, sync XP
     runs = await processRunsForUser(user.id, runs);

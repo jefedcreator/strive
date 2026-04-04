@@ -43,7 +43,7 @@ export async function processRunsForUser(
       id: true,
       createdAt: true,
       runId: true,
-      leaderboard: { select: { type: true } },
+      leaderboard: { select: { type: true, createdAt: true, expiryDate: true } },
     },
   });
 
@@ -56,32 +56,32 @@ export async function processRunsForUser(
   // For each membership, compute stats from runs after the join date
   await Promise.all(
     memberships.map(async (membership) => {
-      const joinDate = new Date(membership.createdAt);
-      // Include runs from the beginning of the month the user joined
-      const joinMonthStart = new Date(Date.UTC(
-        joinDate.getUTCFullYear(),
-        joinDate.getUTCMonth(),
-        1
-      ));
+      const leaderboardStart = new Date(membership.leaderboard.createdAt);
+      const leaderboardEnd = membership.leaderboard.expiryDate 
+        ? new Date(membership.leaderboard.expiryDate)
+        : null;
 
-      const sinceJoin = unique.filter(
-        (r) => new Date(r.date) >= joinMonthStart
-      );
+      const validRuns = unique.filter((r) => {
+        const runDate = new Date(r.date);
+        const isAfterStart = runDate >= leaderboardStart;
+        const isBeforeEnd = leaderboardEnd ? runDate <= leaderboardEnd : true;
+        return isAfterStart && isBeforeEnd;
+      });
 
-      if (sinceJoin.length === 0) return;
+      if (validRuns.length === 0) return;
 
-      const latest = sinceJoin.reduce((prev, curr) =>
+      const latest = validRuns.reduce((prev, curr) =>
         curr.date > prev.date ? curr : prev
       );
 
       // Skip DB update if this leaderboard already has this run as its latest
       if (membership.runId === latest.id) return;
 
-      const totalDistance = sinceJoin.reduce(
+      const totalDistance = validRuns.reduce(
         (sum, r) => sum + r.distance,
         0
       );
-      const totalDuration = sinceJoin.reduce(
+      const totalDuration = validRuns.reduce(
         (sum, r) => sum + r.duration,
         0
       );
@@ -98,7 +98,7 @@ export async function processRunsForUser(
 
       if (leaderboardType === 'PACE') {
         // Best (lowest) pace wins — find the run with the fastest pace
-        const bestPaceRun = sinceJoin.reduce((best, r) => {
+        const bestPaceRun = validRuns.reduce((best, r) => {
           const bestPaceVal = parsePace(best.pace);
           const currentPaceVal = parsePace(r.pace);
           return currentPaceVal < bestPaceVal ? r : best;
