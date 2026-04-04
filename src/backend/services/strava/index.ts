@@ -146,8 +146,15 @@ export class StravaService {
 
     const activities = await response.json();
 
+    // Filter to running activities only — Strava uses `sport_type` in newer API
+    // responses and `type` in older ones; check both for robustness.
+    const runs = activities.filter(
+      (activity: any) =>
+        activity.sport_type === 'Run' || activity.type === 'Run'
+    );
+
     // Return normalized data similar to NRC
-    return activities.map((activity: any): RunData => {
+    return runs.map((activity: any): RunData => {
       const distanceKm = activity.distance / 1000;
       const durationMin = activity.moving_time / 60;
 

@@ -45,12 +45,11 @@ export function NRCLoginModal({
   const isEmailScreen =
     sessionStep === 'email-modal' || sessionStep === 'awaiting-code';
   const isCodeScreen =
-    sessionStep === 'code-modal' ||
-    sessionStep === 'processing' ||
-    sessionStep === 'success';
+    sessionStep === 'code-modal' || sessionStep === 'processing';
+  const isSuccessScreen = sessionStep === 'success';
   const isErrorScreen = sessionStep === 'error';
 
-  const isOpen = isEmailScreen || isCodeScreen || isErrorScreen;
+  const isOpen = isEmailScreen || isCodeScreen || isSuccessScreen || isErrorScreen;
 
   return (
     <Modal
@@ -87,6 +86,8 @@ export function NRCLoginModal({
           <div className="relative p-8 md:p-10">
             {isErrorScreen ? (
               <ErrorStep error={error} reset={reset} />
+            ) : isSuccessScreen ? (
+              <SuccessStep />
             ) : isEmailScreen ? (
               <EmailStep
                 email={email}
@@ -335,6 +336,45 @@ function CodeStep({
     </>
   );
 }
+function SuccessStep() {
+  return (
+    <div className="flex flex-col items-center text-center py-4">
+      {/* Animated checkmark ring */}
+      <div className="relative w-20 h-20 mb-6">
+        <div className="absolute inset-0 rounded-full bg-green-100 dark:bg-green-900/30 animate-ping opacity-30" />
+        <div className="relative w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center shadow-sm">
+          <svg
+            className="h-10 w-10 text-green-600 dark:text-green-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2.5"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+        You&apos;re Connected!
+      </h2>
+      <p className="mt-2 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">
+        Nike Run Club account verified successfully.
+      </p>
+
+      {/* Redirect indicator */}
+      <div className="mt-8 flex items-center justify-center gap-2.5 text-sm font-semibold text-gray-400 dark:text-gray-500">
+        <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-transparent animate-spin" />
+        <span>Taking you to your dashboard&hellip;</span>
+      </div>
+    </div>
+  );
+}
+
 function ErrorStep({
   error,
   reset,
