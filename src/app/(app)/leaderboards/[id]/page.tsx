@@ -18,7 +18,7 @@ export async function generateMetadata({
 
   if (!leaderboard) {
     return {
-      title: 'Leaderboard Not Found',
+      title: 'Leaderboard Not Found | Strive',
     };
   }
 
