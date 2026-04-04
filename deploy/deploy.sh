@@ -6,7 +6,7 @@
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
-APP_DIR="/home/ec2-user/strive"
+APP_DIR="/home/realjefienemokwu/strive"
 cd "$APP_DIR"
 
 echo "🗄️ Running database migrations..."

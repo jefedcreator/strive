@@ -98,7 +98,7 @@ jobs:
             if ! command -v google-chrome-stable &> /dev/null || ! systemctl is-active --quiet xvfb; then
               echo "🛠️ Running first-time setup..."
               cd /home/realjefienemokwu/strive
-              sudo bash deploy/setup-ec2.sh
+              sudo bash deploy/setup-gcp.sh
             else
               echo "✅ Setup already complete, skipping..."
             fi
@@ -117,7 +117,7 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 20
 
-            cd /home/ec2-user/strive
+            cd /home/realjefienemokwu/strive
             bash deploy/deploy.sh
 
             echo "✅ Deployment complete!"
