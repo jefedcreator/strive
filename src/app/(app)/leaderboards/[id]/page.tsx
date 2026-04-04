@@ -27,13 +27,17 @@ export async function generateMetadata({
     leaderboard.description ?? `Check out ${leaderboardName} on Strive!`;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
   const pageUrl = `${baseUrl}/leaderboards/${id}`;
-  const imageUrl = `${baseUrl}/api/og?name=${encodeURIComponent(leaderboardName)}&type=leaderboard&footer=true`;
 
-  // Use club image if available, else og template
-  const rawImage = leaderboard.club?.image ?? imageUrl;
-  const image = rawImage.startsWith('http')
-    ? rawImage
-    : `${baseUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
+  // Dynamic OG image showing actual leaderboard rankings
+  const ogImageUrl = `${baseUrl}/api/leaderboards/${id}/og`;
+
+  // Use club image if available, else the dynamic leaderboard OG
+  const clubImage = leaderboard.club?.image;
+  const image = clubImage
+    ? clubImage.startsWith('http')
+      ? clubImage
+      : `${baseUrl}${clubImage.startsWith('/') ? '' : '/'}${clubImage}`
+    : ogImageUrl;
 
   return {
     title: leaderboardName,
