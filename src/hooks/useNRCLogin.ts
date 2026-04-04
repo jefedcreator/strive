@@ -20,6 +20,7 @@
 import type { NikeAuthResult } from '@/backend/services/puppeteer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useSessionStorage from './useSessionStorage';
+import { useEvent } from './useEvent';
 
 export type NRCLoginStep =
   | 'idle'
@@ -47,9 +48,17 @@ interface UseNRCLoginReturn {
   reset: () => void;
 }
 
+// Steps where the SSE stream should remain active
+const ACTIVE_STEPS = new Set<NRCLoginStep>([
+  'navigating',
+  'email-modal',
+  'awaiting-code',
+  'code-modal',
+  'processing',
+]);
+
 export function useNRCLogin(): UseNRCLoginReturn {
   const sessionIdRef = useRef<string | null>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
 
   const [sessionStep, setSessionStep] = useSessionStorage<NRCLoginStep>(
     'nrc_login_step',
@@ -70,15 +79,23 @@ export function useNRCLogin(): UseNRCLoginReturn {
     [setSessionStep]
   );
 
-  const openStream = useCallback(
-    (sessionId: string) => {
-      eventSourceRef.current?.close();
+  // Keep a stable ref to setCurrentStep so SSE handlers don't close over stale values
+  const setCurrentStepRef = useRef(setCurrentStep);
+  useEffect(() => {
+    setCurrentStepRef.current = setCurrentStep;
+  });
 
-      const es = new EventSource(`/api/login/nrc/stream/${sessionId}`);
-      eventSourceRef.current = es;
+  // ─── useEvent ────────────────────────────────────────────────────────────────
+  // autoReconnect=true means useEvent will re-call connect() on tab-focus /
+  // network-recovery, which re-subscribes our SSE handlers and preserves
+  // whatever modal step is stored in sessionStorage.
 
-      // ── Puppeteer milestone events ────────────────────────────────────────
-      es.addEventListener('nrc-login-step', (e: MessageEvent<string>) => {
+  const { connect, disconnect } = useEvent({
+    autoReconnect: true,
+
+    // ── Puppeteer milestone events ──────────────────────────────────────────
+    events: {
+      'nrc-login-step': (e) => {
         const data = JSON.parse(e.data) as {
           step: string;
           sessionId: string;
@@ -88,32 +105,30 @@ export function useNRCLogin(): UseNRCLoginReturn {
 
         switch (data.step) {
           case 'ready':
-            // Nike email form is loaded → show email modal
             setEmail('');
             setCode('');
-            setCurrentStep('email-modal');
+            setCurrentStepRef.current('email-modal');
             break;
           case 'processing':
-            setCurrentStep('processing');
+            setCurrentStepRef.current('processing');
             break;
           case 'success':
-            setCurrentStep('success');
+            setCurrentStepRef.current('success');
             setEmail('');
             setCode('');
-            es.close();
+            disconnect();
             break;
           case 'error':
             setError(data.message ?? 'An unknown error occurred.');
-            // If error happens, we typically want to clear the code to allow retry
             setCode('');
-            setCurrentStep('error');
-            es.close();
+            setCurrentStepRef.current('error');
+            disconnect();
             break;
         }
-      });
+      },
 
       // ── Code modal trigger ────────────────────────────────────────────────
-      es.addEventListener('login-code', (e: MessageEvent<string>) => {
+      'login-code': (e) => {
         const data = JSON.parse(e.data) as {
           step: string;
           sessionId: string;
@@ -128,116 +143,44 @@ export function useNRCLogin(): UseNRCLoginReturn {
           }
           return current;
         });
-      });
+      },
 
-      // ── Code modal trigger ────────────────────────────────────────────────
-      es.addEventListener('success', (e: MessageEvent<string>) => {
-        es.close();
-      });
-
-      es.onerror = () => {
-        setError((prev) => {
-          if (prev) return prev;
-
-          // If the socket closes and we are still processing/waiting, we should try to reconnect
-          if (
-            sessionStep !== 'idle' &&
-            sessionStep !== 'success' &&
-            sessionStep !== 'error'
-          ) {
-            return 'Connection lost. Please wait while we reconnect...';
-          }
-          return 'Connection to server lost. Please try again.';
-        });
-
-        // Don't change step if we just temporarily lost connection while waiting
-        if (sessionStep === 'idle' || sessionStep === 'success') {
-          setCurrentStep('error');
-        }
-        es.close();
-      };
+      // ── Server signals successful auth ────────────────────────────────────
+      success: () => {
+        disconnect();
+      },
     },
-    [setCurrentStep, setEmail, setCode, setSessionStep, sessionStep]
-  );
+
+    onError: () => {
+      setError((prev) => {
+        if (prev) return prev;
+        const currentStep = sessionIdRef.current ? sessionStep : 'idle';
+        if (ACTIVE_STEPS.has(currentStep as NRCLoginStep)) {
+          return 'Connection lost. Please wait while we reconnect...';
+        }
+        return 'Connection to server lost. Please try again.';
+      });
+
+      if (!ACTIVE_STEPS.has(sessionStep)) {
+        setCurrentStep('error');
+      }
+    },
+  });
 
   // ─── Reset on Refresh logic ──────────────────────────────────────────────
 
   useEffect(() => {
-    // If the sessionStep is active but this is a fresh mount (e.g. page refresh),
-    // we might want to reset it.
-    // Note: sessionStorage persists on refresh, so we need a way to detect
-    // if this is a "first load" of the session.
-    // A simple way is to check if we have an active stream. If not, we reset.
+    // sessionStorage persists on refresh but sessionIdRef is gone → reset
     if (sessionStep !== 'idle' && !sessionIdRef.current) {
       setSessionStep('idle');
       setStep('idle');
     }
   }, [sessionStep, setSessionStep]);
 
-  // ─── Connection Recovery (iOS / Chrome backgrounding) ──────────────────────
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      // Re-establish connection if the app comes back to the foreground
-      // and we have an active session that isn't finished
-      if (
-        document.visibilityState === 'visible' &&
-        sessionIdRef.current &&
-        sessionStep !== 'idle' &&
-        sessionStep !== 'success' &&
-        sessionStep !== 'error'
-      ) {
-        // Only reopen if the connection is closed or closing
-        if (
-          !eventSourceRef.current ||
-          eventSourceRef.current.readyState === EventSource.CLOSED
-        ) {
-          console.log(
-            '[useNRCLogin] 🔄 Reconnecting EventSource after backgrounding'
-          );
-          openStream(sessionIdRef.current);
-          setError(null);
-        }
-      }
-    };
-
-    const handleOnline = () => {
-      if (
-        sessionIdRef.current &&
-        sessionStep !== 'idle' &&
-        sessionStep !== 'success' &&
-        sessionStep !== 'error'
-      ) {
-        console.log(
-          '[useNRCLogin] 🔄 Reconnecting EventSource after going online'
-        );
-        openStream(sessionIdRef.current);
-        setError(null);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('online', handleOnline);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('online', handleOnline);
-    };
-  }, [openStream, sessionStep]);
-
-  // ─── Cleanup on unmount ───────────────────────────────────────────────────
-
-  useEffect(
-    () => () => {
-      eventSourceRef.current?.close();
-    },
-    []
-  );
-
   // ─── Step 1: Init ─────────────────────────────────────────────────────────
 
   const initLogin = useCallback(async () => {
-    eventSourceRef.current?.close();
+    disconnect();
     setCurrentStep('initializing');
     setError(null);
     setResult(null);
@@ -250,13 +193,13 @@ export function useNRCLogin(): UseNRCLoginReturn {
       const { sessionId } = (await res.json()) as { sessionId: string };
       sessionIdRef.current = sessionId;
 
-      openStream(sessionId); // open before navigation completes
+      connect(`/api/login/nrc/stream/${sessionId}`);
       setCurrentStep('navigating');
     } catch (err: any) {
       setError(err.message);
       setCurrentStep('error');
     }
-  }, [openStream]);
+  }, [connect, disconnect, setCurrentStep]);
 
   // ─── Step 2: Submit email ─────────────────────────────────────────────────
 
@@ -268,7 +211,6 @@ export function useNRCLogin(): UseNRCLoginReturn {
         return;
       }
 
-      // Transition to a waiting state while Puppeteer types + clicks Continue
       setCurrentStep('awaiting-code');
 
       try {
@@ -282,7 +224,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
           const { error: msg } = (await res.json()) as { error: string };
           throw new Error(msg ?? 'Failed to submit email.');
         }
-        // The 'login-code' SSE event will drive the step → 'code-modal'
+        // The 'login-code' SSE event will drive step → 'code-modal'
       } catch (err: any) {
         setError(err.message);
         setCurrentStep('error');
@@ -345,7 +287,6 @@ export function useNRCLogin(): UseNRCLoginReturn {
         setCode('');
       } catch (err: any) {
         setError(err.message);
-        // User requested to delete only code if it breaks at the code phase
         setCode('');
         setCurrentStep('error');
       }
@@ -356,8 +297,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
   // ─── Reset ────────────────────────────────────────────────────────────────
 
   const reset = useCallback(() => {
-    eventSourceRef.current?.close();
-    eventSourceRef.current = null;
+    disconnect();
     sessionIdRef.current = null;
     setCurrentStep('idle');
     setSessionStep('idle');
@@ -365,7 +305,7 @@ export function useNRCLogin(): UseNRCLoginReturn {
     setCode('');
     setError(null);
     setResult(null);
-  }, [setEmail, setCode, setCurrentStep, setSessionStep]);
+  }, [disconnect, setEmail, setCode, setCurrentStep, setSessionStep]);
 
   return {
     step,
