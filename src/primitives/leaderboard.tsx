@@ -28,6 +28,7 @@ type LeaderboardEntry = Omit<
     avatar: string | null;
     xp?: number;
     currentStreak?: number;
+    type?: string | null;
   };
 };
 
@@ -191,6 +192,12 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                                 <span className="text-gray-500 dark:text-gray-400">
                                   {getTier(entry.user.xp).name}
                                 </span>
+                              </span>
+                            )}
+                            {/* Platform badge */}
+                            {entry.user.type && (
+                              <span className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter">
+                                {entry.user.type}
                               </span>
                             )}
                           </span>
