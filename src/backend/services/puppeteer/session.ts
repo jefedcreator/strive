@@ -19,6 +19,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { sseService } from '../events';
 import type { ActiveSession, PuppeteerNikeAuthResult } from '@/types';
 import type { CaptureOptions, NikeAuthResult } from '.';
+import { join } from 'path';
+import { existsSync } from 'fs';
+import { execSync } from 'child_process';
 
 puppeteer.use(StealthPlugin());
 
@@ -121,14 +124,18 @@ export class PuppeteerSessionManager {
 
     const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
 
-    // ── BrightData residential proxy via proxy-chain ────────────────────
-    // IMPORTANT: Do NOT use page.authenticate() — it calls CDP Fetch.enable
-    // which Forter detects. proxy-chain creates a local proxy server that
-    // handles BrightData auth transparently. Chrome connects to localhost
-    // (no auth needed = zero CDP calls).
+    // ── BrightData Configuration ────────────────────────────────────
     const proxyUser = process.env.BRIGHTDATA_USERNAME;
     const proxyPass = process.env.BRIGHTDATA_PASSWORD;
     const useProxy = !!(proxyUser && proxyPass);
+
+    // Path to BrightData CA certificate
+    const certPath = join(process.cwd(), 'brightdata-ca.crt');
+
+    // Set CA certificate for Node.js (helps proxy-chain)
+    if (existsSync(certPath)) {
+      process.env.NODE_EXTRA_CA_CERTS = certPath;
+    }
 
     let anonymizedProxyUrl: string | null = null;
 
@@ -140,21 +147,28 @@ export class PuppeteerSessionManager {
     ];
 
     if (useProxy) {
-      // Build the BrightData proxy URL with embedded auth + country targeting
       const brightdataUrl = `http://${proxyUser}-country-za:${proxyPass}@brd.superproxy.io:33335`;
-      // proxy-chain creates a local proxy that handles auth transparently
       anonymizedProxyUrl = await ProxyChain.anonymizeProxy(brightdataUrl);
       launchArgs.push(`--proxy-server=${anonymizedProxyUrl}`);
-      console.log(
-        `[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA) via proxy-chain`
-      );
+
+      // ── Make Chrome trust BrightData CA ────────────────────────────
+      if (existsSync(certPath)) {
+        try {
+          const spkiHash = this.extractSPKIHash(certPath);
+          launchArgs.push(`--ignore-certificate-errors-spki-list=${spkiHash}`);
+          console.log(`[PuppeteerSessionManager] 🔐 BrightData CA whitelisted (SPKI: ${spkiHash.substring(0, 20)}...)`);
+        } catch (err: any) {
+          console.warn(`[PuppeteerSessionManager] ⚠️  Failed to extract SPKI, using fallback:`, err.message);
+          launchArgs.push('--ignore-certificate-errors');
+        }
+      } else {
+        console.warn(`[PuppeteerSessionManager] ⚠️  Certificate not found, using fallback`);
+        launchArgs.push('--ignore-certificate-errors');
+      }
+
+      console.log(`[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA) via proxy-chain`);
     }
 
-    // ── Anti-detection via Chrome launch flags (not CDP) ─────────────
-    // IMPORTANT: Do NOT use page.setUserAgent(), page.emulateTimezone(),
-    // page.setExtraHTTPHeaders(), or page.evaluateOnNewDocument() for
-    // fingerprinting. Forter detects CDP protocol modifications at page
-    // load. Chrome launch flags and env vars are invisible to page scripts.
     if (process.platform === 'linux') {
       launchArgs.push(
         '--window-size=1920,1080',
@@ -163,7 +177,6 @@ export class PuppeteerSessionManager {
         '--disable-gpu',
         '--disable-software-rasterizer'
       );
-      // Set timezone at OS level — Chrome inherits this natively
       process.env.TZ = 'Africa/Johannesburg';
       console.log(
         `[PuppeteerSessionManager] 🛡️ Launch flags: 1920x1080, en-US, TZ=Africa/Johannesburg`
@@ -178,6 +191,7 @@ export class PuppeteerSessionManager {
       userDataDir,
       defaultViewport: null,
       args: launchArgs,
+      ignoreHTTPSErrors: true,
       ignoreDefaultArgs: ['--enable-automation'],
     })) as Browser;
 
@@ -231,6 +245,27 @@ export class PuppeteerSessionManager {
     } catch (err) {
       await browser.close();
       throw err;
+    }
+  }
+
+
+  // ── Extract SPKI fingerprint from certificate ────────────────────
+  private extractSPKIHash(certPath: string): string {
+    try {
+      // Use OpenSSL to extract the SPKI hash (works on macOS/Linux)
+      // OpenSSL command: openssl x509 -in cert.crt -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
+
+      const command = `openssl x509 -in "${certPath}" -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64`;
+
+      const spkiHash = execSync(command, { encoding: 'utf8' }).trim();
+
+      if (!spkiHash || spkiHash.length < 40) {
+        throw new Error('Invalid SPKI hash generated');
+      }
+
+      return spkiHash;
+    } catch (err: any) {
+      throw new Error(`Failed to extract SPKI hash: ${err.message}`);
     }
   }
 
