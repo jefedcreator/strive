@@ -56,8 +56,16 @@ export async function processRunsForUser(
   // For each membership, compute stats from runs after the join date
   await Promise.all(
     memberships.map(async (membership) => {
+      const joinDate = new Date(membership.createdAt);
+      // Include runs from the beginning of the month the user joined
+      const joinMonthStart = new Date(Date.UTC(
+        joinDate.getUTCFullYear(),
+        joinDate.getUTCMonth(),
+        1
+      ));
+
       const sinceJoin = unique.filter(
-        (r) => new Date(r.date) >= membership.createdAt
+        (r) => new Date(r.date) >= joinMonthStart
       );
 
       if (sinceJoin.length === 0) return;
