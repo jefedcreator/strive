@@ -144,7 +144,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
               id="type"
               label="Leaderboard Type"
               error={errors.type?.message}
-              description="Distance ranks by total distance. Pace ranks by best pace."
+              description="Combined rewards top 3 in both distance and pace. Distance or Pace rewards top 3 in that metric only."
             >
               <div className="relative">
                 <select
@@ -152,6 +152,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   id="type"
                   className="h-11 w-full appearance-none rounded-xl border border-gray-200 dark:border-[#2A2A2E] bg-white dark:bg-[#18181B] px-4 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer"
                 >
+                  <option value="COMBINED">Combined (Distance + Pace)</option>
                   <option value="DISTANCE">Distance</option>
                   <option value="PACE">Pace</option>
                 </select>

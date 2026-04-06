@@ -58,7 +58,7 @@ interface LeaderboardDetailClientProps {
 export const LeaderboardDetailClient: React.FC<
   LeaderboardDetailClientProps
 > = ({ initialData }) => {
-  const { data: session } = useSession();
+  const { data: session,status } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -68,6 +68,7 @@ export const LeaderboardDetailClient: React.FC<
     history: 'replace',
     clearOnDefault: true,
   });
+
 
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId
@@ -135,7 +136,7 @@ export const LeaderboardDetailClient: React.FC<
         ? new Date(leaderboard.expiryDate)
         : undefined,
       clubId: leaderboard.clubId ?? undefined,
-      type: leaderboard.type ?? 'DISTANCE',
+      type: leaderboard.type ?? 'COMBINED',
     },
   });
 
@@ -180,6 +181,7 @@ export const LeaderboardDetailClient: React.FC<
 
   const joinMutation = useMutation({
     mutationFn: async () => {
+const isLoggedIn = status 
       const res = await api.post(
         `/leaderboards/${leaderboard.id}/join`,
         {},
@@ -346,9 +348,11 @@ export const LeaderboardDetailClient: React.FC<
             <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${
               leaderboard.type === 'PACE'
                 ? 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30'
-                : 'text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30'
+                : leaderboard.type === 'COMBINED'
+                  ? 'text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-900/30'
+                  : 'text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30'
             }`}>
-              {leaderboard.type === 'PACE' ? 'Pace' : 'Distance'}
+              {leaderboard.type === 'PACE' ? 'Pace' : leaderboard.type === 'COMBINED' ? 'Combined' : 'Distance'}
             </span>
             {leaderboard.club && (
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">

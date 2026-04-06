@@ -47,10 +47,10 @@ export const leaderboardValidatorSchema = z
       .nullable()
       .optional(),
     type: z
-      .enum(['DISTANCE', 'PACE'], {
-        invalid_type_error: 'type must be either DISTANCE or PACE',
+      .enum(['COMBINED', 'DISTANCE', 'PACE'], {
+        invalid_type_error: 'type must be COMBINED, DISTANCE, or PACE',
       })
-      .default('DISTANCE')
+      .default('COMBINED')
       .optional(),
   })
   .strict();

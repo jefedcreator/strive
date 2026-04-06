@@ -72,8 +72,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         (a, b) => parsePace(a.runPace) - parsePace(b.runPace)
       );
     }
+    // COMBINED and DISTANCE both default to score (distance) desc
     return sorted.sort((a, b) => b.score - a.score);
-  }, [entries, sortField, leaderboardType]);
+  }, [entries, sortField, leaderboardType, disableInternalSort]);
 
   const activeSortField = disableInternalSort
     ? 'default'

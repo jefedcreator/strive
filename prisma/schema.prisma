@@ -27,6 +27,7 @@ enum NotificationType {
 }
 
 enum LeaderboardType {
+    COMBINED
     DISTANCE
     PACE
 
@@ -87,7 +88,7 @@ model Leaderboard {
     updatedAt          DateTime             @updatedAt
     isPublic           Boolean              @default(true)
     isActive           Boolean              @default(true)
-    type               LeaderboardType      @default(DISTANCE)
+    type               LeaderboardType      @default(COMBINED)
     expiryDate         DateTime?
     createdBy          User                 @relation("LeaderboardCreator", fields: [createdById], references: [id], onDelete: Cascade)
     createdById        String               @db.ObjectId

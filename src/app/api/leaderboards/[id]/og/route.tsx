@@ -195,6 +195,21 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                     •{'  '}{leaderboard.club.name}
                   </span>
                 )}
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase',
+                    color: leaderboard.type === 'PACE' ? '#F59E0B' : leaderboard.type === 'COMBINED' ? '#A78BFA' : '#2DD4BF',
+                    background: leaderboard.type === 'PACE' ? 'rgba(245,158,11,0.12)' : leaderboard.type === 'COMBINED' ? 'rgba(167,139,250,0.12)' : 'rgba(45,212,191,0.12)',
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                  }}
+                >
+                  {leaderboard.type === 'PACE' ? 'PACE' : leaderboard.type === 'COMBINED' ? 'COMBINED' : 'DISTANCE'}
+                </span>
               </div>
 
               {/* Leaderboard name */}
