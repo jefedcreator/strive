@@ -118,7 +118,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
           }
         }
 
-        if (leaderboardId && inviteId && user) {
+        if (leaderboardId && user) {
           const existingEntry = await db.userLeaderboard.findUnique({
             where: {
               userId_leaderboardId: {
@@ -129,17 +129,24 @@ export const POST = withMiddleware<LoginValidatorSchema>(
           });
 
           if (!existingEntry) {
-            await db.$transaction([
+            const transactions: any[] = [
               db.userLeaderboard.create({
                 data: {
                   userId: user.id,
                   leaderboardId,
                 },
               }),
-              db.leaderboardInvites.delete({
-                where: { id: inviteId },
-              }),
-            ]);
+            ];
+            
+            if (inviteId) {
+              transactions.push(
+                db.leaderboardInvites.delete({
+                  where: { id: inviteId },
+                })
+              );
+            }
+            
+            await db.$transaction(transactions);
           }
         }
       } else {

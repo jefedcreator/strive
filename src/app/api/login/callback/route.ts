@@ -121,7 +121,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
       }
 
       // Handle Leaderboard Join if invite info is present
-      if (leaderboardId && inviteId && user) {
+      if (leaderboardId && user) {
         const existingEntry = await db.userLeaderboard.findUnique({
           where: {
             userId_leaderboardId: {
@@ -132,10 +132,6 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         });
 
         if (!existingEntry) {
-          const invite = await db.leaderboardInvites.findUnique({
-            where: { id: inviteId },
-          });
-
           const transactions: any[] = [
             db.userLeaderboard.create({
               data: {
@@ -145,12 +141,17 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
             }),
           ];
 
-          if (invite?.userId) {
-            transactions.push(
-              db.leaderboardInvites.delete({
-                where: { id: inviteId },
-              })
-            );
+          if (inviteId) {
+            const invite = await db.leaderboardInvites.findUnique({
+              where: { id: inviteId },
+            });
+            if (invite?.userId) {
+              transactions.push(
+                db.leaderboardInvites.delete({
+                  where: { id: inviteId },
+                })
+              );
+            }
           }
 
           await db.$transaction(transactions);

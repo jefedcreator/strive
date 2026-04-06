@@ -181,7 +181,11 @@ export const LeaderboardDetailClient: React.FC<
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-const isLoggedIn = status 
+      const isLoggedIn = status == "authenticated"
+      if (!isLoggedIn) {
+        router.push(`/login?leaderboardId=${leaderboard.id}`);
+        return;
+      }
       const res = await api.post(
         `/leaderboards/${leaderboard.id}/join`,
         {},

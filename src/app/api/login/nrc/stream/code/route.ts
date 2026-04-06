@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (leaderboardId && inviteId) {
+    if (leaderboardId) {
       const existingEntry = await db.userLeaderboard.findUnique({
         where: { userId_leaderboardId: { userId: user.id, leaderboardId } },
       });
@@ -100,10 +100,6 @@ export async function POST(req: NextRequest) {
         const leaderboard = await db.leaderboard.findUnique({
           where: { id: leaderboardId },
           select: { createdById: true, name: true },
-        });
-
-        const invite = await db.leaderboardInvites.findUnique({
-          where: { id: inviteId },
         });
 
         const transactions: any[] = [
@@ -119,11 +115,17 @@ export async function POST(req: NextRequest) {
           }),
         ];
 
-        // Only delete the invite if it was specifically generated for a single user (userId is not null)
-        if (invite?.userId) {
-          transactions.push(
-            db.leaderboardInvites.delete({ where: { id: inviteId } })
-          );
+        if (inviteId) {
+          const invite = await db.leaderboardInvites.findUnique({
+            where: { id: inviteId },
+          });
+
+          // Only delete the invite if it was specifically generated for a single user (userId is not null)
+          if (invite?.userId) {
+            transactions.push(
+              db.leaderboardInvites.delete({ where: { id: inviteId } })
+            );
+          }
         }
 
         await db.$transaction(transactions);
