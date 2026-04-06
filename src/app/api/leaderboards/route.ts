@@ -22,6 +22,7 @@ import {
 } from '@/utils/exceptions';
 import { type Leaderboard, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { emailService } from '@/backend/services/email';
 
 /**
  * @body LeaderboardValidatorSchema
@@ -131,6 +132,55 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
       }
 
       await db.$transaction(transactionOps);
+
+      // Auto-invite/notify all club members if this is a public leaderboard created within a club
+      if (payload.isPublic && payload.clubId) {
+        const clubMembers = await db.userClub.findMany({
+          where: { clubId: payload.clubId, userId: { not: user.id } },
+          include: { user: true },
+        });
+
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
+
+        const invitePromises = clubMembers.map(async (member) => {
+          const invite = await db.$transaction([
+            db.leaderboardInvites.create({
+              data: {
+                userId: member.userId,
+                leaderboardId: leaderboard.id,
+                invitedBy: user.id,
+                isRequest: false,
+              },
+            }),
+            db.notification.create({
+              data: {
+                userId: member.userId,
+                message: `${user.fullname} invited you to join their new leaderboard ${leaderboard.name}`,
+                type: 'leaderboard',
+                leaderboardId: leaderboard.id,
+              },
+            }),
+          ]);
+
+          const inviteLink = `${appUrl}/leaderboards/${leaderboard.id}/invites/${invite[0].id}`;
+
+          try {
+            await emailService.sendInviteEmail({
+              to: member.user.email,
+              invitedByUsername: user.fullname,
+              invitedByEmail: user.email,
+              entityName: leaderboard.name,
+              entityType: 'leaderboard',
+              inviteLink,
+              invitedUserAvatar: user.avatar,
+            });
+          } catch (e) {
+            console.error('Failed to send invite email:', e);
+          }
+        });
+
+        await Promise.allSettled(invitePromises);
+      }
 
       const response: ApiResponse<Leaderboard> = {
         status: 201,
