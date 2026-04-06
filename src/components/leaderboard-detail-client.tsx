@@ -181,11 +181,6 @@ export const LeaderboardDetailClient: React.FC<
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const isLoggedIn = status == "authenticated"
-      if (!isLoggedIn) {
-        router.push(`/login?leaderboardId=${leaderboard.id}`);
-        return;
-      }
       const res = await api.post(
         `/leaderboards/${leaderboard.id}/join`,
         {},
@@ -267,15 +262,19 @@ export const LeaderboardDetailClient: React.FC<
                 size="sm"
                 variant="outline"
                 disabled={joinMutation.isPending || isInactive || isCompleted}
-                onClick={() =>
+                onClick={() => {
+                  if (status !== 'authenticated') {
+                    router.push(`/login?leaderboardId=${leaderboard.id}`);
+                    return;
+                  }
                   toast.promise(joinMutation.mutateAsync(), {
                     loading: 'Joining leaderboard…',
                     success: 'Successfully joined the leaderboard!',
                     error: (err: AxiosError<ApiError>) =>
                       err.response?.data?.message ??
                       'Failed to join leaderboard',
-                  })
-                }
+                  });
+                }}
                 className="bg-black/20 hover:bg-black/40 text-white border-white/20 backdrop-blur-md shadow-sm transition-all"
               >
                 <LogIn className="w-4 h-4 mr-1.5" />

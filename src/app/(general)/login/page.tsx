@@ -41,6 +41,7 @@ function LoginPageContent() {
   const { status } = useSession();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [stravaStatus, setStravaStatus] = useState<string | null>(null);
+  const [isNrcClicked, setIsNrcClicked] = useState(false);
 
   const handleLoginSuccess = (payloadUrl: string | null) => {
     toast.success(`Welcome back!`);
@@ -224,18 +225,21 @@ function LoginPageContent() {
               </div>
               {/* Nike Login */}
               <button
-                onClick={initLogin}
-                disabled={isInitializing}
+                onClick={() => {
+                  setIsNrcClicked(true);
+                  initLogin();
+                }}
+                disabled={isInitializing || isNrcClicked}
                 className="w-full group relative flex justify-center items-center py-4 px-4 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-xl text-white bg-black hover:bg-gray-900 dark:bg-black dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 shadow-lg disabled:opacity-50"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-4">
-                  {isInitializing ? (
+                  {(isInitializing || isNrcClicked) ? (
                     <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
                   ) : (
                     <SiNike className="h-6 w-10 text-white" />
                   )}
                 </span>
-                {isInitializing ? 'Connecting...' : 'Sign in with NRC'}
+                {(isInitializing || isNrcClicked) ? 'Connecting...' : 'Sign in with NRC'}
               </button>
             </div>
 
