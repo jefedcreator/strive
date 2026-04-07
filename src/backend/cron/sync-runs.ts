@@ -188,6 +188,27 @@ async function notifyReAuth(
   provider: string
 ) {
   try {
+    // Stop duplicate emails by ensuring we only send one notification per 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const recentNotification = await db.notification.findFirst({
+      where: {
+        userId: user.id,
+        type: 'info',
+        message: {
+          contains: 'connection has expired',
+        },
+        createdAt: {
+          gte: twentyFourHoursAgo,
+        },
+      },
+    });
+
+    if (recentNotification) {
+      console.log(`${LOG_PREFIX} Re-auth notification already sent to user ${user.id} in the last 24h. Skipping.`);
+      return;
+    }
+
     // Send email
     if (user.email) {
       await emailService.sendReAuthEmail(user.email, provider, user.fullname);
