@@ -5,11 +5,14 @@ import { type Prisma } from '@prisma/client';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+export async function GET(
+  request: Request,
+  props: { params: Promise<{ id: string }> }
+) {
   try {
     const { id } = await props.params;
     console.log('id', id);
-    
+
     if (!id) {
       return new Response('Missing leaderboard id', { status: 400 });
     }
@@ -17,28 +20,35 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     const url = new URL(request.url);
     const sortByParam = url.searchParams.get('sortBy');
     const sortOrderParam = url.searchParams.get('sortOrder');
-    const allowedSortBy = new Set(['score', 'fullname', 'createdAt', 'distance', 'pace']);
+    const allowedSortBy = new Set([
+      'score',
+      'fullname',
+      'createdAt',
+      'distance',
+      'pace',
+    ]);
     const allowedSortOrder = new Set(['asc', 'desc']);
-    const sortBy = sortByParam && allowedSortBy.has(sortByParam) ? sortByParam : 'score';
+    const sortByField =
+      sortByParam && allowedSortBy.has(sortByParam) ? sortByParam : 'score';
     const sortOrder =
       sortOrderParam && allowedSortOrder.has(sortOrderParam)
-        ? sortOrderParam
-        : sortBy === 'pace'
-          ? 'asc'
-          : 'desc';
+        ? (sortOrderParam as Prisma.SortOrder)
+        : ((sortByField === 'pace' ? 'asc' : 'desc') as Prisma.SortOrder);
 
     const orderBy: Prisma.UserLeaderboardOrderByWithRelationInput = {};
 
-    if (sortBy === 'fullname') {
+    if (sortByField === 'fullname') {
       orderBy.user = {
         fullname: sortOrder,
       };
-    } else if (sortBy === 'distance') {
+    } else if (sortByField === 'distance') {
       orderBy.runDistance = sortOrder;
-    } else if (sortBy === 'pace') {
+    } else if (sortByField === 'pace') {
       orderBy.runPace = sortOrder;
     } else {
-      orderBy[sortBy] = sortOrder;
+      orderBy[
+        sortByField as keyof Prisma.UserLeaderboardOrderByWithRelationInput
+      ] = sortOrder;
     }
 
     const leaderboard = await db.leaderboard.findUnique({
@@ -77,10 +87,12 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     const participantCount = leaderboard._count.entries;
     let entries = leaderboard.entries;
 
-    if (sortBy === 'pace') {
+    if (sortByField === 'pace') {
       const isZeroPace = (pace: string | null) =>
         !pace || pace === '0' || pace === '0:00' || pace === '00:00';
-      const validEntries = entries.filter((entry) => !isZeroPace(entry.runPace));
+      const validEntries = entries.filter(
+        (entry) => !isZeroPace(entry.runPace)
+      );
       const zeroEntries = entries.filter((entry) => isZeroPace(entry.runPace));
       entries = [...validEntries, ...zeroEntries];
     }
@@ -88,11 +100,11 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     entries = entries.slice(0, 5);
 
     const activeSortKey =
-      sortBy === 'fullname'
+      sortByField === 'fullname'
         ? 'athlete'
-        : sortBy === 'distance'
+        : sortByField === 'distance'
           ? 'distance'
-          : sortBy === 'pace'
+          : sortByField === 'pace'
             ? 'pace'
             : 'rank';
 
@@ -103,7 +115,9 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       textTransform: 'uppercase' as const,
       color: active ? '#F97316' : 'rgba(255,255,255,0.3)',
       background: active ? 'rgba(249,115,22,0.12)' : 'transparent',
-      border: active ? '1px solid rgba(249,115,22,0.35)' : '1px solid transparent',
+      border: active
+        ? '1px solid rgba(249,115,22,0.35)'
+        : '1px solid transparent',
       padding: active ? '6px 10px' : '0px',
       borderRadius: '10px',
       display: 'flex',
@@ -253,7 +267,8 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                       gap: '6px',
                     }}
                   >
-                    •{'  '}{leaderboard.club.name}
+                    •{'  '}
+                    {leaderboard.club.name}
                   </span>
                 )}
                 <span
@@ -262,14 +277,28 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                     fontWeight: 700,
                     letterSpacing: '3px',
                     textTransform: 'uppercase',
-                    color: leaderboard.type === 'PACE' ? '#F59E0B' : leaderboard.type === 'COMBINED' ? '#A78BFA' : '#2DD4BF',
-                    background: leaderboard.type === 'PACE' ? 'rgba(245,158,11,0.12)' : leaderboard.type === 'COMBINED' ? 'rgba(167,139,250,0.12)' : 'rgba(45,212,191,0.12)',
+                    color:
+                      leaderboard.type === 'PACE'
+                        ? '#F59E0B'
+                        : leaderboard.type === 'COMBINED'
+                          ? '#A78BFA'
+                          : '#2DD4BF',
+                    background:
+                      leaderboard.type === 'PACE'
+                        ? 'rgba(245,158,11,0.12)'
+                        : leaderboard.type === 'COMBINED'
+                          ? 'rgba(167,139,250,0.12)'
+                          : 'rgba(45,212,191,0.12)',
                     padding: '8px 16px',
                     borderRadius: '12px',
                     display: 'flex',
                   }}
                 >
-                  {leaderboard.type === 'PACE' ? 'PACE' : leaderboard.type === 'COMBINED' ? 'COMBINED' : 'DISTANCE'}
+                  {leaderboard.type === 'PACE'
+                    ? 'PACE'
+                    : leaderboard.type === 'COMBINED'
+                      ? 'COMBINED'
+                      : 'DISTANCE'}
                 </span>
               </div>
 
@@ -403,7 +432,9 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                 const colors = getRankColors(rank);
                 const name =
                   entry.user.fullname ?? entry.user.username ?? 'Guest';
-                const initials = getInitials(entry.user.fullname ?? entry.user.username);
+                const initials = getInitials(
+                  entry.user.fullname ?? entry.user.username
+                );
                 const avatarBg = avatarColors[index % avatarColors.length];
 
                 return (
@@ -474,7 +505,8 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                         style={{
                           fontSize: 28,
                           fontWeight: 700,
-                          color: rank <= 3 ? '#FFFFFF' : 'rgba(255,255,255,0.7)',
+                          color:
+                            rank <= 3 ? '#FFFFFF' : 'rgba(255,255,255,0.7)',
                           display: 'flex',
                         }}
                       >
@@ -644,7 +676,8 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
         width: 1200,
         height: 1200,
         headers: {
-          'Cache-Control': 'public, max-age=300, s-maxage=600, stale-while-revalidate=3600',
+          'Cache-Control':
+            'public, max-age=300, s-maxage=600, stale-while-revalidate=3600',
         },
       }
     );
@@ -652,4 +685,4 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     console.error('OG leaderboard error:', e);
     return new Response('Failed to generate image', { status: 500 });
   }
-};
+}
