@@ -1,11 +1,50 @@
 import cron from 'node-cron';
 import { db } from '@/server/db';
+import type { RunData } from '@/types';
 import { stravaService } from '../services/strava';
 import { nrc } from '../services/nrc';
-import { processRunsForUser } from '../services/runs';
+import { getRunDedupId, processRunsForUser } from '../services/runs';
 import { emailService } from '../services/email';
 
 const LOG_PREFIX = '[Cron:SyncRuns]';
+
+async function isLatestRunAlreadySynced(
+  userId: string,
+  latestRun: RunData
+): Promise<boolean> {
+  const latestRunId = getRunDedupId(latestRun);
+  const latestRunDate = new Date(latestRun.date);
+
+  const memberships = await db.userLeaderboard.findMany({
+    where: {
+      userId,
+      leaderboard: {
+        OR: [{ expiryDate: null }, { expiryDate: { gt: new Date() } }],
+      },
+    },
+    select: {
+      runId: true,
+      leaderboard: { select: { createdAt: true, expiryDate: true } },
+    },
+  });
+
+  const relevantMemberships = memberships.filter((membership) => {
+    const leaderboardStart = new Date(membership.leaderboard.createdAt);
+    const leaderboardEnd = membership.leaderboard.expiryDate
+      ? new Date(membership.leaderboard.expiryDate)
+      : null;
+
+    const isAfterStart = latestRunDate >= leaderboardStart;
+    const isBeforeEnd = leaderboardEnd ? latestRunDate <= leaderboardEnd : true;
+    return isAfterStart && isBeforeEnd;
+  });
+
+  if (relevantMemberships.length === 0) return false;
+
+  return relevantMemberships.every(
+    (membership) => membership.runId === latestRunId
+  );
+}
 
 /**
  * Attempt to get a valid Strava access token for a user.
@@ -129,6 +168,40 @@ async function syncStravaUser(user: {
     return;
   }
 
+  const latestRun = await stravaService.fetchLatestRun(token);
+
+  if (!latestRun) {
+    console.log(`${LOG_PREFIX} Strava: No runs found for user ${user.id}.`);
+    await db.user.update({
+      where: { id: user.id },
+      data: { lastSyncAt: new Date() },
+    });
+    return;
+  }
+
+  if (!latestRun) {
+    console.log(`${LOG_PREFIX} NRC: No runs returned for user ${user.id}.`);
+    await db.user.update({
+      where: { id: user.id },
+      data: { lastSyncAt: new Date() },
+    });
+    return;
+  }
+
+  const isAlreadySynced = await isLatestRunAlreadySynced(
+    user.id,
+    latestRun
+  );
+
+  if (isAlreadySynced) {
+    console.log(`${LOG_PREFIX} Strava: Latest run already synced for user ${user.id}. Skipping.`);
+    await db.user.update({
+      where: { id: user.id },
+      data: { lastSyncAt: new Date() },
+    });
+    return;
+  }
+
   const runs = await stravaService.fetchAllActivities(token);
   console.log(`${LOG_PREFIX} Strava: Fetched ${runs.length} runs for user ${user.id}.`);
 
@@ -159,17 +232,36 @@ async function syncNRCUser(user: {
   }
 
   try {
-    const runs = await nrc.fetchRuns(user.access_token);
-    console.log('runs', runs);
+    const latestRun = await nrc.fetchLatestRun(user.access_token);
 
-    if (runs.length === 0) {
+    if (!latestRun) {
       // Empty response could mean expired token or genuinely no runs.
       // We don't send re-auth here — only on actual failures.
       console.log(`${LOG_PREFIX} NRC: No runs returned for user ${user.id}.`);
-    } else {
-      console.log(`${LOG_PREFIX} NRC: Fetched ${runs.length} runs for user ${user.id}.`);
-      await processRunsForUser(user.id, runs);
+      await db.user.update({
+        where: { id: user.id },
+        data: { lastSyncAt: new Date() },
+      });
+      return;
     }
+
+    const isAlreadySynced = await isLatestRunAlreadySynced(
+      user.id,
+      latestRun
+    );
+
+    if (isAlreadySynced) {
+      console.log(`${LOG_PREFIX} NRC: Latest run already synced for user ${user.id}. Skipping.`);
+      await db.user.update({
+        where: { id: user.id },
+        data: { lastSyncAt: new Date() },
+      });
+      return;
+    }
+
+    const runs = await nrc.fetchRuns(user.access_token);
+    console.log(`${LOG_PREFIX} NRC: Fetched ${runs.length} runs for user ${user.id}.`);
+    await processRunsForUser(user.id, runs);
 
     await db.user.update({
       where: { id: user.id },

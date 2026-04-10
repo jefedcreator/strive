@@ -49,7 +49,7 @@ export class StravaService {
     leaderboardId?: string;
     callbackUrl?: string;
   }): string {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
     const params = new URLSearchParams({
       client_id: this.CLIENT_ID!,
       redirect_uri: `${baseUrl}/api/login/callback`,
@@ -176,6 +176,14 @@ export class StravaService {
         name: activity.name,
       };
     });
+  }
+
+  /**
+   * Fetch the most recent running activity for the authenticated athlete.
+   */
+  async fetchLatestRun(accessToken: string): Promise<RunData | null> {
+    const runs = await this.fetchActivities(accessToken, 1, 1);
+    return runs[0] ?? null;
   }
 
   /**

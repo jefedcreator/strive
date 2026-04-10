@@ -4,8 +4,7 @@ import { type RunData } from '@/types';
 const CONFIG = {
   // ACTIVITY_LIST_URL: 'https://api.nike.com/sport/v3/me/activities',
   ACTIVITY_LIST_URL:
-    'https://api.nike.com/plus/v3/activities/before_id/v3/*?limit=30&types=run%2Cjogging&include_deleted=false',
-  URL: 'https://api.nike.com/plus/v3/activities/before_id/v3/*?limit=30&types=run%2Cjogging&include_deleted=false',
+    'https://api.nike.com/plus/v3/activities/before_id/v3/*?types=run%2Cjogging&include_deleted=false',
 };
 
 // Type definitions for the NRC API response
@@ -27,7 +26,16 @@ interface ActivitiesResponse {
 }
 
 class NRC {
-  public async fetchRuns(token: string): Promise<RunData[]> {
+  private buildActivitiesUrl(limit: number): string {
+    return `${CONFIG.ACTIVITY_LIST_URL}&limit=${limit}`;
+  }
+
+  public async fetchLatestRun(token: string): Promise<RunData | null> {
+    const runs = await this.fetchRuns(token, 1);
+    return runs[0] ?? null;
+  }
+
+  public async fetchRuns(token: string, limit = 30): Promise<RunData[]> {
     if (!token) {
       console.log('No token provided.');
       return [];
@@ -38,7 +46,7 @@ class NRC {
     console.log('🏃 Fetching run data...');
     try {
       const { data } = await axios.get<ActivitiesResponse>(
-        CONFIG.ACTIVITY_LIST_URL,
+        this.buildActivitiesUrl(limit),
         {
           headers: {
             Authorization: token,

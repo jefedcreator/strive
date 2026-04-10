@@ -3,6 +3,15 @@ import type { RunData } from '@/types';
 import { checkClubMilestones } from '@/backend/services/rewards';
 import { syncUserXP } from '@/backend/services/xp';
 
+export function getRunDedupId(run: Pick<RunData, 'date' | 'distance' | 'duration'>): string {
+  const timestamp = new Date(run.date).getTime();
+  return `${timestamp}-${run.distance}-${run.duration}`;
+}
+
+function assignRunDedupIds(runs: RunData[]): RunData[] {
+  return runs.map((run) => ({ ...run, id: getRunDedupId(run) }));
+}
+
 /**
  * Shared scoring / leaderboard-update logic.
  *
@@ -21,13 +30,7 @@ export async function processRunsForUser(
   if (runs.length === 0) return runs;
 
   // Assign a consistent ID based on inherent run attributes
-  runs = runs.map((r) => {
-    const timestamp = new Date(r.date).getTime();
-    return {
-      ...r,
-      id: `${timestamp}-${r.distance}-${r.duration}`,
-    };
-  });
+  runs = assignRunDedupIds(runs);
 
   // Deduplicate runs by id
   const unique = Array.from(new Map(runs.map((r) => [r.id, r])).values());

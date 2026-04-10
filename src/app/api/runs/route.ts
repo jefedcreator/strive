@@ -14,9 +14,11 @@ export const GET = withMiddleware(
     let runs: RunData[] = [];
 
     if (user.type === 'NRC') {
-      runs = await nrc.fetchRuns(user.access_token ?? '');
+      const latestRun = await nrc.fetchLatestRun(user.access_token ?? '');
+      runs = latestRun ? [latestRun] : [];
     } else if (user.type === 'STRAVA') {
-      runs = await stravaService.fetchAllActivities(user.access_token ?? '');
+      const latestRun = await stravaService.fetchLatestRun(user.access_token ?? '');
+      runs = latestRun ? [latestRun] : [];
     }
     // Process runs: deduplicate, update leaderboards, check milestones, sync XP
     runs = await processRunsForUser(user.id, runs);
@@ -31,4 +33,3 @@ export const GET = withMiddleware(
   },
   [authMiddleware]
 );
-
