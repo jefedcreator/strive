@@ -435,6 +435,11 @@ export async function GET(
                 const initials = getInitials(
                   entry.user.fullname ?? entry.user.username
                 );
+                const avatarUrl = entry.user.avatar
+                  ? entry.user.avatar.startsWith('http')
+                    ? entry.user.avatar
+                    : `${url.origin}${entry.user.avatar.startsWith('/') ? '' : '/'}${entry.user.avatar}`
+                  : null;
                 const avatarBg = avatarColors[index % avatarColors.length];
 
                 return (
@@ -497,9 +502,25 @@ export async function GET(
                           fontWeight: 700,
                           color: '#FFFFFF',
                           flexShrink: 0,
+                          overflow: 'hidden',
                         }}
                       >
-                        {initials}
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt={name}
+                            width={64}
+                            height={64}
+                            style={{
+                              width: '64px',
+                              height: '64px',
+                              objectFit: 'cover',
+                              display: 'flex',
+                            }}
+                          />
+                        ) : (
+                          initials
+                        )}
                       </div>
                       <span
                         style={{
