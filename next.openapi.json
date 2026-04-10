@@ -3,16 +3,12 @@
   "info": {
     "title": "Strive Documentation",
     "version": "1.0.0",
-    "description": "Strive API Documentation"
+    "description": "This is the OpenAPI specification for your project."
   },
   "servers": [
     {
       "url": "http://localhost:3000/api",
       "description": "Local development server"
-    },
-    {
-      "url": "https://strive-beige.vercel.app/api",
-      "description": "Production server"
     }
   ],
   "components": {
@@ -100,12 +96,12 @@
       }
     }
   },
-  "apiDir": "./src/app/(app)/api",
+  "apiDir": "./src/app/api",
   "schemaDir": "./src",
   "schemaType": "zod",
   "schemaFiles": [],
   "docsUrl": "docs",
-  "ui": "swagger",    
+  "ui": "swagger",
   "outputFile": "openapi.json",
   "outputDir": "./public",
   "includeOpenApiRoutes": false,

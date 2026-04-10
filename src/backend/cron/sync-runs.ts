@@ -59,6 +59,7 @@ export const syncAllUserRuns = async () => {
     const users = await db.user.findMany({
       where: {
         access_token: { not: null },
+        id: "69ad7c90b0f490f1b8898a3e",
         // Only sync users who belong to at least one active leaderboard
         leaderboards: {
           some: {
@@ -159,6 +160,7 @@ async function syncNRCUser(user: {
 
   try {
     const runs = await nrc.fetchRuns(user.access_token);
+    console.log('runs', runs);
 
     if (runs.length === 0) {
       // Empty response could mean expired token or genuinely no runs.
