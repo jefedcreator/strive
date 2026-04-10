@@ -7,6 +7,7 @@ export const runtime = 'nodejs';
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await props.params;
+    console.log('id', id);
     
     if (!id) {
       return new Response('Missing leaderboard id', { status: 400 });
@@ -116,14 +117,14 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
             overflow: 'hidden',
           }}
         >
-          {/* Subtle gradient orbs */}
+          {/* Subtle gradient orbs - scaled up */}
           <div
             style={{
               position: 'absolute',
-              top: '-120px',
-              right: '-80px',
-              width: '400px',
-              height: '400px',
+              top: '-180px',
+              right: '-120px',
+              width: '600px',
+              height: '600px',
               borderRadius: '50%',
               background:
                 'radial-gradient(circle, rgba(249,115,22,0.08) 0%, transparent 70%)',
@@ -133,10 +134,10 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
           <div
             style={{
               position: 'absolute',
-              bottom: '-100px',
-              left: '-60px',
-              width: '350px',
-              height: '350px',
+              bottom: '-150px',
+              left: '-90px',
+              width: '550px',
+              height: '550px',
               borderRadius: '50%',
               background:
                 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)',
@@ -144,36 +145,36 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
             }}
           />
 
-          {/* Header */}
+          {/* Header - scaled padding */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '36px 48px 0 48px',
+              padding: '64px 72px 0 72px',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px',
-                maxWidth: '750px',
+                gap: '12px',
+                maxWidth: '850px',
               }}
             >
-              {/* Type badge */}
+              {/* Type badge - scaled texts and padding */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: '16px',
                 }}
               >
                 <span
                   style={{
-                    fontSize: 13,
+                    fontSize: 20,
                     fontWeight: 800,
-                    letterSpacing: '4px',
+                    letterSpacing: '5px',
                     textTransform: 'uppercase',
                     color: '#F97316',
                     display: 'flex',
@@ -184,12 +185,12 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                 {leaderboard.club && (
                   <span
                     style={{
-                      fontSize: 13,
+                      fontSize: 20,
                       fontWeight: 600,
                       color: 'rgba(255,255,255,0.35)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '6px',
                     }}
                   >
                     •{'  '}{leaderboard.club.name}
@@ -197,14 +198,14 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                 )}
                 <span
                   style={{
-                    fontSize: 11,
+                    fontSize: 16,
                     fontWeight: 700,
-                    letterSpacing: '2px',
+                    letterSpacing: '3px',
                     textTransform: 'uppercase',
                     color: leaderboard.type === 'PACE' ? '#F59E0B' : leaderboard.type === 'COMBINED' ? '#A78BFA' : '#2DD4BF',
                     background: leaderboard.type === 'PACE' ? 'rgba(245,158,11,0.12)' : leaderboard.type === 'COMBINED' ? 'rgba(167,139,250,0.12)' : 'rgba(45,212,191,0.12)',
-                    padding: '4px 10px',
-                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    borderRadius: '12px',
                     display: 'flex',
                   }}
                 >
@@ -212,13 +213,13 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                 </span>
               </div>
 
-              {/* Leaderboard name */}
+              {/* Leaderboard name - scaled font */}
               <h1
                 style={{
-                  fontSize: leaderboard.name.length > 30 ? 34 : 42,
+                  fontSize: leaderboard.name.length > 30 ? 48 : 64,
                   fontWeight: 900,
                   color: '#FFFFFF',
-                  letterSpacing: '-1px',
+                  letterSpacing: '-1.5px',
                   lineHeight: 1.1,
                   display: 'flex',
                   margin: 0,
@@ -228,22 +229,22 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
               </h1>
             </div>
 
-            {/* Participant count */}
+            {/* Participant count - scaled text and padding */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '4px',
-                padding: '16px 24px',
-                borderRadius: '16px',
+                gap: '8px',
+                padding: '24px 36px',
+                borderRadius: '24px',
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.08)',
               }}
             >
               <span
                 style={{
-                  fontSize: 36,
+                  fontSize: 56,
                   fontWeight: 900,
                   color: '#FFFFFF',
                   display: 'flex',
@@ -254,9 +255,9 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
               </span>
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 16,
                   fontWeight: 700,
-                  letterSpacing: '2px',
+                  letterSpacing: '3px',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.35)',
                   display: 'flex',
@@ -267,34 +268,34 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
             </div>
           </div>
 
-          {/* Rankings Table */}
+          {/* Rankings Table - scaled margin and width portions */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              margin: '24px 48px 0 48px',
-              borderRadius: '16px',
+              margin: '40px 72px 0 72px',
+              borderRadius: '24px',
               border: '1px solid rgba(255,255,255,0.08)',
               overflow: 'hidden',
               flex: 1,
             }}
           >
-            {/* Table header */}
+            {/* Table header - scaled columns */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '14px 24px',
+                padding: '24px 36px',
                 background: 'rgba(255,255,255,0.03)',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
               }}
             >
               <span
                 style={{
-                  width: '64px',
-                  fontSize: 10,
+                  width: '100px',
+                  fontSize: 16,
                   fontWeight: 700,
-                  letterSpacing: '3px',
+                  letterSpacing: '4px',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.3)',
                   display: 'flex',
@@ -305,9 +306,9 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
               <span
                 style={{
                   flex: 1,
-                  fontSize: 10,
+                  fontSize: 16,
                   fontWeight: 700,
-                  letterSpacing: '3px',
+                  letterSpacing: '4px',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.3)',
                   display: 'flex',
@@ -317,10 +318,10 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
               </span>
               <span
                 style={{
-                  width: '140px',
-                  fontSize: 10,
+                  width: '220px',
+                  fontSize: 16,
                   fontWeight: 700,
-                  letterSpacing: '3px',
+                  letterSpacing: '4px',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.3)',
                   textAlign: 'right',
@@ -332,10 +333,10 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
               </span>
               <span
                 style={{
-                  width: '130px',
-                  fontSize: 10,
+                  width: '200px',
+                  fontSize: 16,
                   fontWeight: 700,
-                  letterSpacing: '3px',
+                  letterSpacing: '4px',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.3)',
                   textAlign: 'right',
@@ -363,7 +364,7 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      padding: '14px 24px',
+                      padding: '24px 36px',
                       background: colors.bg,
                       borderBottom: `1px solid ${colors.border}`,
                     }}
@@ -371,20 +372,20 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                     {/* Rank badge */}
                     <div
                       style={{
-                        width: '64px',
+                        width: '100px',
                         display: 'flex',
                         alignItems: 'center',
                       }}
                     >
                       <div
                         style={{
-                          width: '32px',
-                          height: '32px',
+                          width: '54px',
+                          height: '54px',
                           borderRadius: '50%',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: 14,
+                          fontSize: 24,
                           fontWeight: 800,
                           background: rank <= 3 ? colors.badge : 'transparent',
                           color: rank <= 3 ? colors.badgeText : colors.text,
@@ -400,20 +401,20 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                         flex: 1,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '14px',
+                        gap: '24px',
                       }}
                     >
                       {/* Avatar */}
                       <div
                         style={{
-                          width: '38px',
-                          height: '38px',
+                          width: '64px',
+                          height: '64px',
                           borderRadius: '50%',
                           background: avatarBg,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: 14,
+                          fontSize: 24,
                           fontWeight: 700,
                           color: '#FFFFFF',
                           flexShrink: 0,
@@ -423,32 +424,32 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                       </div>
                       <span
                         style={{
-                          fontSize: 16,
+                          fontSize: 28,
                           fontWeight: 700,
                           color: rank <= 3 ? '#FFFFFF' : 'rgba(255,255,255,0.7)',
                           display: 'flex',
                         }}
                       >
-                        {name.length > 22 ? name.slice(0, 22) + '…' : name}
+                        {name.length > 24 ? name.slice(0, 24) + '…' : name}
                       </span>
                     </div>
 
                     {/* Distance */}
                     <div
                       style={{
-                        width: '140px',
+                        width: '220px',
                         display: 'flex',
                         justifyContent: 'flex-end',
                       }}
                     >
                       <span
                         style={{
-                          fontSize: 15,
+                          fontSize: 24,
                           fontWeight: 800,
                           color: '#F97316',
                           background: 'rgba(249,115,22,0.1)',
-                          padding: '5px 14px',
-                          borderRadius: '10px',
+                          padding: '10px 20px',
+                          borderRadius: '16px',
                           border: '1px solid rgba(249,115,22,0.15)',
                           display: 'flex',
                         }}
@@ -462,14 +463,14 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                     {/* Pace */}
                     <div
                       style={{
-                        width: '130px',
+                        width: '200px',
                         display: 'flex',
                         justifyContent: 'flex-end',
                       }}
                     >
                       <span
                         style={{
-                          fontSize: 14,
+                          fontSize: 24,
                           fontWeight: 600,
                           color: 'rgba(255,255,255,0.5)',
                           display: 'flex',
@@ -479,9 +480,9 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                         {entry.runPace && (
                           <span
                             style={{
-                              fontSize: 10,
+                              fontSize: 16,
                               color: 'rgba(255,255,255,0.3)',
-                              marginLeft: '3px',
+                              marginLeft: '6px',
                               display: 'flex',
                               alignItems: 'center',
                             }}
@@ -500,9 +501,9 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '40px',
+                  padding: '64px',
                   color: 'rgba(255,255,255,0.3)',
-                  fontSize: 16,
+                  fontSize: 24,
                 }}
               >
                 No athletes have joined yet
@@ -516,13 +517,13 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '12px',
+                  padding: '24px',
                   background: 'rgba(255,255,255,0.02)',
                 }}
               >
                 <span
                   style={{
-                    fontSize: 12,
+                    fontSize: 20,
                     fontWeight: 600,
                     color: 'rgba(255,255,255,0.25)',
                     display: 'flex',
@@ -534,27 +535,27 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
             )}
           </div>
 
-          {/* Footer */}
+          {/* Footer - scaled paddings and texts */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '16px 48px 20px 48px',
+              padding: '32px 72px 48px 72px',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: '16px',
               }}
             >
               <div
                 style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
                   background: '#F97316',
                   display: 'flex',
                   alignItems: 'center',
@@ -562,14 +563,14 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                   overflow: 'hidden',
                 }}
               >
-                <Logo width={24} height={24} fill="#FFFFFF" />
+                <Logo width={36} height={36} fill="#FFFFFF" />
               </div>
               <span
                 style={{
-                  fontSize: 18,
+                  fontSize: 28,
                   fontWeight: 900,
                   color: 'rgba(255,255,255,0.8)',
-                  letterSpacing: '1px',
+                  letterSpacing: '1.5px',
                   display: 'flex',
                 }}
               >
@@ -578,10 +579,10 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
             </div>
             <span
               style={{
-                fontSize: 14,
+                fontSize: 20,
                 fontWeight: 700,
                 color: 'rgba(161,161,170,0.5)',
-                letterSpacing: '3px',
+                letterSpacing: '4px',
                 textTransform: 'uppercase',
                 display: 'flex',
               }}
@@ -593,7 +594,7 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       ),
       {
         width: 1200,
-        height: 630,
+        height: 1200,
         headers: {
           'Cache-Control': 'public, max-age=300, s-maxage=600, stale-while-revalidate=3600',
         },
@@ -603,4 +604,4 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     console.error('OG leaderboard error:', e);
     return new Response('Failed to generate image', { status: 500 });
   }
-}
+};
