@@ -12,8 +12,10 @@ interface PageProps {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
+  const { sortBy } = loadLeaderboardParams.parse(await searchParams);
   const { data: leaderboard } = await getLeaderboard(id);
 
   if (!leaderboard) {
@@ -29,7 +31,7 @@ export async function generateMetadata({
   const pageUrl = `${baseUrl}/leaderboards/${id}`;
 
   // Dynamic OG image showing actual leaderboard rankings
-  const ogImageUrl = `${baseUrl}/api/leaderboards/${id}/og`;
+  const ogImageUrl = `${baseUrl}/api/leaderboards/${id}/og${sortBy ? `?sortBy=${sortBy}` : ''}`;
 
   // Use club image if available, else the dynamic leaderboard OG
   const clubImage = leaderboard.club?.image;

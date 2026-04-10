@@ -1,6 +1,7 @@
 import Logo from '@/primitives/logo';
 import { db } from '@/server/db';
 import { ImageResponse } from 'next/og';
+import { type Prisma } from '@prisma/client';
 
 export const runtime = 'nodejs';
 
@@ -13,12 +14,38 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       return new Response('Missing leaderboard id', { status: 400 });
     }
 
+    const url = new URL(request.url);
+    const sortByParam = url.searchParams.get('sortBy');
+    const sortOrderParam = url.searchParams.get('sortOrder');
+    const allowedSortBy = new Set(['score', 'fullname', 'createdAt', 'distance', 'pace']);
+    const allowedSortOrder = new Set(['asc', 'desc']);
+    const sortBy = sortByParam && allowedSortBy.has(sortByParam) ? sortByParam : 'score';
+    const sortOrder =
+      sortOrderParam && allowedSortOrder.has(sortOrderParam)
+        ? sortOrderParam
+        : sortBy === 'pace'
+          ? 'asc'
+          : 'desc';
+
+    const orderBy: Prisma.UserLeaderboardOrderByWithRelationInput = {};
+
+    if (sortBy === 'fullname') {
+      orderBy.user = {
+        fullname: sortOrder,
+      };
+    } else if (sortBy === 'distance') {
+      orderBy.runDistance = sortOrder;
+    } else if (sortBy === 'pace') {
+      orderBy.runPace = sortOrder;
+    } else {
+      orderBy[sortBy] = sortOrder;
+    }
+
     const leaderboard = await db.leaderboard.findUnique({
       where: { id },
       include: {
         entries: {
-          orderBy: { score: 'desc' },
-          take: 5,
+          orderBy,
           include: {
             user: {
               select: {
@@ -48,7 +75,40 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     const isChallenge = !leaderboard.clubId;
     const typeLabel = isChallenge ? 'CHALLENGE' : 'LEADERBOARD';
     const participantCount = leaderboard._count.entries;
-    const entries = leaderboard.entries;
+    let entries = leaderboard.entries;
+
+    if (sortBy === 'pace') {
+      const isZeroPace = (pace: string | null) =>
+        !pace || pace === '0' || pace === '0:00' || pace === '00:00';
+      const validEntries = entries.filter((entry) => !isZeroPace(entry.runPace));
+      const zeroEntries = entries.filter((entry) => isZeroPace(entry.runPace));
+      entries = [...validEntries, ...zeroEntries];
+    }
+
+    entries = entries.slice(0, 5);
+
+    const activeSortKey =
+      sortBy === 'fullname'
+        ? 'athlete'
+        : sortBy === 'distance'
+          ? 'distance'
+          : sortBy === 'pace'
+            ? 'pace'
+            : 'rank';
+
+    const headerLabelStyle = (active: boolean) => ({
+      fontSize: 16,
+      fontWeight: 700,
+      letterSpacing: '4px',
+      textTransform: 'uppercase' as const,
+      color: active ? '#F97316' : 'rgba(255,255,255,0.3)',
+      background: active ? 'rgba(249,115,22,0.12)' : 'transparent',
+      border: active ? '1px solid rgba(249,115,22,0.35)' : '1px solid transparent',
+      padding: active ? '6px 10px' : '0px',
+      borderRadius: '10px',
+      display: 'flex',
+      boxSizing: 'border-box' as const,
+    });
 
     const getRankColors = (rank: number) => {
       if (rank === 1)
@@ -293,58 +353,46 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
               <span
                 style={{
                   width: '100px',
-                  fontSize: 16,
-                  fontWeight: 700,
-                  letterSpacing: '4px',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.3)',
                   display: 'flex',
                 }}
               >
-                RANK
+                <span style={headerLabelStyle(activeSortKey === 'rank')}>
+                  RANK
+                </span>
               </span>
               <span
                 style={{
                   flex: 1,
-                  fontSize: 16,
-                  fontWeight: 700,
-                  letterSpacing: '4px',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.3)',
                   display: 'flex',
                 }}
               >
-                ATHLETE
+                <span style={headerLabelStyle(activeSortKey === 'athlete')}>
+                  ATHLETE
+                </span>
               </span>
               <span
                 style={{
                   width: '220px',
-                  fontSize: 16,
-                  fontWeight: 700,
-                  letterSpacing: '4px',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.3)',
                   textAlign: 'right',
                   display: 'flex',
                   justifyContent: 'flex-end',
                 }}
               >
-                DISTANCE
+                <span style={headerLabelStyle(activeSortKey === 'distance')}>
+                  DISTANCE
+                </span>
               </span>
               <span
                 style={{
                   width: '200px',
-                  fontSize: 16,
-                  fontWeight: 700,
-                  letterSpacing: '4px',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.3)',
                   textAlign: 'right',
                   display: 'flex',
                   justifyContent: 'flex-end',
                 }}
               >
-                AVG PACE
+                <span style={headerLabelStyle(activeSortKey === 'pace')}>
+                  AVG PACE
+                </span>
               </span>
             </div>
 

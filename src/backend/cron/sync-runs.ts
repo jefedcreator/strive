@@ -235,8 +235,6 @@ async function syncNRCUser(user: {
     const latestRun = await nrc.fetchLatestRun(user.access_token);
 
     if (!latestRun) {
-      // Empty response could mean expired token or genuinely no runs.
-      // We don't send re-auth here — only on actual failures.
       console.log(`${LOG_PREFIX} NRC: No runs returned for user ${user.id}.`);
       await db.user.update({
         where: { id: user.id },
