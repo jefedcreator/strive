@@ -3,19 +3,17 @@ import {
   AnimatePresence,
   motion,
   useScroll,
-  useTransform,
-  type Variants,
+  useTransform
 } from 'framer-motion';
-import { useRef, useState } from 'react';
 import {
   ArrowRight,
   Award,
   Check,
   ChevronDown,
+  ExternalLink,
   Github,
   Globe,
   Instagram,
-  LineChart,
   Medal,
   RefreshCw,
   Star,
@@ -23,9 +21,10 @@ import {
   Trophy,
   Twitter,
   Users,
-  Zap,
+  Zap
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useRef, useState } from 'react';
 
 const Noise = () => (
   <div className="pointer-events-none fixed inset-0 z-50 h-full w-full opacity-[0.03] mix-blend-overlay">
@@ -1344,6 +1343,15 @@ function Footer() {
             © 2026 Strive Platforms Inc. All rights reserved.
           </p>
           <div className="flex gap-6">
+            <a
+              className="text-xs font-semibold text-gray-400 hover:text-primary transition-colors inline-flex items-center gap-1.5"
+              href="https://jefedcreator.cv/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Built with love by James ❤️
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+            </a>
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
