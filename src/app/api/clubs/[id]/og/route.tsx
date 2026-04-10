@@ -1,7 +1,8 @@
 import Logo from '@/primitives/logo';
 import { ImageResponse } from 'next/og';
+import { db } from '@/server/db';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 const OliveWreath = ({
   color,
@@ -26,16 +27,28 @@ const OliveWreath = ({
   </svg>
 );
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  props: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { id } = await props.params;
 
-    const type = (searchParams.get('type') || 'leaderboard') as
-      | 'club'
-      | 'leaderboard'
-      | 'challenge';
-    const name = searchParams.get('name');
-    const showFooter = searchParams.get('footer') === 'true';
+    if (!id) {
+      return new Response('Missing club id', { status: 400 });
+    }
+
+    const club = await db.club.findUnique({
+      where: { id },
+      select: {
+        name: true,
+        image: true,
+      },
+    });
+
+    if (!club) {
+      return new Response('Club not found', { status: 404 });
+    }
 
     const themes = {
       club: {
@@ -61,7 +74,7 @@ export async function GET(request: Request) {
       },
     };
 
-    const t = themes[type] || themes.leaderboard;
+    const t = themes.club;
 
     return new ImageResponse(
       (
@@ -85,7 +98,7 @@ export async function GET(request: Request) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              paddingBottom: showFooter ? '56px' : '0px', // Offsets the height of the absolute footer if shown
+              paddingBottom: '56px',
             }}
           >
             {/* Main Center Seal */}
@@ -131,18 +144,19 @@ export async function GET(request: Request) {
                 color: t.accent,
                 fontSize: 22,
                 fontWeight: 600,
-                letterSpacing: '12px', /* Wide tracking for a sophisticated, luxury feel */
+                letterSpacing:
+                  '12px' /* Wide tracking for a sophisticated, luxury feel */,
                 textTransform: 'uppercase',
                 display: 'flex',
                 opacity: 0.9,
               }}
             >
-              {name}
+              {club.name}
             </div>
           </div>
 
           {/* Optional Footer Area */}
-          {showFooter && (
+          {
             <div
               style={{
                 position: 'absolute',
@@ -204,7 +218,7 @@ export async function GET(request: Request) {
                 usestrive.run
               </span>
             </div>
-          )}
+          }
         </div>
       ),
       {

@@ -11,8 +11,6 @@ export async function GET(
 ) {
   try {
     const { id } = await props.params;
-    console.log('id', id);
-
     if (!id) {
       return new Response('Missing leaderboard id', { status: 400 });
     }
