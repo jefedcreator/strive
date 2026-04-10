@@ -49,7 +49,7 @@ export const PUT = withMiddleware<UpdateLeaderboardValidatorSchema>(
         );
       }
 
-      if (leaderboard.createdAt < new Date() || !leaderboard.isActive) {
+      if ((leaderboard.expiryDate && leaderboard.expiryDate < new Date()) || !leaderboard.isActive) {
         throw new ForbiddenException(
           'You cannot updated an expired or inactive leaderboard'
         );
