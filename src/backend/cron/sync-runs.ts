@@ -98,7 +98,6 @@ export const syncAllUserRuns = async () => {
     const users = await db.user.findMany({
       where: {
         access_token: { not: null },
-        id: "69ad7c90b0f490f1b8898a3e",
         // Only sync users who belong to at least one active leaderboard
         leaderboards: {
           some: {
@@ -168,7 +167,7 @@ async function syncStravaUser(user: {
     return;
   }
 
-  const latestRun = await stravaService.fetchLatestRun(token);
+  const latestRun = await stravaService.fetchLatestRun(token, user.id);
 
   if (!latestRun) {
     console.log(`${LOG_PREFIX} Strava: No runs found for user ${user.id}.`);
@@ -202,7 +201,7 @@ async function syncStravaUser(user: {
     return;
   }
 
-  const runs = await stravaService.fetchAllActivities(token);
+  const runs = await stravaService.fetchAllActivities(token, user.id);
   console.log(`${LOG_PREFIX} Strava: Fetched ${runs.length} runs for user ${user.id}.`);
 
   if (runs.length > 0) {

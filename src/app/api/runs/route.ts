@@ -17,7 +17,7 @@ export const GET = withMiddleware(
       const latestRun = await nrc.fetchLatestRun(user.access_token ?? '');
       runs = latestRun ? [latestRun] : [];
     } else if (user.type === 'STRAVA') {
-      const latestRun = await stravaService.fetchLatestRun(user.access_token ?? '');
+      const latestRun = await stravaService.fetchLatestRun(user.access_token ?? '', user.id);
       runs = latestRun ? [latestRun] : [];
     }
     // Process runs: deduplicate, update leaderboards, check milestones, sync XP

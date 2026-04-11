@@ -1,5 +1,6 @@
 import { type RunData } from '@/types';
 import { signOut } from '@/server/auth';
+import { db } from '@/server/db';
 
 export interface StravaAuthResult {
   auth: {
@@ -119,7 +120,9 @@ export class StravaService {
   async fetchActivities(
     accessToken: string,
     page = 1,
-    perPage = 30
+    perPage = 30,
+    userId?: string,
+    isRetry = false
   ): Promise<RunData[]> {
     const response = await fetch(
       `${this.API_BASE_URL}/athlete/activities?page=${page}&per_page=${perPage}`,
@@ -131,6 +134,36 @@ export class StravaService {
     );
 
     if (response.status === 401) {
+      if (!isRetry && userId) {
+        const user = await db.user.findUnique({
+          where: { id: userId },
+          select: { id: true, refresh_token: true }
+        });
+
+        if (user?.refresh_token) {
+          try {
+            const { auth: newAuth } = await this.refreshAccessToken(user.refresh_token);
+            
+            await db.user.update({
+              where: { id: user.id },
+              data: {
+                access_token: newAuth.accessToken,
+                refresh_token: newAuth.refreshToken,
+                token_expires_at: newAuth.expiresAt
+              }
+            });
+
+            // Retry original request with the new token
+            return this.fetchActivities(newAuth.accessToken, page, perPage, userId, true);
+          } catch (refreshError) {
+            await signOut();
+            throw new Error(
+              'Strava refresh token expired or revoked. User has been logged out.'
+            );
+          }
+        }
+      }
+
       await signOut();
       throw new Error(
         'Strava access token expired or revoked. User has been logged out.'
@@ -181,8 +214,8 @@ export class StravaService {
   /**
    * Fetch the most recent running activity for the authenticated athlete.
    */
-  async fetchLatestRun(accessToken: string): Promise<RunData | null> {
-    const runs = await this.fetchActivities(accessToken, 1, 1);
+  async fetchLatestRun(accessToken: string, userId?: string): Promise<RunData | null> {
+    const runs = await this.fetchActivities(accessToken, 1, 1, userId);
     return runs[0] ?? null;
   }
 
@@ -190,14 +223,14 @@ export class StravaService {
    * Fetch all activities for the authenticated athlete by iterating through all pages.
    * @param accessToken Valid Strava access token
    */
-  async fetchAllActivities(accessToken: string): Promise<RunData[]> {
+  async fetchAllActivities(accessToken: string, userId?: string): Promise<RunData[]> {
     let allActivities: RunData[] = [];
     let page = 1;
     const perPage = 100;
     let hasMore = true;
 
     while (hasMore) {
-      const activities = await this.fetchActivities(accessToken, page, perPage);
+      const activities = await this.fetchActivities(accessToken, page, perPage, userId);
       if (activities.length === 0) {
         hasMore = false;
       } else {
