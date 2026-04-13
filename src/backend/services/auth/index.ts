@@ -1,7 +1,10 @@
 import type { NikeAuthResult } from '@/types';
-import type { Prisma, User } from '@prisma/client';
+import type { Prisma, User, UserType } from '@prisma/client';
+import moment from 'moment';
 import prisma from 'prisma';
 import { generateUsername } from 'unique-username-generator';
+import jwt from 'jsonwebtoken';
+import { signIn } from '@/server/auth';
 
 class AuthService {
   async findOrCreateUser({
@@ -98,158 +101,188 @@ class AuthService {
     leaderboardId?: string;
     inviteId?: string;
   }): Promise<void> {
-    const transactions: any[] = [];
-    const joinedClubIds = new Set<string>();
+    try {
+      const transactions: any[] = [];
+      const joinedClubIds = new Set<string>();
 
-    // --- 1. Handle Direct Club Join ---
-    if (clubId && inviteId) {
-      const existingMember = await prisma.userClub.findUnique({
-        where: {
-          userId_clubId: {
-            userId: user.id,
-            clubId,
-          },
-        },
-      });
-
-      if (!existingMember) {
-        const club = await prisma.club.findUnique({
-          where: { id: clubId },
-          select: { createdById: true, name: true },
-        });
-
-        const invite = await prisma.clubInvites.findUnique({
-          where: { id: inviteId },
-        });
-
-        transactions.push(
-          prisma.userClub.create({
-            data: {
+      // --- 1. Handle Direct Club Join ---
+      if (clubId && inviteId) {
+        const existingMember = await prisma.userClub.findUnique({
+          where: {
+            userId_clubId: {
               userId: user.id,
               clubId,
-              role: 'MEMBER',
-              isActive: true,
             },
-          }),
-          prisma.notification.create({
-            data: {
-              userId: club?.createdById ?? '',
-              message: `${user.fullname} joined your club ${club?.name}`,
-              type: 'info',
-            },
-          }),
-          prisma.club.update({
-            where: { id: clubId },
-            data: { memberCount: { increment: 1 } },
-          })
-        );
-
-        joinedClubIds.add(clubId);
-
-        if (invite?.userId) {
-          transactions.push(
-            prisma.clubInvites.delete({
-              where: { id: inviteId },
-            })
-          );
-        }
-      }
-    }
-
-    // --- 2. Handle Leaderboard Join ---
-    if (leaderboardId) {
-      const existingEntry = await prisma.userLeaderboard.findUnique({
-        where: {
-          userId_leaderboardId: {
-            userId: user.id,
-            leaderboardId,
           },
-        },
-      });
-
-      if (!existingEntry) {
-        const leaderboard = await prisma.leaderboard.findUnique({
-          where: { id: leaderboardId },
-          select: { createdById: true, name: true, clubId: true },
         });
 
-        transactions.push(
-          prisma.userLeaderboard.create({
-            data: {
-              userId: user.id,
-              leaderboardId,
-            },
-          }),
-          prisma.notification.create({
-            data: {
-              userId: leaderboard?.createdById ?? '',
-              message: `${user.fullname} joined your leaderboard ${leaderboard?.name}`,
-              type: 'info',
-            },
-          })
-        );
-
-        // If leaderboard belongs to a club, ensure user is in that club too
-        if (leaderboard?.clubId && !joinedClubIds.has(leaderboard.clubId)) {
-          const lClubId = leaderboard.clubId;
-          const existingMember = await prisma.userClub.findUnique({
-            where: {
-              userId_clubId: {
-                userId: user.id,
-                clubId: lClubId,
-              },
-            },
+        if (!existingMember) {
+          const club = await prisma.club.findUnique({
+            where: { id: clubId },
+            select: { createdById: true, name: true },
           });
 
-          if (!existingMember) {
-            const club = await prisma.club.findUnique({
-              where: { id: lClubId },
-              select: { createdById: true, name: true },
-            });
-
-            transactions.push(
-              prisma.userClub.create({
-                data: {
-                  userId: user.id,
-                  clubId: lClubId,
-                  role: 'MEMBER',
-                  isActive: true,
-                },
-              }),
-              prisma.notification.create({
-                data: {
-                  userId: club?.createdById ?? '',
-                  message: `${user.fullname} joined your club ${club?.name}`,
-                  type: 'info',
-                },
-              }),
-              prisma.club.update({
-                where: { id: lClubId },
-                data: { memberCount: { increment: 1 } },
-              })
-            );
-            joinedClubIds.add(lClubId);
-          }
-        }
-
-        // Handle leaderboard invite cleanup (if inviteId was for a leaderboard)
-        if (inviteId) {
-          const invite = await prisma.leaderboardInvites.findUnique({
+          const invite = await prisma.clubInvites.findUnique({
             where: { id: inviteId },
           });
+
+          transactions.push(
+            prisma.userClub.create({
+              data: {
+                userId: user.id,
+                clubId,
+                role: 'MEMBER',
+                isActive: true,
+              },
+            }),
+            prisma.notification.create({
+              data: {
+                userId: club?.createdById ?? '',
+                message: `${user.fullname} joined your club ${club?.name}`,
+                type: 'info',
+              },
+            }),
+            prisma.club.update({
+              where: { id: clubId },
+              data: { memberCount: { increment: 1 } },
+            })
+          );
+
+          joinedClubIds.add(clubId);
+
           if (invite?.userId) {
             transactions.push(
-              prisma.leaderboardInvites.delete({
+              prisma.clubInvites.delete({
                 where: { id: inviteId },
               })
             );
           }
         }
       }
-    }
 
-    if (transactions.length > 0) {
-      await prisma.$transaction(transactions);
+      // --- 2. Handle Leaderboard Join ---
+      if (leaderboardId) {
+        const existingEntry = await prisma.userLeaderboard.findUnique({
+          where: {
+            userId_leaderboardId: {
+              userId: user.id,
+              leaderboardId,
+            },
+          },
+        });
+
+        if (!existingEntry) {
+          const leaderboard = await prisma.leaderboard.findUnique({
+            where: { id: leaderboardId },
+            select: { createdById: true, name: true, clubId: true },
+          });
+
+          transactions.push(
+            prisma.userLeaderboard.create({
+              data: {
+                userId: user.id,
+                leaderboardId,
+              },
+            }),
+            prisma.notification.create({
+              data: {
+                userId: leaderboard?.createdById ?? '',
+                message: `${user.fullname} joined your leaderboard ${leaderboard?.name}`,
+                type: 'info',
+              },
+            })
+          );
+
+          // If leaderboard belongs to a club, ensure user is in that club too
+          if (leaderboard?.clubId && !joinedClubIds.has(leaderboard.clubId)) {
+            const lClubId = leaderboard.clubId;
+            const existingMember = await prisma.userClub.findUnique({
+              where: {
+                userId_clubId: {
+                  userId: user.id,
+                  clubId: lClubId,
+                },
+              },
+            });
+
+            if (!existingMember) {
+              const club = await prisma.club.findUnique({
+                where: { id: lClubId },
+                select: { createdById: true, name: true },
+              });
+
+              transactions.push(
+                prisma.userClub.create({
+                  data: {
+                    userId: user.id,
+                    clubId: lClubId,
+                    role: 'MEMBER',
+                    isActive: true,
+                  },
+                }),
+                prisma.notification.create({
+                  data: {
+                    userId: club?.createdById ?? '',
+                    message: `${user.fullname} joined your club ${club?.name}`,
+                    type: 'info',
+                  },
+                }),
+                prisma.club.update({
+                  where: { id: lClubId },
+                  data: { memberCount: { increment: 1 } },
+                })
+              );
+              joinedClubIds.add(lClubId);
+            }
+          }
+
+          // Handle leaderboard invite cleanup (if inviteId was for a leaderboard)
+          if (inviteId) {
+            const invite = await prisma.leaderboardInvites.findUnique({
+              where: { id: inviteId },
+            });
+            if (invite?.userId) {
+              transactions.push(
+                prisma.leaderboardInvites.delete({
+                  where: { id: inviteId },
+                })
+              );
+            }
+          }
+        }
+      }
+
+      if (transactions.length > 0) {
+        await prisma.$transaction(transactions);
+      }
+    } catch (error) {
+      console.error('Error in syncUserMemberships:', error);
+      throw error;
+    }
+  }
+
+  async generateUserSession({ id, email, avatar, type }: { id: string, email: string, avatar: string | null, type: UserType }) {
+    try {
+      const jwtPayload = { uid: id, email };
+      const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
+      const expiresAt = moment()
+        .add(jwtExpirationTimeInSec, 'seconds')
+        .toISOString();
+
+      const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
+        expiresIn: jwtExpirationTimeInSec,
+      });
+
+
+      await signIn('credentials', {
+        userId: id,
+        token: auth_token,
+        image: avatar,
+        type, redirect: false,
+      });
+    } catch (error) {
+      console.error('Error in generateUserSession:', error);
+      throw error;
     }
   }
 

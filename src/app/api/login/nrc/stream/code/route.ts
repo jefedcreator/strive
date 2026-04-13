@@ -1,10 +1,6 @@
 import { authService } from '@/backend/services/auth';
 import { puppeteerSessionManager } from '@/backend/services/puppeteer/session';
-import { signIn } from '@/server/auth';
-import { db } from '@/server/db';
 import { UserType } from '@prisma/client';
-import jwt from 'jsonwebtoken';
-import moment from 'moment';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -60,24 +56,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // --- Establish Session ---
-    const jwtPayload = { uid: user.id, email: user.email };
-    const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
-    const expiresAt = moment()
-      .add(jwtExpirationTimeInSec, 'seconds')
-      .toISOString();
-
-    const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
-      expiresIn: jwtExpirationTimeInSec,
-    });
-
-    await signIn('credentials', {
-      userId: user.id,
-      redirect: false,
-      token: auth_token,
-      image: user.avatar,
-      type: user.type,
-    });
+    await authService.generateUserSession({ id: user.id, email: user.email, avatar: user.avatar, type: user.type })
 
     const redirectPath = clubId
       ? `/clubs/${clubId}`

@@ -1,10 +1,7 @@
 import { queryValidatorMiddleware, withMiddleware } from '@/backend/middleware';
 import { authService } from '@/backend/services/auth';
 import { stravaService } from '@/backend/services/strava';
-import { signIn } from '@/server/auth';
 import { InternalServerErrorException } from '@/utils/exceptions';
-import jwt from 'jsonwebtoken';
-import moment from 'moment';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -67,25 +64,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         });
       }
 
-      const jwtPayload = { uid: user.id, email: user.email };
-      const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
-      const expiresAt = moment()
-        .add(jwtExpirationTimeInSec, 'seconds')
-        .toISOString();
-
-      const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
-        expiresIn: jwtExpirationTimeInSec,
-      });
-
-      console.log('accessToken', auth_token);
-
-      await signIn('credentials', {
-        userId: user.id,
-        token: auth_token,
-        image: user.avatar,
-        type: user.type,
-        redirect: false,
-      });
+      await authService.generateUserSession({ id: user.id, email: user.email, avatar: user.avatar, type: user.type })
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
 
