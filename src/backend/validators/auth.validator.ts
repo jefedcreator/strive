@@ -48,3 +48,27 @@ export const validateLogin = (data: unknown) => {
 export const safeValidateLogin = (data: unknown) => {
   return loginValidatorSchema.safeParse(data);
 };
+
+export const nrcCodeValidatorSchema = z
+  .object({
+    sessionId: z.string({ required_error: 'sessionId is required' }),
+    code: z.string({ required_error: 'code is required' }),
+    clubId: z.string().optional().nullable(),
+    leaderboardId: z.string().optional().nullable(),
+    inviteId: z.string().optional().nullable(),
+    callbackUrl: z.string().optional().nullable(),
+  })
+  .strict();
+
+export type NrcCodeValidatorSchema = z.infer<typeof nrcCodeValidatorSchema>;
+
+export const nrcEmailValidatorSchema = z
+  .object({
+    sessionId: z.string({ required_error: 'sessionId is required' }),
+    email: z
+      .string({ required_error: 'email is required' })
+      .email('Invalid email address'),
+  })
+  .strict();
+
+export type NrcEmailValidatorSchema = z.infer<typeof nrcEmailValidatorSchema>;
