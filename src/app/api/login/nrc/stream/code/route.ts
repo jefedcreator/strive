@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
       if (!existingEntry) {
         const leaderboard = await db.leaderboard.findUnique({
           where: { id: leaderboardId },
-          select: { createdById: true, name: true },
+          select: { createdById: true, name: true, clubId: true },
         });
 
         const transactions: any[] = [
@@ -114,6 +114,52 @@ export async function POST(req: NextRequest) {
             },
           }),
         ];
+
+        // If leaderboard belongs to a club, add user to that club too
+        if (leaderboard?.clubId) {
+          const clubId = leaderboard.clubId;
+          const existingMember = await db.userClub.findUnique({
+            where: { userId_clubId: { userId: user.id, clubId } },
+          });
+
+          if (!existingMember) {
+            const club = await db.club.findUnique({
+              where: { id: clubId },
+              select: {
+                createdById: true,
+                name: true,
+              },
+            });
+
+            transactions.push(
+              db.userClub.create({
+                data: {
+                  userId: user.id,
+                  clubId,
+                  role: 'MEMBER',
+                  isActive: true,
+                },
+              })
+            );
+
+            transactions.push(
+              db.notification.create({
+                data: {
+                  userId: club?.createdById ?? '',
+                  message: `${user.fullname} joined your club ${club?.name}`,
+                  type: 'info',
+                },
+              })
+            );
+
+            transactions.push(
+              db.club.update({
+                where: { id: clubId },
+                data: { memberCount: { increment: 1 } },
+              })
+            );
+          }
+        }
 
         if (inviteId) {
           const invite = await db.leaderboardInvites.findUnique({

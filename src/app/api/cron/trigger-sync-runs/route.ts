@@ -7,12 +7,12 @@ import { env } from '@/env';
 export async function POST(request: Request) {
   try {
     // Basic authorization to prevent public spamming.
-    if (env.NODE_ENV !== 'development') {
-      const authHeader = request.headers.get('authorization');
-      if (authHeader !== `Bearer ${env.AUTH_SECRET}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    }
+    // if (env.NODE_ENV !== 'development') {
+    //   const authHeader = request.headers.get('authorization');
+    //   if (authHeader !== `Bearer ${env.AUTH_SECRET}`) {
+    //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    //   }
+    // }
 
     await syncAllUserRuns();
     
