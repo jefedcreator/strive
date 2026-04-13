@@ -217,7 +217,7 @@ export const LeaderboardDetailClient: React.FC<
         <div className="relative w-full rounded-2xl overflow-hidden mb-3 border border-gray-200 dark:border-gray-800">
           <>
             <Image
-              src={`/api/leaderboards/${leaderboard.id}/og?name=${encodeURIComponent(leaderboard.name)}&type=${isChallenge ? 'challenge' : 'leaderboard'}`}
+              src={`/api/leaderboards/${leaderboard.id}/image?name=${encodeURIComponent(leaderboard.name)}&type=${isChallenge ? 'challenge' : 'leaderboard'}`}
               alt={leaderboard.name}
               fill
               className="object-cover"
