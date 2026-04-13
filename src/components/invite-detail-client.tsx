@@ -73,8 +73,8 @@ const InviteDetailClient = ({
 
   const entityImage = isClub
     ? ((invite as ClubInviteDetail).club.image ??
-      `/api/og?name=${encodeURIComponent(entityName)}&type=${type}`)
-    : `/api/og?name=${encodeURIComponent(entityName)}&type=${type}`;
+      `/api/club/${entityId}/og?name=${encodeURIComponent(entityName)}&type=${type}`)
+    : `/api/leaderboards/${entityId}/og?name=${encodeURIComponent(entityName)}&type=${type}`;
 
   const inviterName = inviter?.fullname ?? inviter?.username ?? 'A member';
 

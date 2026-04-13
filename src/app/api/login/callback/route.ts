@@ -64,7 +64,12 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         });
       }
 
-      await authService.generateUserSession({ id: user.id, email: user.email, avatar: user.avatar, type: user.type })
+      await authService.generateUserSession({
+        id: user.id,
+        email: user.email,
+        avatar: user.avatar,
+        type: user.type,
+      });
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
 

@@ -261,7 +261,17 @@ class AuthService {
     }
   }
 
-  async generateUserSession({ id, email, avatar, type }: { id: string, email: string, avatar: string | null, type: UserType }) {
+  async generateUserSession({
+    id,
+    email,
+    avatar,
+    type,
+  }: {
+    id: string;
+    email: string;
+    avatar: string | null;
+    type: UserType;
+  }) {
     try {
       const jwtPayload = { uid: id, email };
       const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
@@ -273,12 +283,12 @@ class AuthService {
         expiresIn: jwtExpirationTimeInSec,
       });
 
-
       await signIn('credentials', {
         userId: id,
         token: auth_token,
         image: avatar,
-        type, redirect: false,
+        type,
+        redirect: false,
       });
     } catch (error) {
       console.error('Error in generateUserSession:', error);

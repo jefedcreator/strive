@@ -127,7 +127,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
-                src={`/api/og?name=${encodeURIComponent(club.name)}&type=club`}
+                src={`/api/club/${club.id}/og?name=${encodeURIComponent(club.name)}&type=club`}
               />
             )}
 

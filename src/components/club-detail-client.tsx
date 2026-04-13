@@ -190,7 +190,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
           <Image
             src={
               club.image ||
-              `/api/og?name=${encodeURIComponent(club.name)}&type=club`
+              `/api/club/${club.id}/og?name=${encodeURIComponent(club.name)}&type=club`
             }
             alt={club.name}
             fill

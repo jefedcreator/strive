@@ -8,7 +8,7 @@ import { loadExploreParams } from '@/utils';
 export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
   const pageUrl = `${baseUrl}/explore`;
-  const imageUrl = `${baseUrl}/api/og?name=Explore%20Strive&type=explore`;
+  const imageUrl = '/banner.png';
 
   return {
     title: 'Explore',

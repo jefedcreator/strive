@@ -118,7 +118,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
-              src={`/api/og?name=${encodeURIComponent(data.name)}&type=leaderboard`}
+              src={`/api/leaderboards/${data.id}/og?name=${encodeURIComponent(data.name)}&type=leaderboard`}
             />
 
             {/* Visibility badge */}

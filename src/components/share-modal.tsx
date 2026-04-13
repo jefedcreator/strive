@@ -239,7 +239,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                     <Image
                       src={
                         image ??
-                        `/api/og?name=${encodeURIComponent(name)}&type=${variant}`
+                        `/api/leaderboards/${entityId}/image?name=${encodeURIComponent(name)}&type=${variant}`
                       }
                       alt={name}
                       width={140}
