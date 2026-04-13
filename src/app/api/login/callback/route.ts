@@ -2,7 +2,6 @@ import { queryValidatorMiddleware, withMiddleware } from '@/backend/middleware';
 import { authService } from '@/backend/services/auth';
 import { stravaService } from '@/backend/services/strava';
 import { signIn } from '@/server/auth';
-import { db } from '@/server/db';
 import { InternalServerErrorException } from '@/utils/exceptions';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
@@ -58,160 +57,14 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
 
       console.log('user', user);
 
-      // Handle Club Join if invite info is present
-      if (clubId && inviteId && user) {
-        // Check if already a member
-        const existingMember = await db.userClub.findUnique({
-          where: {
-            userId_clubId: {
-              userId: user.id,
-              clubId,
-            },
-          },
+      // Handle Club/Leaderboard Joins
+      if (user) {
+        await authService.syncUserMemberships({
+          user,
+          clubId,
+          leaderboardId,
+          inviteId,
         });
-
-        if (!existingMember) {
-          const club = await db.club.findUnique({
-            where: {
-              id: clubId,
-            },
-            select: {
-              createdById: true,
-              name: true,
-            },
-          });
-
-          const invite = await db.clubInvites.findUnique({
-            where: { id: inviteId },
-          });
-
-          // Join the club
-          const transactions: any[] = [
-            db.userClub.create({
-              data: {
-                userId: user.id,
-                clubId,
-                role: 'MEMBER',
-                isActive: true,
-              },
-            }),
-            db.notification.create({
-              data: {
-                userId: club?.createdById ?? '',
-                message: `${user.fullname} joined your club ${club?.name}`,
-                type: 'info',
-              },
-            }),
-            db.club.update({
-              where: { id: clubId },
-              data: { memberCount: { increment: 1 } },
-            }),
-          ];
-
-          if (invite?.userId) {
-            transactions.push(
-              db.clubInvites.delete({
-                where: { id: inviteId },
-              })
-            );
-          }
-
-          await db.$transaction(transactions);
-        }
-      }
-
-      // Handle Leaderboard Join if invite info is present
-      if (leaderboardId && user) {
-        const leaderboard = await db.leaderboard.findUnique({
-          where: { id: leaderboardId },
-          select: { clubId: true },
-        });
-
-        const existingEntry = await db.userLeaderboard.findUnique({
-          where: {
-            userId_leaderboardId: {
-              userId: user.id,
-              leaderboardId,
-            },
-          },
-        });
-
-        if (!existingEntry) {
-          const transactions: any[] = [
-            db.userLeaderboard.create({
-              data: {
-                userId: user.id,
-                leaderboardId,
-              },
-            }),
-          ];
-
-          // If leaderboard belongs to a club, add user to that club too
-          if (leaderboard?.clubId) {
-            const clubId = leaderboard.clubId;
-            const existingMember = await db.userClub.findUnique({
-              where: {
-                userId_clubId: {
-                  userId: user.id,
-                  clubId,
-                },
-              },
-            });
-
-            if (!existingMember) {
-              const club = await db.club.findUnique({
-                where: { id: clubId },
-                select: {
-                  createdById: true,
-                  name: true,
-                },
-              });
-
-              transactions.push(
-                db.userClub.create({
-                  data: {
-                    userId: user.id,
-                    clubId,
-                    role: 'MEMBER',
-                    isActive: true,
-                  },
-                })
-              );
-
-              transactions.push(
-                db.notification.create({
-                  data: {
-                    userId: club?.createdById ?? '',
-                    message: `${user.fullname} joined your club ${club?.name}`,
-                    type: 'info',
-                  },
-                })
-              );
-
-              transactions.push(
-                db.club.update({
-                  where: { id: clubId },
-                  data: { memberCount: { increment: 1 } },
-                })
-              );
-            }
-          }
-
-          if (inviteId) {
-            const invite = await db.leaderboardInvites.findUnique({
-              where: { id: inviteId },
-            });
-            if (invite?.userId) {
-              transactions.push(
-                db.leaderboardInvites.delete({
-                  where: { id: inviteId },
-                })
-              );
-            }
-          }
-
-          await db.$transaction(transactions);
-        }
       }
 
       const jwtPayload = { uid: user.id, email: user.email };

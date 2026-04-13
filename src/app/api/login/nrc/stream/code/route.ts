@@ -51,131 +51,13 @@ export async function POST(req: NextRequest) {
     console.log('user', user);
 
     // --- Handle Club/Leaderboard Joining ---
-    if (clubId && inviteId) {
-      const existingMember = await db.userClub.findUnique({
-        where: { userId_clubId: { userId: user.id, clubId } },
+    if (user) {
+      await authService.syncUserMemberships({
+        user,
+        clubId,
+        leaderboardId,
+        inviteId,
       });
-
-      if (!existingMember) {
-        const club = await db.club.findUnique({
-          where: { id: clubId },
-          select: { createdById: true, name: true },
-        });
-
-        const invite = await db.clubInvites.findUnique({
-          where: { id: inviteId },
-        });
-
-        const transactions: any[] = [
-          db.userClub.create({
-            data: { userId: user.id, clubId, role: 'MEMBER', isActive: true },
-          }),
-          db.notification.create({
-            data: {
-              userId: club?.createdById ?? '',
-              message: `${user.fullname} joined your club ${club?.name}`,
-              type: 'info',
-            },
-          }),
-          db.club.update({
-            where: { id: clubId },
-            data: { memberCount: { increment: 1 } },
-          }),
-        ];
-
-        if (invite?.userId) {
-          transactions.push(db.clubInvites.delete({ where: { id: inviteId } }));
-        }
-
-        await db.$transaction(transactions);
-      }
-    }
-
-    if (leaderboardId) {
-      const existingEntry = await db.userLeaderboard.findUnique({
-        where: { userId_leaderboardId: { userId: user.id, leaderboardId } },
-      });
-
-      if (!existingEntry) {
-        const leaderboard = await db.leaderboard.findUnique({
-          where: { id: leaderboardId },
-          select: { createdById: true, name: true, clubId: true },
-        });
-
-        const transactions: any[] = [
-          db.userLeaderboard.create({
-            data: { userId: user.id, leaderboardId },
-          }),
-          db.notification.create({
-            data: {
-              userId: leaderboard?.createdById ?? '',
-              message: `${user.fullname} joined your leaderboard ${leaderboard?.name}`,
-              type: 'info',
-            },
-          }),
-        ];
-
-        // If leaderboard belongs to a club, add user to that club too
-        if (leaderboard?.clubId) {
-          const clubId = leaderboard.clubId;
-          const existingMember = await db.userClub.findUnique({
-            where: { userId_clubId: { userId: user.id, clubId } },
-          });
-
-          if (!existingMember) {
-            const club = await db.club.findUnique({
-              where: { id: clubId },
-              select: {
-                createdById: true,
-                name: true,
-              },
-            });
-
-            transactions.push(
-              db.userClub.create({
-                data: {
-                  userId: user.id,
-                  clubId,
-                  role: 'MEMBER',
-                  isActive: true,
-                },
-              })
-            );
-
-            transactions.push(
-              db.notification.create({
-                data: {
-                  userId: club?.createdById ?? '',
-                  message: `${user.fullname} joined your club ${club?.name}`,
-                  type: 'info',
-                },
-              })
-            );
-
-            transactions.push(
-              db.club.update({
-                where: { id: clubId },
-                data: { memberCount: { increment: 1 } },
-              })
-            );
-          }
-        }
-
-        if (inviteId) {
-          const invite = await db.leaderboardInvites.findUnique({
-            where: { id: inviteId },
-          });
-
-          // Only delete the invite if it was specifically generated for a single user (userId is not null)
-          if (invite?.userId) {
-            transactions.push(
-              db.leaderboardInvites.delete({ where: { id: inviteId } })
-            );
-          }
-        }
-
-        await db.$transaction(transactions);
-      }
     }
 
     // --- Establish Session ---
