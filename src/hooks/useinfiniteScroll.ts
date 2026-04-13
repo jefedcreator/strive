@@ -29,7 +29,9 @@ export function useInfiniteScroll<T>({
         const getIdentifier = (item: any) =>
           item.id || item._id || JSON.stringify(item);
 
-        const itemsMap = new Map(prev.map((item) => [getIdentifier(item), item]));
+        const itemsMap = new Map(
+          prev.map((item) => [getIdentifier(item), item])
+        );
         data.data.forEach((item) => itemsMap.set(getIdentifier(item), item));
         return Array.from(itemsMap.values());
       });

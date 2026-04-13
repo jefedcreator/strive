@@ -58,9 +58,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
       router.refresh();
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to join club'
-      );
+      toast.error(error.response?.data?.message ?? 'Failed to join club');
     },
   });
 
@@ -83,9 +81,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
       router.refresh();
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to invite user'
-      );
+      toast.error(error.response?.data?.message ?? 'Failed to invite user');
     },
   });
 
@@ -101,9 +97,7 @@ export const ClubCard: React.FC<ClubCardProps> = ({ club, showType }) => {
       setIsDeleteModalOpen(false);
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(
-        error.response?.data?.message ?? 'Failed to delete club'
-      );
+      toast.error(error.response?.data?.message ?? 'Failed to delete club');
     },
   });
 

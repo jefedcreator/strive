@@ -1,6 +1,9 @@
 import type { ClubQueryValidatorSchema } from '@/backend/validators/club.validator';
 import type { ExploreQueryValidatorSchema } from '@/backend/validators/explore.validator';
-import type { LeaderboardEntriesQueryValidatorSchema, LeaderboardQueryValidatorSchema } from '@/backend/validators/leaderboard.validator';
+import type {
+  LeaderboardEntriesQueryValidatorSchema,
+  LeaderboardQueryValidatorSchema,
+} from '@/backend/validators/leaderboard.validator';
 import type { NotificationQueryValidatorSchema } from '@/backend/validators/notification.validator';
 import type { RewardsQueryValidatorSchema } from '@/backend/validators/rewards.validator';
 import type {
@@ -16,7 +19,7 @@ import type {
   PaginatedApiResponse,
   RewardsData,
   RunData,
-  UserRewardDetail
+  UserRewardDetail,
 } from '@/types';
 import { type WithNull } from '@/utils';
 import type { User } from '@prisma/client';
@@ -369,7 +372,16 @@ async function getReward(
 }
 
 export {
-  getClub, getClubInvite,
-  getClubs, getExploreItems, getLeaderboard, getLeaderboardInvite, getLeaderboards, getNotifications, getProfile, getReward, getRewards, getRuns
+  getClub,
+  getClubInvite,
+  getClubs,
+  getExploreItems,
+  getLeaderboard,
+  getLeaderboardInvite,
+  getLeaderboards,
+  getNotifications,
+  getProfile,
+  getReward,
+  getRewards,
+  getRuns,
 };
-

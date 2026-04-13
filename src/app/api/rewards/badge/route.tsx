@@ -7,7 +7,8 @@ export const runtime = 'edge';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = (searchParams.get('type') || 'gold') as keyof typeof variantStyles;    
+    const type = (searchParams.get('type') ||
+      'gold') as keyof typeof variantStyles;
     const title = searchParams.get('title') || 'Reward';
     const subtitle = searchParams.get('subtitle') || '';
     const milestone = searchParams.get('milestone') || '';

@@ -15,9 +15,7 @@ class AuthService {
   }: NikeAuthResult & {
     refreshToken?: string;
     tokenExpiresAt?: number;
-  }): Promise<
-    Pick<User, 'id' | 'type' | 'fullname' | 'avatar' | 'email'>
-  > {
+  }): Promise<Pick<User, 'id' | 'type' | 'fullname' | 'avatar' | 'email'>> {
     console.log('avatar', avatar);
 
     const user = await prisma.user.findFirst({
@@ -76,7 +74,10 @@ class AuthService {
       if (createdUser.email) {
         // Use dynamic import to avoid potential circular dependencies if email service imports AuthService
         const { emailService } = await import('../email');
-        void emailService.sendWelcomeEmail(createdUser.email, createdUser.fullname ?? 'Runner');
+        void emailService.sendWelcomeEmail(
+          createdUser.email,
+          createdUser.fullname ?? 'Runner'
+        );
       }
 
       return createdUser;

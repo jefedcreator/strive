@@ -40,14 +40,16 @@ const ReAuthNotification = ({
         <Body className="bg-gray-50 py-10 px-4 font-sans">
           {/* Main Card Container */}
           <Container className="max-w-[600px] mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-solid border-gray-200">
-            
             {/* Header */}
-            <Section className="border-b border-solid border-gray-100 px-8 py-6" style={{ width: '100%' }}>
+            <Section
+              className="border-b border-solid border-gray-100 px-8 py-6"
+              style={{ width: '100%' }}
+            >
               <Text className="text-gray-900 text-xl font-bold leading-tight tracking-tight m-0">
-                <Logo 
-                  className="bg-primary rounded-lg mr-2 inline-block align-middle" 
+                <Logo
+                  className="bg-primary rounded-lg mr-2 inline-block align-middle"
                   style={{ width: '32px', height: '32px' }}
-                  cutoutClassName="text-white" 
+                  cutoutClassName="text-white"
                 />
                 Strive
               </Text>
@@ -55,7 +57,6 @@ const ReAuthNotification = ({
 
             {/* Content Section */}
             <Section className="px-8 py-12" style={{ width: '100%' }}>
-              
               {/* Pill */}
               <Section className="text-center mb-6">
                 <Text className="inline-block bg-red-100 text-red-600 text-[10px] m-0 py-1 px-4 rounded-full font-bold uppercase tracking-wider">
@@ -68,15 +69,20 @@ const ReAuthNotification = ({
               </Heading>
 
               <Text className="text-gray-600 text-lg font-normal mb-8 max-w-sm mx-auto leading-relaxed text-center">
-                Hey {fullname}, your {provider} connection has expired. 
-                Log in to Strive to keep your runs and leaderboards up to date.
+                Hey {fullname}, your {provider} connection has expired. Log in
+                to Strive to keep your runs and leaderboards up to date.
               </Text>
 
               {/* Visualizer */}
               <Section className="mb-10 mx-auto" style={{ width: '280px' }}>
                 <div
                   className="h-[280px] w-[280px] rounded-full border-8 border-solid border-white bg-red-500"
-                  style={{ background: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 50%, #b91c1c 100%)', margin: '0 auto', display: 'block' }}
+                  style={{
+                    background:
+                      'linear-gradient(135deg, #fca5a5 0%, #ef4444 50%, #b91c1c 100%)',
+                    margin: '0 auto',
+                    display: 'block',
+                  }}
                 >
                   <Text className="m-0 text-6xl text-center mt-[70px] text-white">
                     🔄
@@ -103,10 +109,14 @@ const ReAuthNotification = ({
             </Section>
 
             {/* Footer Message */}
-            <Section className="bg-gray-50 px-8 py-8 border-t border-solid border-gray-100 text-center" style={{ width: '100%' }}>
+            <Section
+              className="bg-gray-50 px-8 py-8 border-t border-solid border-gray-100 text-center"
+              style={{ width: '100%' }}
+            >
               <Text className="text-gray-500 text-xs leading-relaxed m-0 text-center">
-                We automatically sync your runs so your leaderboards stay fresh. 
-                When your connection expires, we need you to log in again so we can keep things running smoothly.
+                We automatically sync your runs so your leaderboards stay fresh.
+                When your connection expires, we need you to log in again so we
+                can keep things running smoothly.
               </Text>
               <Text className="text-gray-400 m-0 mt-6 text-center text-lg">
                 🔗 &nbsp;&bull;&nbsp; 🏃 &nbsp;&bull;&nbsp; 🔄

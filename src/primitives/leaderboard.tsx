@@ -12,7 +12,7 @@ import { type UserLeaderboard, type LeaderboardType } from '@prisma/client';
 import { getTier } from '@/backend/services/xp/logic';
 import { ProfileFrame } from '@/components/profile-frame';
 import React from 'react';
-import { parsePace,formatDuration } from '@/utils';
+import { parsePace, formatDuration } from '@/utils';
 
 type LeaderboardEntry = Omit<
   UserLeaderboard,
@@ -57,20 +57,14 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     if (disableInternalSort) return entries;
     const sorted = [...entries];
     if (sortField === 'runDistance') {
-      return sorted.sort(
-        (a, b) => (b.runDistance ?? 0) - (a.runDistance ?? 0)
-      );
+      return sorted.sort((a, b) => (b.runDistance ?? 0) - (a.runDistance ?? 0));
     }
     if (sortField === 'runPace') {
-      return sorted.sort(
-        (a, b) => parsePace(a.runPace) - parsePace(b.runPace)
-      );
+      return sorted.sort((a, b) => parsePace(a.runPace) - parsePace(b.runPace));
     }
     // Default sort based on leaderboard type
     if (leaderboardType === 'PACE') {
-      return sorted.sort(
-        (a, b) => parsePace(a.runPace) - parsePace(b.runPace)
-      );
+      return sorted.sort((a, b) => parsePace(a.runPace) - parsePace(b.runPace));
     }
     // COMBINED and DISTANCE both default to score (distance) desc
     return sorted.sort((a, b) => b.score - a.score);

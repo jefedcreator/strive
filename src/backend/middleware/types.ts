@@ -31,9 +31,10 @@ type Prettify<T> = {
 
 export type QueryParameters = Prettify<
   BaseQueryValidatorSchema &
-  LeaderboardQueryValidatorSchema &
-  ClubQueryValidatorSchema &
-  ExploreQueryValidatorSchema & NotificationQueryValidatorSchema
+    LeaderboardQueryValidatorSchema &
+    ClubQueryValidatorSchema &
+    ExploreQueryValidatorSchema &
+    NotificationQueryValidatorSchema
 >;
 
 export interface AuthRequest<B = unknown, Q = QueryParameters>

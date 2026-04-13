@@ -3,7 +3,9 @@ import type { RunData } from '@/types';
 import { checkClubMilestones } from '@/backend/services/rewards';
 import { syncUserXP } from '@/backend/services/xp';
 
-export function getRunDedupId(run: Pick<RunData, 'date' | 'distance' | 'duration'>): string {
+export function getRunDedupId(
+  run: Pick<RunData, 'date' | 'distance' | 'duration'>
+): string {
   const timestamp = new Date(run.date).getTime();
   return `${timestamp}-${run.distance}-${run.duration}`;
 }
@@ -46,7 +48,9 @@ export async function processRunsForUser(
       id: true,
       createdAt: true,
       runId: true,
-      leaderboard: { select: { type: true, createdAt: true, expiryDate: true } },
+      leaderboard: {
+        select: { type: true, createdAt: true, expiryDate: true },
+      },
     },
   });
 
@@ -60,7 +64,7 @@ export async function processRunsForUser(
   await Promise.all(
     memberships.map(async (membership) => {
       const leaderboardStart = new Date(membership.leaderboard.createdAt);
-      const leaderboardEnd = membership.leaderboard.expiryDate 
+      const leaderboardEnd = membership.leaderboard.expiryDate
         ? new Date(membership.leaderboard.expiryDate)
         : null;
 
@@ -80,14 +84,8 @@ export async function processRunsForUser(
       // Skip DB update if this leaderboard already has this run as its latest
       if (membership.runId === latest.id) return;
 
-      const totalDistance = validRuns.reduce(
-        (sum, r) => sum + r.distance,
-        0
-      );
-      const totalDuration = validRuns.reduce(
-        (sum, r) => sum + r.duration,
-        0
-      );
+      const totalDistance = validRuns.reduce((sum, r) => sum + r.distance, 0);
+      const totalDuration = validRuns.reduce((sum, r) => sum + r.duration, 0);
 
       const avgPaceMinPerKm =
         totalDistance > 0 ? totalDuration / totalDistance : 0;

@@ -1,7 +1,9 @@
 import { db } from '@/server/db';
 import { emailService } from '../email';
 
-const CLUB_MILESTONES = [10, 20, 50, 100, 200, 250, 500, 1000, 2500, 5000, 10000]; // km
+const CLUB_MILESTONES = [
+  10, 20, 50, 100, 200, 250, 500, 1000, 2500, 5000, 10000,
+]; // km
 
 /**
  * Check and award club milestone rewards based on cumulative distance.
@@ -84,9 +86,10 @@ export async function checkClubMilestones(clubId: string) {
         });
 
         // Build URLs for the email
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
+        const baseUrl =
+          process.env.NEXT_PUBLIC_APP_URL ?? 'https://usestrive.run';
         const rewardUrl = `${baseUrl}/rewards/${userReward.id}`;
-        
+
         const badgeParams = new URLSearchParams({
           type: 'club',
           title: reward.title,
@@ -98,8 +101,8 @@ export async function checkClubMilestones(clubId: string) {
         // Send Email
         if (member.email) {
           await emailService.sendClubMilestoneEmail(
-            member.email, 
-            club.name, 
+            member.email,
+            club.name,
             milestone,
             badgeUrl,
             rewardUrl

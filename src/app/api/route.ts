@@ -1,4 +1,3 @@
-
 /**
  * @description Health check.
  */

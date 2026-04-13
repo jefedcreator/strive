@@ -137,24 +137,32 @@ export class StravaService {
       if (!isRetry && userId) {
         const user = await db.user.findUnique({
           where: { id: userId },
-          select: { id: true, refresh_token: true }
+          select: { id: true, refresh_token: true },
         });
 
         if (user?.refresh_token) {
           try {
-            const { auth: newAuth } = await this.refreshAccessToken(user.refresh_token);
-            
+            const { auth: newAuth } = await this.refreshAccessToken(
+              user.refresh_token
+            );
+
             await db.user.update({
               where: { id: user.id },
               data: {
                 access_token: newAuth.accessToken,
                 refresh_token: newAuth.refreshToken,
-                token_expires_at: newAuth.expiresAt
-              }
+                token_expires_at: newAuth.expiresAt,
+              },
             });
 
             // Retry original request with the new token
-            return this.fetchActivities(newAuth.accessToken, page, perPage, userId, true);
+            return this.fetchActivities(
+              newAuth.accessToken,
+              page,
+              perPage,
+              userId,
+              true
+            );
           } catch (refreshError) {
             await signOut();
             throw new Error(
@@ -214,7 +222,10 @@ export class StravaService {
   /**
    * Fetch the most recent running activity for the authenticated athlete.
    */
-  async fetchLatestRun(accessToken: string, userId?: string): Promise<RunData | null> {
+  async fetchLatestRun(
+    accessToken: string,
+    userId?: string
+  ): Promise<RunData | null> {
     const runs = await this.fetchActivities(accessToken, 1, 1, userId);
     return runs[0] ?? null;
   }
@@ -223,14 +234,22 @@ export class StravaService {
    * Fetch all activities for the authenticated athlete by iterating through all pages.
    * @param accessToken Valid Strava access token
    */
-  async fetchAllActivities(accessToken: string, userId?: string): Promise<RunData[]> {
+  async fetchAllActivities(
+    accessToken: string,
+    userId?: string
+  ): Promise<RunData[]> {
     let allActivities: RunData[] = [];
     let page = 1;
     const perPage = 100;
     let hasMore = true;
 
     while (hasMore) {
-      const activities = await this.fetchActivities(accessToken, page, perPage, userId);
+      const activities = await this.fetchActivities(
+        accessToken,
+        page,
+        perPage,
+        userId
+      );
       if (activities.length === 0) {
         hasMore = false;
       } else {

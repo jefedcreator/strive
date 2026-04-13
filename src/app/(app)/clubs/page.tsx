@@ -5,7 +5,9 @@ import { loadClubsParams } from '@/utils';
 import type { PageProps } from '@/types';
 
 export default async function ClubsPage({ searchParams }: PageProps) {
-  const { isActive, isPublic, query } = loadClubsParams.parse(await searchParams);
+  const { isActive, isPublic, query } = loadClubsParams.parse(
+    await searchParams
+  );
 
   const initialData = await getClubs({
     isActive,

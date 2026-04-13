@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { RewardType } from '@prisma/client';
-import { emailService } from '../src/backend/services/email'
+import { emailService } from '../src/backend/services/email';
 const TARGET_EMAIL = 'jefiene77@gmail.com';
 
 async function main() {

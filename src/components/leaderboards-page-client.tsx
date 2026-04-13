@@ -99,8 +99,6 @@ export const LeaderboardsPageClient: React.FC<LeaderboardsPageClientProps> = ({
     select: (response) => response?.data ?? [],
   });
 
-
-
   const {
     register,
     handleSubmit,

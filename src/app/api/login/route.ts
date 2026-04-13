@@ -137,7 +137,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
                 },
               }),
             ];
-            
+
             if (inviteId) {
               transactions.push(
                 db.leaderboardInvites.delete({
@@ -145,7 +145,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
                 })
               );
             }
-            
+
             await db.$transaction(transactions);
           }
         }

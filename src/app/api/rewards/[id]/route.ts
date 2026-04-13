@@ -13,7 +13,7 @@ import { NextResponse } from 'next/server';
 
 /**
  * @pathParams paramValidator
- * @description Get a user reward by ID. 
+ * @description Get a user reward by ID.
  */
 export const GET = withMiddleware<unknown>(
   async (request, { params }) => {

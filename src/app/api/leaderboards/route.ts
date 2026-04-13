@@ -140,7 +140,8 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
           include: { user: true },
         });
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
+        const appUrl =
+          process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
 
         const invitePromises = clubMembers.map(async (member) => {
           const invite = await db.$transaction([

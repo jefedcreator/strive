@@ -1,5 +1,12 @@
-import { authMiddleware, queryValidatorMiddleware, withMiddleware } from '@/backend/middleware';
-import { baseQueryValidatorSchema, type BaseQueryValidatorSchema } from '@/backend/validators/index.validator';
+import {
+  authMiddleware,
+  queryValidatorMiddleware,
+  withMiddleware,
+} from '@/backend/middleware';
+import {
+  baseQueryValidatorSchema,
+  type BaseQueryValidatorSchema,
+} from '@/backend/validators/index.validator';
 import { db } from '@/server/db';
 import { type ApiResponse } from '@/types';
 import { InternalServerErrorException } from '@/utils/exceptions';
@@ -12,7 +19,7 @@ import { NextResponse } from 'next/server';
 export const GET = withMiddleware<BaseQueryValidatorSchema>(
   async (request) => {
     try {
-      const payload = request.query
+      const payload = request.query;
       const email = payload?.query;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

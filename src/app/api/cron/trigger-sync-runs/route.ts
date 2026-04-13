@@ -15,10 +15,16 @@ export async function POST(request: Request) {
     // }
 
     await syncAllUserRuns();
-    
-    return NextResponse.json({ success: true, message: 'Run sync cron job manual trigger completed.' });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Run sync cron job manual trigger completed.',
+    });
   } catch (error) {
     console.error('Error triggering manual run sync cron job:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }

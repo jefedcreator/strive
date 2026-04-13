@@ -9,7 +9,6 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-
 function buildBadgeImageUrl(reward: {
   type: string;
   title: string;

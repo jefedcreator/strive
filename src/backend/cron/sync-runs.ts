@@ -51,9 +51,12 @@ async function isLatestRunAlreadySynced(
  * Refreshes the token if it's expired or about to expire (within 5 minutes).
  * Returns the valid access token, or null if refresh fails.
  */
-async function getValidStravaToken(
-  user: { id: string; access_token: string | null; refresh_token: string | null; token_expires_at: number | null }
-): Promise<string | null> {
+async function getValidStravaToken(user: {
+  id: string;
+  access_token: string | null;
+  refresh_token: string | null;
+  token_expires_at: number | null;
+}): Promise<string | null> {
   if (!user.access_token || !user.refresh_token) {
     console.warn(`${LOG_PREFIX} User ${user.id} missing Strava tokens.`);
     return null;
@@ -83,7 +86,10 @@ async function getValidStravaToken(
     console.log(`${LOG_PREFIX} Token refreshed for user ${user.id}.`);
     return auth.accessToken;
   } catch (error) {
-    console.error(`${LOG_PREFIX} Failed to refresh Strava token for user ${user.id}:`, error);
+    console.error(
+      `${LOG_PREFIX} Failed to refresh Strava token for user ${user.id}:`,
+      error
+    );
     return null;
   }
 }
@@ -120,7 +126,9 @@ export const syncAllUserRuns = async () => {
       },
     });
 
-    console.log(`${LOG_PREFIX} Found ${users.length} users with active leaderboards to sync.`);
+    console.log(
+      `${LOG_PREFIX} Found ${users.length} users with active leaderboards to sync.`
+    );
 
     let synced = 0;
     let failed = 0;
@@ -187,13 +195,12 @@ async function syncStravaUser(user: {
     return;
   }
 
-  const isAlreadySynced = await isLatestRunAlreadySynced(
-    user.id,
-    latestRun
-  );
+  const isAlreadySynced = await isLatestRunAlreadySynced(user.id, latestRun);
 
   if (isAlreadySynced) {
-    console.log(`${LOG_PREFIX} Strava: Latest run already synced for user ${user.id}. Skipping.`);
+    console.log(
+      `${LOG_PREFIX} Strava: Latest run already synced for user ${user.id}. Skipping.`
+    );
     await db.user.update({
       where: { id: user.id },
       data: { lastSyncAt: new Date() },
@@ -202,7 +209,9 @@ async function syncStravaUser(user: {
   }
 
   const runs = await stravaService.fetchAllActivities(token, user.id);
-  console.log(`${LOG_PREFIX} Strava: Fetched ${runs.length} runs for user ${user.id}.`);
+  console.log(
+    `${LOG_PREFIX} Strava: Fetched ${runs.length} runs for user ${user.id}.`
+  );
 
   if (runs.length > 0) {
     await processRunsForUser(user.id, runs);
@@ -242,13 +251,12 @@ async function syncNRCUser(user: {
       return;
     }
 
-    const isAlreadySynced = await isLatestRunAlreadySynced(
-      user.id,
-      latestRun
-    );
+    const isAlreadySynced = await isLatestRunAlreadySynced(user.id, latestRun);
 
     if (isAlreadySynced) {
-      console.log(`${LOG_PREFIX} NRC: Latest run already synced for user ${user.id}. Skipping.`);
+      console.log(
+        `${LOG_PREFIX} NRC: Latest run already synced for user ${user.id}. Skipping.`
+      );
       await db.user.update({
         where: { id: user.id },
         data: { lastSyncAt: new Date() },
@@ -257,7 +265,9 @@ async function syncNRCUser(user: {
     }
 
     const runs = await nrc.fetchRuns(user.access_token);
-    console.log(`${LOG_PREFIX} NRC: Fetched ${runs.length} runs for user ${user.id}.`);
+    console.log(
+      `${LOG_PREFIX} NRC: Fetched ${runs.length} runs for user ${user.id}.`
+    );
     await processRunsForUser(user.id, runs);
 
     await db.user.update({
@@ -296,7 +306,9 @@ async function notifyReAuth(
     });
 
     if (recentNotification) {
-      console.log(`${LOG_PREFIX} Re-auth notification already sent to user ${user.id} in the last 24h. Skipping.`);
+      console.log(
+        `${LOG_PREFIX} Re-auth notification already sent to user ${user.id} in the last 24h. Skipping.`
+      );
       return;
     }
 
@@ -314,9 +326,14 @@ async function notifyReAuth(
       },
     });
 
-    console.log(`${LOG_PREFIX} Re-auth notification sent to user ${user.id} (${provider}).`);
+    console.log(
+      `${LOG_PREFIX} Re-auth notification sent to user ${user.id} (${provider}).`
+    );
   } catch (error) {
-    console.error(`${LOG_PREFIX} Failed to send re-auth notification for user ${user.id}:`, error);
+    console.error(
+      `${LOG_PREFIX} Failed to send re-auth notification for user ${user.id}:`,
+      error
+    );
   }
 }
 

@@ -158,7 +158,9 @@ export const processExpiredLeaderboards = async () => {
       },
     });
 
-    console.log(`[Cron] Found ${expiredLeaderboards.length} expired leaderboards to process.`);
+    console.log(
+      `[Cron] Found ${expiredLeaderboards.length} expired leaderboards to process.`
+    );
 
     for (const leaderboard of expiredLeaderboards) {
       const allEntries = leaderboard.entries;
@@ -181,7 +183,9 @@ export const processExpiredLeaderboards = async () => {
             where: { id: leaderboard.id },
             data: { isActive: false },
           });
-          console.log(`[Cron] Leaderboard ${leaderboard.id} expired with no qualified entries. Marked inactive.`);
+          console.log(
+            `[Cron] Leaderboard ${leaderboard.id} expired with no qualified entries. Marked inactive.`
+          );
           continue;
         }
 
@@ -203,7 +207,9 @@ export const processExpiredLeaderboards = async () => {
             (a, b) => (b.runDistance ?? 0) - (a.runDistance ?? 0)
           );
         } else if (leaderboard.type === 'PACE') {
-          qualifiedEntries = qualifiedEntries.filter((e) => !isZeroPace(e.runPace));
+          qualifiedEntries = qualifiedEntries.filter(
+            (e) => !isZeroPace(e.runPace)
+          );
           qualifiedEntries.sort(
             (a, b) => parsePace(a.runPace) - parsePace(b.runPace)
           );
@@ -219,7 +225,9 @@ export const processExpiredLeaderboards = async () => {
             where: { id: leaderboard.id },
             data: { isActive: false },
           });
-          console.log(`[Cron] Leaderboard ${leaderboard.id} expired with no qualified entries. Marked inactive.`);
+          console.log(
+            `[Cron] Leaderboard ${leaderboard.id} expired with no qualified entries. Marked inactive.`
+          );
           continue;
         }
 
@@ -232,7 +240,9 @@ export const processExpiredLeaderboards = async () => {
         data: { isActive: false },
       });
 
-      console.log(`[Cron] Processed leaderboard: ${leaderboard.id} (${leaderboard.name})`);
+      console.log(
+        `[Cron] Processed leaderboard: ${leaderboard.id} (${leaderboard.name})`
+      );
     }
 
     console.log('[Cron] Finished processExpiredLeaderboards.');

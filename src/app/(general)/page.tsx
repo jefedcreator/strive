@@ -3,7 +3,7 @@ import {
   AnimatePresence,
   motion,
   useScroll,
-  useTransform
+  useTransform,
 } from 'framer-motion';
 import {
   ArrowRight,
@@ -21,7 +21,7 @@ import {
   Trophy,
   Twitter,
   Users,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRef, useState } from 'react';
@@ -567,8 +567,8 @@ function Capabilities() {
                   </h3>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  Earn custom badges for distance milestones and exclusive rewards
-                  as you climb leaderboards.
+                  Earn custom badges for distance milestones and exclusive
+                  rewards as you climb leaderboards.
                 </p>
               </div>
             </motion.div>
@@ -839,7 +839,10 @@ function LeaderboardSection() {
 
 function RewardsSection() {
   return (
-    <section className="py-32 overflow-hidden bg-background-light dark:bg-[#0B0F19] relative" id="rewards">
+    <section
+      className="py-32 overflow-hidden bg-background-light dark:bg-[#0B0F19] relative"
+      id="rewards"
+    >
       {/* Decorative Blur */}
       <div className="absolute top-[20%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 blur-[120px] rounded-full mix-blend-screen opacity-50 dark:opacity-20 pointer-events-none"></div>
 
@@ -859,7 +862,9 @@ function RewardsSection() {
               </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-10 leading-relaxed font-medium">
-              Every step counts. Unlock exclusive tier badges and rewards as you hit new distance milestones and climb the leaderboards. Share your achievements with beautifully generated custom visuals.
+              Every step counts. Unlock exclusive tier badges and rewards as you
+              hit new distance milestones and climb the leaderboards. Share your
+              achievements with beautifully generated custom visuals.
             </p>
             <ul className="space-y-6">
               {[
@@ -926,8 +931,12 @@ function RewardsSection() {
                       <Star className="w-3 h-3 text-[#FFD700] fill-[#FFD700] opacity-50 group-hover:opacity-100 transition-opacity delay-150" />
                     </div>
                     <Award className="w-16 h-16 text-[#FFD700] mb-3 drop-shadow-[0_0_15px_rgba(255,215,0,0.3)] group-hover:scale-110 transition-transform duration-500" />
-                    <span className="font-black text-gray-900 dark:text-white text-lg tracking-tight">Gold Tier</span>
-                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">1000+ km</span>
+                    <span className="font-black text-gray-900 dark:text-white text-lg tracking-tight">
+                      Gold Tier
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
+                      1000+ km
+                    </span>
                   </motion.div>
 
                   {/* Badge 2 */}
@@ -940,8 +949,12 @@ function RewardsSection() {
                       <Star className="w-3 h-3 text-[#C0C0C0] fill-[#C0C0C0] opacity-50 group-hover:opacity-100 transition-opacity delay-75" />
                     </div>
                     <Medal className="w-16 h-16 text-[#C0C0C0] mb-3 drop-shadow-[0_0_15px_rgba(192,192,192,0.3)] group-hover:scale-110 transition-transform duration-500" />
-                    <span className="font-black text-gray-900 dark:text-white text-lg tracking-tight">Silver Tier</span>
-                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">500+ km</span>
+                    <span className="font-black text-gray-900 dark:text-white text-lg tracking-tight">
+                      Silver Tier
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
+                      500+ km
+                    </span>
                   </motion.div>
                 </div>
               </div>

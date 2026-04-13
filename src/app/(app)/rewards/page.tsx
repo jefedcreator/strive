@@ -19,10 +19,7 @@ export default async function RewardsPage({ searchParams }: PageProps) {
   return (
     <div className="relative">
       <Background />
-      <RewardsPageClient
-        currentFilters={{ page }}
-        initialData={initialData}
-      />
+      <RewardsPageClient currentFilters={{ page }} initialData={initialData} />
     </div>
   );
 }

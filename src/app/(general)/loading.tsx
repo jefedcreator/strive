@@ -55,7 +55,10 @@ export default function Loading() {
       <div className="max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="p-8 bg-gray-50 dark:bg-[#121826] rounded-[2rem] space-y-4">
+            <div
+              key={i}
+              className="p-8 bg-gray-50 dark:bg-[#121826] rounded-[2rem] space-y-4"
+            >
               <Skeleton className="h-14 w-14 rounded-2xl" />
               <Skeleton className="h-6 w-3/4" />
               <Skeleton className="h-4 w-full" />

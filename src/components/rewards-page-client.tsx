@@ -75,7 +75,6 @@ export const RewardsPageClient: React.FC<RewardsPageClientProps> = ({
     throttleMs: 1000,
   });
 
-
   const isPaging = page !== currentFilters.page;
 
   // Use infinite scroll for the rewards list

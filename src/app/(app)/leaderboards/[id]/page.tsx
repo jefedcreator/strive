@@ -70,13 +70,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function LeaderboardDetailPage({ params, searchParams }: PageProps) {
+export default async function LeaderboardDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { id } = await params;
-  const { sortBy } = loadLeaderboardParams.parse(
-    await searchParams
-  );
+  const { sortBy } = loadLeaderboardParams.parse(await searchParams);
 
-  const initialData = await getLeaderboard(id, {sortBy});
+  const initialData = await getLeaderboard(id, { sortBy });
 
   if (!initialData.data) {
     notFound();

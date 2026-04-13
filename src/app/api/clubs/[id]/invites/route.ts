@@ -20,7 +20,6 @@ import {
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 
-
 /**
  * @pathParams paramValidator
  * @body ClubInviteValidatorSchema

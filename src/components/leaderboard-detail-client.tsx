@@ -58,7 +58,7 @@ interface LeaderboardDetailClientProps {
 export const LeaderboardDetailClient: React.FC<
   LeaderboardDetailClientProps
 > = ({ initialData }) => {
-  const { data: session,status } = useSession();
+  const { data: session, status } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -68,7 +68,6 @@ export const LeaderboardDetailClient: React.FC<
     history: 'replace',
     clearOnDefault: true,
   });
-
 
   const currentUserId = session?.user?.id;
   const isCreator = currentUserId
@@ -348,14 +347,20 @@ export const LeaderboardDetailClient: React.FC<
             </p>
           )}
           <div className="flex flex-wrap items-center gap-2 ml-auto">
-            <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${
-              leaderboard.type === 'PACE'
-                ? 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30'
+            <span
+              className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${
+                leaderboard.type === 'PACE'
+                  ? 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30'
+                  : leaderboard.type === 'COMBINED'
+                    ? 'text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-900/30'
+                    : 'text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30'
+              }`}
+            >
+              {leaderboard.type === 'PACE'
+                ? 'Pace'
                 : leaderboard.type === 'COMBINED'
-                  ? 'text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-900/30'
-                  : 'text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30'
-            }`}>
-              {leaderboard.type === 'PACE' ? 'Pace' : leaderboard.type === 'COMBINED' ? 'Combined' : 'Distance'}
+                  ? 'Combined'
+                  : 'Distance'}
             </span>
             {leaderboard.club && (
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">
@@ -386,36 +391,64 @@ export const LeaderboardDetailClient: React.FC<
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-xl text-gray-900 dark:text-white flex items-center gap-3">
             {isChallenge ? 'Challenge' : 'Leaderboard'} Rankings
-            {isPending && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
+            {isPending && (
+              <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+            )}
           </h2>
-          
+
           <div className="flex items-center gap-4">
             <span className="text-xs font-bold tracking-widest uppercase text-gray-400 dark:text-gray-500 hidden sm:inline-block">
               {entries.length} {entries.length === 1 ? 'Athlete' : 'Athletes'}
             </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 gap-2 text-xs font-medium bg-card-light dark:bg-card-dark cursor-pointer text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-800">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-2 text-xs font-medium bg-card-light dark:bg-card-dark cursor-pointer text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-800"
+                >
                   <Filter className="w-3.5 h-3.5" />
-                  Sort: {sortBy === 'score' ? 'Default' : sortBy === 'distance' ? 'Distance' : 'Pace'}
+                  Sort:{' '}
+                  {sortBy === 'score'
+                    ? 'Default'
+                    : sortBy === 'distance'
+                      ? 'Distance'
+                      : 'Pace'}
                   <ChevronDown className="w-3 h-3 ml-1 text-gray-400" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44 bg-white dark:bg-[#18181B] border border-gray-200 dark:border-gray-800 shadow-xl">
-                <DropdownMenuItem onClick={() => handleSortChange('score')} className={`text-xs cursor-pointer ${sortBy === 'score' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}>
+              <DropdownMenuContent
+                align="end"
+                className="w-44 bg-white dark:bg-[#18181B] border border-gray-200 dark:border-gray-800 shadow-xl"
+              >
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('score')}
+                  className={`text-xs cursor-pointer ${sortBy === 'score' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}
+                >
                   Default
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSortChange('distance')} className={`text-xs cursor-pointer ${sortBy === 'distance' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}>
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('distance')}
+                  className={`text-xs cursor-pointer ${sortBy === 'distance' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}
+                >
                   Distance
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSortChange('pace')} className={`text-xs cursor-pointer ${sortBy === 'pace' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}>
+                <DropdownMenuItem
+                  onClick={() => handleSortChange('pace')}
+                  className={`text-xs cursor-pointer ${sortBy === 'pace' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}
+                >
                   Pace
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-        <Leaderboard entries={entries} currentUserId={session?.user.id} leaderboardType={leaderboard.type} disableInternalSort />
+        <Leaderboard
+          entries={entries}
+          currentUserId={session?.user.id}
+          leaderboardType={leaderboard.type}
+          disableInternalSort
+        />
       </FadeInItem>
 
       <LeaderboardModal

@@ -22,7 +22,7 @@
     "docs:generate": "npx next-openapi-gen generate",
     "docs:init": "npx next-openapi-gen init --ui swagger",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\" \"test/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\" \"scripts/**/*.ts\""
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",

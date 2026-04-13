@@ -131,12 +131,14 @@ export const GET = withMiddleware<unknown, ExploreQueryValidatorSchema>(
           }),
         ]);
         total = count;
-        combinedData = leaderboards.map(({ entries, type: leaderboardType, ...rest }) => ({
-          ...rest,
-          kind: 'leaderboard' as const,
-          leaderboardType,
-          isMember: !!(entries && entries.length > 0),
-        })) as unknown as ExploreListItem[];
+        combinedData = leaderboards.map(
+          ({ entries, type: leaderboardType, ...rest }) => ({
+            ...rest,
+            kind: 'leaderboard' as const,
+            leaderboardType,
+            isMember: !!(entries && entries.length > 0),
+          })
+        ) as unknown as ExploreListItem[];
       } else {
         // Fetch both for interleaved result
         const [clubCount, lbCount, clubs, leaderboards] = await Promise.all([
@@ -166,12 +168,14 @@ export const GET = withMiddleware<unknown, ExploreQueryValidatorSchema>(
           isMember: !!(members && members.length > 0),
         }));
 
-        const mappedLbs = leaderboards.map(({ entries, type: leaderboardType, ...rest }) => ({
-          ...rest,
-          kind: 'leaderboard' as const,
-          leaderboardType,
-          isMember: !!(entries && entries.length > 0),
-        }));
+        const mappedLbs = leaderboards.map(
+          ({ entries, type: leaderboardType, ...rest }) => ({
+            ...rest,
+            kind: 'leaderboard' as const,
+            leaderboardType,
+            isMember: !!(entries && entries.length > 0),
+          })
+        );
 
         combinedData = [...mappedClubs, ...mappedLbs]
           .sort(

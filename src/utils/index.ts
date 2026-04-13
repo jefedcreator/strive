@@ -161,13 +161,15 @@ const loadLeaderboardParams = createSearchParamsCache(leaderboardParams);
 const loadBaseParams = createSearchParamsCache(baseParams);
 const loadClubsParams = createSearchParamsCache(clubsParams);
 
-
 const getFontSize = (text: string, baseSize: number, minSize: number) => {
   const maxContentWidth = 1000;
 
   const estimatedWidth = text.length * (baseSize * 0.65);
   if (estimatedWidth > maxContentWidth) {
-    return Math.max(minSize, Math.floor(maxContentWidth / (text.length * 0.65)));
+    return Math.max(
+      minSize,
+      Math.floor(maxContentWidth / (text.length * 0.65))
+    );
   }
   return baseSize;
 };
@@ -205,20 +207,36 @@ function undefinedToNull<T extends object>(obj: T): WithNull<T> {
 export {
   cn,
   convertBase64ToFile,
-  convertFileToBase64, exploreParams, formatDuration, generateRandomString,
+  convertFileToBase64,
+  exploreParams,
+  formatDuration,
+  generateRandomString,
   genUsername,
-  getChildId, getFontSize,
+  getChildId,
+  getFontSize,
   // getDateRange,
   hashPassword,
   HttpException,
   isFile,
-  isValidObjectId, loadExploreParams,
-  loadNotificationParams, loadLeaderboardParams, loadLeaderboardsParams, leaderboardsParams, mongoIdValidator, notificationParams, parseHttpError, parsePace, parseTransactionStatus,
+  isValidObjectId,
+  loadExploreParams,
+  loadNotificationParams,
+  loadLeaderboardParams,
+  loadLeaderboardsParams,
+  leaderboardsParams,
+  mongoIdValidator,
+  notificationParams,
+  parseHttpError,
+  parsePace,
+  parseTransactionStatus,
   twMerge,
   uniqueNumber,
-  verifyPassword, loadBaseParams, baseParams, loadClubsParams, clubsParams,
+  verifyPassword,
+  loadBaseParams,
+  baseParams,
+  loadClubsParams,
+  clubsParams,
   undefinedToNull,
 };
 
 export type { WithNull };
-

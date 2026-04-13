@@ -44,10 +44,10 @@ const RewardNotification = ({
   const badgeGradient = isGold
     ? 'linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #d97706 100%)'
     : isSilver
-    ? 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 50%, #6b7280 100%)'
-    : isBronze
-    ? 'linear-gradient(135deg, #c2410c 0%, #9a3412 50%, #7c2d12 100%)'
-    : 'linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%)';
+      ? 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 50%, #6b7280 100%)'
+      : isBronze
+        ? 'linear-gradient(135deg, #c2410c 0%, #9a3412 50%, #7c2d12 100%)'
+        : 'linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%)';
 
   return (
     <Html>
@@ -66,16 +66,18 @@ const RewardNotification = ({
         <Body className="bg-gray-50 py-10 px-4 font-sans">
           {/* Main Card Container */}
           <Container className="max-w-[600px] mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-solid border-gray-200">
-            
             {/* Header */}
-            <Section className="border-b border-solid border-gray-100 px-8 py-6" style={{ width: '100%' }}>
+            <Section
+              className="border-b border-solid border-gray-100 px-8 py-6"
+              style={{ width: '100%' }}
+            >
               <Row style={{ width: '100%' }}>
                 <Column className="text-left align-middle">
                   <Text className="text-gray-900 text-xl font-bold leading-tight tracking-tight m-0">
-                    <Logo 
-                      className="bg-primary rounded-lg mr-2 inline-block align-middle" 
+                    <Logo
+                      className="bg-primary rounded-lg mr-2 inline-block align-middle"
                       style={{ width: '32px', height: '32px' }}
-                      cutoutClassName="text-white" 
+                      cutoutClassName="text-white"
                     />
                     Strive
                   </Text>
@@ -97,11 +99,16 @@ const RewardNotification = ({
               </Heading>
 
               <Text className="text-gray-600 text-lg font-normal mb-8 max-w-sm mx-auto leading-relaxed text-center">
-                You&apos;ve earned the <span className="font-bold text-gray-900">{badgeType} Badge</span> in the{' '}
+                You&apos;ve earned the{' '}
+                <span className="font-bold text-gray-900">
+                  {badgeType} Badge
+                </span>{' '}
+                in the{' '}
                 <span className="text-primary font-semibold">
                   {leaderboardName}
                 </span>{' '}
-                {contextType}{metricText ? `${metricText}.` : '.'}
+                {contextType}
+                {metricText ? `${metricText}.` : '.'}
               </Text>
 
               {/* Badge Visualizer */}
@@ -118,7 +125,11 @@ const RewardNotification = ({
                 ) : (
                   <div
                     className="h-[280px] w-[280px] rounded-full border-8 border-solid border-white"
-                    style={{ background: badgeGradient, margin: '0 auto', display: 'block' }}
+                    style={{
+                      background: badgeGradient,
+                      margin: '0 auto',
+                      display: 'block',
+                    }}
                   >
                     <Text className="m-0 text-6xl text-center text-white mt-[80px]">
                       🏆
@@ -151,7 +162,10 @@ const RewardNotification = ({
             </Section>
 
             {/* Footer Message */}
-            <Section className="bg-gray-50 px-8 py-8 border-t border-solid border-gray-100 text-center" style={{ width: '100%' }}>
+            <Section
+              className="bg-gray-50 px-8 py-8 border-t border-solid border-gray-100 text-center"
+              style={{ width: '100%' }}
+            >
               <Text className="text-gray-500 text-xs leading-relaxed m-0 text-center">
                 Outstanding performance! Your dedication to the run is paying
                 off. Keep pushing your limits and stay ahead of the pack.
@@ -163,7 +177,10 @@ const RewardNotification = ({
           </Container>
 
           {/* Unsubscribe / Compliance */}
-          <Section className="py-10 text-center max-w-[600px] mx-auto" style={{ width: '100%' }}>
+          <Section
+            className="py-10 text-center max-w-[600px] mx-auto"
+            style={{ width: '100%' }}
+          >
             <Text className="text-gray-400 text-xs mb-2 m-0 text-center">
               Sent with ❤️ from the Strive Team
             </Text>

@@ -36,9 +36,9 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
         where: { id: leaderboardId },
         include: {
           club: {
-            select: { name: true, createdById: true }
-          }
-        }
+            select: { name: true, createdById: true },
+          },
+        },
       });
 
       if (!leaderboard) {

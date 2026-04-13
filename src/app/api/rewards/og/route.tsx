@@ -9,12 +9,15 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const type = (searchParams.get('type') || 'gold') as keyof typeof variantStyles;
+    const type = (searchParams.get('type') ||
+      'gold') as keyof typeof variantStyles;
     const title = searchParams.get('title') || 'Reward';
     const subtitle = searchParams.get('subtitle') || '';
     const username = searchParams.get('username') || 'Runner';
     const milestone = searchParams.get('milestone') || '';
-    const context = (searchParams.get('context') || 'leaderboard') as 'leaderboard' | 'challenge';
+    const context = (searchParams.get('context') || 'leaderboard') as
+      | 'leaderboard'
+      | 'challenge';
 
     const isChallenge = context === 'challenge';
     const theme = variantStyles[type] || variantStyles.gold;
@@ -23,7 +26,9 @@ export async function GET(request: Request) {
 
     // Context-specific visuals
     const contextAccent = isChallenge ? '#F97316' : '#14B8A6';
-    const contextTagline = isChallenge ? 'Challenge conquered on Strive' : 'Leaderboard finish on Strive';
+    const contextTagline = isChallenge
+      ? 'Challenge conquered on Strive'
+      : 'Leaderboard finish on Strive';
     const ContextIcon = isChallenge ? BadgeIcons.Sword : BadgeIcons.Trophy;
     const contextName = isChallenge ? 'CHALLENGE' : 'LEADERBOARD';
 
@@ -222,7 +227,11 @@ export async function GET(request: Request) {
                   display: 'flex',
                 }}
               >
-                <BadgeIcons.Sparkles width="64" height="64" color={theme.accent} />
+                <BadgeIcons.Sparkles
+                  width="64"
+                  height="64"
+                  color={theme.accent}
+                />
               </div>
             </div>
 

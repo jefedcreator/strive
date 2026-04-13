@@ -5,7 +5,6 @@ import { getTier, calculateRunXP } from './logic';
 
 export * from './logic';
 
-
 // ─── Streak Logic ──────────────────────────────────────────────────────────────
 
 /**

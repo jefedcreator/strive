@@ -55,14 +55,16 @@ export const InviteEmail = ({
         <Body className="bg-gray-50 py-10 px-4 font-sans">
           {/* Main Card Container */}
           <Container className="max-w-[600px] mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-solid border-gray-200">
-            
             {/* Header */}
-            <Section className="border-b border-solid border-gray-100 px-8 py-6" style={{ width: '100%' }}>
+            <Section
+              className="border-b border-solid border-gray-100 px-8 py-6"
+              style={{ width: '100%' }}
+            >
               <Text className="text-gray-900 text-xl font-bold leading-tight tracking-tight m-0">
-                <Logo 
-                  className="bg-primary rounded-lg mr-2 inline-block align-middle" 
+                <Logo
+                  className="bg-primary rounded-lg mr-2 inline-block align-middle"
                   style={{ width: '32px', height: '32px' }}
-                  cutoutClassName="text-white" 
+                  cutoutClassName="text-white"
                 />
                 Strive
               </Text>
@@ -70,7 +72,6 @@ export const InviteEmail = ({
 
             {/* Content Section */}
             <Section className="px-8 py-12" style={{ width: '100%' }}>
-              
               {/* Pill */}
               <Section className="text-center mb-6">
                 <Text className="inline-block bg-orange-100 text-primary text-[10px] m-0 py-1 px-4 rounded-full font-bold uppercase tracking-wider">
@@ -85,9 +86,7 @@ export const InviteEmail = ({
 
               <Text className="text-gray-600 text-lg font-normal mb-8 max-w-sm mx-auto leading-relaxed text-center">
                 <strong>{inviter}</strong> has invited you to join the{' '}
-                <span className="text-primary font-semibold">
-                  {entityName}
-                </span>{' '}
+                <span className="text-primary font-semibold">{entityName}</span>{' '}
                 {entityType}.
               </Text>
 
@@ -103,9 +102,14 @@ export const InviteEmail = ({
                     style={{ margin: '0 auto', display: 'block' }}
                   />
                 ) : (
-                  <div 
-                    className="h-[280px] w-[280px] rounded-full border-8 border-solid border-white bg-amber-500" 
-                    style={{ background: 'linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #d97706 100%)', margin: '0 auto', display: 'block' }}
+                  <div
+                    className="h-[280px] w-[280px] rounded-full border-8 border-solid border-white bg-amber-500"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #d97706 100%)',
+                      margin: '0 auto',
+                      display: 'block',
+                    }}
                   >
                     <Text className="m-0 text-6xl text-center mt-[70px] text-white">
                       👋
@@ -138,7 +142,10 @@ export const InviteEmail = ({
             </Section>
 
             {/* Footer Message */}
-            <Section className="bg-gray-50 px-8 py-8 border-t border-solid border-gray-100" style={{ width: '100%' }}>
+            <Section
+              className="bg-gray-50 px-8 py-8 border-t border-solid border-gray-100"
+              style={{ width: '100%' }}
+            >
               <Text className="text-gray-500 text-xs leading-relaxed m-0 text-center">
                 Ready to hit the ground running? Accept the invitation to
                 connect with others, share your progress, and stay motivated.
@@ -150,7 +157,10 @@ export const InviteEmail = ({
           </Container>
 
           {/* Unsubscribe / Compliance */}
-          <Section className="py-10 text-center max-w-[600px] mx-auto" style={{ width: '100%' }}>
+          <Section
+            className="py-10 text-center max-w-[600px] mx-auto"
+            style={{ width: '100%' }}
+          >
             <Text className="text-gray-400 text-xs mb-2 m-0 text-center">
               Sent with ❤️ from the Strive Team
             </Text>

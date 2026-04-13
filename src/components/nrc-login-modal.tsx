@@ -49,7 +49,8 @@ export function NRCLoginModal({
   const isSuccessScreen = sessionStep === 'success';
   const isErrorScreen = sessionStep === 'error';
 
-  const isOpen = isEmailScreen || isCodeScreen || isSuccessScreen || isErrorScreen;
+  const isOpen =
+    isEmailScreen || isCodeScreen || isSuccessScreen || isErrorScreen;
 
   return (
     <Modal

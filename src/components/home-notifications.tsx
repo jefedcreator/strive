@@ -36,7 +36,7 @@ export function timeAgo(date: Date | string): string {
 
 export function HomeNotifications({ token }: { token: string }) {
   const { data, isLoading } = useQuery<
-    PaginatedApiResponse<NotificationWithRelations[]> 
+    PaginatedApiResponse<NotificationWithRelations[]>
   >({
     queryKey: ['notifications', 'home-preview'],
     queryFn: async () => {

@@ -17,10 +17,16 @@ export async function POST(request: Request) {
     }
 
     await processExpiredLeaderboards();
-    
-    return NextResponse.json({ success: true, message: 'Cron job manual trigger completed.' });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Cron job manual trigger completed.',
+    });
   } catch (error) {
     console.error('Error triggering manual cron job:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }

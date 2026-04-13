@@ -15,7 +15,10 @@ export default function Loading() {
       {/* API Sections Skeleton */}
       <div className="space-y-6">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex flex-col gap-4 p-4 border border-gray-100 dark:border-white/5 rounded-xl">
+          <div
+            key={i}
+            className="flex flex-col gap-4 p-4 border border-gray-100 dark:border-white/5 rounded-xl"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-6 w-16 rounded" />

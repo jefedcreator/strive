@@ -233,13 +233,15 @@ function LoginPageContent() {
                 className="w-full group relative flex justify-center items-center py-4 px-4 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-xl text-white bg-black hover:bg-gray-900 dark:bg-black dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 shadow-lg disabled:opacity-50"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-4">
-                  {(isInitializing || isNrcClicked) ? (
+                  {isInitializing || isNrcClicked ? (
                     <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
                   ) : (
                     <SiNike className="h-6 w-10 text-white" />
                   )}
                 </span>
-                {(isInitializing || isNrcClicked) ? 'Connecting...' : 'Sign in with NRC'}
+                {isInitializing || isNrcClicked
+                  ? 'Connecting...'
+                  : 'Sign in with NRC'}
               </button>
             </div>
 

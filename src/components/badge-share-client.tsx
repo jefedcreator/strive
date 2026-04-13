@@ -46,7 +46,11 @@ export const BadgeShareClient: React.FC<{
           title: `${badge.username} earned "${badge.title}" on Strive`,
           text: badge.description || `Check out this badge on Strive!`,
           url: window.location.href,
-          files: [new File([badge.badgeUrl], `${badge.title}.png`, { type: 'image/png' })],
+          files: [
+            new File([badge.badgeUrl], `${badge.title}.png`, {
+              type: 'image/png',
+            }),
+          ],
         });
       } catch {
         // User cancelled share

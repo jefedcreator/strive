@@ -8,7 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from '@/primitives/dropdown-menu';
 import { Modal } from '@/primitives/Modal';
 import { type ApiError, type ApiResponse, type ClubDetail } from '@/types';
@@ -163,7 +163,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['club', club.id] });
       await queryClient.invalidateQueries({ queryKey: ['clubs'] });
-      router.refresh()
+      router.refresh();
     },
   });
 
