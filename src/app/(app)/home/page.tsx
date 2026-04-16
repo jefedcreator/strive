@@ -1,15 +1,14 @@
+import { getTier } from '@/backend/services/xp';
 import Background from '@/components/background';
 import { HomeNotifications } from '@/components/home-notifications';
 import { HomeQuickActions } from '@/components/home-quick-actions';
 import { LastRunCard } from '@/components/last-run-card';
 import { getLeaderboards } from '@/server';
 import { auth } from '@/server/auth';
-import { db } from '@/server/db';
-import { getTier } from '@/backend/services/xp';
 import { Award, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
 import { redirect } from 'next/navigation';
+import React from 'react';
 
 const THRESHOLDS = [
   { name: 'Pacer', emoji: '🥉', threshold: 0 },
@@ -38,10 +37,10 @@ export default async function HomePage() {
   const leaderboard =
     latestMembership?.entries?.slice(0, 5).map((entry: any, index: number) => {
       const isMe = entry.userId === user.id;
-      const athleteName = isMe
+      const athlete = isMe
         ? 'You'
         : (entry.user.fullname ?? entry.user.username ?? 'Unknown Athlete');
-      const initials = isMe ? 'R' : athleteName.slice(0, 2).toUpperCase();
+      const initials = isMe ? 'R' : athlete.slice(0, 2).toUpperCase();
 
       let color =
         'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500';
@@ -59,7 +58,7 @@ export default async function HomePage() {
 
       return {
         rank: index + 1,
-        athlete: athleteName,
+        athlete,
         distance:
           entry.score > 0 ? `${(entry.score / 1000).toFixed(1)} km` : '0 km',
         avgPace: entry.runPace ? `${entry.runPace} /km` : '--',

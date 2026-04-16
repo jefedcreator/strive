@@ -9,19 +9,17 @@
 //   4. Wait for next screen to load
 //   5. Emit 'login-code' SSE event → client opens code modal
 
+import type { ActiveSession, PuppeteerNikeAuthResult } from '@/types';
+import { execSync } from 'child_process';
 import { createRequire } from 'module';
+import type { Browser, Page } from 'puppeteer';
+import { v4 as uuidv4 } from 'uuid';
+import type { CaptureOptions, NikeAuthResult } from '.';
+import { sseService } from '../events';
 const require = createRequire(import.meta.url);
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const ProxyChain = require('proxy-chain');
-import type { Browser, Page } from 'puppeteer';
-import { v4 as uuidv4 } from 'uuid';
-import { sseService } from '../events';
-import type { ActiveSession, PuppeteerNikeAuthResult } from '@/types';
-import type { CaptureOptions, NikeAuthResult } from '.';
-import { join } from 'path';
-import { existsSync } from 'fs';
-import { execSync } from 'child_process';
 
 puppeteer.use(StealthPlugin());
 
@@ -113,139 +111,6 @@ export class PuppeteerSessionManager {
       sseService.close(sessionId);
     }
   }
-
-  // ─── Phase 0: Init ────────────────────────────────────────────────────────
-
-  // public async initSession(options: CaptureOptions = {}): Promise<string> {
-  //   const sessionId = uuidv4();
-  //   const { headless = false, userDataDir, timeout = 0 } = options;
-
-  //   console.log(`[PuppeteerSessionManager] Starting new session: ${sessionId}`);
-
-  //   const chromePath = process.env.CHROME_PATH ?? this.DEFAULT_CHROME_PATH;
-
-  //   // ── BrightData Configuration ────────────────────────────────────
-  //   const proxyUser = process.env.BRIGHTDATA_USERNAME;
-  //   const proxyPass = process.env.BRIGHTDATA_PASSWORD;
-  //   const useProxy = !!(proxyUser && proxyPass);
-
-  //   // Path to BrightData CA certificate
-  //   const certPath = join(process.cwd(), 'brightdata-ca.crt');
-
-  //   // Set CA certificate for Node.js (helps proxy-chain)
-  //   if (existsSync(certPath)) {
-  //     process.env.NODE_EXTRA_CA_CERTS = certPath;
-  //   }
-
-  //   let anonymizedProxyUrl: string | null = null;
-
-  //   const launchArgs = [
-  //     '--start-maximized',
-  //     '--no-sandbox',
-  //     '--disable-setuid-sandbox',
-  //     '--disable-blink-features=AutomationControlled',
-  //   ];
-
-  //   if (useProxy) {
-  //     const brightdataUrl = `http://${proxyUser}-country-za:${proxyPass}@brd.superproxy.io:33335`;
-  //     anonymizedProxyUrl = await ProxyChain.anonymizeProxy(brightdataUrl);
-  //     launchArgs.push(`--proxy-server=${anonymizedProxyUrl}`);
-
-  //     // ── Make Chrome trust BrightData CA ────────────────────────────
-  //     if (existsSync(certPath)) {
-  //       try {
-  //         const spkiHash = this.extractSPKIHash(certPath);
-  //         launchArgs.push(`--ignore-certificate-errors-spki-list=${spkiHash}`);
-  //         console.log(`[PuppeteerSessionManager] 🔐 BrightData CA whitelisted (SPKI: ${spkiHash.substring(0, 20)}...)`);
-  //       } catch (err: any) {
-  //         console.warn(`[PuppeteerSessionManager] ⚠️  Failed to extract SPKI, using fallback:`, err.message);
-  //         launchArgs.push('--ignore-certificate-errors');
-  //       }
-  //     } else {
-  //       console.warn(`[PuppeteerSessionManager] ⚠️  Certificate not found, using fallback`);
-  //       launchArgs.push('--ignore-certificate-errors');
-  //     }
-  //     console.log(`[PuppeteerSessionManager] 🌍 Proxy: BrightData residential (ZA) via proxy-chain`);
-  //   }
-
-  //   if (process.platform === 'linux') {
-  //     launchArgs.push(
-  //       '--window-size=1920,1080',
-  //       '--lang=en-US',
-  //       '--disable-dev-shm-usage',
-  //       '--disable-gpu',
-  //       '--disable-software-rasterizer'
-  //     );
-  //     process.env.TZ = 'Africa/Johannesburg';
-  //     console.log(
-  //       `[PuppeteerSessionManager] 🛡️ Launch flags: 1920x1080, en-US, TZ=Africa/Johannesburg`
-  //     );
-  //   }
-
-  //   console.log(`[PuppeteerSessionManager] Chrome: ${chromePath}`);
-
-  //   const browser = (await puppeteer.launch({
-  //     headless,
-  //     executablePath: chromePath,
-  //     userDataDir,
-  //     defaultViewport: null,
-  //     args: launchArgs,
-  //     ignoreHTTPSErrors: true,
-  //     ignoreDefaultArgs: ['--enable-automation'],
-  //   })) as Browser;
-
-  //   try {
-  //     const page = (await browser.pages())[0] ?? (await browser.newPage());
-
-  //     // No page.authenticate() needed — proxy-chain handles auth locally
-  //     // (page.authenticate uses CDP Fetch.enable which Forter detects)
-
-  //     let resolvePromise!: (
-  //       value: NikeAuthResult | PromiseLike<NikeAuthResult>
-  //     ) => void;
-  //     let rejectPromise!: (reason?: any) => void;
-  //     const resultPromise = new Promise<NikeAuthResult>((resolve, reject) => {
-  //       resolvePromise = resolve;
-  //       rejectPromise = reject;
-  //     });
-
-  //     this.sessions.set(sessionId, {
-  //       browser,
-  //       page,
-  //       startTime: Date.now(),
-  //       resolve: resolvePromise,
-  //       reject: rejectPromise,
-  //     });
-
-  //     // Track proxy URL for cleanup on session close
-  //     if (anonymizedProxyUrl) {
-  //       (this.sessions.get(sessionId) as any).__proxyUrl = anonymizedProxyUrl;
-  //     }
-
-  //     this.startNavigationFlow(sessionId, page, timeout).catch((err) => {
-  //       console.error(
-  //         `[PuppeteerSessionManager] Navigation error for ${sessionId}:`,
-  //         err
-  //       );
-  //       rejectPromise(err);
-  //       this.closeSession(sessionId).catch(console.error);
-  //     });
-
-  //     resultPromise
-  //       .then(() =>
-  //         console.log(`[PuppeteerSessionManager] Flow completed: ${sessionId}`)
-  //       )
-  //       .catch(() =>
-  //         console.log(`[PuppeteerSessionManager] Flow failed: ${sessionId}`)
-  //       )
-  //       .finally(() => this.closeSession(sessionId).catch(console.error));
-
-  //     return sessionId;
-  //   } catch (err) {
-  //     await browser.close();
-  //     throw err;
-  //   }
-  // }
 
   public async initSession(options: CaptureOptions = {}): Promise<string> {
     const sessionId = uuidv4();
@@ -365,26 +230,6 @@ export class PuppeteerSessionManager {
     } catch (err) {
       await browser.close();
       throw err;
-    }
-  }
-
-  // ── Extract SPKI fingerprint from certificate ────────────────────
-  private extractSPKIHash(certPath: string): string {
-    try {
-      // Use OpenSSL to extract the SPKI hash (works on macOS/Linux)
-      // OpenSSL command: openssl x509 -in cert.crt -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
-
-      const command = `openssl x509 -in "${certPath}" -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64`;
-
-      const spkiHash = execSync(command, { encoding: 'utf8' }).trim();
-
-      if (!spkiHash || spkiHash.length < 40) {
-        throw new Error('Invalid SPKI hash generated');
-      }
-
-      return spkiHash;
-    } catch (err: any) {
-      throw new Error(`Failed to extract SPKI hash: ${err.message}`);
     }
   }
 

@@ -3,27 +3,19 @@ import { TooltipProvider } from '@/components/tooltip';
 import { TopNav } from '@/components/top-nav';
 import { Provider } from '@/provider';
 import { getRuns } from '@/server';
-import '@/styles/globals.css';
-import { type Metadata, type Viewport } from 'next';
 import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from 'sonner';
+import { type Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run'
-  ),
   title: {
     template: '%s | Strive',
     default: 'Strive Dashboard - Your Competitions and Clubs',
   },
   description:
     'Track your rank, manage your running clubs, and analyze your competitive performance.',
-  icons: {
-    icon: '/favicon.png',
-    apple: '/favicon.png',
-  },
   openGraph: {
     title: 'Strive Dashboard - Your Competitions and Clubs',
     description:
@@ -48,40 +40,12 @@ export const metadata: Metadata = {
       'Track your rank, manage your running clubs, and analyze your competitive performance.',
     images: ['/banner.png'],
   },
-  appleWebApp: {
-    title: 'Strive',
-    capable: true,
-    statusBarStyle: 'black-translucent',
-  },
-  keywords: [
-    'Strive App',
-    'Clubs',
-    'Running Dashboard',
-    'Strava Integration',
-    'Nike Run Club Integration',
-  ],
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-    },
-  },
   alternates: {
     canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run'}/home`,
   },
 };
 
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: 'cover',
-};
-
-export default async function RootLayout({
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -89,42 +53,20 @@ export default async function RootLayout({
   const { data } = await getRuns();
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className="bg-background-light dark:bg-background-dark min-h-[100dvh]"
-    >
-      <head>
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-              html { min-height: 100dvh; background-color: #F7F9FB; }
-              body { min-height: 100dvh; background-color: #F7F9FB; }
-              @media (prefers-color-scheme: dark) {
-                html, body { background-color: #0B0F19; }
-              }
-              html.dark, html.dark body { background-color: #0B0F19; }
-            `,
-          }}
-        />
-      </head>
-      <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-[100dvh] transition-colors duration-300 relative overflow-x-hidden antialiased">
-        <NextTopLoader showSpinner={false} color="#ff014e" />
-        <Provider data={data}>
-          <TooltipProvider delayDuration={0}>
-            <div className="flex min-h-[100dvh]">
-              <Sidebar />
-              <div className="flex-1 flex flex-col lg:pt-0">
-                <TopNav />
-                <div className="container mx-auto max-w-7xl px-4 py-6 md:p-6">
-                  <main className="w-full">{children}</main>
-                </div>
-              </div>
+    <Provider data={data}>
+      <NextTopLoader showSpinner={false} color="#ff014e" />
+      <TooltipProvider delayDuration={0}>
+        <div className="flex min-h-[100dvh]">
+          <Sidebar />
+          <div className="flex-1 flex flex-col lg:pt-0">
+            <TopNav />
+            <div className="container mx-auto max-w-7xl px-4 py-6 md:p-6">
+              <main className="w-full">{children}</main>
             </div>
-          </TooltipProvider>
-          <Toaster richColors position="top-center" closeButton />
-        </Provider>
-      </body>
-    </html>
+          </div>
+        </div>
+      </TooltipProvider>
+      <Toaster richColors position="top-center" closeButton />
+    </Provider>
   );
 }

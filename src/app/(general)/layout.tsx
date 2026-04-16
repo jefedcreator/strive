@@ -1,21 +1,13 @@
 import { Provider } from '@/provider';
-import '@/styles/globals.css';
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run'
-  ),
   title: {
     template: '%s | Strive',
     default: 'Strive - The Ultimate Running Community & Competition Platform',
   },
   description:
     'Join the global running community. Compete on unified leaderboards, join private clubs, and push your limits across Strava and Nike Run Club.',
-  icons: {
-    icon: '/favicon.png',
-    apple: '/favicon.png',
-  },
   openGraph: {
     title: 'Strive - The Ultimate Running Community & Competition Platform',
     description:
@@ -40,69 +32,19 @@ export const metadata: Metadata = {
       'Join the global running community. Compete on unified leaderboards, join private clubs, and push your limits across Strava and Nike Run Club.',
     images: ['/banner.png'],
   },
-  appleWebApp: {
-    title: 'Strive',
-    capable: true,
-    statusBarStyle: 'black-translucent',
-  },
-  keywords: [
-    'Strive',
-    'Running',
-    'Community',
-    'Leaderboards',
-    'Nike Run Club',
-    'Strava',
-    'Competition',
-    'Run Tracker',
-  ],
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
   alternates: {
     canonical: process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run',
   },
 };
 
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: 'cover',
-};
-
-export default function RootLayout({
+export default function GeneralLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className="bg-background-light dark:bg-background-dark"
-    >
-      <head>
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-              html, body { background-color: #F7F9FB; }
-              @media (prefers-color-scheme: dark) {
-                html, body { background-color: #0B0F19; }
-              }
-            `,
-          }}
-        />
-      </head>
-      <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 relative overflow-x-hidden">
+    <Provider>
+      <div className="relative min-h-screen transition-colors duration-300 overflow-x-hidden">
         <div className="absolute inset-0 z-0 opacity-5 pointer-events-none select-none">
           <svg
             className="absolute top-10 left-10 w-64 h-64 text-gray-900 dark:text-gray-100 bg-pattern-item"
@@ -133,8 +75,8 @@ export default function RootLayout({
           </svg>
           <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-primary rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
         </div>
-        <Provider>{children}</Provider>
-      </body>
-    </html>
+        {children}
+      </div>
+    </Provider>
   );
 }
