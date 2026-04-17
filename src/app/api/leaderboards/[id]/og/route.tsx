@@ -158,13 +158,7 @@ export async function GET(
 
     const getInitials = (name: string | null) => {
       if (!name) return '?';
-      const parts = name.split(' ');
-      if (parts.length >= 2) {
-        const first = parts[0]?.[0] ?? '';
-        const second = parts[1]?.[0] ?? '';
-        return `${first}${second}`.toUpperCase();
-      }
-      return (name[0] ?? '?').toUpperCase();
+      return name.charAt(0).toUpperCase();
     };
 
     const avatarColors = [
@@ -433,7 +427,7 @@ export async function GET(
                 const initials = getInitials(
                   entry.user.fullname ?? entry.user.username
                 );
-                const avatarUrl = entry.user.avatar
+                const avatarUrl = entry.user.avatar && entry.user.avatar !== 'null'
                   ? entry.user.avatar.startsWith('http')
                     ? entry.user.avatar
                     : `${url.origin}${entry.user.avatar.startsWith('/') ? '' : '/'}${entry.user.avatar}`
