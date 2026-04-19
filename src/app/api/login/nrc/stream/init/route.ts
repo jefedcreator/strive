@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { puppeteerSessionManager } from '@/backend/services/puppeteer/session';
+import { puppeteerSessionManager } from '@/backend/services/puppeteer';
 
 export const POST = async () => {
   try {

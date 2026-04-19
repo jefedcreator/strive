@@ -228,7 +228,6 @@ export class StravaService {
     perPage = 1
   ): Promise<RunData | null> {
     const runs = await this.fetchActivities(accessToken, 1, perPage, userId);
-    console.log('runs', runs);
     return runs[0] ?? null;
   }
 

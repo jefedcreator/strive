@@ -52,8 +52,6 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         tokenExpiresAt: auth.expiresAt,
       });
 
-      console.log('user', user);
-
       // Handle Club/Leaderboard Joins
       if (user) {
         await authService.syncUserMemberships({

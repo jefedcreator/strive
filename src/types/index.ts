@@ -364,6 +364,24 @@ export interface RewardsData {
   tierBadgeUrl: string;
 }
 
+
+//  interface NikeAuthResult {
+//   email: string | null;
+//   token: string | null;
+//   username: string | null;
+// }
+
+// const wsUrl = `wss://brd-customer-hl_d063dc7f-zone-strive_browser1:i9gep3lg6frd@brd.superproxy.io:9222`;
+
+ interface CaptureOptions {
+  headless?: boolean | 'new';
+  userDataDir?: string;
+  timeout?: number;
+  email?: string;
+  password?: string;
+}
+
+
 export { DateRangeFilters };
 export type {
   Activity,

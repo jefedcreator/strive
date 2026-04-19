@@ -17,7 +17,7 @@
 //     → [SSE: nrc-login-step { step: 'success' }]
 //   success | error
 
-import type { NikeAuthResult } from '@/backend/services/puppeteer';
+import type { NikeAuthResult } from '@/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useSessionStorage from './useSessionStorage';
 import { useEvent } from './useEvent';

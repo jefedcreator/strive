@@ -1,6 +1,6 @@
 import { bodyValidatorMiddleware, withMiddleware } from '@/backend/middleware';
 import { authService } from '@/backend/services/auth';
-import { puppeteerSessionManager } from '@/backend/services/puppeteer/session';
+import { puppeteerSessionManager } from '@/backend/services/puppeteer';
 import {
   nrcCodeValidatorSchema,
   type NrcCodeValidatorSchema,
@@ -34,8 +34,6 @@ export const POST = withMiddleware<NrcCodeValidatorSchema>(
       if (!user) {
         throw new Error('User authentication failed.');
       }
-
-      console.log('user', user);
 
       // --- Handle Club/Leaderboard Joining ---
       if (user) {

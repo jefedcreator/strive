@@ -1,7 +1,7 @@
 import { bodyValidatorMiddleware, withMiddleware } from '@/backend/middleware';
 import { authService } from '@/backend/services/auth';
 import { db } from '@/server/db';
-import { puppeteerService } from '@/backend/services/puppeteer';
+import { puppeteerSessionManager } from '@/backend/services/puppeteer';
 import { stravaService } from '@/backend/services/strava';
 import {
   loginValidatorSchema,
@@ -45,164 +45,12 @@ export const POST = withMiddleware<LoginValidatorSchema>(
       // ---------------------------------------------------------
       // 2. NRC HANDLER (One-Step Flow)
       // ---------------------------------------------------------
-      else if (payload?.type === 'nrc') {
-        if (!payload.email || !payload.password) {
-          throw new Error('Email and password are required for NRC login.');
-        }
-
-        const { email, token, username } =
-          await puppeteerService.captureNikeAuth({
-            email: payload.email,
-            password: payload.password,
-            headless: 'new',
-          });
-
-        if (!email || !token || !username) {
-          throw new Error(
-            'Missing required user information from Nike authentication.'
-          );
-        }
-
-        user = await authService.findOrCreateUser({
-          type: 'NRC',
-          email,
-          token,
-          fullname: username,
-        });
-
-        const { clubId, leaderboardId, inviteId } = payload;
-        if (clubId && inviteId && user) {
-          const existingMember = await db.userClub.findUnique({
-            where: {
-              userId_clubId: {
-                userId: user.id,
-                clubId,
-              },
-            },
-          });
-
-          if (!existingMember) {
-            const club = await db.club.findUnique({
-              where: {
-                id: clubId,
-              },
-              select: {
-                createdById: true,
-                name: true,
-              },
-            });
-            await db.$transaction([
-              db.userClub.create({
-                data: {
-                  userId: user.id,
-                  clubId,
-                  role: 'MEMBER',
-                  isActive: true,
-                },
-              }),
-              db.notification.create({
-                data: {
-                  userId: club?.createdById ?? '',
-                  message: `${user.fullname} joined your club ${club?.name}`,
-                  type: 'info',
-                },
-              }),
-              db.club.update({
-                where: { id: clubId },
-                data: { memberCount: { increment: 1 } },
-              }),
-              db.clubInvites.delete({
-                where: { id: inviteId },
-              }),
-            ]);
-          }
-        }
-
-        if (leaderboardId && user) {
-          const existingEntry = await db.userLeaderboard.findUnique({
-            where: {
-              userId_leaderboardId: {
-                userId: user.id,
-                leaderboardId,
-              },
-            },
-          });
-
-          if (!existingEntry) {
-            const transactions: any[] = [
-              db.userLeaderboard.create({
-                data: {
-                  userId: user.id,
-                  leaderboardId,
-                },
-              }),
-            ];
-
-            if (inviteId) {
-              transactions.push(
-                db.leaderboardInvites.delete({
-                  where: { id: inviteId },
-                })
-              );
-            }
-
-            await db.$transaction(transactions);
-          }
-        }
-      } else {
+      else {
         throw new Error('Invalid login type provided.');
       }
 
-      // ---------------------------------------------------------
-      // 3. ESTABLISH SESSION (Auth.js)
-      // ---------------------------------------------------------
-      if (!user) {
-        throw new Error('User authentication failed.');
-      }
 
-      // ---------------------------------------------------------
-      // 4. GENERATE JWT FOR API AUTHENTICATION
-      // ---------------------------------------------------------
-      const jwtPayload = { uid: user.id, email: user.email };
-      const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
-      const expiresAt = moment()
-        .add(jwtExpirationTimeInSec, 'seconds')
-        .toISOString();
-
-      const auth_token = jwt.sign(jwtPayload, process.env.AUTH_SECRET!, {
-        expiresIn: jwtExpirationTimeInSec,
-      });
-
-      await signIn('credentials', {
-        userId: user.id,
-        redirect: false,
-        token: auth_token,
-        image: user.avatar,
-      });
-
-      const responsePayload: any = {
-        status: 201,
-        data: {
-          ...user,
-          token: auth_token,
-          expiresAt,
-        },
-      };
-
-      if (payload?.type === 'nrc') {
-        if (payload?.clubId) {
-          responsePayload.action = 'redirect';
-          responsePayload.url = `/clubs/${payload.clubId}`;
-        } else if (payload?.leaderboardId) {
-          responsePayload.action = 'redirect';
-          responsePayload.url = `/leaderboards/${payload.leaderboardId}`;
-        } else if (payload?.callbackUrl) {
-          responsePayload.action = 'redirect';
-          responsePayload.url = payload.callbackUrl;
-        }
-      }
-
-      return NextResponse.json(responsePayload, { status: 201 });
+      return NextResponse.json({ status: 201 });
     } catch (error: any) {
       if (error.statusCode) throw error;
       throw new InternalServerErrorException(

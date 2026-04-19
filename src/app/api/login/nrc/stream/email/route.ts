@@ -5,7 +5,7 @@
 // via SSE to open the code modal on the client.
 
 import { bodyValidatorMiddleware, withMiddleware } from '@/backend/middleware';
-import { puppeteerSessionManager } from '@/backend/services/puppeteer/session';
+import { puppeteerSessionManager } from '@/backend/services/puppeteer';
 import {
   nrcEmailValidatorSchema,
   type NrcEmailValidatorSchema,

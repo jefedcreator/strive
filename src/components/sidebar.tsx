@@ -31,7 +31,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname,useRouter } from 'next/navigation';
 import { useState } from 'react';
 import ToggleTheme from './toggle-theme';
 
@@ -61,8 +61,9 @@ export function Sidebar() {
   const { theme } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { data: session } = useSession();
+  const { data: session,status } = useSession();
   const user = session?.user;
+  const router = useRouter();
 
   const NavItem = ({
     item,
@@ -344,10 +345,10 @@ export function Sidebar() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800" />
                       <DropdownMenuItem
-                        onClick={() => signOut({ callbackUrl: '/' })}
+                        onClick={status  === 'authenticated' ? () => signOut({ callbackUrl: '/' }) : () => router.push('/login')}
                         className="text-red-500 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10 cursor-pointer"
                       >
-                        Log out
+                      {status === 'authenticated' ? 'Log out' : 'Log in'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
