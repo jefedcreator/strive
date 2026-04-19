@@ -14,9 +14,6 @@ async function main() {
   const userId = args[0];
   const accessToken = args[1];
 
-  //   const userId = '69d109fe14b5d3380218d6f2';
-  // const accessToken = '3b3c89524298c2210f272c001e7970dc87e264b5';
-
   console.log(`🚀 Fetching latest run for user ${userId}...`);
 
   try {
