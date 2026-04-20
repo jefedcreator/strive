@@ -4,6 +4,8 @@ import { getClubReward } from '@/server';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { auth } from '@/server/auth';
+import { db } from '@/server/db';
+import { ClaimBadgeButton } from '@/components/claim-badge-button';
 
 interface PageProps {
   params: Promise<{ id: string; rewardId: string }>;
@@ -82,19 +84,32 @@ export default async function ClubBadgePage({ params }: PageProps) {
     notFound();
   }
 
+  const userId = session?.user?.id;
+  
+  // Check if user is a member
+  const membership = userId ? await db.userClub.findUnique({
+    where: { userId_clubId: { userId, clubId: id } },
+  }) : null;
+  
+  const isMember = !!membership && membership.isActive;
+
+  // Check if already claimed
+  const userReward = userId ? await db.userReward.findUnique({
+    where: { userId_rewardId: { userId, rewardId } },
+  }) : null;
+  
+  const hasClaimed = !!userReward;
+
   const badgeUrl = buildBadgeImageUrl(data);
-  // For club milestones, the "earner" is the club itself
   const username = data.club.name;
   
-  // A user can download if they are a member of the club
-  // We'll simplify this by checking if they are logged in for now, 
-  // or we could do a DB check if strictly required.
-  const canDownload = !!session?.user?.id;
+  // can download only if claimed
+  const canDownload = hasClaimed;
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
       <Background />
-      <div className="z-10 w-full max-w-lg">
+      <div className="z-10 w-full max-w-lg space-y-6">
         <BadgeShareClient
           badge={{
             id: data.id,
@@ -111,6 +126,19 @@ export default async function ClubBadgePage({ params }: PageProps) {
           }}
           canDownload={canDownload}
         />
+
+        {isMember && !hasClaimed && (
+          <ClaimBadgeButton clubId={id} rewardId={rewardId} />
+        )}
+        
+        {hasClaimed && (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 text-center">
+            <p className="text-green-600 dark:text-green-400 text-sm font-bold flex items-center justify-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              You have claimed this badge!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
