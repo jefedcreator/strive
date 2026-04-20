@@ -172,10 +172,17 @@ export const GET = withMiddleware<ClubDetail>(
             },
           },
           leaderboards: true,
+          rewards: {
+            where: { type: 'CLUB_MILESTONE' },
+            orderBy: { milestone: 'asc' },
+          },
           _count: {
             select: {
               members: true,
               leaderboards: true,
+              rewards: {
+                where: { type: 'CLUB_MILESTONE' },
+              },
             },
           },
         },

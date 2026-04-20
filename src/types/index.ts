@@ -4,6 +4,7 @@ import {
   type Leaderboard,
   type Notification,
   type User,
+  type Reward,
 } from '@prisma/client';
 import type { SearchParams } from 'nuqs/server';
 import type { Browser, Page } from 'puppeteer';
@@ -53,9 +54,11 @@ export interface ClubMember {
 export type ClubDetail = Club & {
   members: ClubMember[];
   leaderboards: Leaderboard[];
+  rewards: Reward[];
   _count: {
     members: number;
     leaderboards: number;
+    rewards: number;
   };
 };
 
@@ -351,6 +354,20 @@ export interface UserRewardDetail {
     milestone: number | null;
     leaderboard: { name: string } | null;
     club: { name: string } | null;
+  };
+}
+
+export interface ClubRewardDetail {
+  id: string;
+  type: 'GOLD' | 'SILVER' | 'BRONZE' | 'CLUB_MILESTONE';
+  title: string;
+  description: string | null;
+  milestone: number | null;
+  createdAt: Date;
+  club: {
+    id: string;
+    name: string;
+    image: string | null;
   };
 }
 

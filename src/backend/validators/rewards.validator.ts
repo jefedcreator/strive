@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { baseQueryValidatorSchema } from './index.validator';
+import { mongoIdValidator } from '@/utils';
 
 export const rewardsQueryValidatorSchema = baseQueryValidatorSchema
   .partial()
@@ -8,3 +9,10 @@ export const rewardsQueryValidatorSchema = baseQueryValidatorSchema
 export type RewardsQueryValidatorSchema = z.infer<
   typeof rewardsQueryValidatorSchema
 >;
+
+export const clubRewardParamValidator = z.object({
+  id: mongoIdValidator,
+  rewardId: mongoIdValidator,
+});
+
+export type ClubRewardParamValidator = z.infer<typeof clubRewardParamValidator>;

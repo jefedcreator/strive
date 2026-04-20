@@ -11,6 +11,7 @@ import type {
   ClubDetail,
   ClubInviteDetail,
   ClubListItem,
+  ClubRewardDetail,
   ExploreListItem,
   LeaderboardDetail,
   LeaderboardInviteDetail,
@@ -371,9 +372,33 @@ async function getReward(
   }
 }
 
+async function getClubReward(
+  id: string,
+  rewardId: string
+): Promise<ApiResponse<ClubRewardDetail | null>> {
+  try {
+    const url = `clubs/${id}/rewards/${rewardId}`;
+    const res = await fetcher(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch club reward: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<ApiResponse<ClubRewardDetail>>;
+  } catch (error) {
+    console.error('Error fetching club reward:', error);
+    return {
+      status: 500,
+      message: 'Failed to fetch club reward',
+      data: null,
+    };
+  }
+}
+
 export {
   getClub,
   getClubInvite,
+  getClubReward,
   getClubs,
   getExploreItems,
   getLeaderboard,

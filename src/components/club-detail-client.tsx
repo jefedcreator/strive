@@ -24,6 +24,7 @@ import {
   LogIn,
   LogOut,
   MoreHorizontal,
+  Shield,
   Trophy,
   User,
   Users,
@@ -381,6 +382,58 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
           </div>
         </FadeInItem>
 
+        {/* Rewards */}
+        <FadeInItem>
+          <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <h2 className="font-bold text-gray-900 dark:text-white">
+                Rewards
+              </h2>
+              <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                {club.rewards.length}
+              </span>
+            </div>
+
+            {club.rewards.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
+                  <Shield className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                </div>
+                <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
+                  No rewards yet
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                  Club milestones will appear here once achieved.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                {club.rewards.map((reward) => (
+                  <Link
+                    key={reward.id}
+                    href={`/clubs/${club.id}/rewards/${reward.id}`}
+                    className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                        <Shield className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                          {reward.title}
+                        </p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                          {reward.milestone}km Milestone
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </FadeInItem>
         {/* Members */}
         <FadeInItem>
           <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
