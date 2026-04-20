@@ -32,6 +32,7 @@ export const POST = withMiddleware<LoginValidatorSchema>(
             clubId: payload.clubId,
             leaderboardId: payload.leaderboardId,
             inviteId: payload.inviteId,
+            rewardId: payload.rewardId,
             callbackUrl: payload.callbackUrl,
           });
           return NextResponse.json({

@@ -11,8 +11,15 @@ import { NextResponse } from 'next/server';
 export const POST = withMiddleware<NrcCodeValidatorSchema>(
   async (request) => {
     try {
-      const { sessionId, code, clubId, leaderboardId, inviteId, callbackUrl } =
-        request.validatedData!;
+      const {
+        sessionId,
+        code,
+        clubId,
+        leaderboardId,
+        inviteId,
+        rewardId,
+        callbackUrl,
+      } = request.validatedData!;
 
       const { email, token, username, avatar } =
         await puppeteerSessionManager.submitCode(sessionId, code);
@@ -35,13 +42,14 @@ export const POST = withMiddleware<NrcCodeValidatorSchema>(
         throw new Error('User authentication failed.');
       }
 
-      // --- Handle Club/Leaderboard Joining ---
+      // --- Handle Club/Leaderboard/Reward Joining ---
       if (user) {
         await authService.syncUserMemberships({
           user,
           clubId: clubId ?? undefined,
           leaderboardId: leaderboardId ?? undefined,
           inviteId: inviteId ?? undefined,
+          rewardId: rewardId ?? undefined,
         });
       }
 

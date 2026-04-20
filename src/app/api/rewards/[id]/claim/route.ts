@@ -25,12 +25,16 @@ import { NextResponse } from 'next/server';
 export const POST = withMiddleware<ClubRewardParamValidator>(
   async (request, { params }) => {
     try {
-      const { id, rewardId } = params;
+      const { id } = params;
       const user = request.user!;
 
       // 1. Verify the reward exists and belongs to the club
       const reward = await db.reward.findUnique({
-        where: { id: rewardId },
+        where: { id },
+        select: {
+          clubId: true,
+          type: true,
+        }
       });
 
       if (!reward || reward.clubId !== id) {
@@ -44,7 +48,7 @@ export const POST = withMiddleware<ClubRewardParamValidator>(
       // 2. Verify the user is an active member of the club
       const membership = await db.userClub.findUnique({
         where: {
-          userId_clubId: { userId: user.id, clubId: id },
+          userId_clubId: { userId: user.id, clubId: reward.clubId },
         },
       });
 
@@ -55,9 +59,9 @@ export const POST = withMiddleware<ClubRewardParamValidator>(
       // 3. Upsert the UserReward (as requested, based on the service snippet)
       const userReward = await db.userReward.upsert({
         where: {
-          userId_rewardId: { userId: user.id, rewardId: reward.id },
+          userId_rewardId: { userId: user.id, rewardId: id },
         },
-        create: { userId: user.id, rewardId: reward.id },
+        create: { userId: user.id, rewardId: id },
         update: {}, // No-op if it already exists
       });
 

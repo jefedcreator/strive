@@ -23,6 +23,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
       let clubId: string | undefined;
       let leaderboardId: string | undefined;
       let inviteId: string | undefined;
+      let rewardId: string | undefined;
       let callbackUrl: string | undefined;
 
       console.log('leaderboardId', leaderboardId);
@@ -34,6 +35,7 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
           clubId = parsedState.clubId;
           leaderboardId = parsedState.leaderboardId;
           inviteId = parsedState.inviteId;
+          rewardId = parsedState.rewardId;
           callbackUrl = parsedState.callbackUrl;
         } catch (e) {
           console.error('Failed to parse state:', e);
@@ -52,13 +54,14 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
         tokenExpiresAt: auth.expiresAt,
       });
 
-      // Handle Club/Leaderboard Joins
+      // Handle Club/Leaderboard/Reward Joins
       if (user) {
         await authService.syncUserMemberships({
           user,
           clubId,
           leaderboardId,
           inviteId,
+          rewardId,
         });
       }
 

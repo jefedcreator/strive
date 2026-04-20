@@ -30,7 +30,7 @@ export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
       }
 
       const { data } = await api.post<ApiResponse<UserReward>>(
-        `/clubs/${clubId}/rewards/${rewardId}/claim`,
+        `/rewards/${rewardId}/claim`,
         {},
         {
           headers: {

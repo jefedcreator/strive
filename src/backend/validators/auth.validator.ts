@@ -10,6 +10,7 @@ export const loginValidatorSchema = z
     clubId: z.string().optional(),
     leaderboardId: z.string().optional(),
     inviteId: z.string().optional(),
+    rewardId: z.string().optional(),
     sessionId: z.string().optional(),
     email: z.string().optional(),
     password: z.string().optional(),
@@ -56,6 +57,7 @@ export const nrcCodeValidatorSchema = z
     clubId: z.string().optional().nullable(),
     leaderboardId: z.string().optional().nullable(),
     inviteId: z.string().optional().nullable(),
+    rewardId: z.string().optional().nullable(),
     callbackUrl: z.string().optional().nullable(),
   })
   .strict();

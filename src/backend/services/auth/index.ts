@@ -95,11 +95,13 @@ class AuthService {
     clubId,
     leaderboardId,
     inviteId,
+    rewardId,
   }: {
     user: Pick<User, 'id' | 'fullname'>;
     clubId?: string;
     leaderboardId?: string;
     inviteId?: string;
+    rewardId?: string;
   }): Promise<void> {
     try {
       const transactions: any[] = [];
@@ -249,6 +251,66 @@ class AuthService {
               );
             }
           }
+        }
+      }
+
+      // --- 3. Handle Reward Claim & Club Join ---
+      if (rewardId) {
+        const reward = await prisma.reward.findUnique({
+          where: { id: rewardId },
+          include: { club: { select: { name: true, createdById: true } } },
+        });
+
+        if (reward?.clubId) {
+          const rClubId = reward.clubId;
+
+          // Only join if they aren't already a member (and haven't joined in this call)
+          if (!joinedClubIds.has(rClubId)) {
+            const existingMember = await prisma.userClub.findUnique({
+              where: {
+                userId_clubId: {
+                  userId: user.id,
+                  clubId: rClubId,
+                },
+              },
+            });
+
+            if (!existingMember) {
+              transactions.push(
+                prisma.userClub.create({
+                  data: {
+                    userId: user.id,
+                    clubId: rClubId,
+                    role: 'MEMBER',
+                    isActive: true,
+                  },
+                }),
+                prisma.notification.create({
+                  data: {
+                    userId: reward.club?.createdById ?? '',
+                    message: `${user.fullname} joined your club ${reward.club?.name} to claim a reward`,
+                    type: 'info',
+                  },
+                }),
+                prisma.club.update({
+                  where: { id: rClubId },
+                  data: { memberCount: { increment: 1 } },
+                })
+              );
+              joinedClubIds.add(rClubId);
+            }
+          }
+
+          // Generate Reward (Upsert)
+          transactions.push(
+            prisma.userReward.upsert({
+              where: {
+                userId_rewardId: { userId: user.id, rewardId: reward.id },
+              },
+              create: { userId: user.id, rewardId: reward.id },
+              update: {}, // No-op if it already exists
+            })
+          );
         }
       }
 

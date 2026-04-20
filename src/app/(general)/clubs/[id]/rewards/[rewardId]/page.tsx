@@ -121,7 +121,7 @@ export default async function ClubBadgePage({ params }: PageProps) {
   } else if (!isMember) {
     contextualActions = (
       <Button asChild variant="secondary" className="w-full h-12 text-sm font-bold gap-2">
-        <Link href={`/login?clubs=${id}&callbackUrl=/clubs/${id}/rewards/${rewardId}`}>
+        <Link href={`/login?rewardId=${rewardId}&callbackUrl=/clubs/${id}/rewards/${rewardId}`}>
           <Users className="w-4 h-4" />
           Join Club to Claim
         </Link>
