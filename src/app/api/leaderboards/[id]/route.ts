@@ -256,15 +256,27 @@ export const GET = withMiddleware<
             );
           }
 
-          // Pure pace sort: handle based on sortOrder
+          // Pure pace sort: handle based on sortOrder with distance tie-breaker
           const paceA = parsePaceToSeconds(a.runPace);
           const paceB = parsePaceToSeconds(b.runPace);
+
+          if (paceA === paceB) {
+            return (b.runDistance ?? 0) - (a.runDistance ?? 0);
+          }
 
           return sortOrder === 'asc' ? paceA - paceB : paceB - paceA;
         });
 
         leaderboard.entries = [...validEntries, ...zeroEntries];
       }
+
+      // Normalize pace display for all entries (e.g., "07:06" -> "7:06")
+      leaderboard.entries = leaderboard.entries.map((entry) => ({
+        ...entry,
+        runPace: entry.runPace
+          ? entry.runPace.replace(/^0(?=\d)/, '')
+          : entry.runPace,
+      }));
 
       const response: ApiResponse<typeof leaderboard> = {
         status: 200,

@@ -98,7 +98,7 @@ export async function processRunsForUser(
         totalDistance > 0 ? totalDuration / totalDistance : 0;
       const paceMin = Math.floor(avgPaceMinPerKm);
       const paceSec = Math.round((avgPaceMinPerKm - paceMin) * 60);
-      const avgPace = `${String(paceMin).padStart(2, '0')}:${String(paceSec).padStart(2, '0')}`;
+      const avgPace = `${paceMin}:${String(paceSec).padStart(2, '0')}`;
 
       // Compute score based on leaderboard type
       const leaderboardType = membership.leaderboard.type;
