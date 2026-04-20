@@ -52,12 +52,12 @@ export const POST = withMiddleware<NrcCodeValidatorSchema>(
         type: user.type,
       });
 
-      const redirectPath = clubId
-        ? `/clubs/${clubId}`
-        : leaderboardId
-          ? `/leaderboards/${leaderboardId}`
-          : callbackUrl
-            ? callbackUrl
+      const redirectPath = callbackUrl
+        ? callbackUrl
+        : clubId
+          ? `/clubs/${clubId}`
+          : leaderboardId
+            ? `/leaderboards/${leaderboardId}`
             : '/home';
 
       return NextResponse.json(

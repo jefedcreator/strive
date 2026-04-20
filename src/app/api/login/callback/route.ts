@@ -71,14 +71,14 @@ export const GET = withMiddleware<unknown, StravaCallbackQuerySchema>(
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://usestrive.run';
 
-      if (clubId) {
+      if (callbackUrl) {
+        return NextResponse.redirect(new URL(callbackUrl, appUrl));
+      } else if (clubId) {
         return NextResponse.redirect(new URL(`/clubs/${clubId}`, appUrl));
       } else if (leaderboardId) {
         return NextResponse.redirect(
           new URL(`/leaderboards/${leaderboardId}`, appUrl)
         );
-      } else if (callbackUrl) {
-        return NextResponse.redirect(new URL(callbackUrl, appUrl));
       }
 
       return NextResponse.redirect(new URL('/home', appUrl));
