@@ -52,6 +52,7 @@ export async function generateMetadata({
     context: 'club',
     ...(data.description ? { subtitle: data.description } : {}),
     ...(data.milestone ? { milestone: String(data.milestone) } : {}),
+    ...(data.club.image ? { image: data.club.image } : {}),
   });
 
   const imageUrl = `${baseUrl}/api/rewards/og?${ogParams.toString()}`;

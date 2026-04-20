@@ -17,20 +17,37 @@ export async function GET(request: Request) {
     const milestone = searchParams.get('milestone') || '';
     const context = (searchParams.get('context') || 'leaderboard') as
       | 'leaderboard'
-      | 'challenge';
+      | 'challenge'
+      | 'club';
+    const image = searchParams.get('image');
 
     const isChallenge = context === 'challenge';
+    const isClub = context === 'club';
     const theme = variantStyles[type] || variantStyles.gold;
     const label = milestone ? `${milestone}K` : theme.label;
     const MainIcon = theme.Icon;
 
     // Context-specific visuals
-    const contextAccent = isChallenge ? '#F97316' : '#14B8A6';
-    const contextTagline = isChallenge
-      ? 'Challenge conquered on Strive'
-      : 'Leaderboard finish on Strive';
-    const ContextIcon = isChallenge ? BadgeIcons.Sword : BadgeIcons.Trophy;
-    const contextName = isChallenge ? 'CHALLENGE' : 'LEADERBOARD';
+    const contextAccent = isClub
+      ? '#F59E0B'
+      : isChallenge
+        ? '#F97316'
+        : '#14B8A6';
+    const contextTagline = isClub
+      ? 'Club milestone achieved on Strive'
+      : isChallenge
+        ? 'Challenge conquered on Strive'
+        : 'Leaderboard finish on Strive';
+    const ContextIcon = isClub
+      ? BadgeIcons.Shield
+      : isChallenge
+        ? BadgeIcons.Sword
+        : BadgeIcons.Trophy;
+    const contextName = isClub
+      ? 'CLUB MILESTONE'
+      : isChallenge
+        ? 'CHALLENGE'
+        : 'LEADERBOARD';
 
     const titleFontSize = getFontSize(title, 64, 32);
     const subtitleFontSize = getFontSize(subtitle, 26, 18);
@@ -301,9 +318,23 @@ export async function GET(request: Request) {
                     fontSize: 24,
                     fontWeight: '800',
                     color: contextAccent,
+                    overflow: 'hidden',
                   }}
                 >
-                  {username[0]?.toUpperCase() ?? 'R'}
+                  {image ? (
+                    <img
+                      src={image}
+                      width="40"
+                      height="40"
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        objectFit: 'cover',
+                      }}
+                    />
+                  ) : (
+                    username[0]?.toUpperCase() ?? 'R'
+                  )}
                 </div>
                 <span
                   style={{
