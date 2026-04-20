@@ -6,6 +6,9 @@ import { notFound } from 'next/navigation';
 import { auth } from '@/server/auth';
 import { db } from '@/server/db';
 import { ClaimBadgeButton } from '@/components/claim-badge-button';
+import Link from 'next/link';
+import { LogIn, Users } from 'lucide-react';
+import { Button } from '@/primitives/Button';
 
 interface PageProps {
   params: Promise<{ id: string; rewardId: string }>;
@@ -102,14 +105,35 @@ export default async function ClubBadgePage({ params }: PageProps) {
 
   const badgeUrl = buildBadgeImageUrl(data);
   const username = data.club.name;
-  
-  // can download only if claimed
-  const canDownload = hasClaimed;
+
+  let contextualActions: React.ReactNode = null;
+
+  if (!userId) {
+    contextualActions = (
+      <Button asChild className="w-full h-12 text-sm font-bold gap-2">
+        <Link href={`/login?callbackUrl=/clubs/${id}/rewards/${rewardId}`}>
+          <LogIn className="w-4 h-4" />
+          Login to Claim
+        </Link>
+      </Button>
+    );
+  } else if (!isMember) {
+    contextualActions = (
+      <Button asChild variant="secondary" className="w-full h-12 text-sm font-bold gap-2">
+        <Link href={`/clubs/${id}`}>
+          <Users className="w-4 h-4" />
+          Join Club to Claim
+        </Link>
+      </Button>
+    );
+  } else if (!hasClaimed) {
+    contextualActions = <ClaimBadgeButton clubId={id} rewardId={rewardId} />;
+  }
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
       <Background />
-      <div className="z-10 w-full max-w-lg space-y-6">
+      <div className="z-10 w-full max-w-lg">
         <BadgeShareClient
           badge={{
             id: data.id,
@@ -124,21 +148,9 @@ export default async function ClubBadgePage({ params }: PageProps) {
             leaderboardName: null,
             clubName: data.club.name,
           }}
-          canDownload={canDownload}
+          canDownload={hasClaimed}
+          actions={contextualActions}
         />
-
-        {isMember && !hasClaimed && (
-          <ClaimBadgeButton clubId={id} rewardId={rewardId} />
-        )}
-        
-        {hasClaimed && (
-          <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 text-center">
-            <p className="text-green-600 dark:text-green-400 text-sm font-bold flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              You have claimed this badge!
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -24,7 +24,8 @@ interface BadgeShareData {
 export const BadgeShareClient: React.FC<{
   badge: BadgeShareData;
   canDownload?: boolean;
-}> = ({ badge, canDownload = false }) => {
+  actions?: React.ReactNode;
+}> = ({ badge, canDownload = false, actions }) => {
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = badge.badgeUrl;
@@ -153,30 +154,34 @@ export const BadgeShareClient: React.FC<{
           )} */}
 
           {/* Actions */}
-          <div
-            className={cn(
-              'grid gap-3 pt-2',
-              canDownload ? 'grid-cols-2' : 'grid-cols-1'
-            )}
-          >
-            {canDownload && (
+          {actions ? (
+            <div className="pt-2">{actions}</div>
+          ) : (
+            <div
+              className={cn(
+                'grid gap-3 pt-2',
+                canDownload ? 'grid-cols-2' : 'grid-cols-1'
+              )}
+            >
+              {canDownload && (
+                <Button
+                  onClick={handleDownload}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </Button>
+              )}
               <Button
-                onClick={handleDownload}
+                variant="secondary"
+                onClick={handleShare}
                 className="flex items-center justify-center gap-2"
               >
-                <Download className="w-4 h-4" />
-                Download
+                <Share2 className="w-4 h-4" />
+                {canDownload ? 'Share' : 'Share Badge'}
               </Button>
-            )}
-            <Button
-              variant="secondary"
-              onClick={handleShare}
-              className="flex items-center justify-center gap-2"
-            >
-              <Share2 className="w-4 h-4" />
-              {canDownload ? 'Share' : 'Share Badge'}
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
 
         {/* CTA */}
