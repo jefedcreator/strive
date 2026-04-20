@@ -195,18 +195,10 @@ async function syncStravaUser(user: {
     return;
   }
 
-  const isAlreadySynced = await isLatestRunAlreadySynced(user.id, latestRun);
-
-  if (isAlreadySynced) {
-    console.log(
-      `${LOG_PREFIX} Strava: Latest run already synced for user ${user.id}. Skipping.`
-    );
-    await db.user.update({
-      where: { id: user.id },
-      data: { lastSyncAt: new Date() },
-    });
-    return;
-  }
+  /* 
+     Checking isAlreadySynced is now handled in processRunsForUser 
+     which has more context (leaderboard join dates). 
+  */
 
   const runs = await stravaService.fetchAllActivities(token, user.id);
   console.log(
@@ -251,20 +243,12 @@ async function syncNRCUser(user: {
       return;
     }
 
-    const isAlreadySynced = await isLatestRunAlreadySynced(user.id, latestRun);
+    /* 
+       Checking isAlreadySynced is now handled in processRunsForUser 
+       which has more context (leaderboard join dates). 
+    */
 
-    if (isAlreadySynced) {
-      console.log(
-        `${LOG_PREFIX} NRC: Latest run already synced for user ${user.id}. Skipping.`
-      );
-      await db.user.update({
-        where: { id: user.id },
-        data: { lastSyncAt: new Date() },
-      });
-      return;
-    }
-
-    const runs = await nrc.fetchRuns(user.access_token);
+    const runs = await nrc.fetchAllActivities(user.access_token);
     console.log(
       `${LOG_PREFIX} NRC: Fetched ${runs.length} runs for user ${user.id}.`
     );

@@ -14,14 +14,12 @@ export const GET = withMiddleware(
     let runs: RunData[] = [];
 
     if (user.type === 'NRC') {
-      const latestRun = await nrc.fetchLatestRun(user.access_token ?? '');
-      runs = latestRun ? [latestRun] : [];
+      runs = await nrc.fetchAllActivities(user.access_token ?? '');
     } else if (user.type === 'STRAVA') {
-      const latestRun = await stravaService.fetchLatestRun(
+      runs = await stravaService.fetchAllActivities(
         user.access_token ?? '',
         user.id
       );
-      runs = latestRun ? [latestRun] : [];
     }
     // Process runs: deduplicate, update leaderboards, check milestones, sync XP
     runs = await processRunsForUser(user.id, runs);

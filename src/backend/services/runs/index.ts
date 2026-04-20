@@ -48,6 +48,8 @@ export async function processRunsForUser(
       id: true,
       createdAt: true,
       runId: true,
+      runDistance: true,
+      runDuration: true,
       leaderboard: {
         select: { type: true, createdAt: true, expiryDate: true },
       },
@@ -81,11 +83,16 @@ export async function processRunsForUser(
         curr.date > prev.date ? curr : prev
       );
 
-      // Skip DB update if this leaderboard already has this run as its latest
-      if (membership.runId === latest.id) return;
-
       const totalDistance = validRuns.reduce((sum, r) => sum + r.distance, 0);
       const totalDuration = validRuns.reduce((sum, r) => sum + r.duration, 0);
+
+      // Skip DB update if this leaderboard already has this run as its latest AND stats match
+      if (
+        membership.runId === latest.id &&
+        membership.runDistance === parseFloat(totalDistance.toFixed(2)) &&
+        membership.runDuration === parseFloat(totalDuration.toFixed(2))
+      )
+        return;
 
       const avgPaceMinPerKm =
         totalDistance > 0 ? totalDuration / totalDistance : 0;

@@ -18,7 +18,7 @@ async function main() {
 
   try {
     // Fetch runs using the NRC service
-    const runs = await nrc.fetchRuns(accessToken);
+    const runs = await nrc.fetchAllActivities(accessToken);
 
     if (runs && runs.length > 0) {
       console.log(`✅ Success: Found ${runs.length} runs.`);
