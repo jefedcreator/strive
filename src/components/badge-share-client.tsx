@@ -136,7 +136,7 @@ export const BadgeShareClient: React.FC<{
           </div>
 
           {/* Context */}
-          {(badge.leaderboardName || badge.clubName) && (
+          {/* {(badge.leaderboardName || badge.clubName) && (
             <div className="text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-white/[0.02] rounded-xl p-3 border border-gray-100 dark:border-gray-800">
               {badge.leaderboardName && (
                 <p>
@@ -150,7 +150,7 @@ export const BadgeShareClient: React.FC<{
                 </p>
               )}
             </div>
-          )}
+          )} */}
 
           {/* Actions */}
           <div
