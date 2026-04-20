@@ -226,12 +226,43 @@ export const GET = withMiddleware<
       if (sortBy === 'pace' || sortBy === 'effort') {
         const isZeroPace = (pace: string | null) =>
           !pace || pace === '0' || pace === '0:00' || pace === '00:00';
+
+        const parsePaceToSeconds = (pace: string | null) => {
+          if (isZeroPace(pace)) return Infinity;
+          const [min, sec] = pace!.split(':').map(Number);
+          if (min !== undefined && sec !== undefined) return min * 60 + sec;
+          if (min !== undefined) return min * 60;
+          return Infinity;
+        };
+
         const validEntries = leaderboard.entries.filter(
           (e) => !isZeroPace(e.runPace)
         );
         const zeroEntries = leaderboard.entries.filter((e) =>
           isZeroPace(e.runPace)
         );
+
+        // Perform manual sort to handle inconsistent string padding
+        validEntries.sort((a, b) => {
+          if (sortBy === 'effort') {
+            // Distance is already sorted correctly by the database.
+            // We only need to handle ties where numeric pace sorting is required.
+            if (a.runDistance !== b.runDistance) {
+              return 0; // maintain database order for distances
+            }
+            // Tie-breaker: faster pace (lower seconds) ranks higher
+            return (
+              parsePaceToSeconds(a.runPace) - parsePaceToSeconds(b.runPace)
+            );
+          }
+
+          // Pure pace sort: handle based on sortOrder
+          const paceA = parsePaceToSeconds(a.runPace);
+          const paceB = parsePaceToSeconds(b.runPace);
+
+          return sortOrder === 'asc' ? paceA - paceB : paceB - paceA;
+        });
+
         leaderboard.entries = [...validEntries, ...zeroEntries];
       }
 
