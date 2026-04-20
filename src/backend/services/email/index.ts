@@ -118,8 +118,9 @@ class EmailService {
     to: string,
     clubName: string,
     milestoneKm: number,
+    clubId: string,
     badgeUrl?: string,
-    rewardUrl?: string
+    rewardUrl?: string,
   ) {
     try {
       const { data, error } = await this.resend.emails.send({
@@ -131,6 +132,7 @@ class EmailService {
           milestoneKm,
           badgeUrl,
           rewardUrl,
+          clubId
         }),
       });
 

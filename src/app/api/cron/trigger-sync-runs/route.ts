@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
 import { syncAllUserRuns } from '@/backend/cron/sync-runs';
-import { env } from '@/env';
+import { NextResponse } from 'next/server';
 
 // This endpoint is purposefully exposed to allow us to manually
 // trigger the run sync cron behavior, specifically for testing.
@@ -13,6 +12,8 @@ export async function POST(request: Request) {
     //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     //   }
     // }
+
+    console.log(`Starting run sync for all users...`);
 
     await syncAllUserRuns();
 

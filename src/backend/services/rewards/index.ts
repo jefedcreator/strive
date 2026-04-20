@@ -104,6 +104,7 @@ export async function checkClubMilestones(clubId: string) {
             member.email,
             club.name,
             milestone,
+            club.id,
             badgeUrl,
             rewardUrl
           );

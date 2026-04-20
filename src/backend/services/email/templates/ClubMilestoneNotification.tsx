@@ -21,6 +21,7 @@ interface ClubMilestoneNotificationProps {
   milestoneKm: number;
   badgeUrl?: string;
   rewardUrl?: string;
+  clubId:string
 }
 
 const ClubMilestoneNotification = ({
@@ -28,6 +29,7 @@ const ClubMilestoneNotification = ({
   milestoneKm = 100,
   badgeUrl,
   rewardUrl = 'https://usestrive.run/rewards',
+  clubId
 }: ClubMilestoneNotificationProps) => {
   return (
     <Html>
@@ -145,10 +147,10 @@ const ClubMilestoneNotification = ({
                 </Button>
                 <Text className="text-gray-500 text-sm font-medium mt-6 text-center">
                   <Link
-                    href={`${rewardUrl}/leaderboard`}
+                    href={`https://usestrive.run/clubs/${clubId}`}
                     className="text-gray-500 hover:text-primary transition-colors no-underline"
                   >
-                    View Club Leaderboard
+                    View Club
                   </Link>
                 </Text>
               </Section>
