@@ -231,7 +231,7 @@ export const GET = withMiddleware<LeaderboardQueryValidatorSchema>(
                 },
                 entries: {
                   where: { isActive: true },
-                  orderBy: { score: 'desc' },
+                  orderBy: [{ runDistance: 'desc' }, { runPace: 'asc' }],
                   take: 5,
                   include: {
                     user: {

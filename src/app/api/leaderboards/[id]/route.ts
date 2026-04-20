@@ -159,21 +159,27 @@ export const GET = withMiddleware<
       const user = request.user;
       const query = request.query!;
 
-      const sortBy = query.sortBy ?? 'score';
+      const sortBy = query.sortBy ?? 'effort';
       const sortOrder = query.sortOrder ?? (sortBy === 'pace' ? 'asc' : 'desc');
 
-      const orderBy: Prisma.UserLeaderboardOrderByWithRelationInput = {};
+      let orderBy:
+        | Prisma.UserLeaderboardOrderByWithRelationInput
+        | Prisma.UserLeaderboardOrderByWithRelationInput[];
 
-      if (sortBy === 'fullname') {
-        orderBy.user = {
-          fullname: sortOrder,
+      if (sortBy === 'effort') {
+        orderBy = [{ runDistance: sortOrder }, { runPace: 'asc' }];
+      } else if (sortBy === 'fullname') {
+        orderBy = {
+          user: {
+            fullname: sortOrder,
+          },
         };
       } else if (sortBy === 'distance') {
-        orderBy.runDistance = sortOrder;
+        orderBy = { runDistance: sortOrder };
       } else if (sortBy === 'pace') {
-        orderBy.runPace = sortOrder;
+        orderBy = { runPace: sortOrder };
       } else {
-        orderBy[sortBy] = sortOrder;
+        orderBy = { [sortBy as any]: sortOrder };
       }
 
       const leaderboard = await db.leaderboard.findUnique({
@@ -217,7 +223,7 @@ export const GET = withMiddleware<
       }
 
       // Ensure that entries with 0/missing pace stay at the bottom
-      if (sortBy === 'pace') {
+      if (sortBy === 'pace' || sortBy === 'effort') {
         const isZeroPace = (pace: string | null) =>
           !pace || pace === '0' || pace === '0:00' || pace === '00:00';
         const validEntries = leaderboard.entries.filter(

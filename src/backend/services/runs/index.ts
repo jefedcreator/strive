@@ -98,7 +98,7 @@ export async function processRunsForUser(
         totalDistance > 0 ? totalDuration / totalDistance : 0;
       const paceMin = Math.floor(avgPaceMinPerKm);
       const paceSec = Math.round((avgPaceMinPerKm - paceMin) * 60);
-      const avgPace = `${paceMin}:${String(paceSec).padStart(2, '0')}`;
+      const avgPace = `${String(paceMin).padStart(2, '0')}:${String(paceSec).padStart(2, '0')}`;
 
       // Compute score based on leaderboard type
       const leaderboardType = membership.leaderboard.type;
@@ -114,6 +114,11 @@ export async function processRunsForUser(
         const bestPaceVal = parsePace(bestPaceRun.pace);
         // Invert so higher score = faster pace; ORDER BY score DESC works
         score = bestPaceVal > 0 ? Math.round(1_000_000 / bestPaceVal) : 0;
+      } else if (leaderboardType === 'COMBINED') {
+        // EFFORT: Distance (primary) + Inverse of Pace (tie-breaker)
+        // Scaled so 1km = 1000 points, and pace adds up to ~500 points (for a 2:00 pace)
+        const paceScore = avgPaceMinPerKm > 0 ? 1000 / avgPaceMinPerKm : 0;
+        score = Math.round(totalDistance * 1000 + paceScore);
       } else {
         // DISTANCE: higher total distance = higher score
         score = Math.round(totalDistance * 1000);

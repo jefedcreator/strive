@@ -119,13 +119,13 @@ export const leaderboardEntriesQueryValidatorSchema = baseQueryValidatorSchema
   .partial()
   .extend({
     sortBy: z
-      .enum(['score', 'fullname', 'createdAt', 'distance', 'pace'], {
+      .enum(['effort', 'score', 'fullname', 'createdAt', 'distance', 'pace'], {
         errorMap: () => ({
           message:
-            'sortBy must be one of: score, fullname, createdAt, distance, pace',
+            'sortBy must be one of: effort, score, fullname, createdAt, distance, pace',
         }),
       })
-      .default('score')
+      .default('effort')
       .optional(),
   })
   .strict();
