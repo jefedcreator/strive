@@ -71,12 +71,12 @@ export default async function RootLayout({
         
         <div className="w-full shrink-0 border-t border-gray-100 dark:border-white/5 py-8 mt-auto z-10 relative bg-white dark:bg-[#06080D]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0 whitespace-nowrap">
+            <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0 whitespace-nowrap">
               © {new Date().getFullYear()} Strive Platforms Inc. All rights reserved.
             </p>
             <div className="flex gap-6">
               <a
-                className="text-xs font-semibold text-gray-400 hover:text-primary transition-colors inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                className="text-[10px] sm:text-xs font-semibold text-gray-400 hover:text-primary transition-colors inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                 href="https://jefedcreator.cv/"
                 target="_blank"
                 rel="noreferrer"
@@ -84,7 +84,7 @@ export default async function RootLayout({
                 Built with love by James ❤️
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 shrink-0 whitespace-nowrap">
+              <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 shrink-0 whitespace-nowrap">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>

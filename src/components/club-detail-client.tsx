@@ -320,196 +320,202 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
         </div>
       </FadeInItem>
 
-      {/* Leaderboards + Members grid */}
-      <FadeInStagger className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Leaderboards */}
-        <FadeInItem>
-          <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-              <h2 className="font-bold text-gray-900 dark:text-white">
-                Leaderboards
-              </h2>
-              <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
-                {club.leaderboards.length}
-              </span>
-            </div>
-
-            {club.leaderboards.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-                  <Trophy className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                </div>
-                <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
-                  No leaderboards yet
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
-                  Create a leaderboard to start competing within this club.
-                </p>
+      {/* Leaderboards + Rewards + Members grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* Left Column: Leaderboards & Rewards */}
+        <FadeInStagger className="flex flex-col gap-8">
+          {/* Leaderboards */}
+          <FadeInItem>
+            <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                <h2 className="font-bold text-gray-900 dark:text-white">
+                  Leaderboards
+                </h2>
+                <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                  {club.leaderboards.length}
+                </span>
               </div>
-            ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {club.leaderboards.map((lb) => {
-                  const isCompleted = lb.expiryDate
-                    ? new Date(lb.expiryDate) < new Date()
-                    : false;
-                  return (
+
+              {club.leaderboards.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
+                    <Trophy className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  </div>
+                  <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
+                    No leaderboards yet
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                    Create a leaderboard to start competing within this club.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {club.leaderboards.map((lb) => {
+                    const isCompleted = lb.expiryDate
+                      ? new Date(lb.expiryDate) < new Date()
+                      : false;
+                    return (
+                      <Link
+                        key={lb.id}
+                        href={`/leaderboards/${lb.id}`}
+                        className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white">
+                            <Trophy className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors">
+                              {lb.name}
+                            </p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                              {isCompleted ? 'Ended' : 'Active'}
+                              {lb.expiryDate &&
+                                ` · ${new Date(lb.expiryDate).toLocaleDateString()}`}
+                            </p>
+                          </div>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </FadeInItem>
+
+          {/* Rewards */}
+          <FadeInItem>
+            <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                <h2 className="font-bold text-gray-900 dark:text-white">
+                  Rewards
+                </h2>
+                <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                  {club.rewards.length}
+                </span>
+              </div>
+
+              {club.rewards.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
+                    <Shield className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  </div>
+                  <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
+                    No rewards yet
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                    Club milestones will appear here once achieved.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {club.rewards.map((reward) => (
                     <Link
-                      key={lb.id}
-                      href={`/leaderboards/${lb.id}`}
+                      key={reward.id}
+                      href={`/clubs/${club.id}/rewards/${reward.id}`}
                       className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-white">
-                          <Trophy className="w-5 h-5" />
+                        <div className="w-9 h-9 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                          <Shield className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors">
-                            {lb.name}
+                          <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                            {reward.title}
                           </p>
                           <p className="text-xs text-gray-400 dark:text-gray-500">
-                            {isCompleted ? 'Ended' : 'Active'}
-                            {lb.expiryDate &&
-                              ` · ${new Date(lb.expiryDate).toLocaleDateString()}`}
+                            {reward.milestone}km Milestone
                           </p>
                         </div>
                       </div>
                       <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                     </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </FadeInItem>
-
-        {/* Rewards */}
-        <FadeInItem>
-          <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-              <h2 className="font-bold text-gray-900 dark:text-white">
-                Rewards
-              </h2>
-              <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
-                {club.rewards.length}
-              </span>
-            </div>
-
-            {club.rewards.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-                  <Shield className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  ))}
                 </div>
-                <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
-                  No rewards yet
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
-                  Club milestones will appear here once achieved.
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {club.rewards.map((reward) => (
-                  <Link
-                    key={reward.id}
-                    href={`/clubs/${club.id}/rewards/${reward.id}`}
-                    className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                        <Shield className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                          {reward.title}
-                        </p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500">
-                          {reward.milestone}km Milestone
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </FadeInItem>
-        {/* Members */}
-        <FadeInItem>
-          <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-              <h2 className="font-bold text-gray-900 dark:text-white">
-                Members
-              </h2>
-              <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
-                {club._count.members}
-              </span>
+              )}
             </div>
+          </FadeInItem>
+        </FadeInStagger>
 
-            {club.members.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-                  <Users className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                </div>
-                <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
-                  No members yet
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
-                  Invite members to grow your club community.
-                </p>
+        {/* Right Column: Members */}
+        <FadeInStagger className="h-full">
+          <FadeInItem className="h-full flex flex-col">
+            <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-soft overflow-hidden flex flex-col h-full">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
+                <h2 className="font-bold text-gray-900 dark:text-white">
+                  Members
+                </h2>
+                <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                  {club._count.members}
+                </span>
               </div>
-            ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {club.members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between px-6 py-4"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-                        {member.user.avatar ? (
-                          <Image
-                            src={member.user.avatar}
-                            alt={
-                              member.user.fullname ??
-                              member.user.username ??
-                              'Guest'
-                            }
-                            className="w-full h-full object-cover"
-                            width={36}
-                            height={36}
-                          />
-                        ) : (
-                          <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {member.user.fullname ??
-                            member.user.username ??
-                            'Guest'}
-                        </p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500">
-                          {`Joined ${new Date(member.joinedAt).toLocaleDateString()}`}
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
-                        member.role === 'ADMIN'
-                          ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20'
-                          : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
-                      }`}
-                    >
-                      {member.role}
-                    </span>
+
+              {club.members.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center grow">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
+                    <Users className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </FadeInItem>
-      </FadeInStagger>
+                  <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">
+                    No members yet
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                    Invite members to grow your club community.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 grow overflow-y-auto">
+                  {club.members.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between px-6 py-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center overflow-hidden shrink-0">
+                          {member.user.avatar ? (
+                            <Image
+                              src={member.user.avatar}
+                              alt={
+                                member.user.fullname ??
+                                member.user.username ??
+                                'Guest'
+                              }
+                              className="w-full h-full object-cover"
+                              width={36}
+                              height={36}
+                            />
+                          ) : (
+                            <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[140px] md:max-w-[200px]">
+                            {member.user.fullname ??
+                              member.user.username ??
+                              'Guest'}
+                          </p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">
+                            {`Joined ${new Date(member.joinedAt).toLocaleDateString()}`}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide shrink-0 ${
+                          member.role === 'ADMIN'
+                            ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20'
+                            : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+                        }`}
+                      >
+                        {member.role}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </FadeInItem>
+        </FadeInStagger>
+      </div>
 
       <ClubModal
         isOpen={isEditModalOpen}
