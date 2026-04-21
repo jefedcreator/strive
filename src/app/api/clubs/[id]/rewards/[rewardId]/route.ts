@@ -31,6 +31,7 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
               id: true,
               name: true,
               image: true,
+              isPublic: true,
             },
           },
         },
@@ -54,6 +55,7 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
             id: reward.club.id,
             name: reward.club.name,
             image: reward.club.image,
+            isPublic: reward.club.isPublic,
           },
         },
       };

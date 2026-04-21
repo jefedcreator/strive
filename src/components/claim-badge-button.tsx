@@ -14,27 +14,25 @@ import { useMutation } from '@tanstack/react-query';
 interface ClaimBadgeButtonProps {
   clubId: string;
   rewardId: string;
+  label?: string;
 }
 
 export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
   clubId,
   rewardId,
+  label = 'Claim Badge',
 }) => {
   const router = useRouter();
   const { data: session } = useSession();
 
   const claimMutation = useMutation({
     mutationFn: async () => {
-      if (!session?.user?.token) {
-        throw new Error('You must be logged in to claim rewards');
-      }
-
       const { data } = await api.post<ApiResponse<UserReward>>(
         `/rewards/${rewardId}/claim`,
         {},
         {
           headers: {
-            Authorization: `Bearer ${session.user.token}`,
+            Authorization: `Bearer ${session?.user.token}`,
           },
         }
       );
@@ -59,6 +57,10 @@ export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
   });
 
   const handleClaim = () => {
+    if (!session?.user?.token) {
+      router.push(`/login?rewardId=${rewardId}&callbackUrl=/clubs/${clubId}/rewards/${rewardId}`);
+      return;
+    }
     claimMutation.mutate();
   };
 
@@ -69,7 +71,7 @@ export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
       className="w-full flex items-center justify-center gap-2 py-6 text-lg font-bold bg-amber-500 hover:bg-amber-600 text-white border-none shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all"
     >
       <ShieldCheck className={`w-6 h-6 ${claimMutation.isPending ? 'animate-pulse' : ''}`} />
-      {claimMutation.isPending ? 'Claiming...' : 'Claim Badge'}
+      {claimMutation.isPending ? 'Claiming...' : label}
     </Button>
   );
 };

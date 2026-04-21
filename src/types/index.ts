@@ -368,6 +368,7 @@ export interface ClubRewardDetail {
     id: string;
     name: string;
     image: string | null;
+    isPublic: boolean;
   };
 }
 

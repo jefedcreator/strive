@@ -118,6 +118,8 @@ export default async function ClubBadgePage({ params }: PageProps) {
         </Link>
       </Button>
     );
+  } else if (!isMember && data.club.isPublic) {
+    contextualActions = <ClaimBadgeButton clubId={id} rewardId={rewardId} label="Join Club & Claim" />;
   } else if (!isMember) {
     contextualActions = (
       <Button asChild variant="secondary" className="w-full h-12 text-sm font-bold gap-2">
