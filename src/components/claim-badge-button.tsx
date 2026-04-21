@@ -43,8 +43,8 @@ export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
 
       return data;
     },
-    onSuccess: () => {
-      toast.success('Badge claimed successfully!');
+    onSuccess: (response) => {
+      toast.success(response.message || 'Badge claimed successfully!');
       router.refresh();
     },
     onError: (error: any) => {

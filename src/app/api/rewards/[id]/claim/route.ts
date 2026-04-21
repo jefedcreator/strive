@@ -86,9 +86,41 @@ export const POST = withMiddleware<ClubRewardParamValidator>(
             }),
           ]);
         } else {
-          throw new ForbiddenException(
-            'You must be an active member of the club to claim this reward'
-          );
+          // Private club: Send join request
+          const existingInvite = await db.clubInvites.findFirst({
+            where: {
+              userId: user.id,
+              clubId: reward.clubId,
+            },
+          });
+
+          if (!existingInvite) {
+            await db.$transaction([
+              db.clubInvites.create({
+                data: {
+                  userId: user.id,
+                  clubId: reward.clubId,
+                  isRequest: true,
+                },
+              }),
+              db.notification.create({
+                data: {
+                  userId: reward.club.createdById,
+                  message: `${user.fullname} wants to join your club ${reward.club.name} to claim a reward`,
+                  type: 'club',
+                  clubId: reward.clubId,
+                },
+              }),
+            ]);
+          }
+
+          const response: ApiResponse<null> = {
+            status: 200,
+            message:
+              'Join request sent. You will be able to claim this reward once accepted.',
+            data: null,
+          };
+          return NextResponse.json(response);
         }
       }
 

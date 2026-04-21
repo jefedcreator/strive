@@ -46,8 +46,6 @@ export const POST = withMiddleware<unknown>(
         throw new ConflictException('You are already a member of this club');
       }
 
-      console.log('club', club);
-
       if (club.isPublic) {
         await db.$transaction([
           db.userClub.create({

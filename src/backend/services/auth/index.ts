@@ -210,31 +210,61 @@ class AuthService {
             if (!existingMember) {
               const club = await prisma.club.findUnique({
                 where: { id: lClubId },
-                select: { createdById: true, name: true },
+                select: { createdById: true, name: true, isPublic: true },
               });
 
-              transactions.push(
-                prisma.userClub.create({
-                  data: {
+              if (club?.isPublic) {
+                transactions.push(
+                  prisma.userClub.create({
+                    data: {
+                      userId: user.id,
+                      clubId: lClubId,
+                      role: 'MEMBER',
+                      isActive: true,
+                    },
+                  }),
+                  prisma.notification.create({
+                    data: {
+                      userId: club?.createdById ?? '',
+                      message: `${user.fullname} joined your club ${club?.name}`,
+                      type: 'info',
+                    },
+                  }),
+                  prisma.club.update({
+                    where: { id: lClubId },
+                    data: { memberCount: { increment: 1 } },
+                  })
+                );
+                joinedClubIds.add(lClubId);
+              } else {
+                // Private club: generate a join request instead
+                const existingInvite = await prisma.clubInvites.findFirst({
+                  where: {
                     userId: user.id,
                     clubId: lClubId,
-                    role: 'MEMBER',
-                    isActive: true,
                   },
-                }),
-                prisma.notification.create({
-                  data: {
-                    userId: club?.createdById ?? '',
-                    message: `${user.fullname} joined your club ${club?.name}`,
-                    type: 'info',
-                  },
-                }),
-                prisma.club.update({
-                  where: { id: lClubId },
-                  data: { memberCount: { increment: 1 } },
-                })
-              );
-              joinedClubIds.add(lClubId);
+                });
+
+                if (!existingInvite) {
+                  transactions.push(
+                    prisma.clubInvites.create({
+                      data: {
+                        userId: user.id,
+                        clubId: lClubId,
+                        isRequest: true,
+                      },
+                    }),
+                    prisma.notification.create({
+                      data: {
+                        userId: club?.createdById ?? '',
+                        message: `${user.fullname} wants to join your club ${club?.name}`,
+                        type: 'club',
+                        clubId: lClubId,
+                      },
+                    })
+                  );
+                }
+              }
             }
           }
 
@@ -258,7 +288,9 @@ class AuthService {
       if (rewardId) {
         const reward = await prisma.reward.findUnique({
           where: { id: rewardId },
-          include: { club: { select: { name: true, createdById: true } } },
+          include: {
+            club: { select: { name: true, createdById: true, isPublic: true } },
+          },
         });
 
         if (reward?.clubId) {
@@ -276,41 +308,80 @@ class AuthService {
             });
 
             if (!existingMember) {
-              transactions.push(
-                prisma.userClub.create({
-                  data: {
+              if (reward.club?.isPublic) {
+                transactions.push(
+                  prisma.userClub.create({
+                    data: {
+                      userId: user.id,
+                      clubId: rClubId,
+                      role: 'MEMBER',
+                      isActive: true,
+                    },
+                  }),
+                  prisma.notification.create({
+                    data: {
+                      userId: reward.club?.createdById ?? '',
+                      message: `${user.fullname} joined your club ${reward.club?.name} to claim a reward`,
+                      type: 'info',
+                    },
+                  }),
+                  prisma.club.update({
+                    where: { id: rClubId },
+                    data: { memberCount: { increment: 1 } },
+                  }),
+                  // Claim reward immediately for public club
+                  prisma.userReward.upsert({
+                    where: {
+                      userId_rewardId: { userId: user.id, rewardId: reward.id },
+                    },
+                    create: { userId: user.id, rewardId: reward.id },
+                    update: {},
+                  })
+                );
+                joinedClubIds.add(rClubId);
+              } else {
+                // Private club: generate a join request instead
+                const existingInvite = await prisma.clubInvites.findFirst({
+                  where: {
                     userId: user.id,
                     clubId: rClubId,
-                    role: 'MEMBER',
-                    isActive: true,
                   },
-                }),
-                prisma.notification.create({
-                  data: {
-                    userId: reward.club?.createdById ?? '',
-                    message: `${user.fullname} joined your club ${reward.club?.name} to claim a reward`,
-                    type: 'info',
+                });
+
+                if (!existingInvite) {
+                  transactions.push(
+                    prisma.clubInvites.create({
+                      data: {
+                        userId: user.id,
+                        clubId: rClubId,
+                        isRequest: true,
+                      },
+                    }),
+                    prisma.notification.create({
+                      data: {
+                        userId: reward.club?.createdById ?? '',
+                        message: `${user.fullname} wants to join your club ${reward.club?.name} to claim a reward`,
+                        type: 'club',
+                        clubId: rClubId,
+                      },
+                    })
+                  );
+                }
+                // We skip upserting the reward for private clubs until they are accepted
+              }
+            } else {
+              // Already a member: Generate Reward (Upsert)
+              transactions.push(
+                prisma.userReward.upsert({
+                  where: {
+                    userId_rewardId: { userId: user.id, rewardId: reward.id },
                   },
-                }),
-                prisma.club.update({
-                  where: { id: rClubId },
-                  data: { memberCount: { increment: 1 } },
+                  create: { userId: user.id, rewardId: reward.id },
+                  update: {},
                 })
               );
-              joinedClubIds.add(rClubId);
             }
           }
-
-          // Generate Reward (Upsert)
-          transactions.push(
-            prisma.userReward.upsert({
-              where: {
-                userId_rewardId: { userId: user.id, rewardId: reward.id },
-              },
-              create: { userId: user.id, rewardId: reward.id },
-              update: {}, // No-op if it already exists
-            })
-          );
         }
       }
 
