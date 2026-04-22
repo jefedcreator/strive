@@ -1,10 +1,10 @@
 import {
-  type UserType,
   type Club,
   type Leaderboard,
   type Notification,
-  type User,
   type Reward,
+  type User,
+  type UserType,
 } from '@prisma/client';
 import type { SearchParams } from 'nuqs/server';
 import type { Browser, Page } from 'puppeteer';
@@ -403,17 +403,16 @@ interface CaptureOptions {
 }
 
 
+interface SearchedUser extends Pick<User, 'id' | 'fullname' | 'avatar' | 'username'> {
+  isExternal?: boolean
+}
+
 export { DateRangeFilters };
 export type {
-  Activity,
-  FilterOption,
-  ISubMenu,
-  NikeAuthResult,
-  LeaderboardEntry,
-  NRCLoginStep,
+  ActiveSession, Activity, CaptureOptions, FilterOption,
+  ISubMenu, LeaderboardEntry, NikeAuthResult, NRCLoginStep,
   Option,
   PageProps,
-  PuppeteerNikeAuthResult,
-  CaptureOptions,
-  ActiveSession,
+  PuppeteerNikeAuthResult, SearchedUser
 };
+

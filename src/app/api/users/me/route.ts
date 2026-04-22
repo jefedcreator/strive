@@ -29,22 +29,22 @@ export const GET = withMiddleware<User>(
 
       const fullUser = await db.user.findUnique({
         where: { id: user.id },
-        include: {
-          clubs: {
-            where: { isActive: true },
-            include: {
-              club: true,
-            },
-          },
-          leaderboards: {
-            where: { isActive: true },
-            include: {
-              leaderboard: true,
-            },
-          },
-          createdClubs: true,
-          createdLeaderboards: true,
-        },
+        // include: {
+        //   clubs: {
+        //     where: { isActive: true },
+        //     include: {
+        //       club: true,
+        //     },
+        //   },
+        //   leaderboards: {
+        //     where: { isActive: true },
+        //     include: {
+        //       leaderboard: true,
+        //     },
+        //   },
+        //   createdClubs: true,
+        //   createdLeaderboards: true,
+        // },
       });
 
       if (!fullUser) {
@@ -111,7 +111,7 @@ export const PUT = withMiddleware<UpdateUserValidatorSchema>(
         data,
       });
 
-      const response: ApiResponse<typeof updatedUser> = {
+      const response: ApiResponse<User> = {
         status: 200,
         message: 'Profile updated successfully',
         data: updatedUser,

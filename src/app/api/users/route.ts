@@ -8,7 +8,7 @@ import {
   type BaseQueryValidatorSchema,
 } from '@/backend/validators/index.validator';
 import { db } from '@/server/db';
-import { type ApiResponse } from '@/types';
+import { type ApiResponse, type SearchedUser } from '@/types';
 import { InternalServerErrorException } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 
@@ -74,7 +74,7 @@ export const GET = withMiddleware<BaseQueryValidatorSchema>(
         return NextResponse.json(response, { status: 404 });
       }
 
-      const response: ApiResponse<typeof user> = {
+      const response: ApiResponse<SearchedUser> = {
         status: 200,
         message: 'User found successfully',
         data: user,

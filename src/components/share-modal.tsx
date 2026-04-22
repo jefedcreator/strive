@@ -5,6 +5,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Field } from '@/primitives';
 import { Input } from '@/primitives/Input';
 import { Modal } from '@/primitives/Modal';
+import type { SearchedUser } from '@/types';
 import api from '@/utils/axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -117,7 +118,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         `/users?query=${encodeURIComponent(debouncedEmail)}`,
         { headers: { Authorization: `Bearer ${session?.user?.token}` } }
       );
-      return res.data?.data;
+      return res.data?.data as SearchedUser;
     },
     enabled:
       !!debouncedEmail &&
