@@ -28,7 +28,7 @@ export interface ApiError {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-  PaginationMeta { }
+    PaginationMeta {}
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -86,9 +86,9 @@ export type LeaderboardListItem = Leaderboard & {
       avatar: string | null;
       fullname: string | null;
       username: string | null;
-      type: true,
-      xp: true,
-      currentStreak: true,
+      type: true;
+      xp: true;
+      currentStreak: true;
     };
   } & {
     id: string;
@@ -153,7 +153,7 @@ export interface LeaderboardEntryRecord {
 /** Full leaderboard detail returned by GET /api/leaderboards/[id] */
 export type LeaderboardDetail = Leaderboard & {
   // image: string | null;
-  club: Pick<LeaderboardClubSummary, 'image'|"name"> | null;
+  club: Pick<LeaderboardClubSummary, 'image' | 'name'> | null;
   entries: LeaderboardEntryRecord[];
   _count: {
     entries: number;
@@ -234,11 +234,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-  | {
-    1: string;
-    2?: string | undefined;
-  }
-  | undefined;
+    | {
+        1: string;
+        2?: string | undefined;
+      }
+    | undefined;
 };
 
 enum DateRangeFilters {
@@ -385,7 +385,6 @@ export interface RewardsData {
   tierBadgeUrl: string;
 }
 
-
 //  interface NikeAuthResult {
 //   email: string | null;
 //   token: string | null;
@@ -402,17 +401,23 @@ interface CaptureOptions {
   password?: string;
 }
 
-
-interface SearchedUser extends Pick<User, 'id' | 'fullname' | 'avatar' | 'username'> {
-  isExternal?: boolean
+interface SearchedUser
+  extends Pick<User, 'id' | 'fullname' | 'avatar' | 'username'> {
+  isExternal?: boolean;
 }
 
 export { DateRangeFilters };
 export type {
-  ActiveSession, Activity, CaptureOptions, FilterOption,
-  ISubMenu, LeaderboardEntry, NikeAuthResult, NRCLoginStep,
+  ActiveSession,
+  Activity,
+  CaptureOptions,
+  FilterOption,
+  ISubMenu,
+  LeaderboardEntry,
+  NikeAuthResult,
+  NRCLoginStep,
   Option,
   PageProps,
-  PuppeteerNikeAuthResult, SearchedUser
+  PuppeteerNikeAuthResult,
+  SearchedUser,
 };
-

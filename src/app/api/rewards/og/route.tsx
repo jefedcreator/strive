@@ -333,7 +333,7 @@ export async function GET(request: Request) {
                       }}
                     />
                   ) : (
-                    username[0]?.toUpperCase() ?? 'R'
+                    (username[0]?.toUpperCase() ?? 'R')
                   )}
                 </div>
                 <span

@@ -5,7 +5,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Field } from '@/primitives';
 import { Input } from '@/primitives/Input';
 import { Modal } from '@/primitives/Modal';
-import type { SearchedUser } from '@/types';
+import type { ApiResponse, SearchedUser } from '@/types';
 import api from '@/utils/axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -111,15 +111,20 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     }
   }, [open, reset]);
 
-  const { data: foundUser, isFetching: isSearching } = useQuery({
+  const { data: foundUser, isFetching: isSearching } = useQuery<
+    ApiResponse<SearchedUser>,
+    Error,
+    SearchedUser
+  >({
     queryKey: ['userSearch', debouncedEmail],
     queryFn: async () => {
       const res = await api.get(
         `/users?query=${encodeURIComponent(debouncedEmail)}`,
         { headers: { Authorization: `Bearer ${session?.user?.token}` } }
       );
-      return res.data?.data as SearchedUser;
+      return res.data;
     },
+    select: (response) => response.data,
     enabled:
       !!debouncedEmail &&
       debouncedEmail.length >= 3 &&

@@ -14,7 +14,11 @@ import {
   type UpdateLeaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
 import { db } from '@/server/db';
-import { type ApiResponse, type LeaderboardDetail, type LeaderboardListItem } from '@/types';
+import {
+  type ApiResponse,
+  type LeaderboardDetail,
+  type LeaderboardListItem,
+} from '@/types';
 import {
   ForbiddenException,
   InternalServerErrorException,
@@ -284,7 +288,9 @@ export const GET = withMiddleware<
         ...entry,
         createdAt: entry.createdAt.toISOString(),
         updatedAt: entry.updatedAt.toISOString(),
-        lastScoreDate: entry.lastScoreDate ? entry.lastScoreDate.toISOString() : null,
+        lastScoreDate: entry.lastScoreDate
+          ? entry.lastScoreDate.toISOString()
+          : null,
         runPace: entry.runPace
           ? entry.runPace.replace(/^0(?=\d)/, '')
           : entry.runPace,
@@ -296,7 +302,7 @@ export const GET = withMiddleware<
         data: {
           ...leaderboard,
           // image: leaderboard.club?.image ?? null,
-          entries
+          entries,
         },
       };
 

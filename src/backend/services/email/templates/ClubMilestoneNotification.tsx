@@ -21,7 +21,7 @@ interface ClubMilestoneNotificationProps {
   milestoneKm: number;
   badgeUrl?: string;
   rewardUrl?: string;
-  clubId:string
+  clubId: string;
 }
 
 const ClubMilestoneNotification = ({
@@ -29,7 +29,7 @@ const ClubMilestoneNotification = ({
   milestoneKm = 100,
   badgeUrl,
   rewardUrl = 'https://usestrive.run/rewards',
-  clubId
+  clubId,
 }: ClubMilestoneNotificationProps) => {
   return (
     <Html>

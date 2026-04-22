@@ -58,7 +58,9 @@ export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
 
   const handleClaim = () => {
     if (!session?.user?.token) {
-      router.push(`/login?rewardId=${rewardId}&callbackUrl=/clubs/${clubId}/rewards/${rewardId}`);
+      router.push(
+        `/login?rewardId=${rewardId}&callbackUrl=/clubs/${clubId}/rewards/${rewardId}`
+      );
       return;
     }
     claimMutation.mutate();
@@ -70,7 +72,9 @@ export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
       disabled={claimMutation.isPending}
       className="w-full flex items-center justify-center gap-2 py-6 text-lg font-bold bg-amber-500 hover:bg-amber-600 text-white border-none shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all"
     >
-      <ShieldCheck className={`w-6 h-6 ${claimMutation.isPending ? 'animate-pulse' : ''}`} />
+      <ShieldCheck
+        className={`w-6 h-6 ${claimMutation.isPending ? 'animate-pulse' : ''}`}
+      />
       {claimMutation.isPending ? 'Claiming...' : label}
     </Button>
   );

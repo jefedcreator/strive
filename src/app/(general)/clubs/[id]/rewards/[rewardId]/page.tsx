@@ -56,7 +56,8 @@ export async function generateMetadata({
   });
 
   const imageUrl = `${baseUrl}/api/rewards/og?${ogParams.toString()}`;
-  const description = data.description ?? `${clubName} earned "${data.title}" on Strive`;
+  const description =
+    data.description ?? `${clubName} earned "${data.title}" on Strive`;
 
   return {
     metadataBase: new URL(baseUrl),
@@ -89,19 +90,23 @@ export default async function ClubBadgePage({ params }: PageProps) {
   }
 
   const userId = session?.user?.id;
-  
+
   // Check if user is a member
-  const membership = userId ? await db.userClub.findUnique({
-    where: { userId_clubId: { userId, clubId: id } },
-  }) : null;
-  
+  const membership = userId
+    ? await db.userClub.findUnique({
+        where: { userId_clubId: { userId, clubId: id } },
+      })
+    : null;
+
   const isMember = !!membership && membership.isActive;
 
   // Check if already claimed
-  const userReward = userId ? await db.userReward.findUnique({
-    where: { userId_rewardId: { userId, rewardId } },
-  }) : null;
-  
+  const userReward = userId
+    ? await db.userReward.findUnique({
+        where: { userId_rewardId: { userId, rewardId } },
+      })
+    : null;
+
   const hasClaimed = !!userReward;
 
   const badgeUrl = buildBadgeImageUrl(data);
@@ -112,14 +117,22 @@ export default async function ClubBadgePage({ params }: PageProps) {
   if (!userId) {
     contextualActions = (
       <Button asChild className="w-full h-12 text-sm font-bold gap-2">
-        <Link href={`/login?rewardId=${rewardId}&callbackUrl=/clubs/${id}/rewards/${rewardId}`}>
+        <Link
+          href={`/login?rewardId=${rewardId}&callbackUrl=/clubs/${id}/rewards/${rewardId}`}
+        >
           <LogIn className="w-4 h-4" />
           Login to Claim
         </Link>
       </Button>
     );
   } else if (!isMember) {
-    contextualActions = <ClaimBadgeButton clubId={id} rewardId={rewardId} label="Join Club & Claim" />;
+    contextualActions = (
+      <ClaimBadgeButton
+        clubId={id}
+        rewardId={rewardId}
+        label="Join Club & Claim"
+      />
+    );
   } else if (!hasClaimed) {
     contextualActions = <ClaimBadgeButton clubId={id} rewardId={rewardId} />;
   }

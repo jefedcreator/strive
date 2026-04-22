@@ -68,11 +68,12 @@ export default async function RootLayout({
       </head>
       <body className="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 min-h-[100dvh] transition-colors duration-300 relative overflow-x-hidden antialiased flex flex-col">
         <div className="flex-1 shrink-0 flex flex-col">{children}</div>
-        
+
         <div className="w-full shrink-0 border-t border-gray-100 dark:border-white/5 py-8 mt-auto z-10 relative bg-white dark:bg-[#06080D]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0 whitespace-nowrap">
-              © {new Date().getFullYear()} Strive Platforms Inc. All rights reserved.
+              © {new Date().getFullYear()} Strive Platforms Inc. All rights
+              reserved.
             </p>
             <div className="flex gap-6">
               <a

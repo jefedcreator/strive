@@ -57,7 +57,7 @@ export const GET = withMiddleware<BaseQueryValidatorSchema>(
             message: 'Valid external email',
             data: {
               id: email,
-              fullname: fallbackName || "",
+              fullname: fallbackName || '',
               avatar: null,
               username: null,
               isExternal: true,

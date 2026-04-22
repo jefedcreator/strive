@@ -427,11 +427,12 @@ export async function GET(
                 const initials = getInitials(
                   entry.user.fullname ?? entry.user.username
                 );
-                const avatarUrl = entry.user.avatar && entry.user.avatar !== 'null'
-                  ? entry.user.avatar.startsWith('http')
-                    ? entry.user.avatar
-                    : `${url.origin}${entry.user.avatar.startsWith('/') ? '' : '/'}${entry.user.avatar}`
-                  : null;
+                const avatarUrl =
+                  entry.user.avatar && entry.user.avatar !== 'null'
+                    ? entry.user.avatar.startsWith('http')
+                      ? entry.user.avatar
+                      : `${url.origin}${entry.user.avatar.startsWith('/') ? '' : '/'}${entry.user.avatar}`
+                    : null;
                 const avatarBg = avatarColors[index % avatarColors.length];
 
                 return (

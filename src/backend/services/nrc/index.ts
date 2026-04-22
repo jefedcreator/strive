@@ -27,7 +27,10 @@ interface ActivitiesResponse {
 
 class NRC {
   private buildActivitiesUrl(limit: number, beforeId = '*'): string {
-    const baseUrl = CONFIG.ACTIVITY_LIST_URL.replace('before_id/v3/*', `before_id/v3/${beforeId}`);
+    const baseUrl = CONFIG.ACTIVITY_LIST_URL.replace(
+      'before_id/v3/*',
+      `before_id/v3/${beforeId}`
+    );
     return `${baseUrl}&limit=${limit}`;
   }
 
@@ -43,12 +46,16 @@ class NRC {
     const limit = 30;
 
     while (hasMore) {
-      const { runs, paging } = await this.fetchRunsWithPaging(token, limit, beforeId);
+      const { runs, paging } = await this.fetchRunsWithPaging(
+        token,
+        limit,
+        beforeId
+      );
       if (runs.length === 0) {
         hasMore = false;
       } else {
         allRuns = [...allRuns, ...runs];
-        beforeId = paging.before_id || "*";
+        beforeId = paging.before_id || '*';
         // If NRC provides no next before_id or we got fewer runs than requested, we might be at the end.
         // However, unofficial APIs are tricky. Often a null before_id or empty activities list is the best indicator.
         if (!beforeId || runs.length < limit) {
@@ -78,14 +85,13 @@ class NRC {
     console.log('🏃 Fetching NRC run data...');
     try {
       const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      const { data } = await axios.get<ActivitiesResponse & { paging?: { before_id: string } }>(
-        this.buildActivitiesUrl(limit, beforeId),
-        {
-          headers: {
-            Authorization: authToken,
-          },
-        }
-      );
+      const { data } = await axios.get<
+        ActivitiesResponse & { paging?: { before_id: string } }
+      >(this.buildActivitiesUrl(limit, beforeId), {
+        headers: {
+          Authorization: authToken,
+        },
+      });
 
       const { activities, paging } = data;
       const runs: RunData[] = [];
@@ -121,7 +127,11 @@ class NRC {
       return {
         runs,
         paging: {
-          before_id: paging?.before_id || (activities.length > 0 ? activities[activities.length - 1]!.id : null),
+          before_id:
+            paging?.before_id ||
+            (activities.length > 0
+              ? activities[activities.length - 1]!.id
+              : null),
         },
       };
     } catch (error) {

@@ -9,7 +9,12 @@
 //   4. Wait for next screen to load
 //   5. Emit 'login-code' SSE event → client opens code modal
 
-import type { ActiveSession, CaptureOptions, NikeAuthResult, PuppeteerNikeAuthResult } from '@/types';
+import type {
+  ActiveSession,
+  CaptureOptions,
+  NikeAuthResult,
+  PuppeteerNikeAuthResult,
+} from '@/types';
 import { createRequire } from 'module';
 import type { Browser, Page } from 'puppeteer';
 import { v4 as uuidv4 } from 'uuid';
@@ -188,10 +193,12 @@ export class PuppeteerSessionManager {
         value: PuppeteerNikeAuthResult | PromiseLike<PuppeteerNikeAuthResult>
       ) => void;
       let rejectPromise!: (reason?: any) => void;
-      const resultPromise = new Promise<PuppeteerNikeAuthResult>((resolve, reject) => {
-        resolvePromise = resolve;
-        rejectPromise = reject;
-      });
+      const resultPromise = new Promise<PuppeteerNikeAuthResult>(
+        (resolve, reject) => {
+          resolvePromise = resolve;
+          rejectPromise = reject;
+        }
+      );
 
       this.sessions.set(sessionId, {
         browser,

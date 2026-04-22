@@ -25,7 +25,7 @@ import { NextResponse } from 'next/server';
 export const POST = withMiddleware<ClubRewardParamValidator>(
   async (request, { params }) => {
     try {
-      const { id = "" } = params;
+      const { id = '' } = params;
       const user = request.user!;
 
       // 1. Verify the reward exists

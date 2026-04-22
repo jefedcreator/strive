@@ -50,7 +50,6 @@ export const POST = withMiddleware<LoginValidatorSchema>(
         throw new Error('Invalid login type provided.');
       }
 
-
       return NextResponse.json({ status: 201 });
     } catch (error: any) {
       if (error.statusCode) throw error;
