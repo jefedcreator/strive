@@ -14,7 +14,7 @@ import {
   type UpdateLeaderboardValidatorSchema,
 } from '@/backend/validators/leaderboard.validator';
 import { db } from '@/server/db';
-import { type ApiResponse } from '@/types';
+import { type ApiResponse, type LeaderboardDetail, type LeaderboardListItem } from '@/types';
 import {
   ForbiddenException,
   InternalServerErrorException,
@@ -185,6 +185,14 @@ export const GET = withMiddleware<
       const leaderboard = await db.leaderboard.findUnique({
         where: { id },
         include: {
+          club: {
+            select: {
+              // id: true,
+              // name: true,
+              image: true,
+              // slug: true,
+            },
+          },
           entries: {
             orderBy,
             include: {
@@ -267,21 +275,29 @@ export const GET = withMiddleware<
           return sortOrder === 'asc' ? paceA - paceB : paceB - paceA;
         });
 
+        // @ts-ignore - manual sort override
         leaderboard.entries = [...validEntries, ...zeroEntries];
       }
 
       // Normalize pace display for all entries (e.g., "07:06" -> "7:06")
-      leaderboard.entries = leaderboard.entries.map((entry) => ({
+      const entries = leaderboard.entries.map((entry) => ({
         ...entry,
+        createdAt: entry.createdAt.toISOString(),
+        updatedAt: entry.updatedAt.toISOString(),
+        lastScoreDate: entry.lastScoreDate ? entry.lastScoreDate.toISOString() : null,
         runPace: entry.runPace
           ? entry.runPace.replace(/^0(?=\d)/, '')
           : entry.runPace,
       }));
 
-      const response: ApiResponse<typeof leaderboard> = {
+      const response: ApiResponse<LeaderboardDetail> = {
         status: 200,
         message: 'Leaderboard retrieved successfully',
-        data: leaderboard,
+        data: {
+          ...leaderboard,
+          image: leaderboard.club?.image ?? null,
+          entries
+        },
       };
 
       return NextResponse.json(response);

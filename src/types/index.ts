@@ -28,7 +28,7 @@ export interface ApiError {
 
 export interface PaginatedApiResponse<T = unknown>
   extends ApiResponse<T>,
-    PaginationMeta {}
+  PaginationMeta { }
 
 /** Shape returned by GET /api/clubs — Club without memberCount, plus computed counts */
 export type ClubListItem = Omit<Club, 'memberCount'> & {
@@ -86,6 +86,9 @@ export type LeaderboardListItem = Leaderboard & {
       avatar: string | null;
       fullname: string | null;
       username: string | null;
+      type: true,
+      xp: true,
+      currentStreak: true,
     };
   } & {
     id: string;
@@ -150,7 +153,7 @@ export interface LeaderboardEntryRecord {
 /** Full leaderboard detail returned by GET /api/leaderboards/[id] */
 export type LeaderboardDetail = Leaderboard & {
   image: string | null;
-  club: LeaderboardClubSummary | null;
+  // club: Pick<LeaderboardClubSummary, 'image'> | null;
   entries: LeaderboardEntryRecord[];
   _count: {
     entries: number;
@@ -231,11 +234,11 @@ type Option = {
   value: string;
   label: string;
   icon?:
-    | {
-        1: string;
-        2?: string | undefined;
-      }
-    | undefined;
+  | {
+    1: string;
+    2?: string | undefined;
+  }
+  | undefined;
 };
 
 enum DateRangeFilters {
@@ -391,7 +394,7 @@ export interface RewardsData {
 
 // const wsUrl = `wss://brd-customer-hl_d063dc7f-zone-strive_browser1:i9gep3lg6frd@brd.superproxy.io:9222`;
 
- interface CaptureOptions {
+interface CaptureOptions {
   headless?: boolean | 'new';
   userDataDir?: string;
   timeout?: number;
