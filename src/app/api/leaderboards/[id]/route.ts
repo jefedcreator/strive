@@ -295,7 +295,7 @@ export const GET = withMiddleware<
         message: 'Leaderboard retrieved successfully',
         data: {
           ...leaderboard,
-          image: leaderboard.club?.image ?? null,
+          // image: leaderboard.club?.image ?? null,
           entries
         },
       };

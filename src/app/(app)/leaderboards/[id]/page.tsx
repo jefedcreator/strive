@@ -34,12 +34,12 @@ export async function generateMetadata({
   const ogImageUrl = `${baseUrl}/api/leaderboards/${id}/og${sortBy ? `?sortBy=${sortBy}` : ''}`;
 
   // Use club image if available, else the dynamic leaderboard OG
-  const clubImage = leaderboard.club?.image;
-  const image = clubImage
-    ? clubImage.startsWith('http')
-      ? clubImage
-      : `${baseUrl}${clubImage.startsWith('/') ? '' : '/'}${clubImage}`
-    : ogImageUrl;
+  // const clubImage = leaderboard?.club?.image;
+  // const image = clubImage
+  //   ? clubImage.startsWith('http')
+  //     ? clubImage
+  //     : `${baseUrl}${clubImage.startsWith('/') ? '' : '/'}${clubImage}`
+  //   : ogImageUrl;
 
   return {
     title: leaderboardName,
@@ -53,7 +53,7 @@ export async function generateMetadata({
       url: pageUrl,
       images: [
         {
-          url: image,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: leaderboardName,
@@ -65,7 +65,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: leaderboardName,
       description,
-      images: [image],
+      images: [ogImageUrl],
     },
   };
 }

@@ -52,12 +52,12 @@ export const GET = withMiddleware<BaseQueryValidatorSchema>(
           const fallbackNameMatch = email.match(/^([^@]+)@/);
           const fallbackName = fallbackNameMatch ? fallbackNameMatch[1] : email;
 
-          const response: ApiResponse<any> = {
+          const response: ApiResponse<SearchedUser> = {
             status: 200,
             message: 'Valid external email',
             data: {
-              id: email, // use email as ID signal for external invites
-              fullname: fallbackName,
+              id: email,
+              fullname: fallbackName || "",
               avatar: null,
               username: null,
               isExternal: true,
