@@ -153,7 +153,7 @@ export interface LeaderboardEntryRecord {
 /** Full leaderboard detail returned by GET /api/leaderboards/[id] */
 export type LeaderboardDetail = Leaderboard & {
   // image: string | null;
-  club: Pick<LeaderboardClubSummary, 'image'> | null;
+  club: Pick<LeaderboardClubSummary, 'image'|"name"> | null;
   entries: LeaderboardEntryRecord[];
   _count: {
     entries: number;

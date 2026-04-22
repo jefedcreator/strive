@@ -188,7 +188,7 @@ export const GET = withMiddleware<
           club: {
             select: {
               // id: true,
-              // name: true,
+              name: true,
               image: true,
               // slug: true,
             },
