@@ -3,6 +3,7 @@ import { parseHttpError } from '@/utils';
 import { HttpException, UnauthorizedException } from '@/utils/exceptions';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { type z } from 'zod';
 import type {
   AuthRequest,
@@ -91,6 +92,20 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
       }
     } catch (error: any) {
       console.error('Middleware execution error:', error);
+      
+      Sentry.captureException(error, {
+        tags: {
+          type: 'middleware_error',
+        },
+        extra: {
+          url: request.url,
+          method: request.method,
+          params: request.params,
+          query: request.query,
+        },
+        user: request.user ? { id: request.user.id, email: request.user.email ?? undefined } : undefined,
+      });
+
       const statusCode =
         error instanceof HttpException
           ? error.statusCode
@@ -105,6 +120,21 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
       return await handler(request, { params: request.params! });
     } catch (error: any) {
       console.error('Handler error:', error);
+
+      Sentry.captureException(error, {
+        tags: {
+          type: 'handler_error',
+        },
+        extra: {
+          url: request.url,
+          method: request.method,
+          params: request.params,
+          query: request.query,
+          body: request.parsedBody,
+        },
+        user: request.user ? { id: request.user.id, email: request.user.email ?? undefined } : undefined,
+      });
+
       const statusCode =
         error instanceof HttpException
           ? error.statusCode
