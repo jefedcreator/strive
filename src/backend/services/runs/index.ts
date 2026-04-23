@@ -2,6 +2,7 @@ import { db } from '@/server/db';
 import type { RunData } from '@/types';
 import { checkClubMilestones } from '@/backend/services/rewards';
 import { syncUserXP } from '@/backend/services/xp';
+import { buildPositionMap } from '@/backend/services/leaderboards/ranking';
 
 export function getRunDedupId(
   run: Pick<RunData, 'date' | 'distance' | 'duration'>
@@ -46,6 +47,7 @@ export async function processRunsForUser(
     },
     select: {
       id: true,
+      leaderboardId: true,
       createdAt: true,
       runId: true,
       runDistance: true,
@@ -61,6 +63,35 @@ export async function processRunsForUser(
     const [min, sec] = pace.split(':').map(Number);
     return (min ?? 0) + (sec ?? 0) / 60;
   };
+
+  const leaderboardIds = [...new Set(memberships.map((m) => m.leaderboardId))];
+  const previousPositionsByLeaderboardId = new Map<string, Map<string, number>>();
+
+  if (leaderboardIds.length > 0) {
+    const existingEntries = await db.userLeaderboard.findMany({
+      where: {
+        leaderboardId: { in: leaderboardIds },
+      },
+      select: {
+        id: true,
+        userId: true,
+        leaderboardId: true,
+        score: true,
+        createdAt: true,
+        runDistance: true,
+        runPace: true,
+      },
+    });
+
+    for (const leaderboardId of leaderboardIds) {
+      previousPositionsByLeaderboardId.set(
+        leaderboardId,
+        buildPositionMap(
+          existingEntries.filter((entry) => entry.leaderboardId === leaderboardId)
+        )
+      );
+    }
+  }
 
   // For each membership, compute stats from runs after the join date
   await Promise.all(
@@ -139,6 +170,49 @@ export async function processRunsForUser(
       });
     })
   );
+
+  if (leaderboardIds.length > 0) {
+    const updatedEntries = await db.userLeaderboard.findMany({
+      where: {
+        leaderboardId: { in: leaderboardIds },
+      },
+      select: {
+        id: true,
+        userId: true,
+        leaderboardId: true,
+        score: true,
+        createdAt: true,
+        runDistance: true,
+        runPace: true,
+      },
+    });
+
+    await Promise.all(
+      leaderboardIds.map(async (leaderboardId) => {
+        const leaderboardEntries = updatedEntries.filter(
+          (entry) => entry.leaderboardId === leaderboardId
+        );
+        const currentPositions = buildPositionMap(leaderboardEntries);
+        const previousPositions =
+          previousPositionsByLeaderboardId.get(leaderboardId) ?? new Map();
+
+        await Promise.all(
+          leaderboardEntries.map((entry) =>
+            db.userLeaderboard.update({
+              where: { id: entry.id },
+              data: {
+                formerPosition:
+                  previousPositions.get(entry.id) ??
+                  currentPositions.get(entry.id) ??
+                  null,
+                currentPosition: currentPositions.get(entry.id) ?? null,
+              },
+            })
+          )
+        );
+      })
+    );
+  }
 
   // Check club milestones for all clubs the user belongs to
   const userClubs = await db.userClub.findMany({

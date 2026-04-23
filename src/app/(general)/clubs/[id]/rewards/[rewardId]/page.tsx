@@ -1,14 +1,14 @@
 import Background from '@/components/background';
 import { BadgeShareClient } from '@/components/badge-share-client';
+import { ClaimBadgeButton } from '@/components/claim-badge-button';
+import { Button } from '@/primitives/Button';
 import { getClubReward } from '@/server';
-import { type Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { auth } from '@/server/auth';
 import { db } from '@/server/db';
-import { ClaimBadgeButton } from '@/components/claim-badge-button';
+import { LogIn } from 'lucide-react';
+import { type Metadata } from 'next';
 import Link from 'next/link';
-import { LogIn, Users } from 'lucide-react';
-import { Button } from '@/primitives/Button';
+import { notFound } from 'next/navigation';
 
 interface PageProps {
   params: Promise<{ id: string; rewardId: string }>;

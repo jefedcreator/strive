@@ -26,6 +26,91 @@ import {
 } from '@/utils/exceptions';
 import { type Leaderboard, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import {
+  isZeroPace,
+  parsePaceToSeconds,
+} from '@/backend/services/leaderboards/ranking';
+
+const sortLeaderboardEntries = <
+  T extends {
+    score: number;
+    createdAt: Date;
+    runDistance: number | null;
+    runPace: string | null;
+    user: { fullname: string | null };
+  },
+>(
+  entries: T[],
+  sortBy: string,
+  sortOrder: 'asc' | 'desc'
+) => {
+  const sorted = [...entries];
+
+  if (sortBy === 'fullname') {
+    return sorted.sort((a, b) => {
+      const nameA = a.user.fullname ?? '';
+      const nameB = b.user.fullname ?? '';
+      return sortOrder === 'asc'
+        ? nameA.localeCompare(nameB)
+        : nameB.localeCompare(nameA);
+    });
+  }
+
+  if (sortBy === 'createdAt') {
+    return sorted.sort((a, b) =>
+      sortOrder === 'asc'
+        ? a.createdAt.getTime() - b.createdAt.getTime()
+        : b.createdAt.getTime() - a.createdAt.getTime()
+    );
+  }
+
+  if (sortBy === 'distance') {
+    return sorted.sort((a, b) =>
+      sortOrder === 'asc'
+        ? (a.runDistance ?? 0) - (b.runDistance ?? 0)
+        : (b.runDistance ?? 0) - (a.runDistance ?? 0)
+    );
+  }
+
+  if (sortBy === 'pace') {
+    const validEntries = sorted.filter((entry) => !isZeroPace(entry.runPace));
+    const zeroEntries = sorted.filter((entry) => isZeroPace(entry.runPace));
+
+    validEntries.sort((a, b) => {
+      const paceA = parsePaceToSeconds(a.runPace);
+      const paceB = parsePaceToSeconds(b.runPace);
+
+      if (paceA === paceB) {
+        return (b.runDistance ?? 0) - (a.runDistance ?? 0);
+      }
+
+      return sortOrder === 'asc' ? paceA - paceB : paceB - paceA;
+    });
+
+    return [...validEntries, ...zeroEntries];
+  }
+
+  if (sortBy === 'effort') {
+    const validEntries = sorted.filter((entry) => !isZeroPace(entry.runPace));
+    const zeroEntries = sorted.filter((entry) => isZeroPace(entry.runPace));
+
+    validEntries.sort((a, b) => {
+      if ((a.runDistance ?? 0) !== (b.runDistance ?? 0)) {
+        return sortOrder === 'asc'
+          ? (a.runDistance ?? 0) - (b.runDistance ?? 0)
+          : (b.runDistance ?? 0) - (a.runDistance ?? 0);
+      }
+
+      return parsePaceToSeconds(a.runPace) - parsePaceToSeconds(b.runPace);
+    });
+
+    return [...validEntries, ...zeroEntries];
+  }
+
+  return sorted.sort((a, b) =>
+    sortOrder === 'asc' ? a.score - b.score : b.score - a.score
+  );
+};
 
 /**
  * @pathParams paramValidator
@@ -234,58 +319,23 @@ export const GET = withMiddleware<
         );
       }
 
-      // Ensure that entries with 0/missing pace stay at the bottom
-      if (sortBy === 'pace' || sortBy === 'effort') {
-        const isZeroPace = (pace: string | null) =>
-          !pace || pace === '0' || pace === '0:00' || pace === '00:00';
-
-        const parsePaceToSeconds = (pace: string | null) => {
-          if (isZeroPace(pace)) return Infinity;
-          const [min, sec] = pace!.split(':').map(Number);
-          if (min !== undefined && sec !== undefined) return min * 60 + sec;
-          if (min !== undefined) return min * 60;
-          return Infinity;
-        };
-
-        const validEntries = leaderboard.entries.filter(
-          (e) => !isZeroPace(e.runPace)
-        );
-        const zeroEntries = leaderboard.entries.filter((e) =>
-          isZeroPace(e.runPace)
-        );
-
-        // Perform manual sort to handle inconsistent string padding
-        validEntries.sort((a, b) => {
-          if (sortBy === 'effort') {
-            // Distance is already sorted correctly by the database.
-            // We only need to handle ties where numeric pace sorting is required.
-            if (a.runDistance !== b.runDistance) {
-              return 0; // maintain database order for distances
-            }
-            // Tie-breaker: faster pace (lower seconds) ranks higher
-            return (
-              parsePaceToSeconds(a.runPace) - parsePaceToSeconds(b.runPace)
-            );
-          }
-
-          // Pure pace sort: handle based on sortOrder with distance tie-breaker
-          const paceA = parsePaceToSeconds(a.runPace);
-          const paceB = parsePaceToSeconds(b.runPace);
-
-          if (paceA === paceB) {
-            return (b.runDistance ?? 0) - (a.runDistance ?? 0);
-          }
-
-          return sortOrder === 'asc' ? paceA - paceB : paceB - paceA;
-        });
-
-        // @ts-ignore - manual sort override
-        leaderboard.entries = [...validEntries, ...zeroEntries];
-      }
+      const currentEntries = sortLeaderboardEntries(
+        leaderboard.entries,
+        sortBy,
+        sortOrder
+      );
 
       // Normalize pace display for all entries (e.g., "07:06" -> "7:06")
-      const entries = leaderboard.entries.map((entry) => ({
-        ...entry,
+      const entries = currentEntries.map((entry, index) => {
+        const activeSortPosition = index + 1;
+        const defaultPosition = entry.currentPosition ?? activeSortPosition;
+        const formerPosition =
+          sortBy === 'effort' ? (entry.formerPosition ?? defaultPosition) : defaultPosition;
+
+        return {
+          ...entry,
+          formerPosition,
+          currentPosition: activeSortPosition,
         createdAt: entry.createdAt.toISOString(),
         updatedAt: entry.updatedAt.toISOString(),
         lastScoreDate: entry.lastScoreDate
@@ -294,7 +344,8 @@ export const GET = withMiddleware<
         runPace: entry.runPace
           ? entry.runPace.replace(/^0(?=\d)/, '')
           : entry.runPace,
-      }));
+        };
+      });
 
       const response: ApiResponse<LeaderboardDetail> = {
         status: 200,

@@ -17,8 +17,10 @@ import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
 type LeaderboardEntry = Omit<
   UserLeaderboard,
-  'createdAt' | 'updatedAt' | 'lastScoreDate'
+  'createdAt' | 'updatedAt' | 'lastScoreDate' | 'formerPosition' | 'currentPosition'
 > & {
+  formerPosition?: number | null;
+  currentPosition?: number | null;
   createdAt: Date | string;
   updatedAt: Date | string;
   lastScoreDate: Date | string | null;
@@ -38,6 +40,7 @@ interface LeaderboardProps {
   currentUserId?: string;
   leaderboardType?: LeaderboardType;
   disableInternalSort?: boolean;
+  movementTooltipMode?: 'historical' | 'relative';
 }
 
 type SortField = 'default' | 'runDistance' | 'runPace';
@@ -47,6 +50,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   currentUserId,
   leaderboardType = 'DISTANCE',
   disableInternalSort = false,
+  movementTooltipMode = 'historical',
 }) => {
   const [sortField, setSortField] = React.useState<SortField>('default');
 
@@ -71,13 +75,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     return sorted.sort((a, b) => b.score - a.score);
   }, [entries, sortField, leaderboardType, disableInternalSort]);
 
-  // Map each entry's userId to its original position (from the API order)
-  const originalRankMap = React.useMemo(() => {
-    const map = new Map<string, number>();
-    entries.forEach((entry, idx) => map.set(entry.userId, idx + 1));
-    return map;
-  }, [entries]);
-
   const activeSortField = disableInternalSort
     ? 'default'
     : sortField !== 'default'
@@ -85,6 +82,22 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
       : leaderboardType === 'PACE'
         ? 'runPace'
         : 'runDistance';
+
+  const getMovementTooltip = (rankDiff: number) => {
+    const directionLabel =
+      rankDiff > 0
+        ? `Up ${rankDiff}`
+        : rankDiff < 0
+          ? `Down ${Math.abs(rankDiff)}`
+          : 'No change';
+
+    const contextLabel =
+      movementTooltipMode === 'historical'
+        ? 'since the last leaderboard update'
+        : 'relative to the default leaderboard order';
+
+    return `${directionLabel} ${contextLabel}`;
+  };
 
   return (
     <div className="grid grid-cols-1 w-full">
@@ -116,8 +129,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             <TableBody className="divide-y divide-gray-50 dark:divide-gray-800/50">
               {sortedEntries.map((entry, index) => {
                 const rank = index + 1;
-                const originalRank = originalRankMap.get(entry.userId) ?? rank;
-                const rankDiff = originalRank - rank; // positive = moved up, negative = moved down
+                const currentPosition = entry.currentPosition ?? rank;
+                const formerPosition = entry.formerPosition ?? currentPosition;
+                const rankDiff = formerPosition - currentPosition;
                 const isCurrentUser = entry.userId === currentUserId;
 
                 return (
@@ -146,44 +160,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
                     {/* Athlete */}
                     <TableCell className="px-8 py-5">
-                      {/* Rank change indicator */}
-                      <div className="flex items-center gap-3 min-w-[200px]">
-                        <div className="shrink-0 flex items-center justify-center w-5">
-                          {rankDiff > 0 ? (
-                            <div
-                              className="flex items-center gap-0.5"
-                              title={`Up ${rankDiff}`}
-                            >
-                              <ArrowUp
-                                className="w-3.5 h-3.5 text-emerald-500"
-                                strokeWidth={3}
-                              />
-                              <span className="text-[10px] font-bold text-emerald-500 tabular-nums">
-                                {rankDiff}
-                              </span>
-                            </div>
-                          ) : rankDiff < 0 ? (
-                            <div
-                              className="flex items-center gap-0.5"
-                              title={`Down ${Math.abs(rankDiff)}`}
-                            >
-                              <ArrowDown
-                                className="w-3.5 h-3.5 text-red-500"
-                                strokeWidth={3}
-                              />
-                              <span className="text-[10px] font-bold text-red-500 tabular-nums">
-                                {Math.abs(rankDiff)}
-                              </span>
-                            </div>
-                          ) : (
-                            <Minus
-                              className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600"
-                              strokeWidth={3}
-                              //  title="No change"
-                            />
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="flex items-center gap-4 min-w-[200px]">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <ProfileFrame
                             xp={entry.user.xp}
                             streak={entry.user.currentStreak}
@@ -216,6 +194,42 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                                   : 'text-gray-900 dark:text-gray-100'
                               }`}
                             >
+                              <span className="shrink-0 inline-flex items-center justify-center w-5">
+                                {rankDiff > 0 ? (
+                                  <span
+                                    className="flex items-center gap-0.5"
+                                    title={getMovementTooltip(rankDiff)}
+                                  >
+                                    <ArrowUp
+                                      className="w-3.5 h-3.5 text-emerald-500"
+                                      strokeWidth={3}
+                                    />
+                                    <span className="text-[10px] font-bold text-emerald-500 tabular-nums">
+                                      {rankDiff}
+                                    </span>
+                                  </span>
+                                ) : rankDiff < 0 ? (
+                                  <span
+                                    className="flex items-center gap-0.5"
+                                    title={getMovementTooltip(rankDiff)}
+                                  >
+                                    <ArrowDown
+                                      className="w-3.5 h-3.5 text-red-500"
+                                      strokeWidth={3}
+                                    />
+                                    <span className="text-[10px] font-bold text-red-500 tabular-nums">
+                                      {Math.abs(rankDiff)}
+                                    </span>
+                                  </span>
+                                ) : (
+                                  <span title={getMovementTooltip(rankDiff)}>
+                                    <Minus
+                                      className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600"
+                                      strokeWidth={3}
+                                    />
+                                  </span>
+                                )}
+                              </span>
                               {entry.user.fullname ??
                                 entry.user.username ??
                                 'Guest'}

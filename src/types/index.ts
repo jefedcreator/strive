@@ -136,6 +136,8 @@ export interface LeaderboardEntryRecord {
   userId: string;
   leaderboardId: string;
   score: number;
+  formerPosition?: number | null;
+  currentPosition?: number | null;
   createdAt: string;
   updatedAt: string;
   lastScoreDate: string | null;
