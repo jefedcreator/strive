@@ -126,11 +126,10 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
     const url = req.nextUrl
       ? `${req.nextUrl.pathname}${req.nextUrl.search}`
       : (() => {
-        const parsed = new URL(req.url);
-        return `${parsed.pathname}${parsed.search}`;
-      })();
+          const parsed = new URL(req.url);
+          return `${parsed.pathname}${parsed.search}`;
+        })();
     const response = await executeRequest(req, context);
-
     const duration = Date.now() - startTime;
     const statusCode = response.status;
 
@@ -172,30 +171,30 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
  */
 export const pathParamValidatorMiddleware =
   (schema: z.ZodObject<any>) =>
-    async (request: AuthRequest<any, any>): Promise<MiddlewareResponse> => {
-      const params = request.params ?? {};
-      const result = schema.safeParse(params);
+  async (request: AuthRequest<any, any>): Promise<MiddlewareResponse> => {
+    const params = request.params ?? {};
+    const result = schema.safeParse(params);
 
-      if (result.success) {
-        return {
-          message: 'Invalid ID parameter',
-          statusCode: 200,
-          next: true,
-        };
-      } else {
-        const firstError = result.error.issues[0];
-        const errorPath = firstError?.path.join('.');
-        const errorMessage = firstError?.message;
+    if (result.success) {
+      return {
+        message: 'Invalid ID parameter',
+        statusCode: 200,
+        next: true,
+      };
+    } else {
+      const firstError = result.error.issues[0];
+      const errorPath = firstError?.path.join('.');
+      const errorMessage = firstError?.message;
 
-        return {
-          message: errorPath
-            ? `${errorPath}: ${errorMessage}`
-            : (errorMessage ?? ''),
-          statusCode: 422,
-          next: false,
-        };
-      }
-    };
+      return {
+        message: errorPath
+          ? `${errorPath}: ${errorMessage}`
+          : (errorMessage ?? ''),
+        statusCode: 422,
+        next: false,
+      };
+    }
+  };
 
 /**
  *
@@ -310,46 +309,46 @@ export const optionalAuthMiddleware = async <B = unknown, Q = QueryParameters>(
  */
 export const queryValidatorMiddleware =
   <Q extends z.ZodTypeAny>(schema: Q) =>
-    async (
-      request: AuthRequest<unknown, z.infer<Q>>
-    ): Promise<MiddlewareResponse> => {
-      try {
-        const searchParams = request.nextUrl.searchParams;
-        const query: Record<string, string> = {};
-        searchParams.forEach((value, key) => {
-          query[key] = value;
-        });
+  async (
+    request: AuthRequest<unknown, z.infer<Q>>
+  ): Promise<MiddlewareResponse> => {
+    try {
+      const searchParams = request.nextUrl.searchParams;
+      const query: Record<string, string> = {};
+      searchParams.forEach((value, key) => {
+        query[key] = value;
+      });
 
-        const result = schema.safeParse(query);
+      const result = schema.safeParse(query);
 
-        if (!result.success) {
-          const errorPath = result.error.issues[0]?.message;
+      if (!result.success) {
+        const errorPath = result.error.issues[0]?.message;
 
-          return {
-            message: errorPath
-              ? `Invalid query parameter: ${errorPath}`
-              : 'Invalid query parameters',
-            statusCode: 422,
-            next: false,
-          };
-        }
-
-        request.query = result.data;
-      } catch (error) {
-        console.error(error);
         return {
-          message: 'Error parsing query parameters',
-          statusCode: 400,
+          message: errorPath
+            ? `Invalid query parameter: ${errorPath}`
+            : 'Invalid query parameters',
+          statusCode: 422,
           next: false,
         };
       }
 
+      request.query = result.data;
+    } catch (error) {
+      console.error(error);
       return {
-        message: '',
-        statusCode: 200,
-        next: true,
+        message: 'Error parsing query parameters',
+        statusCode: 400,
+        next: false,
       };
+    }
+
+    return {
+      message: '',
+      statusCode: 200,
+      next: true,
     };
+  };
 
 /**
  *
@@ -360,39 +359,39 @@ export const queryValidatorMiddleware =
 
 export const bodyValidatorMiddleware =
   <B extends z.ZodTypeAny>(schema: B) =>
-    async (
-      request: AuthRequest<z.infer<B>, unknown>
-    ): Promise<MiddlewareResponse> => {
-      const body = request.parsedBody ?? {};
-      // const query = request.query ?? {};
-      const files = (request.files as Record<string, unknown>) ?? {};
+  async (
+    request: AuthRequest<z.infer<B>, unknown>
+  ): Promise<MiddlewareResponse> => {
+    const body = request.parsedBody ?? {};
+    // const query = request.query ?? {};
+    const files = (request.files as Record<string, unknown>) ?? {};
 
-      const dataToValidate = {
-        ...(body as Record<string, unknown>),
-        // ...(query as Record<string, unknown>),
-        ...files,
-      };
-      const result = schema.safeParse(dataToValidate);
-
-      if (result.success) {
-        request.validatedData = result.data;
-
-        return {
-          message: '',
-          statusCode: 200,
-          next: true,
-        };
-      } else {
-        const firstError = result.error.issues[0];
-        const errorPath = firstError?.path.join('.');
-        const errorMessage = firstError?.message;
-
-        return {
-          message: errorPath
-            ? `${errorPath}: ${errorMessage}`
-            : (errorMessage ?? 'Validation failed'),
-          statusCode: 422,
-          next: false,
-        };
-      }
+    const dataToValidate = {
+      ...(body as Record<string, unknown>),
+      // ...(query as Record<string, unknown>),
+      ...files,
     };
+    const result = schema.safeParse(dataToValidate);
+
+    if (result.success) {
+      request.validatedData = result.data;
+
+      return {
+        message: '',
+        statusCode: 200,
+        next: true,
+      };
+    } else {
+      const firstError = result.error.issues[0];
+      const errorPath = firstError?.path.join('.');
+      const errorMessage = firstError?.message;
+
+      return {
+        message: errorPath
+          ? `${errorPath}: ${errorMessage}`
+          : (errorMessage ?? 'Validation failed'),
+        statusCode: 422,
+        next: false,
+      };
+    }
+  };

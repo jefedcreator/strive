@@ -50,3 +50,5 @@ yarn-error.log*
 .agent
 
 debug/
+# Sentry Config File
+.env.sentry-build-plugin
