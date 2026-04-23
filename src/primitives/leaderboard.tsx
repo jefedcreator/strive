@@ -13,6 +13,7 @@ import { getTier } from '@/backend/services/xp/logic';
 import { ProfileFrame } from '@/components/profile-frame';
 import React from 'react';
 import { parsePace, formatDuration } from '@/utils';
+import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
 type LeaderboardEntry = Omit<
   UserLeaderboard,
@@ -70,6 +71,13 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     return sorted.sort((a, b) => b.score - a.score);
   }, [entries, sortField, leaderboardType, disableInternalSort]);
 
+  // Map each entry's userId to its original position (from the API order)
+  const originalRankMap = React.useMemo(() => {
+    const map = new Map<string, number>();
+    entries.forEach((entry, idx) => map.set(entry.userId, idx + 1));
+    return map;
+  }, [entries]);
+
   const activeSortField = disableInternalSort
     ? 'default'
     : sortField !== 'default'
@@ -108,6 +116,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             <TableBody className="divide-y divide-gray-50 dark:divide-gray-800/50">
               {sortedEntries.map((entry, index) => {
                 const rank = index + 1;
+                const originalRank = originalRankMap.get(entry.userId) ?? rank;
+                const rankDiff = originalRank - rank; // positive = moved up, negative = moved down
                 const isCurrentUser = entry.userId === currentUserId;
 
                 return (
@@ -136,71 +146,109 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
                     {/* Athlete */}
                     <TableCell className="px-8 py-5">
-                      <div className="flex items-center gap-4 min-w-[200px]">
-                        <ProfileFrame
-                          xp={entry.user.xp}
-                          streak={entry.user.currentStreak}
-                          size="md"
-                        >
-                          <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
-                            {entry.user.avatar && (
-                              <AvatarImage
-                                src={entry.user.avatar}
-                                alt={
-                                  entry.user.fullname ??
-                                  entry.user.username ??
-                                  'Guest'
-                                }
-                                className="object-cover"
+                      {/* Rank change indicator */}
+                      <div className="flex items-center gap-3 min-w-[200px]">
+                        <div className="shrink-0 flex items-center justify-center w-5">
+                          {rankDiff > 0 ? (
+                            <div
+                              className="flex items-center gap-0.5"
+                              title={`Up ${rankDiff}`}
+                            >
+                              <ArrowUp
+                                className="w-3.5 h-3.5 text-emerald-500"
+                                strokeWidth={3}
                               />
-                            )}
-                            <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
-                              {entry.user.fullname?.[0] ??
-                                entry.user.username?.[0] ??
-                                'G'}
-                            </AvatarFallback>
-                          </Avatar>
-                        </ProfileFrame>
-                        <div className="flex flex-col truncate">
-                          <span
-                            className={`text-sm font-bold tracking-tight truncate flex items-center gap-1.5 ${
-                              isCurrentUser
-                                ? 'text-primary dark:text-white'
-                                : 'text-gray-900 dark:text-gray-100'
-                            }`}
-                          >
-                            {entry.user.fullname ??
-                              entry.user.username ??
-                              'Guest'}
-                            {isCurrentUser && (
-                              <span className="text-[10px] uppercase font-black tracking-widest text-primary/60 dark:text-white/40">
-                                (You)
+                              <span className="text-[10px] font-bold text-emerald-500 tabular-nums">
+                                {rankDiff}
                               </span>
-                            )}
-                            {/* Tier badge */}
-                            {entry.user.xp != null && (
-                              <span
-                                className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/5"
-                                title={`${getTier(entry.user.xp).name} — ${entry.user.xp.toLocaleString()} XP`}
-                              >
-                                {getTier(entry.user.xp).emoji}
-                                <span className="text-gray-500 dark:text-gray-400">
-                                  {getTier(entry.user.xp).name}
-                                </span>
+                            </div>
+                          ) : rankDiff < 0 ? (
+                            <div
+                              className="flex items-center gap-0.5"
+                              title={`Down ${Math.abs(rankDiff)}`}
+                            >
+                              <ArrowDown
+                                className="w-3.5 h-3.5 text-red-500"
+                                strokeWidth={3}
+                              />
+                              <span className="text-[10px] font-bold text-red-500 tabular-nums">
+                                {Math.abs(rankDiff)}
                               </span>
-                            )}
-                            {/* Platform badge */}
-                            {entry.user.type && (
-                              <span className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter">
-                                {entry.user.type}
-                              </span>
-                            )}
-                          </span>
-                          {entry.user.username && entry.user.fullname && (
-                            <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                              @{entry.user.username}
-                            </span>
+                            </div>
+                          ) : (
+                            <Minus
+                              className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600"
+                              strokeWidth={3}
+                              //  title="No change"
+                            />
                           )}
+                        </div>
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                          <ProfileFrame
+                            xp={entry.user.xp}
+                            streak={entry.user.currentStreak}
+                            size="md"
+                          >
+                            <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
+                              {entry.user.avatar && (
+                                <AvatarImage
+                                  src={entry.user.avatar}
+                                  alt={
+                                    entry.user.fullname ??
+                                    entry.user.username ??
+                                    'Guest'
+                                  }
+                                  className="object-cover"
+                                />
+                              )}
+                              <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
+                                {entry.user.fullname?.[0] ??
+                                  entry.user.username?.[0] ??
+                                  'G'}
+                              </AvatarFallback>
+                            </Avatar>
+                          </ProfileFrame>
+                          <div className="flex flex-col truncate">
+                            <span
+                              className={`text-sm font-bold tracking-tight truncate flex items-center gap-1.5 ${
+                                isCurrentUser
+                                  ? 'text-primary dark:text-white'
+                                  : 'text-gray-900 dark:text-gray-100'
+                              }`}
+                            >
+                              {entry.user.fullname ??
+                                entry.user.username ??
+                                'Guest'}
+                              {isCurrentUser && (
+                                <span className="text-[10px] uppercase font-black tracking-widest text-primary/60 dark:text-white/40">
+                                  (You)
+                                </span>
+                              )}
+                              {/* Tier badge */}
+                              {entry.user.xp != null && (
+                                <span
+                                  className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/5"
+                                  title={`${getTier(entry.user.xp).name} — ${entry.user.xp.toLocaleString()} XP`}
+                                >
+                                  {getTier(entry.user.xp).emoji}
+                                  <span className="text-gray-500 dark:text-gray-400">
+                                    {getTier(entry.user.xp).name}
+                                  </span>
+                                </span>
+                              )}
+                              {/* Platform badge */}
+                              {entry.user.type && (
+                                <span className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter">
+                                  {entry.user.type}
+                                </span>
+                              )}
+                            </span>
+                            {entry.user.username && entry.user.fullname && (
+                              <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                                @{entry.user.username}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </TableCell>

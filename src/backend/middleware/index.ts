@@ -105,7 +105,7 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
       }
     } catch (error: any) {
       console.error('Middleware execution error:', error);
-      
+
       Sentry.captureException(error, {
         tags: {
           type: 'middleware_error',
@@ -116,7 +116,9 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
           params: request.params,
           query: request.query,
         },
-        user: request.user ? { id: request.user.id, email: request.user.email ?? undefined } : undefined,
+        user: request.user
+          ? { id: request.user.id, email: request.user.email ?? undefined }
+          : undefined,
       });
 
       const statusCode =
@@ -145,7 +147,9 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
           query: request.query,
           body: request.parsedBody,
         },
-        user: request.user ? { id: request.user.id, email: request.user.email ?? undefined } : undefined,
+        user: request.user
+          ? { id: request.user.id, email: request.user.email ?? undefined }
+          : undefined,
       });
 
       const statusCode =
