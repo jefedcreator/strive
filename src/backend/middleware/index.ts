@@ -22,6 +22,19 @@ import type {
  * @returns
  */
 
+const getExternalUrl = (url: string) => {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL;
+  if (!baseUrl) return url;
+
+  try {
+    const parsedUrl = new URL(url);
+    const parsedBase = new URL(baseUrl);
+    return `${parsedBase.origin}${parsedUrl.pathname}${parsedUrl.search}`;
+  } catch {
+    return url;
+  }
+};
+
 export const withMiddleware = <B = unknown, Q = QueryParameters>(
   handler: (
     request: AuthRequest<B, Q>,
@@ -98,7 +111,7 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
           type: 'middleware_error',
         },
         extra: {
-          url: request.url,
+          url: getExternalUrl(request.url),
           method: request.method,
           params: request.params,
           query: request.query,
@@ -126,7 +139,7 @@ export const withMiddleware = <B = unknown, Q = QueryParameters>(
           type: 'handler_error',
         },
         extra: {
-          url: request.url,
+          url: getExternalUrl(request.url),
           method: request.method,
           params: request.params,
           query: request.query,

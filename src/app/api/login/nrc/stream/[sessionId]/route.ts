@@ -1,19 +1,11 @@
-// src/app/api/nrc/stream/[sessionId]/route.ts
-//
-// The client opens this endpoint with EventSource immediately after receiving
-// a sessionId from POST /api/nrc/init. The stream stays open and pushes
-// Puppeteer milestones (ready, processing, success, error) as SSE events.
-
+import { withMiddleware } from '@/backend/middleware';
 import { sseService } from '@/backend/services/events';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ sessionId: string }> }
-) {
-  const { sessionId } = await params;
+export const GET = withMiddleware(async (request, { params }) => {
+  const { sessionId } = params;
 
   if (!sessionId) {
     return NextResponse.json(
@@ -32,4 +24,4 @@ export async function GET(
       'X-Accel-Buffering': 'no',
     },
   });
-}
+}, []);
