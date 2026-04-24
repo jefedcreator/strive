@@ -1,3 +1,5 @@
+import { getTier } from '@/backend/services/xp/logic';
+import { ProfileFrame } from '@/components/profile-frame';
 import { Avatar, AvatarFallback, AvatarImage } from '@/primitives/avatar';
 import { Badge } from '@/primitives/badge';
 import {
@@ -8,12 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/primitives/table';
-import { type UserLeaderboard, type LeaderboardType } from '@prisma/client';
-import { getTier } from '@/backend/services/xp/logic';
-import { ProfileFrame } from '@/components/profile-frame';
+import { formatDuration, parsePace } from '@/utils';
+import { type LeaderboardType, type UserLeaderboard } from '@prisma/client';
+import { ArrowDown, ArrowUp, Equal } from 'lucide-react';
 import React from 'react';
-import { parsePace, formatDuration } from '@/utils';
-import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
 type LeaderboardEntry = Omit<
   UserLeaderboard,
@@ -190,7 +190,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                               </span>
                             </span>
                           ) : (
-                            <Minus
+                            <Equal
                               className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600"
                               strokeWidth={3}
                             />
