@@ -56,8 +56,8 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
           })
         ])
 
-        isClaimed = !!claimedReward && !!membership?.isActive
-        isMember = !!membership
+        isClaimed = !!claimedReward
+        isMember = !!membership && !!membership?.isActive
       }
 
       const response: ApiResponse<ClubRewardDetail> = {
