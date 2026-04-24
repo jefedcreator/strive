@@ -188,6 +188,8 @@ export async function processRunsForUser(
         createdAt: true,
         runDistance: true,
         runPace: true,
+        formerPosition: true,
+        currentPosition: true,
       },
     });
 
@@ -205,16 +207,22 @@ export async function processRunsForUser(
             db.userLeaderboard.update({
               where: { id: entry.id },
               data: (() => {
-                const currentPosition = currentPositions.get(entry.id) ?? null;
-                const previousPosition =
-                  previousPositions.get(entry.id) ?? currentPosition;
+                const newPosition = currentPositions.get(entry.id) ?? null;
+                const oldPosition =
+                  previousPositions.get(entry.id) ?? newPosition;
+
+                let formerPosition: number | null;
+                if (oldPosition !== newPosition) {
+                  // Position changed this cycle — store the old position
+                  formerPosition = oldPosition;
+                } else {
+                  // Position didn't change — keep existing DB formerPosition
+                  formerPosition = entry.formerPosition ?? newPosition;
+                }
 
                 return {
-                  formerPosition:
-                    previousPosition !== currentPosition
-                      ? previousPosition
-                      : currentPosition,
-                  currentPosition,
+                  formerPosition,
+                  currentPosition: newPosition,
                 };
               })(),
             })

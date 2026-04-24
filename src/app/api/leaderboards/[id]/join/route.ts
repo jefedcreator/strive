@@ -13,6 +13,7 @@ import {
   NotFoundException,
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
+import { buildPositionMap } from '@/backend/services/leaderboards/ranking';
 
 /**
  * @pathParams paramValidator
@@ -125,6 +126,37 @@ export const POST = withMiddleware<unknown>(
         }
 
         await db.$transaction(transactionOps);
+
+        // Recalculate positions for all entries after the new member joins
+        const allEntries = await db.userLeaderboard.findMany({
+          where: { leaderboardId },
+          select: {
+            id: true,
+            userId: true,
+            leaderboardId: true,
+            score: true,
+            createdAt: true,
+            runDistance: true,
+            runPace: true,
+            formerPosition: true,
+            currentPosition: true,
+          },
+        });
+
+        const newPositions = buildPositionMap(allEntries);
+        await Promise.all(
+          allEntries.map((entry) => {
+            const newPosition = newPositions.get(entry.id) ?? null;
+            const formerPosition = entry.currentPosition ?? newPosition;
+            return db.userLeaderboard.update({
+              where: { id: entry.id },
+              data: {
+                formerPosition,
+                currentPosition: newPosition,
+              },
+            });
+          })
+        );
 
         const response: ApiResponse<null> = {
           status: 200,

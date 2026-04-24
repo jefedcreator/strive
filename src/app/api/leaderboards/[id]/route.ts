@@ -326,12 +326,31 @@ export const GET = withMiddleware<
         sortOrder
       );
 
+      // Compute effort-based positions for relative movement when sorting by non-effort fields
+      const effortPositionMap = new Map<string, number>();
+      if (sortBy !== 'effort') {
+        const effortSorted = sortLeaderboardEntries(
+          leaderboard.entries,
+          'effort',
+          'desc'
+        );
+        effortSorted.forEach((entry, idx) => {
+          effortPositionMap.set(entry.id, idx + 1);
+        });
+      }
+
       // Normalize pace display for all entries (e.g., "07:06" -> "7:06")
       const entries = currentEntries.map((entry, index) => {
         const activeSortPosition = index + 1;
-        const defaultPosition = entry.currentPosition ?? activeSortPosition;
-        const formerPosition =
-          sortBy === 'effort' ? (entry.formerPosition ?? defaultPosition) : defaultPosition;
+
+        let formerPosition: number;
+        if (sortBy === 'effort') {
+          // Historical movement: use DB-stored former position
+          formerPosition = entry.formerPosition ?? activeSortPosition;
+        } else {
+          // Relative movement: use the entry's effort-based position
+          formerPosition = effortPositionMap.get(entry.id) ?? activeSortPosition;
+        }
 
         return {
           ...entry,
