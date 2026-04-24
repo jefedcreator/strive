@@ -1,7 +1,7 @@
 import type { NikeAuthResult } from '@/types';
 import type { Prisma, User, UserType } from '@prisma/client';
 import moment from 'moment';
-import prisma from 'prisma';
+import { db as prisma } from '@/server/db';
 import { generateUsername } from 'unique-username-generator';
 import jwt from 'jsonwebtoken';
 import { signIn } from '@/server/auth';
@@ -295,9 +295,9 @@ class AuthService {
 
         if (reward?.clubId) {
           const rClubId = reward.clubId;
+          let isMemberOrJoined = joinedClubIds.has(rClubId);
 
-          // Only join if they aren't already a member (and haven't joined in this call)
-          if (!joinedClubIds.has(rClubId)) {
+          if (!isMemberOrJoined) {
             const existingMember = await prisma.userClub.findUnique({
               where: {
                 userId_clubId: {
@@ -307,7 +307,10 @@ class AuthService {
               },
             });
 
-            if (!existingMember) {
+            if (existingMember) {
+              isMemberOrJoined = true;
+            } else {
+              // Join if public, otherwise request
               if (reward.club?.isPublic) {
                 transactions.push(
                   prisma.userClub.create({
@@ -328,19 +331,12 @@ class AuthService {
                   prisma.club.update({
                     where: { id: rClubId },
                     data: { memberCount: { increment: 1 } },
-                  }),
-                  // Claim reward immediately for public club
-                  prisma.userReward.upsert({
-                    where: {
-                      userId_rewardId: { userId: user.id, rewardId: reward.id },
-                    },
-                    create: { userId: user.id, rewardId: reward.id },
-                    update: {},
                   })
                 );
                 joinedClubIds.add(rClubId);
+                isMemberOrJoined = true;
               } else {
-                // Private club: generate a join request instead
+                // Private club: generate a join request
                 const existingInvite = await prisma.clubInvites.findFirst({
                   where: {
                     userId: user.id,
@@ -367,20 +363,21 @@ class AuthService {
                     })
                   );
                 }
-                // We skip upserting the reward for private clubs until they are accepted
               }
-            } else {
-              // Already a member: Generate Reward (Upsert)
-              transactions.push(
-                prisma.userReward.upsert({
-                  where: {
-                    userId_rewardId: { userId: user.id, rewardId: reward.id },
-                  },
-                  create: { userId: user.id, rewardId: reward.id },
-                  update: {},
-                })
-              );
             }
+          }
+
+          // If the user is now a member (or was already one), claim the reward
+          if (isMemberOrJoined) {
+            transactions.push(
+              prisma.userReward.upsert({
+                where: {
+                  userId_rewardId: { userId: user.id, rewardId: reward.id },
+                },
+                create: { userId: user.id, rewardId: reward.id },
+                update: {},
+              })
+            );
           }
         }
       }
