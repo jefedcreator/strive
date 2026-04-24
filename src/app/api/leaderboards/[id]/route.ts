@@ -81,11 +81,16 @@ const sortLeaderboardEntries = <
       const paceB = parsePaceToSeconds(b.runPace);
 
       if (paceA === paceB) {
-        return (b.runDistance ?? 0) - (a.runDistance ?? 0);
+        if ((b.runDistance ?? 0) !== (a.runDistance ?? 0)) {
+          return (b.runDistance ?? 0) - (a.runDistance ?? 0);
+        }
+        return a.createdAt.getTime() - b.createdAt.getTime();
       }
 
       return sortOrder === 'asc' ? paceA - paceB : paceB - paceA;
     });
+
+    zeroEntries.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     return [...validEntries, ...zeroEntries];
   }
@@ -101,8 +106,13 @@ const sortLeaderboardEntries = <
           : (b.runDistance ?? 0) - (a.runDistance ?? 0);
       }
 
-      return parsePaceToSeconds(a.runPace) - parsePaceToSeconds(b.runPace);
+      const paceDiff = parsePaceToSeconds(a.runPace) - parsePaceToSeconds(b.runPace);
+      if (paceDiff !== 0) return paceDiff;
+
+      return a.createdAt.getTime() - b.createdAt.getTime();
     });
+
+    zeroEntries.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     return [...validEntries, ...zeroEntries];
   }
@@ -344,7 +354,7 @@ export const GET = withMiddleware<
         const activeSortPosition = index + 1;
 
         let formerPosition: number;
-        if (sortBy === 'effort') {
+        if (sortBy === 'effort' || sortBy === 'distance') {
           // Historical movement: use DB-stored former position
           formerPosition = entry.formerPosition ?? activeSortPosition;
         } else {

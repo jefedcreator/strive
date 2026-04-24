@@ -448,7 +448,7 @@ export const LeaderboardDetailClient: React.FC<
           currentUserId={session?.user.id}
           leaderboardType={leaderboard.type}
           disableInternalSort
-          movementTooltipMode={sortBy === 'effort' ? 'historical' : 'relative'}
+          movementTooltipMode={(sortBy === 'effort' || sortBy === 'distance') ? 'historical' : 'relative'}
         />
       </FadeInItem>
 

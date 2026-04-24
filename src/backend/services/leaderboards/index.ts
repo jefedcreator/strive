@@ -30,8 +30,13 @@ export function sortEntriesByDefaultLeaderboardOrder<T extends RankableEntry>(
       return (b.runDistance ?? 0) - (a.runDistance ?? 0);
     }
 
-    return parsePaceToSeconds(a.runPace) - parsePaceToSeconds(b.runPace);
+    const paceDiff = parsePaceToSeconds(a.runPace) - parsePaceToSeconds(b.runPace);
+    if (paceDiff !== 0) return paceDiff;
+
+    return a.createdAt.getTime() - b.createdAt.getTime();
   });
+
+  zeroEntries.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   return [...validEntries, ...zeroEntries];
 }

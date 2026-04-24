@@ -63,6 +63,16 @@ export const DELETE = withMiddleware<unknown>(
             },
           },
         }),
+        db.userLeaderboard.deleteMany({
+          where: {
+            user: {
+              id: user.id,
+            },
+            leaderboard: {
+              clubId,
+            }
+          },
+        }),
         db.notification.create({
           data: {
             userId: club.createdById,
