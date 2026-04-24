@@ -165,31 +165,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     <TableCell className="px-8 py-5">
                       <div className="flex items-center gap-4 min-w-[200px]">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <ProfileFrame
-                            xp={entry.user.xp}
-                            streak={entry.user.currentStreak}
-                            size="md"
-                          >
-                            <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
-                              {entry.user.avatar && (
-                                <AvatarImage
-                                  src={entry.user.avatar}
-                                  alt={
-                                    entry.user.fullname ??
-                                    entry.user.username ??
-                                    'Guest'
-                                  }
-                                  className="object-cover"
-                                />
-                              )}
-                              <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
-                                {entry.user.fullname?.[0] ??
-                                  entry.user.username?.[0] ??
-                                  'G'}
-                              </AvatarFallback>
-                            </Avatar>
-                          </ProfileFrame>
-                          <div className="flex flex-col truncate">
+                            <div className="flex flex-col truncate">
                             <span
                               className={`text-sm font-bold tracking-tight truncate flex items-center gap-1.5 ${
                                 isCurrentUser
@@ -266,6 +242,31 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                               </span>
                             )}
                           </div>
+                          <ProfileFrame
+                            xp={entry.user.xp}
+                            streak={entry.user.currentStreak}
+                            size="md"
+                          >
+                            <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
+                              {entry.user.avatar && (
+                                <AvatarImage
+                                  src={entry.user.avatar}
+                                  alt={
+                                    entry.user.fullname ??
+                                    entry.user.username ??
+                                    'Guest'
+                                  }
+                                  className="object-cover"
+                                />
+                              )}
+                              <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
+                                {entry.user.fullname?.[0] ??
+                                  entry.user.username?.[0] ??
+                                  'G'}
+                              </AvatarFallback>
+                            </Avatar>
+                          </ProfileFrame>
+                        
                         </div>
                       </div>
                     </TableCell>
