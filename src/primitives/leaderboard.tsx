@@ -128,7 +128,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             </TableHeader>
             <TableBody className="divide-y divide-gray-50 dark:divide-gray-800/50">
               {sortedEntries.map((entry, index) => {
-                const rank = index + 1;
+                const rank =
+                  disableInternalSort && entry.currentPosition != null
+                    ? entry.currentPosition
+                    : index + 1;
                 const currentPosition = entry.currentPosition ?? rank;
                 const formerPosition = entry.formerPosition ?? currentPosition;
                 const rankDiff = formerPosition - currentPosition;
@@ -205,7 +208,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                                       strokeWidth={3}
                                     />
                                     <span className="text-[10px] font-bold text-emerald-500 tabular-nums">
-                                      {rankDiff}
+                                      +{rankDiff}
                                     </span>
                                   </span>
                                 ) : rankDiff < 0 ? (
@@ -218,7 +221,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                                       strokeWidth={3}
                                     />
                                     <span className="text-[10px] font-bold text-red-500 tabular-nums">
-                                      {Math.abs(rankDiff)}
+                                      -{Math.abs(rankDiff)}
                                     </span>
                                   </span>
                                 ) : (

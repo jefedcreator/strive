@@ -63,7 +63,7 @@ export const LeaderboardDetailClient: React.FC<
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [sortByState, setSortByState] = useQueryState('sortBy', {
-    defaultValue: 'score',
+    defaultValue: 'effort',
     shallow: false,
     history: 'replace',
     clearOnDefault: true,
@@ -77,11 +77,11 @@ export const LeaderboardDetailClient: React.FC<
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-  const sortBy = sortByState || 'score';
+  const sortBy = sortByState || 'effort';
 
   const handleSortChange = (newSortBy: string) => {
     startTransition(async () => {
-      await setSortByState(newSortBy === 'score' ? null : newSortBy);
+      await setSortByState(newSortBy === 'effort' ? null : newSortBy);
     });
   };
 
@@ -409,7 +409,7 @@ export const LeaderboardDetailClient: React.FC<
                 >
                   <Filter className="w-3.5 h-3.5" />
                   Sort:{' '}
-                  {sortBy === 'score'
+                  {sortBy === 'effort'
                     ? 'Default'
                     : sortBy === 'distance'
                       ? 'Distance'
@@ -422,8 +422,8 @@ export const LeaderboardDetailClient: React.FC<
                 className="w-44 bg-white dark:bg-[#18181B] border border-gray-200 dark:border-gray-800 shadow-xl"
               >
                 <DropdownMenuItem
-                  onClick={() => handleSortChange('score')}
-                  className={`text-xs cursor-pointer ${sortBy === 'score' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}
+                  onClick={() => handleSortChange('effort')}
+                  className={`text-xs cursor-pointer ${sortBy === 'effort' ? 'font-bold' : ''} focus:bg-gray-100 dark:focus:bg-[#2A2A2E]`}
                 >
                   Default
                 </DropdownMenuItem>
@@ -448,7 +448,7 @@ export const LeaderboardDetailClient: React.FC<
           currentUserId={session?.user.id}
           leaderboardType={leaderboard.type}
           disableInternalSort
-          movementTooltipMode={sortBy === 'score' ? 'historical' : 'relative'}
+          movementTooltipMode={sortBy === 'effort' ? 'historical' : 'relative'}
         />
       </FadeInItem>
 

@@ -151,7 +151,7 @@ const leaderboardsParams = {
 };
 
 const leaderboardParams = {
-  sortBy: parseAsStringEnum(['pace', 'distance', 'createdAt']),
+  sortBy: parseAsStringEnum(['effort', 'score', 'pace', 'distance', 'createdAt']),
 };
 
 const loadLeaderboardsParams = createSearchParamsCache(leaderboardsParams);

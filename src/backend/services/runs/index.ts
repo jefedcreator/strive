@@ -66,6 +66,7 @@ export async function processRunsForUser(
 
   const leaderboardIds = [...new Set(memberships.map((m) => m.leaderboardId))];
   const previousPositionsByLeaderboardId = new Map<string, Map<string, number>>();
+  const affectedLeaderboardIds = new Set<string>();
 
   if (leaderboardIds.length > 0) {
     const existingEntries = await db.userLeaderboard.findMany({
@@ -168,13 +169,16 @@ export async function processRunsForUser(
           lastScoreDate: new Date(latest.date),
         },
       });
+
+      affectedLeaderboardIds.add(membership.leaderboardId);
     })
   );
 
-  if (leaderboardIds.length > 0) {
+  if (affectedLeaderboardIds.size > 0) {
+    const affectedLeaderboardIdList = [...affectedLeaderboardIds];
     const updatedEntries = await db.userLeaderboard.findMany({
       where: {
-        leaderboardId: { in: leaderboardIds },
+        leaderboardId: { in: affectedLeaderboardIdList },
       },
       select: {
         id: true,
@@ -188,7 +192,7 @@ export async function processRunsForUser(
     });
 
     await Promise.all(
-      leaderboardIds.map(async (leaderboardId) => {
+      affectedLeaderboardIdList.map(async (leaderboardId) => {
         const leaderboardEntries = updatedEntries.filter(
           (entry) => entry.leaderboardId === leaderboardId
         );
@@ -200,13 +204,19 @@ export async function processRunsForUser(
           leaderboardEntries.map((entry) =>
             db.userLeaderboard.update({
               where: { id: entry.id },
-              data: {
-                formerPosition:
-                  previousPositions.get(entry.id) ??
-                  currentPositions.get(entry.id) ??
-                  null,
-                currentPosition: currentPositions.get(entry.id) ?? null,
-              },
+              data: (() => {
+                const currentPosition = currentPositions.get(entry.id) ?? null;
+                const previousPosition =
+                  previousPositions.get(entry.id) ?? currentPosition;
+
+                return {
+                  formerPosition:
+                    previousPosition !== currentPosition
+                      ? previousPosition
+                      : currentPosition,
+                  currentPosition,
+                };
+              })(),
             })
           )
         );

@@ -248,7 +248,8 @@ export const GET = withMiddleware<
       const user = request.user;
       const query = request.query!;
 
-      const sortBy = query.sortBy ?? 'effort';
+      const requestedSortBy = query.sortBy ?? 'effort';
+      const sortBy = requestedSortBy === 'score' ? 'effort' : requestedSortBy;
       const sortOrder = query.sortOrder ?? (sortBy === 'pace' ? 'asc' : 'desc');
 
       let orderBy:
