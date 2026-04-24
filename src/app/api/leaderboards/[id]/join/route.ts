@@ -130,7 +130,6 @@ export const POST = withMiddleware<unknown>(
         // Recalculate positions for all entries after the new member joins
         await recalculateLeaderboardPositions(leaderboardId);
 
-
         const response: ApiResponse<null> = {
           status: 200,
           message: 'Successfully joined the leaderboard',

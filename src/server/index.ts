@@ -42,7 +42,11 @@ const fetcher = async (url: string): Promise<Response> => {
     'Content-Type': 'application/json',
   };
 
-  if (session?.user?.token && session.user.token !== 'undefined' && session.user.token !== 'null') {
+  if (
+    session?.user?.token &&
+    session.user.token !== 'undefined' &&
+    session.user.token !== 'null'
+  ) {
     headers['Authorization'] = `Bearer ${session.user.token}`;
   }
 
@@ -381,7 +385,7 @@ async function getReward(
 }
 
 async function getBadge(
-  id: string,
+  id: string
 ): Promise<ApiResponse<ClubRewardDetail | null>> {
   try {
     console.log(`Fetching badge with id: ${id}`);

@@ -17,7 +17,11 @@ import React from 'react';
 
 type LeaderboardEntry = Omit<
   UserLeaderboard,
-  'createdAt' | 'updatedAt' | 'lastScoreDate' | 'formerPosition' | 'currentPosition'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'lastScoreDate'
+  | 'formerPosition'
+  | 'currentPosition'
 > & {
   formerPosition?: number | null;
   currentPosition?: number | null;

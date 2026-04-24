@@ -23,7 +23,7 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
   async (request, { params }) => {
     try {
       const user = request.user;
-      const { id = "" } = params;
+      const { id = '' } = params;
 
       const reward = await db.reward.findUnique({
         where: { id },
@@ -43,8 +43,8 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
         throw new NotFoundException('Reward not found');
       }
 
-      let isClaimed = false
-      let isMember = false
+      let isClaimed = false;
+      let isMember = false;
 
       if (user?.id) {
         const [claimedReward, membership] = await Promise.all([
@@ -52,11 +52,13 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
             where: { userId_rewardId: { userId: user.id, rewardId: id } },
           }),
           db.userClub.findUnique({
-            where: { userId_clubId: { userId: user.id, clubId: reward.clubId } },
-          })
-        ])
-        isClaimed = !!claimedReward
-        isMember = !!membership
+            where: {
+              userId_clubId: { userId: user.id, clubId: reward.clubId },
+            },
+          }),
+        ]);
+        isClaimed = !!claimedReward;
+        isMember = !!membership;
       }
 
       const response: ApiResponse<ClubRewardDetail> = {
@@ -75,8 +77,9 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
             image: reward.club.image,
             isPublic: reward.club.isPublic,
           },
-          isClaimed, isMember,
-          isExpired: request.isExpired
+          isClaimed,
+          isMember,
+          isExpired: request.isExpired,
         },
       };
 
@@ -88,5 +91,8 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
       );
     }
   },
-  [optionalAuthMiddleware, pathParamValidatorMiddleware(clubRewardParamValidator)]
+  [
+    optionalAuthMiddleware,
+    pathParamValidatorMiddleware(clubRewardParamValidator),
+  ]
 );

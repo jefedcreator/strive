@@ -1,7 +1,4 @@
-import {
-  authMiddleware,
-  withMiddleware,
-} from '@/backend/middleware';
+import { authMiddleware, withMiddleware } from '@/backend/middleware';
 import type { AuthRequest } from '@/backend/middleware/types';
 import { db } from '@/server/db';
 import { type ApiResponse, type ClubRewardItem } from '@/types';

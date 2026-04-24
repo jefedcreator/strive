@@ -49,7 +49,7 @@ export function buildPositionMap<T extends RankableEntry>(entries: T[]) {
 
 export async function recalculateLeaderboardPositions(leaderboardId: string) {
   const { db } = await import('@/server/db');
-  
+
   const allEntries = await db.userLeaderboard.findMany({
     where: { leaderboardId },
     select: {

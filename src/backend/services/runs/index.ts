@@ -65,7 +65,10 @@ export async function processRunsForUser(
   };
 
   const leaderboardIds = [...new Set(memberships.map((m) => m.leaderboardId))];
-  const previousPositionsByLeaderboardId = new Map<string, Map<string, number>>();
+  const previousPositionsByLeaderboardId = new Map<
+    string,
+    Map<string, number>
+  >();
   const affectedLeaderboardIds = new Set<string>();
 
   if (leaderboardIds.length > 0) {
@@ -88,7 +91,9 @@ export async function processRunsForUser(
       previousPositionsByLeaderboardId.set(
         leaderboardId,
         buildPositionMap(
-          existingEntries.filter((entry) => entry.leaderboardId === leaderboardId)
+          existingEntries.filter(
+            (entry) => entry.leaderboardId === leaderboardId
+          )
         )
       );
     }

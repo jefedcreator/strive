@@ -389,7 +389,9 @@ class AuthService {
       // If we joined a leaderboard, recalculate its positions
       if (leaderboardId) {
         // Use dynamic import to avoid potential circular dependencies
-        const { recalculateLeaderboardPositions } = await import('../leaderboards');
+        const { recalculateLeaderboardPositions } = await import(
+          '../leaderboards'
+        );
         await recalculateLeaderboardPositions(leaderboardId);
       }
     } catch (error) {

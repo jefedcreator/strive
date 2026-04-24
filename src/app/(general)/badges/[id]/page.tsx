@@ -99,20 +99,15 @@ export default async function ClubBadgePage({ params }: PageProps) {
   if (!userId || data.isExpired) {
     contextualActions = (
       <Button asChild className="w-full h-12 text-sm font-bold gap-2">
-        <Link
-          href={`/login?rewardId=${id}&callbackUrl=/badges/${id}`}
-        >
+        <Link href={`/login?rewardId=${id}&callbackUrl=/badges/${id}`}>
           <LogIn className="w-4 h-4" />
-          {data.isExpired ? 'Session Expired - Login to Claim' : 'Login to Claim'}
+          Login to Claim
         </Link>
       </Button>
     );
   } else if (!data.isMember) {
     contextualActions = (
-      <ClaimBadgeButton
-        rewardId={id}
-        label="Join Club & Claim"
-      />
+      <ClaimBadgeButton rewardId={id} label="Join Club & Claim" />
     );
   } else if (!data.isClaimed) {
     contextualActions = <ClaimBadgeButton rewardId={id} />;

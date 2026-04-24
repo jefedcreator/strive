@@ -349,7 +349,8 @@ export const GET = withMiddleware<
           formerPosition = entry.formerPosition ?? activeSortPosition;
         } else {
           // Relative movement: use the entry's effort-based position
-          formerPosition = effortPositionMap.get(entry.id) ?? activeSortPosition;
+          formerPosition =
+            effortPositionMap.get(entry.id) ?? activeSortPosition;
         }
 
         return {
