@@ -163,9 +163,66 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
                     {/* Athlete */}
                     <TableCell className="px-8 py-5">
-                      <div className="flex items-center gap-4 min-w-[200px]">
+                      <div className="flex items-center gap-3 min-w-[200px]">
+                        {/* Movement indicator */}
+                        <span
+                          className="shrink-0 inline-flex items-center justify-center w-10"
+                          title={getMovementTooltip(rankDiff)}
+                        >
+                          {rankDiff > 0 ? (
+                            <span className="flex items-center gap-0.5">
+                              <ArrowUp
+                                className="w-3.5 h-3.5 text-emerald-500"
+                                strokeWidth={3}
+                              />
+                              <span className="text-[10px] font-bold text-emerald-500 tabular-nums">
+                                +{rankDiff}
+                              </span>
+                            </span>
+                          ) : rankDiff < 0 ? (
+                            <span className="flex items-center gap-0.5">
+                              <ArrowDown
+                                className="w-3.5 h-3.5 text-red-500"
+                                strokeWidth={3}
+                              />
+                              <span className="text-[10px] font-bold text-red-500 tabular-nums">
+                                -{Math.abs(rankDiff)}
+                              </span>
+                            </span>
+                          ) : (
+                            <Minus
+                              className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600"
+                              strokeWidth={3}
+                            />
+                          )}
+                        </span>
+
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="flex flex-col truncate">
+                          <ProfileFrame
+                            xp={entry.user.xp}
+                            streak={entry.user.currentStreak}
+                            size="md"
+                          >
+                            <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
+                              {entry.user.avatar && (
+                                <AvatarImage
+                                  src={entry.user.avatar}
+                                  alt={
+                                    entry.user.fullname ??
+                                    entry.user.username ??
+                                    'Guest'
+                                  }
+                                  className="object-cover"
+                                />
+                              )}
+                              <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
+                                {entry.user.fullname?.[0] ??
+                                  entry.user.username?.[0] ??
+                                  'G'}
+                              </AvatarFallback>
+                            </Avatar>
+                          </ProfileFrame>
+                          <div className="flex flex-col truncate">
                             <span
                               className={`text-sm font-bold tracking-tight truncate flex items-center gap-1.5 ${
                                 isCurrentUser
@@ -173,42 +230,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                                   : 'text-gray-900 dark:text-gray-100'
                               }`}
                             >
-                              <span className="shrink-0 inline-flex items-center justify-center w-5">
-                                {rankDiff > 0 ? (
-                                  <span
-                                    className="flex items-center gap-0.5"
-                                    title={getMovementTooltip(rankDiff)}
-                                  >
-                                    <ArrowUp
-                                      className="w-3.5 h-3.5 text-emerald-500"
-                                      strokeWidth={3}
-                                    />
-                                    <span className="text-[10px] font-bold text-emerald-500 tabular-nums">
-                                      +{rankDiff}
-                                    </span>
-                                  </span>
-                                ) : rankDiff < 0 ? (
-                                  <span
-                                    className="flex items-center gap-0.5"
-                                    title={getMovementTooltip(rankDiff)}
-                                  >
-                                    <ArrowDown
-                                      className="w-3.5 h-3.5 text-red-500"
-                                      strokeWidth={3}
-                                    />
-                                    <span className="text-[10px] font-bold text-red-500 tabular-nums">
-                                      -{Math.abs(rankDiff)}
-                                    </span>
-                                  </span>
-                                ) : (
-                                  <span title={getMovementTooltip(rankDiff)}>
-                                    <Minus
-                                      className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600"
-                                      strokeWidth={3}
-                                    />
-                                  </span>
-                                )}
-                              </span>
                               {entry.user.fullname ??
                                 entry.user.username ??
                                 'Guest'}
@@ -242,31 +263,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                               </span>
                             )}
                           </div>
-                          <ProfileFrame
-                            xp={entry.user.xp}
-                            streak={entry.user.currentStreak}
-                            size="md"
-                          >
-                            <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-card-dark shadow-sm shrink-0">
-                              {entry.user.avatar && (
-                                <AvatarImage
-                                  src={entry.user.avatar}
-                                  alt={
-                                    entry.user.fullname ??
-                                    entry.user.username ??
-                                    'Guest'
-                                  }
-                                  className="object-cover"
-                                />
-                              )}
-                              <AvatarFallback className="bg-gray-100 dark:bg-gray-800 font-bold text-sm text-gray-500 dark:text-gray-400">
-                                {entry.user.fullname?.[0] ??
-                                  entry.user.username?.[0] ??
-                                  'G'}
-                              </AvatarFallback>
-                            </Avatar>
-                          </ProfileFrame>
-                        
                         </div>
                       </div>
                     </TableCell>
