@@ -23,6 +23,7 @@ import {
 import { type Leaderboard, type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { emailService } from '@/backend/services/email';
+import { recalculateLeaderboardPositions } from '@/backend/services/leaderboards';
 
 /**
  * @body LeaderboardValidatorSchema
@@ -132,6 +133,7 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
       }
 
       await db.$transaction(transactionOps);
+      await recalculateLeaderboardPositions(leaderboard.id);
 
       // Auto-invite/notify all club members if this is a public leaderboard created within a club
       if (payload.isPublic && payload.clubId) {

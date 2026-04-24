@@ -372,16 +372,15 @@ async function getReward(
   }
 }
 
-async function getClubReward(
+async function getBadge(
   id: string,
-  rewardId: string
 ): Promise<ApiResponse<ClubRewardDetail | null>> {
   try {
-    const url = `clubs/${id}/rewards/${rewardId}`;
+    const url = `badges/${id}`;
     const res = await fetcher(url);
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch club reward: ${res.statusText}`);
+      throw new Error(`Failed to fetch badge: ${res.statusText}`);
     }
 
     return res.json() as Promise<ApiResponse<ClubRewardDetail>>;
@@ -398,7 +397,7 @@ async function getClubReward(
 export {
   getClub,
   getClubInvite,
-  getClubReward,
+  getBadge,
   getClubs,
   getExploreItems,
   getLeaderboard,

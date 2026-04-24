@@ -388,6 +388,13 @@ class AuthService {
       if (transactions.length > 0) {
         await prisma.$transaction(transactions);
       }
+
+      // If we joined a leaderboard, recalculate its positions
+      if (leaderboardId) {
+        // Use dynamic import to avoid potential circular dependencies
+        const { recalculateLeaderboardPositions } = await import('../leaderboards');
+        await recalculateLeaderboardPositions(leaderboardId);
+      }
     } catch (error) {
       console.error('Error in syncUserMemberships:', error);
       throw error;

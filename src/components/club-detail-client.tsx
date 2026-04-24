@@ -413,7 +413,7 @@ export const ClubDetailClient: React.FC<ClubDetailClientProps> = ({
                   {club.rewards.map((reward) => (
                     <Link
                       key={reward.id}
-                      href={`/clubs/${club.id}/rewards/${reward.id}`}
+                      href={`/badges/${reward.id}`}
                       className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
                     >
                       <div className="flex items-center gap-3">

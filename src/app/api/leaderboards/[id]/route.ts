@@ -29,7 +29,7 @@ import { NextResponse } from 'next/server';
 import {
   isZeroPace,
   parsePaceToSeconds,
-} from '@/backend/services/leaderboards/ranking';
+} from '@/backend/services/leaderboards';
 
 const sortLeaderboardEntries = <
   T extends {
@@ -356,14 +356,14 @@ export const GET = withMiddleware<
           ...entry,
           formerPosition,
           currentPosition: activeSortPosition,
-        createdAt: entry.createdAt.toISOString(),
-        updatedAt: entry.updatedAt.toISOString(),
-        lastScoreDate: entry.lastScoreDate
-          ? entry.lastScoreDate.toISOString()
-          : null,
-        runPace: entry.runPace
-          ? entry.runPace.replace(/^0(?=\d)/, '')
-          : entry.runPace,
+          createdAt: entry.createdAt.toISOString(),
+          updatedAt: entry.updatedAt.toISOString(),
+          lastScoreDate: entry.lastScoreDate
+            ? entry.lastScoreDate.toISOString()
+            : null,
+          runPace: entry.runPace
+            ? entry.runPace.replace(/^0(?=\d)/, '')
+            : entry.runPace,
         };
       });
 

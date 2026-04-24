@@ -12,13 +12,12 @@ import { type UserReward } from '@prisma/client';
 import { useMutation } from '@tanstack/react-query';
 
 interface ClaimBadgeButtonProps {
-  clubId: string;
+  // clubId: string;
   rewardId: string;
   label?: string;
 }
 
 export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
-  clubId,
   rewardId,
   label = 'Claim Badge',
 }) => {
@@ -59,7 +58,7 @@ export const ClaimBadgeButton: React.FC<ClaimBadgeButtonProps> = ({
   const handleClaim = () => {
     if (!session?.user?.token) {
       router.push(
-        `/login?rewardId=${rewardId}&callbackUrl=/clubs/${clubId}/rewards/${rewardId}`
+        `/login?rewardId=${rewardId}&callbackUrl=/badges/${rewardId}`
       );
       return;
     }

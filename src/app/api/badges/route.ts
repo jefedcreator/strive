@@ -1,40 +1,50 @@
 import {
   authMiddleware,
-  pathParamValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
-import { paramValidator } from '@/backend/validators/index.validator';
+import type { AuthRequest } from '@/backend/middleware/types';
 import { db } from '@/server/db';
 import { type ApiResponse, type ClubRewardItem } from '@/types';
-import {
-  InternalServerErrorException,
-  NotFoundException,
-} from '@/utils/exceptions';
+import { InternalServerErrorException } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 
 /**
- * @description Get rewards earned by a specific club.
+ * @description Get club milestone badges for every club the authenticated user belongs to.
  */
 export const GET = withMiddleware<unknown>(
-  async (request, { params }) => {
+  async (request: AuthRequest) => {
     try {
-      const { id } = params;
+      const user = request.user!;
 
-      const club = await db.club.findUnique({
-        where: { id },
-        select: { id: true, name: true },
+      const memberships = await db.userClub.findMany({
+        where: {
+          userId: user.id,
+          isActive: true,
+        },
+        select: { clubId: true },
       });
 
-      if (!club) {
-        throw new NotFoundException('Club not found');
+      const clubIds = memberships.map((membership) => membership.clubId);
+
+      if (clubIds.length === 0) {
+        const response: ApiResponse<ClubRewardItem[]> = {
+          status: 200,
+          message: 'Club rewards retrieved successfully',
+          data: [],
+        };
+
+        return NextResponse.json(response);
       }
 
       const rewards = await db.reward.findMany({
-        where: { clubId: id },
+        where: {
+          clubId: { in: clubIds },
+          type: 'CLUB_MILESTONE',
+        },
         include: {
           _count: { select: { userRewards: true } },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { milestone: 'asc' }],
       });
 
       const mapped = rewards.map((r) => {
@@ -72,5 +82,5 @@ export const GET = withMiddleware<unknown>(
       );
     }
   },
-  [authMiddleware, pathParamValidatorMiddleware(paramValidator)]
+  [authMiddleware]
 );

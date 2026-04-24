@@ -46,3 +46,37 @@ export function buildPositionMap<T extends RankableEntry>(entries: T[]) {
 
   return positionByEntryId;
 }
+
+export async function recalculateLeaderboardPositions(leaderboardId: string) {
+  const { db } = await import('@/server/db');
+  
+  const allEntries = await db.userLeaderboard.findMany({
+    where: { leaderboardId },
+    select: {
+      id: true,
+      userId: true,
+      leaderboardId: true,
+      score: true,
+      createdAt: true,
+      runDistance: true,
+      runPace: true,
+      formerPosition: true,
+      currentPosition: true,
+    },
+  });
+
+  const newPositions = buildPositionMap(allEntries);
+  await Promise.all(
+    allEntries.map((entry) => {
+      const newPosition = newPositions.get(entry.id) ?? null;
+      const formerPosition = entry.currentPosition ?? newPosition;
+      return db.userLeaderboard.update({
+        where: { id: entry.id },
+        data: {
+          formerPosition,
+          currentPosition: newPosition,
+        },
+      });
+    })
+  );
+}

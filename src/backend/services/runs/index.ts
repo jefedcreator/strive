@@ -2,7 +2,7 @@ import { db } from '@/server/db';
 import type { RunData } from '@/types';
 import { checkClubMilestones } from '@/backend/services/rewards';
 import { syncUserXP } from '@/backend/services/xp';
-import { buildPositionMap } from '@/backend/services/leaderboards/ranking';
+import { buildPositionMap } from '@/backend/services/leaderboards';
 
 export function getRunDedupId(
   run: Pick<RunData, 'date' | 'distance' | 'duration'>

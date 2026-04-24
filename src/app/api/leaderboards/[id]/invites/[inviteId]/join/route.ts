@@ -15,6 +15,7 @@ import {
 import { type Prisma } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { recalculateLeaderboardPositions } from '@/backend/services/leaderboards';
 
 const inviteParamValidator = paramValidator.extend({
   inviteId: z.string().min(1),
@@ -126,6 +127,7 @@ export const POST = withMiddleware<unknown>(
       }
 
       await db.$transaction(transactionOps);
+      await recalculateLeaderboardPositions(leaderboardId);
 
       const response: ApiResponse<null> = {
         status: 200,

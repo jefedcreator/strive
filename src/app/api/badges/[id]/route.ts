@@ -1,4 +1,5 @@
 import {
+  optionalAuthMiddleware,
   pathParamValidatorMiddleware,
   withMiddleware,
 } from '@/backend/middleware';
@@ -21,10 +22,11 @@ import { NextResponse } from 'next/server';
 export const GET = withMiddleware<ClubRewardParamValidator>(
   async (request, { params }) => {
     try {
-      const { id, rewardId } = params;
+      const user = request.user!;
+      const { id } = params;
 
       const reward = await db.reward.findUnique({
-        where: { id: rewardId },
+        where: { id },
         include: {
           club: {
             select: {
@@ -41,9 +43,26 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
         throw new NotFoundException('Reward not found');
       }
 
+      let isClaimed = false
+      let isMember = false
+
+      if (user.id) {
+        const [claimedReward, membership] = await Promise.all([
+          db.userReward.findUnique({
+            where: { userId_rewardId: { userId: user.id, rewardId: id } },
+          }),
+          db.userClub.findUnique({
+            where: { userId_clubId: { userId: user.id, clubId: reward.clubId } },
+          })
+        ])
+
+        isClaimed = !!claimedReward && !!membership?.isActive
+        isMember = !!membership
+      }
+
       const response: ApiResponse<ClubRewardDetail> = {
         status: 200,
-        message: 'Reward retrieved successfully',
+        message: 'Badge retrieved successfully',
         data: {
           id: reward.id,
           type: reward.type,
@@ -57,6 +76,7 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
             image: reward.club.image,
             isPublic: reward.club.isPublic,
           },
+          isClaimed, isMember
         },
       };
 
@@ -64,9 +84,9 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
     } catch (error: any) {
       if (error.statusCode) throw error;
       throw new InternalServerErrorException(
-        `An error occurred while fetching reward: ${error.message}`
+        `An error occurred while fetching badge: ${error.message}`
       );
     }
   },
-  [pathParamValidatorMiddleware(clubRewardParamValidator)]
+  [optionalAuthMiddleware, pathParamValidatorMiddleware(clubRewardParamValidator)]
 );

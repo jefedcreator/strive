@@ -18,6 +18,7 @@ import {
   NotFoundException,
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
+import { recalculateLeaderboardPositions } from '@/backend/services/leaderboards';
 
 /**
  * @pathParams paramValidator
@@ -142,6 +143,7 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
       }
 
       await db.$transaction(transactionOps);
+      await recalculateLeaderboardPositions(leaderboardId);
 
       const response: ApiResponse<null> = {
         status: 200,

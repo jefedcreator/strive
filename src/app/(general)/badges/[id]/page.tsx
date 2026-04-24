@@ -2,7 +2,7 @@ import Background from '@/components/background';
 import { BadgeShareClient } from '@/components/badge-share-client';
 import { ClaimBadgeButton } from '@/components/claim-badge-button';
 import { Button } from '@/primitives/Button';
-import { getClubReward } from '@/server';
+import { getBadge } from '@/server';
 import { auth } from '@/server/auth';
 import { db } from '@/server/db';
 import { LogIn } from 'lucide-react';
@@ -35,8 +35,8 @@ function buildBadgeImageUrl(reward: {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { id, rewardId } = await params;
-  const { data } = await getClubReward(id, rewardId);
+  const { id } = await params;
+  const { data } = await getBadge(id);
 
   if (!data) {
     return { title: 'Badge Not Found | Strive' };
@@ -69,7 +69,7 @@ export async function generateMetadata({
       images: [imageUrl],
       type: 'website',
       siteName: 'Strive',
-      url: `${baseUrl}/clubs/${id}/rewards/${rewardId}`,
+      url: `${baseUrl}/badges/${id}`,
     },
     twitter: {
       card: 'summary_large_image',
@@ -81,8 +81,8 @@ export async function generateMetadata({
 }
 
 export default async function ClubBadgePage({ params }: PageProps) {
-  const { id, rewardId } = await params;
-  const { data } = await getClubReward(id, rewardId);
+  const { id } = await params;
+  const { data } = await getBadge(id);
   const session = await auth();
 
   if (!data) {
@@ -90,24 +90,6 @@ export default async function ClubBadgePage({ params }: PageProps) {
   }
 
   const userId = session?.user?.id;
-
-  // Check if user is a member
-  const membership = userId
-    ? await db.userClub.findUnique({
-        where: { userId_clubId: { userId, clubId: id } },
-      })
-    : null;
-
-  const isMember = !!membership && membership.isActive;
-
-  // Check if already claimed
-  const userReward = userId
-    ? await db.userReward.findUnique({
-        where: { userId_rewardId: { userId, rewardId } },
-      })
-    : null;
-
-  const hasClaimed = !!userReward;
 
   const badgeUrl = buildBadgeImageUrl(data);
   const username = data.club.name;
@@ -118,23 +100,22 @@ export default async function ClubBadgePage({ params }: PageProps) {
     contextualActions = (
       <Button asChild className="w-full h-12 text-sm font-bold gap-2">
         <Link
-          href={`/login?rewardId=${rewardId}&callbackUrl=/clubs/${id}/rewards/${rewardId}`}
+          href={`/login?rewardId=${id}&callbackUrl=/badges/${id}`}
         >
           <LogIn className="w-4 h-4" />
           Login to Claim
         </Link>
       </Button>
     );
-  } else if (!isMember) {
+  } else if (!data.isMember) {
     contextualActions = (
       <ClaimBadgeButton
-        clubId={id}
-        rewardId={rewardId}
+        rewardId={id}
         label="Join Club & Claim"
       />
     );
-  } else if (!hasClaimed) {
-    contextualActions = <ClaimBadgeButton clubId={id} rewardId={rewardId} />;
+  } else if (!data.isClaimed) {
+    contextualActions = <ClaimBadgeButton rewardId={id} />;
   }
 
   return (
@@ -155,7 +136,7 @@ export default async function ClubBadgePage({ params }: PageProps) {
             leaderboardName: null,
             clubName: data.club.name,
           }}
-          canDownload={hasClaimed}
+          canDownload={data.isClaimed}
           actions={contextualActions}
         />
       </div>

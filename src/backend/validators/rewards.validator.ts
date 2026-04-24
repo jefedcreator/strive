@@ -12,7 +12,7 @@ export type RewardsQueryValidatorSchema = z.infer<
 
 export const clubRewardParamValidator = z.object({
   id: mongoIdValidator,
-  rewardId: mongoIdValidator.optional(),
+  // rewardId: mongoIdValidator.optional(),
 });
 
 export type ClubRewardParamValidator = z.infer<typeof clubRewardParamValidator>;
