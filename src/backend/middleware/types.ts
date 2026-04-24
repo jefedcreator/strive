@@ -45,6 +45,7 @@ export interface AuthRequest<B = unknown, Q = QueryParameters>
   files?: Record<string, File>;
   validatedData?: B;
   user: User | null;
+  isExpired?: boolean;
 }
 
 export interface ValidationResult {

@@ -96,14 +96,14 @@ export default async function ClubBadgePage({ params }: PageProps) {
 
   let contextualActions: React.ReactNode = null;
 
-  if (!userId) {
+  if (!userId || data.isExpired) {
     contextualActions = (
       <Button asChild className="w-full h-12 text-sm font-bold gap-2">
         <Link
           href={`/login?rewardId=${id}&callbackUrl=/badges/${id}`}
         >
           <LogIn className="w-4 h-4" />
-          Login to Claim
+          {data.isExpired ? 'Session Expired - Login to Claim' : 'Login to Claim'}
         </Link>
       </Button>
     );

@@ -377,6 +377,7 @@ export interface ClubRewardDetail {
   };
   isClaimed: boolean;
   isMember: boolean;
+  isExpired?: boolean;
 }
 
 export interface RewardsData {

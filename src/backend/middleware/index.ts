@@ -338,7 +338,9 @@ export const optionalAuthMiddleware = async <B = unknown, Q = QueryParameters>(
       request.user = user;
     }
   } catch (error: any) {
-    console.error('Optional Auth Middleware error:', error.message || error);
+    if (error.name === 'TokenExpiredError') {
+      request.isExpired = true;
+    }
     request.user = null;
   }
 

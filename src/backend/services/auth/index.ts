@@ -414,7 +414,7 @@ class AuthService {
   }) {
     try {
       const jwtPayload = { uid: id, email };
-      const jwtExpirationTimeInSec = 1 * 60 * 60 * 24; // 24 Hours
+      const jwtExpirationTimeInSec = 30 * 60 * 60 * 24; // 30 Days
       const expiresAt = moment()
         .add(jwtExpirationTimeInSec, 'seconds')
         .toISOString();

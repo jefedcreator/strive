@@ -47,7 +47,6 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
       let isMember = false
 
       if (user?.id) {
-        console.log(`Checking membership for user: ${user.id} in club: ${reward.clubId}`);
         const [claimedReward, membership] = await Promise.all([
           db.userReward.findUnique({
             where: { userId_rewardId: { userId: user.id, rewardId: id } },
@@ -56,12 +55,8 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
             where: { userId_clubId: { userId: user.id, clubId: reward.clubId } },
           })
         ])
-
-        console.log(`Membership found: ${!!membership}, Claimed: ${!!claimedReward}`);
         isClaimed = !!claimedReward
         isMember = !!membership
-      } else {
-        console.log('No user identified in badge API request');
       }
 
       const response: ApiResponse<ClubRewardDetail> = {
@@ -80,7 +75,8 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
             image: reward.club.image,
             isPublic: reward.club.isPublic,
           },
-          isClaimed, isMember
+          isClaimed, isMember,
+          isExpired: request.isExpired
         },
       };
 
