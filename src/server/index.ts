@@ -38,8 +38,16 @@ const fetcher = async (url: string): Promise<Response> => {
     session = await uncachedAuth();
   }
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (session?.user?.token && session.user.token !== 'undefined' && session.user.token !== 'null') {
+    headers['Authorization'] = `Bearer ${session.user.token}`;
+  }
+
   const res = await fetch(`${baseUrl}/api/${url}`, {
-    headers: { Authorization: `Bearer ${session?.user.token}` },
+    headers,
     cache: 'no-store',
   });
 

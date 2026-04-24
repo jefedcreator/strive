@@ -259,13 +259,13 @@ export const authMiddleware = async <B = unknown, Q = QueryParameters>(
       throw new UnauthorizedException('Unauthorized');
     }
 
-    const auth_token = token?.split('Bearer')[1];
-    if (!auth_token) {
+    const auth_token = token.replace(/^Bearer\s+/i, '').trim();
+    if (!auth_token || auth_token === 'undefined' || auth_token === 'null') {
       throw new UnauthorizedException('Invalid auth token format');
     }
 
     const decoded = jwt.verify(
-      auth_token.trim(),
+      auth_token,
       process.env.AUTH_SECRET!
     ) as I_JwtPayload;
 
@@ -316,8 +316,8 @@ export const optionalAuthMiddleware = async <B = unknown, Q = QueryParameters>(
     };
   }
 
-  const token = authHeader.split('Bearer')[1]?.trim();
-  if (!token) {
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  if (!token || token === 'undefined' || token === 'null') {
     request.user = null;
     return {
       message: '',
@@ -337,7 +337,8 @@ export const optionalAuthMiddleware = async <B = unknown, Q = QueryParameters>(
       });
       request.user = user;
     }
-  } catch (_error) {
+  } catch (error: any) {
+    console.error('Optional Auth Middleware error:', error.message || error);
     request.user = null;
   }
 
