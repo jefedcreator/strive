@@ -22,8 +22,8 @@ import { NextResponse } from 'next/server';
 export const GET = withMiddleware<ClubRewardParamValidator>(
   async (request, { params }) => {
     try {
-      const user = request.user!;
-      const { id } = params;
+      const user = request.user;
+      const { id = "" } = params;
 
       const reward = await db.reward.findUnique({
         where: { id },
@@ -39,14 +39,14 @@ export const GET = withMiddleware<ClubRewardParamValidator>(
         },
       });
 
-      if (!reward || !reward.club || reward.clubId !== id) {
+      if (!reward || !reward.club || !reward.clubId) {
         throw new NotFoundException('Reward not found');
       }
 
       let isClaimed = false
       let isMember = false
 
-      if (user.id) {
+      if (user?.id) {
         const [claimedReward, membership] = await Promise.all([
           db.userReward.findUnique({
             where: { userId_rewardId: { userId: user.id, rewardId: id } },
