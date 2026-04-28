@@ -388,7 +388,6 @@ async function getBadge(
   id: string
 ): Promise<ApiResponse<ClubRewardDetail | null>> {
   try {
-    console.log(`Fetching badge with id: ${id}`);
     const url = `badges/${id}`;
     const res = await fetcher(url);
 

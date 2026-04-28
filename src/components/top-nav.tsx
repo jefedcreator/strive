@@ -160,7 +160,7 @@ export function TopNav() {
       {/* --- Breadcrumbs --- */}
       <nav className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
         <Link
-          href="/"
+          href="/home"
           className="hover:text-primary dark:hover:text-primary transition-colors flex items-center gap-1"
         >
           <Home className="w-[18px] h-[18px]" />

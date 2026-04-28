@@ -3,22 +3,24 @@ import { Skeleton } from '@/primitives';
 
 export default function Loading() {
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center p-4 animate-in fade-in duration-500">
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
       <Background />
       <div className="z-10 w-full max-w-lg mx-auto bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden">
         {/* Badge Image Skeleton */}
-        <Skeleton className="aspect-square w-full rounded-none opacity-50" />
+        <div className="aspect-square w-full bg-gray-950 flex items-center justify-center">
+          <Skeleton className="w-48 h-48 rounded-full opacity-10" />
+        </div>
 
         {/* Info Skeleton */}
         <div className="p-6 space-y-4">
           {/* Type pill Skeleton */}
           <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-3 w-24 rounded-full" />
+            <Skeleton className="h-3 w-20 rounded-full" />
           </div>
 
           {/* Title Skeleton */}
-          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-9 w-3/4" />
 
           {/* Description Skeleton */}
           <div className="space-y-2">
@@ -31,27 +33,20 @@ export default function Loading() {
             <Skeleton className="w-10 h-10 rounded-full" />
             <div className="space-y-2 flex flex-col">
               <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-3 w-32" />
+              <Skeleton className="h-3 w-32 opacity-60" />
             </div>
           </div>
 
-          {/* Context box Skeleton */}
-          <div className="rounded-xl p-3 border border-gray-100 dark:border-gray-800 space-y-2 flex flex-col">
-            <Skeleton className="h-3 w-1/2" />
-            <Skeleton className="h-3 w-2/3" />
-          </div>
-
           {/* Actions Skeleton */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <Skeleton className="h-10 rounded-xl" />
-            <Skeleton className="h-10 rounded-xl" />
+          <div className="pt-2">
+            <Skeleton className="h-12 w-full rounded-xl" />
           </div>
         </div>
 
         {/* CTA Bar Skeleton */}
         <div className="border-t border-gray-100 dark:border-gray-800 p-4 bg-primary/5 flex items-center justify-between">
-          <Skeleton className="h-3 w-32" />
-          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-3 w-32 rounded-full" />
+          <Skeleton className="h-3 w-16 rounded-full" />
         </div>
       </div>
     </div>
