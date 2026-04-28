@@ -104,9 +104,9 @@ class AuthService {
     rewardId?: string;
   }): Promise<void> {
     try {
-      const transactions: any[] = [];
+      const transactions: Prisma.PrismaPromise<unknown>[] = [];
       const joinedClubIds = new Set<string>();
-
+      let joinedLeaderboard = false;
       // --- 1. Handle Direct Club Join ---
       if (clubId && inviteId) {
         const existingMember = await prisma.userClub.findUnique({
@@ -119,14 +119,14 @@ class AuthService {
         });
 
         if (!existingMember) {
-          const club = await prisma.club.findUnique({
-            where: { id: clubId },
-            select: { createdById: true, name: true },
-          });
-
-          const invite = await prisma.clubInvites.findUnique({
-            where: { id: inviteId },
-          });
+          const [club, invite] = await Promise.all([
+            prisma.club.findUnique({
+              where: { id: clubId },
+              select: { createdById: true, name: true },
+            }), prisma.clubInvites.findUnique({
+              where: { id: inviteId },
+            })
+          ])
 
           transactions.push(
             prisma.userClub.create({
@@ -194,6 +194,8 @@ class AuthService {
               },
             })
           );
+
+          joinedLeaderboard = true;
 
           // If leaderboard belongs to a club, ensure user is in that club too
           if (leaderboard?.clubId && !joinedClubIds.has(leaderboard.clubId)) {
@@ -387,7 +389,7 @@ class AuthService {
       }
 
       // If we joined a leaderboard, recalculate its positions
-      if (leaderboardId) {
+      if (joinedLeaderboard && leaderboardId) {
         // Use dynamic import to avoid potential circular dependencies
         const { recalculateLeaderboardPositions } = await import(
           '../leaderboards'

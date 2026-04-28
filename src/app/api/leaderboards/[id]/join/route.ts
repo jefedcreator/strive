@@ -14,6 +14,7 @@ import {
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 import { recalculateLeaderboardPositions } from '@/backend/services/leaderboards';
+import type { Prisma } from '@prisma/client';
 
 /**
  * @pathParams paramValidator
@@ -55,14 +56,16 @@ export const POST = withMiddleware<unknown>(
       });
 
       if (existingMembership) {
-        throw new ConflictException(
-          'You are already a member of this leaderboard'
-        );
+        return NextResponse.json({
+          status: 200,
+          message: 'You are already a member of this leaderboard',
+          data: null,
+        });
       }
 
       if (leaderboard.isPublic) {
         // Direct join for public leaderboards
-        const transactionOps: any[] = [
+        const transactionOps: Prisma.PrismaPromise<unknown>[] = [
           db.userLeaderboard.create({
             data: {
               userId: user.id,

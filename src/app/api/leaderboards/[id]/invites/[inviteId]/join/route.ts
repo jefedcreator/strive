@@ -55,9 +55,11 @@ export const POST = withMiddleware<unknown>(
       });
 
       if (existingMembership) {
-        throw new ConflictException(
-          'You are already a member of this leaderboard'
-        );
+        return NextResponse.json({
+          status: 200,
+          message: 'You are already a member of this leaderboard',
+          data: null,
+        });
       }
 
       const invite = await db.leaderboardInvites.findUnique({

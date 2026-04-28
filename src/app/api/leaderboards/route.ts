@@ -88,7 +88,7 @@ export const POST = withMiddleware<LeaderboardValidatorSchema>(
         data,
       });
 
-      const transactionOps: any[] = [
+      const transactionOps: Prisma.PrismaPromise<unknown>[] = [
         db.userLeaderboard.create({
           data: {
             userId: user.id,

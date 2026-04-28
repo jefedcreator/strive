@@ -19,6 +19,7 @@ import {
 } from '@/utils/exceptions';
 import { NextResponse } from 'next/server';
 import { recalculateLeaderboardPositions } from '@/backend/services/leaderboards';
+import type { Prisma } from '@prisma/client';
 
 /**
  * @pathParams paramValidator
@@ -71,16 +72,31 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
         );
       }
 
-      // Check if the invite/request exists
-
-      // Add user to leaderboard and remove invite
-      const transactionOps: any[] = [
-        db.userLeaderboard.create({
-          data: {
+      // Check if user is already a member
+      const existingMembership = await db.userLeaderboard.findUnique({
+        where: {
+          userId_leaderboardId: {
             userId: userToAcceptId,
             leaderboardId,
           },
-        }),
+        },
+      });
+
+      // Add user to leaderboard and remove invite if not already a member
+      const transactionOps: Prisma.PrismaPromise<unknown>[] = [];
+
+      if (!existingMembership) {
+        transactionOps.push(
+          db.userLeaderboard.create({
+            data: {
+              userId: userToAcceptId,
+              leaderboardId,
+            },
+          })
+        );
+      }
+
+      transactionOps.push(
         db.leaderboardInvites.delete({
           where: { id: invite.id },
         }),
@@ -93,8 +109,8 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
             type: 'info',
             leaderboardId,
           },
-        }),
-      ];
+        })
+      );
 
       // If the leaderboard belongs to a club, also add the user to that club
       if (leaderboard.clubId) {
@@ -143,7 +159,9 @@ export const POST = withMiddleware<AcceptLeaderboardInviteValidatorSchema>(
       }
 
       await db.$transaction(transactionOps);
-      await recalculateLeaderboardPositions(leaderboardId);
+      if (!existingMembership) {
+        await recalculateLeaderboardPositions(leaderboardId);
+      }
 
       const response: ApiResponse<null> = {
         status: 200,
